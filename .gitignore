@@ -1,0 +1,10 @@
+# Downloaded by fetch.sh (vendor copyright, size): not versioned
+FPGAlist/*/docs/
+FPGAlist/*/pins/
+FPGAlist/*/models/
+FPGAlist/*/boards/
+FPGAlist/*/reference/
+FPGAlist/*/software/*
+!FPGAlist/*/software/SHA1SUMS
+sockets/socket*/
+*.part

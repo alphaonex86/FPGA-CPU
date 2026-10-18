@@ -1,0 +1,10 @@
+# Original CPU datasheets (bus protocol, pinout, power) — fetch with ../fetch.sh
+socket3/intel486_military_family_dx4_pga.pdf https://datasheets.chipdb.org/Intel/x86/486/datashts/27132903.PDF
+socket3/intel_dx4_write_back_enhanced.pdf https://datasheets.chipdb.org/Intel/x86/486/datashts/27277102.PDF
+socket3/amd_enhanced_am486_family_20736.pdf https://www.amd.com/content/dam/amd/en/documents/archived-tech-docs/datasheets/20736.pdf
+socket7/pentium_mmx_datasheet_243185-004.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20MMX/24318504.PDF
+socket7/pentium_family_developers_manual_241428-005.pdf https://datasheets.chipdb.org/Intel/x86/Pentium/24142805.PDF
+socket370/pentium3_pga370_245264-001.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20III/24526401.pdf
+socket370/pentium3_512k_tualatin_249657-004.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20III/24965704.pdf
+socket370/ap906_agtl_layout_guidelines.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20III/24508601.pdf
+socket370/pentium2_developers_manual_243502.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20II/24350201.PDF
