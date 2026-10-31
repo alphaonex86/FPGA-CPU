@@ -1,0 +1,6 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "Interposer")(type "KiCad")(uri "${KIPRJMOD}/../lib/Interposer_Logic.kicad_sym")(options "")(descr "Translator"))
+  (lib (name "SocketFPGA")(type "KiCad")(uri "${KIPRJMOD}/../lib/FPGA_CycloneV_5CEFA9_F484.kicad_sym")(options "")(descr "FPGA"))
+  (lib (name "Socket370CPU")(type "KiCad")(uri "${KIPRJMOD}/../../sockets/kicad/Intel_PentiumIII_Coppermine_PGA370.kicad_sym")(options "")(descr "CPU"))
+)

@@ -1,0 +1,52 @@
+# Copies from the operator's local archive (not downloadable) — fetch with ../fetch.sh
+# Socket 3: 486 bus, Socket 3 geometry, UMC chipset, Biostar MB-8433UUD-A
+socket3/i486_hardware_reference_manual_1990.pdf file:///mnt/data/perso/retro/am486/1990-i486-microprocessor-hardware-reference-manual-66190b13db193148505282.pdf
+socket3/intel486_microprocessors_and_related_products_241731-002.pdf file:///mnt/data/perso/retro/Socket%203/241731-002_Intel486_Microprocessors_and_Related_Products_Jan95.pdf
+socket3/intel486dx_datasheet_1992.pdf file:///mnt/data/perso/retro/Socket%203/486DX_Data_Sheet_Oct92.pdf
+socket3/intel486dx2_datasheet_1992.pdf file:///mnt/data/perso/retro/Socket%203/486dx2-data-sheet-feb92-66190b480a4aa947219738.pdf
+socket3/intel_overdrive_processors_290436-006.pdf file:///mnt/data/perso/retro/Socket%203/29043606-68fabc2c18ad9447018695.pdf
+socket3/486_common_socket_implementation.pdf file:///mnt/data/perso/retro/Socket%203/4193.pdf
+socket3/486_podp_pinout_differences.pdf file:///mnt/data/perso/retro/Socket%203/486-_PODP-Pinout%20and%20Differences.pdf
+socket3/socket3_pinout_top.jpg file:///mnt/data/perso/retro/Socket%203/socket3-pinout-6571ff00c41cf767160897.jpg
+socket3/socket3_pinout_bottom.jpg file:///mnt/data/perso/retro/Socket%203/socket3-pinout-bottom-657200e5e40b5104159011.jpg
+socket3/amd_am486dx4_datasheet.pdf file:///mnt/data/perso/retro/am486/A80486DX4-clean.PDF
+socket3/amd_am5x86_19751C.pdf file:///mnt/data/perso/retro/am486/19751c-66f2daf92b2ed463152551.pdf
+socket3/umc_um8881_um8886_reverse_engineered_2026-02-16.pdf file:///mnt/data/perso/retro/am486/umc-chipset-2026-02-16-69b1cfa6b35e6123494638.pdf
+socket3/board/biostar_mb-8433uud_manual_v2.pdf file:///mnt/data/perso/retro/am486/biostar_mb-8433uud-v2.pdf
+socket3/board/mb-8433uud-a_rev3.1_front.jpg file:///mnt/data/perso/retro/am486/motherboard-486-biostar-mb-8433uud-a-rev-3-1-jpg-front-6951a78110067141085188.jpg
+socket3/board/bios_dump_UUD960306I.bin file:///mnt/data/perso/retro/am486/BIOSORIGINAL.bin
+socket3/board/bios_UUD0520S.bin file:///mnt/data/perso/retro/am486/UUD0520S.BIN
+# Socket 7: P55C voltage/VRM notes, Intel 430TX, Biostar MB-8500TTD
+socket7/ap579_flexible_motherboard_243187-002.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket7/docs/datasheets/cpu_Intel_AP-579_flexible_motherboard_243187-002.pdf
+socket7/ap580_pentium_mmx_voltage_243186-003.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket7/docs/datasheets/cpu_Intel_AP-580_243186-003.pdf
+socket7/intel_82439tx_mtxc_290559-001.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket7/docs/datasheets/chipset_Intel_82439TX_MTXC_290559-001.pdf
+socket7/intel_82371ab_piix4.pdf file:///mnt/data/perso/retro/BIOSTAR%20MB-8500TTD/82371AB.PDF
+socket7/board/biostar_mb-8500ttd_spec.pdf file:///mnt/data/perso/retro/BIOSTAR%20MB-8500TTD/35346.pdf
+socket7/board/biostar_mb-8500ttd_settings.pdf file:///mnt/data/perso/retro/BIOSTAR%20MB-8500TTD/8500ttd-settings-6962b12d80e61696733551.pdf
+socket7/board/biostar_mb-8500ttd_undocumented_jumpers.pdf file:///mnt/data/perso/retro/BIOSTAR%20MB-8500TTD/biostar-mb-8500ttd-undocumented-jumper-table-by-feipoa-6962b1d5b916c993083026.pdf
+socket7/board/ics9169c-27_clock_generator.pdf file:///mnt/data/perso/retro/BIOSTAR%20MB-8500TTD/ICS9169C-27.PDF
+socket7/board/mb-8500ttd_photo.jpg file:///mnt/data/perso/retro/BIOSTAR%20MB-8500TTD/BIOSTAR%20MB-8500TTD%20diskless.jpeg
+socket7/board/bios_dump_original.bin file:///mnt/data/perso/retro/BIOSTAR%20MB-8500TTD/original.bin
+socket7/board/cpuinfo_pentium_mmx_233.txt file:///mnt/data/perso/retro/BIOSTAR%20MB-8500TTD/cpuinfo.txt
+# Socket 370: PGA370 geometry, P6 bus, VIA VT82C694X + VT82C686B board
+socket370/pentium3_pga370_245264-008.pdf file:///mnt/data/perso/retro/Socket%20370/24526408.pdf
+socket370/pentium3_spec_update_244453-058.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket370/docs/datasheets/cpu_Intel_PentiumIII_spec_update_244453-058.pdf
+socket370/celeron_243658-020.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket370/docs/datasheets/cpu_Intel_Celeron_upto1.1GHz_243658-020.pdf
+socket370/pga370_socket_design_guidelines_244410-002.pdf file:///mnt/data/perso/retro/Socket%20370/24441002-65bd98a4cbe09754855163.pdf
+socket370/pga370_pin_map.pdf file:///mnt/data/perso/retro/Socket%20370/869842209-Socket-370.pdf
+socket370/p6_family_hardware_developers_manual_244001-001.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket370/docs/datasheets/cpu_Intel_P6_family_HW_devmanual_244001-001.pdf
+socket370/pentium_pro_developers_manual_vol1.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket370/docs/datasheets/cpu_Intel_PentiumPro_devmanual_vol1.pdf
+socket370/via_vt82c694t_datasheet_1.00.pdf file:///mnt/data/perso/retro/VIA%20P3/vt82c694t-v1-00-6623f075de86c365423273.pdf
+socket370/via_vt82c686b_datasheet.pdf file:///mnt/data/perso/retro/VIA%20P3/vt82c686b-southbridge-datasheet-64864986dcfb8269986481.pdf
+socket370/board/bios_dump_694X-686B_2001-06-20.bin file:///mnt/data/perso/retro/VIA%20P3/SST39SF020A_20251107_112938.BIN
+socket370/board/board_photo.jpg file:///mnt/data/perso/retro/VIA%20P3/img20250817155212-68baa1d81e54d033467809.jpg
+socket370/board/ics94241_clock_generator.pdf file:///mnt/data/perso/retro/VIA%20P3/REN_94241_DST_20060324.pdf
+socket370/board/isl6524_vrm_controller.pdf file:///mnt/data/perso/retro/VIA%20P3/ISL6524.PDF
+socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket7/docs/datasheets/chipset_Intel_430HX_design_guide_297467-002.pdf
+parts/ti_tps54620_6a_buck.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket370/docs/datasheets/pwr_TI_TPS54620_6A_buck.pdf
+parts/ti_tps62130_3a_buck.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket370/docs/datasheets/pwr_TI_TPS62130_3A_buck.pdf
+parts/ti_tps51200_vtt_sink_source.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket370/docs/datasheets/pwr_TI_TPS51200_VTT_sink_source.pdf
+parts/cui_pj-063ah_barrel_jack.pdf file:///home/user/Desktop/CatchChallenger/FPGAmotherboard/socket370/docs/datasheets/conn_CUI_PJ-063AH_barrel_jack.pdf
+slot1/celeron_sepp_24365803.pdf file:///mnt/data/perso/retro/SLOT%201/24365803.pdf
+slot1/ap587_slot1_power_distribution_24333201.pdf file:///mnt/data/perso/retro/SLOT%201/24333201-65c637c4b2b49179115712.pdf
+slot1/pentium3_power_distribution_24508501.pdf file:///mnt/data/perso/retro/SLOT%201/24508501.pdf

@@ -3,6 +3,14 @@
 An x86 CPU in an FPGA, on an interposer that plugs into an original PC CPU
 socket and runs the board's stock BIOS, chipset, RAM and disks.
 
+Planned brand name for the ASIC build: **LastUpgrade** — the last upgrade
+for an old board: with its own memory (large L2, on-module RAM) and
+SSE2, it should run a modern OS at correct performance.
+
+Linked project: [FPGAmotherboard](https://github.com/alphaonex86/FPGAmotherboard),
+the reverse (a real CPU on a board whose chipset is an FPGA) for the same
+sockets; the socket KiCad models in `sockets/kicad/` come from it.
+
 ## Goals
 
 - ISA: i686 + x87 + MMX + SSE + SSE2 first (modern software such as Node.js
@@ -40,14 +48,22 @@ Planning: FPGAs chosen, documentation collected. No RTL yet.
 - `AGENTS.md` — project rules and requirements.
 - `FPGAlist/` — FPGA survey; `CycloneV_A9/` and `Ti180_G400/` hold the vendor
   documentation, pin-outs, models, board references and toolchain notes.
-- `sockets/` — original CPU datasheets (bus protocol, pinout, power).
+- `sockets/` — per socket: CPU datasheets (bus protocol, pinout, power),
+  chipset datasheets and the target board's manual, BIOS dump and photo;
+  `kicad/` holds the socket footprints, symbols, 3D models and pin maps.
+- `isa/` — x86 ISA manuals (Intel SDM, AMD APM, CPUID AP-485).
+- `plan/` — interposer board plan (3 sockets x 2 FPGAs) and the prompt to run it.
 - `fetch.sh` — downloads everything listed in the `sources.txt` files.
 
 ## Offline documentation
 
 Vendor files are not stored in git (copyright, size). Download them with:
 
-    ./fetch.sh FPGAlist/*/sources.txt sockets/sources.txt
+    ./fetch.sh FPGAlist/*/sources.txt sockets/sources.txt isa/sources.txt sockets/local-sources.txt
+
+`sockets/local-sources.txt` copies files from the operator's local archive
+(`file://`). No VT82C694X datasheet was found: use the VT82C694T one and
+86Box's model (`FPGAcommon/86Box`).
 
 Quartus and Efinity need a vendor account: see
 [FPGAlist/CycloneV_A9/README.md](FPGAlist/CycloneV_A9/README.md) and

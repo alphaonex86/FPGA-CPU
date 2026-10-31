@@ -8,3 +8,26 @@ socket370/pentium3_pga370_245264-001.pdf https://datasheets.chipdb.org/Intel/x86
 socket370/pentium3_512k_tualatin_249657-004.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20III/24965704.pdf
 socket370/ap906_agtl_layout_guidelines.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20III/24508601.pdf
 socket370/pentium2_developers_manual_243502.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20II/24350201.PDF
+# Interposer parts
+parts/mill-max_catalog_metric.pdf https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/7161/Mill%20Max%20catalog.pdf
+# Board parts (regulators etc. on the target motherboards)
+parts/sharp_pq30rv21.pdf https://datasheet4u.com/pdf/465536/PQ30RV21.pdf
+# Slot 1 (SC242): SECC/SECC2 cartridges, AGTL+, VID straps
+slot1/pentium2_350-450_sc242_24365703.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20II/24365703.PDF
+slot1/pentium3_secc2_24445201.pdf https://datasheets.chipdb.org/Intel/x86/Pentium%20III/24445201.pdf
+slot1/sc242_connector_designguidelines_243397-02.pdf https://peertje.daanberg.net/drivers/intel/download.intel.com/design/PentiumII/applnots/24339702.PDF
+slot1/sec_cartridge_packaging_databook_ch16.pdf https://www.intel.com/content/dam/www/public/us/en/documents/packaging-databooks/packaging-chapter-16-databook.pdf
+# D8 chipsets: Intel 440BX, i810, i820; VIA Apollo Pro 133/133A
+# D8 chipsets (web.archive.org captures of download.intel.com files)
+slot1/board/intel_440bx_host_bridge_29063301.pdf https://web.archive.org/web/20110629170855id_/http://download.intel.com/design/chipsets/datashts/29063301.pdf
+slot1/board/intel_82801AA_ich0_29065503.pdf https://web.archive.org/web/20061128182207id_/http://download.intel.com:80/design/chipsets/datashts/29065503.pdf
+slot1/board/intel_82801BA_ich2_29068702.pdf https://web.archive.org/web/20070211091718id_/http://download.intel.com:80/design/chipsets/datashts/29068702.pdf
+slot1/board/intel_82810_gmch_29065602.pdf https://web.archive.org/web/20051208065809id_/ftp://download.intel.com/design/chipsets/datashts/29065602.pdf
+# PIIX4E pairs with 440BX: already in the repo at socket7/intel_82371ab_piix4.pdf
+# DDR3L dies for the cartridge RAM (S5/S6): 8 Gb x16 singles + TwinDie pack,
+# and the independent ball-map confirmation (Opal Kelly FOMD-ACV docs)
+slot1/die/mt41k512m16ha_8gb_x16_ddr3l.pdf https://www.alliancememory.com/wp-content/uploads/Micron_8Gb_DDR3_SDRAM_PartNo.MT41K512M16HA-107_125.pdf
+slot1/die/mt41k512m16_twindie_8gb_x16_ddr3l_auto.pdf https://www.farnell.com/datasheets/3110920.pdf
+# (local snapshot only: the docs site serves HTML, fetch.sh can't take it)
+# slot1/die/opalkelly_fomd_acv_ddr3_pinmap.html https://docs.opalkelly.com/fomd-acv/ddr3-memory
+parts/ti_sn74cb3t3245.pdf https://www.ti.com/lit/ds/symlink/sn74cb3t3245.pdf

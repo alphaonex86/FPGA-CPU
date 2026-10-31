@@ -1,0 +1,9 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "Slot1")(type "KiCad")(uri "${KIPRJMOD}/../lib/Slot1.pretty")(options "")(descr "Slot 1 interposer footprint set"))
+  (lib (name "Interposer")(type "KiCad")(uri "${KIPRJMOD}/../lib/Interposer.pretty")(options "")(descr "Slot 1 interposer footprint set"))
+  (lib (name "DDR3")(type "KiCad")(uri "${KIPRJMOD}/../lib/DDR3.pretty")(options "")(descr "Slot 1 interposer footprint set"))
+  (lib (name "TPS")(type "KiCad")(uri "${KIPRJMOD}/../lib/TPS.pretty")(options "")(descr "Slot 1 interposer footprint set"))
+  (lib (name "Conn")(type "KiCad")(uri "${KIPRJMOD}/../lib/Conn.pretty")(options "")(descr "Slot 1 interposer footprint set"))
+  (lib (name "Pwr")(type "KiCad")(uri "${KIPRJMOD}/../lib/Pwr.pretty")(options "")(descr "Slot 1 interposer footprint set"))
+)

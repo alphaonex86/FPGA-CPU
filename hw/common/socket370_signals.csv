@@ -1,0 +1,371 @@
+pin,signal,dir,level,standard,class,required,source
+A3,D29#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A5,D28#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A7,D43#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A9,D37#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A11,D44#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A13,D51#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A15,D47#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A17,D48#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A19,D57#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A21,D46#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A23,D53#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A25,D60#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A27,D61#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A29,DEP7#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A31,DEP3#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A33,DEP2#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A35,PRDY#,O,"AGTL+ (OD, VTT-terminated)",AGTL+,debug,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24; sockets/socket370/pentium3_pga370_245264-008.pdf p89 probe
+A37,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B2,D35#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+B4,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B6,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B8,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B10,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B12,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B14,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B16,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B18,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B20,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B22,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B24,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B26,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B28,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B30,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B32,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B34,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+B36,BINIT#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C1,D33#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C3,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+C5,D31#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C7,D34#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C9,D36#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C11,D45#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C13,D49#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C15,D40#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C17,D59#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C19,D55#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C21,D54#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C23,D58#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C25,D50#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C27,D56#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C29,DEP5#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C31,DEP1#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C33,DEP0#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C35,BPM0#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+C37,CPUPRES#,O,active-low presence,CMOS-OD,strap,yes,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p88
+D2,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D4,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D6,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D8,D38#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D10,D39#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D12,D42#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D14,D41#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D16,D52#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D18,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D20,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D22,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D24,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D26,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D28,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D30,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+D36,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E1,D26#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+E3,D25#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+E5,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E7,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E9,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E11,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E13,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E15,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E17,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E19,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E21,Reserved,,,,nc,no,pinmap
+E23,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E25,D62#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+E27,SLEWCTRL,I,strap,passive,strap,yes,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p91
+E29,DEP6#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+E31,DEP4#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+E33,VREF,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+E35,BPM1#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+E37,BP3#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+F2,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F4,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F6,D32#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+F8,D22#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+F10,Reserved,,,,nc,no,pinmap
+F12,D27#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+F14,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F16,D63#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+F18,VREF,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F20,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F22,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F24,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F26,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F28,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F30,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F32,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F34,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+F36,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+G1,D21#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+G3,D23#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+G5,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+G33,BP2#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+G35,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+G37,Reserved,,,,nc,no,pinmap
+H2,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+H4,D16#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+H6,D19#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+H32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+H34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+H36,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+J1,D7#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+J3,D30#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+J5,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+J33,PICCLK,I,2.5 V-tolerant CMOS,CMOS,clock,yes,sockets/socket370/pentium3_pga370_245264-008.pdf p22 + p40 Table 19
+J35,PICD0,IO,2.5 V-tolerant CMOS,CMOS-OD,sideband,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf p22, p40 Table 19"
+J37,PREQ#,I,CMOS,CMOS,debug,yes,sockets/socket370/pentium3_pga370_245264-008.pdf p89 probe
+K2,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+K4,VREF,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+K6,D24#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+K32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+K34,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+K36,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+L1,D13#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+L3,D20#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+L5,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+L33,Reserved,,,,nc,no,pinmap
+L35,PICD1,IO,2.5 V-tolerant CMOS,CMOS-OD,sideband,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf p22, p40 Table 19"
+L37,LINT1,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23; sockets/socket370/pentium3_pga370_245264-008.pdf p89
+M2,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+M4,D11#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+M6,D3#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+M32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+M34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+M36,LINT0,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23; sockets/socket370/pentium3_pga370_245264-008.pdf p89
+N1,D2#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+N3,D14#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+N5,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+N33,Reserved,,,,nc,no,pinmap
+N35,Reserved,,,,nc,no,pinmap
+N37,Reserved,,,,nc,no,pinmap
+P2,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+P4,D18#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+P6,D9#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+P32,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+P34,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+P36,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Q1,D12#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+Q3,D10#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+Q5,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Q33,Reserved,,,,nc,no,pinmap
+Q35,Reserved,,,,nc,no,pinmap
+Q37,Reserved,,,,nc,no,pinmap
+R2,Reserved,,,,nc,no,pinmap
+R4,D17#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+R6,VREF,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+R32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+R34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+R36,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+S1,D8#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+S3,D5#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+S5,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+S33,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+S35,RTTCTRL,I,strap,passive,strap,yes,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p91
+S37,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+T2,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+T4,D1#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+T6,D6#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+T32,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+T34,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+T36,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+U1,D4#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+U3,D15#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+U5,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+U33,PLL,I,filtered VCCCORE,analog,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p90 2.3.1
+U35,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+U37,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+V2,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+V4,BERR#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+V6,VREF,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+V32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+V34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+V36,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+W1,D0#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+W3,A34#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+W5,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+W33,PLL,I,filtered VCCCORE,analog,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p90 2.3.1
+W35,Reserved,,,,nc,no,pinmap
+W37,BCLK,I,2.5 V (0.5-2.0 V swing),CMOS,clock,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/14 p23,37"
+X2,BR1#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+X4,RESET2#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,control,no,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24; sockets/socket370/pentium3_pga370_245264-008.pdf p90 unused
+X6,A32#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+X32,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+X34,Reserved,,,,nc,no,pinmap
+X36,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Y1,Reserved,,,,nc,no,pinmap
+Y3,A26#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+Y5,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Y33,CLKREF,I,1.25 V +/-6.5% PLL ref,analog,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p30 Table 7 note 15
+Y35,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Y37,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Z2,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Z4,A29#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+Z6,A18#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+Z32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Z34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+Z36,VCC2.5,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AA1,A27#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AA3,A30#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AA5,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AA33,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AA35,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AA37,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AB2,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AB4,A24#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AB6,A23#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AB32,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AB34,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AB36,VCCCMOS,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AC1,A33#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AC3,A20#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AC5,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AC33,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AC35,FERR#,OD,CMOS (OD),CMOS,sideband,no,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23; sockets/socket370/pentium3_pga370_245264-008.pdf p88
+AC37,RSP#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AD2,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AD4,A31#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AD6,VREF,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AD32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AD34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AD36,VCC1,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AE1,A17#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AE3,A22#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AE5,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AE33,A20M#,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+AE35,IERR#,OD,CMOS (OD),CMOS,sideband,no,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23; sockets/socket370/pentium3_pga370_245264-008.pdf p88
+AE37,FLUSH#,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+AF2,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AF4,A35#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AF6,A25#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AF32,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AF34,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AF36,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AG1,EDGCTRL,O,51-ohm class to VCCCORE,passive,strap,no,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p88 not used
+AG3,A19#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AG5,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AG33,INIT#,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+AG35,STPCLK#,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+AG37,IGNNE#,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+AH2,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AH4,RESET#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH6,A10#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH8,A5#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH10,A8#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH12,A4#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH14,BNR#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH16,REQ1#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH18,REQ2#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH20,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AH22,RS1#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH24,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AH26,RS0#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AH28,THERMTRIP#,OD,CMOS (OD),CMOS,sideband,no,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23; sockets/socket370/pentium3_pga370_245264-008.pdf p91
+AH30,SLP#,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+AH32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AH34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AH36,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ1,A21#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AJ3,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ5,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ7,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ9,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ11,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ13,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ15,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ17,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ19,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ21,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ23,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ25,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ27,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ29,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AJ31,BSEL1,O,single-driver active high,CMOS-OD,strap,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p25-26,87"
+AJ33,BSEL0,O,single-driver active high,CMOS-OD,strap,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p25-26,87"
+AJ35,SMI#,I,CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+AJ37,VID3,O,passive open/short,passive,strap,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p20-21,92"
+AK2,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AK4,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AK6,A28#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AK8,A3#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AK10,A11#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AK12,VREF,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AK14,A14#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AK16,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AK18,REQ0#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AK20,LOCK#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AK22,VREF,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AK24,AERR#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AK26,PWRGOOD,I,2.5 V-tolerant CMOS,CMOS,control,yes,sockets/socket370/pentium3_pga370_245264-008.pdf p22 note 4
+AK28,RS2#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AK30,Reserved,,,,nc,no,pinmap
+AK32,TMS,I,CMOS (rail unverified: NM8),,debug,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74
+AK34,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AK36,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AL1,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AL3,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AL5,A15#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL7,A13#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL9,A9#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL11,AP0#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL13,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AL15,A7#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL17,REQ4#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL19,REQ3#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL21,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AL23,HITM#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL25,HIT#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL27,DBSY#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AL29,THERMDN,O,analog diode,analog,sideband,no,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p91
+AL31,THERMDP,I,analog diode,analog,sideband,no,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p91
+AL33,TCK,I,CMOS (rail unverified: NM8),,debug,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74
+AL35,VID0,O,passive open/short,passive,strap,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p20-21,92"
+AL37,VID2,O,passive open/short,passive,strap,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p20-21,92"
+AM2,Reserved,,,,nc,no,pinmap
+AM4,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM6,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM8,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM10,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM12,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM14,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM16,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM18,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM20,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM22,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM24,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM26,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM28,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM30,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM32,VCCCORE,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM34,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AM36,VID1,O,passive open/short,passive,strap,yes,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p20-21,92"
+AN3,GND,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AN5,A12#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN7,A16#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN9,A6#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN11,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AN13,AP1#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN15,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AN17,BPRI#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN19,DEFER#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN21,VTT,,,,power,no,sockets/socket370/pentium3_pga370_245264-008.pdf p17 pin counts
+AN23,RP#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN25,TRDY#,I,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN27,DRDY#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN29,BR0#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN31,ADS#,IO,"AGTL+ (OD, VTT-terminated)",AGTL+,bus,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AN33,TRST#,I,CMOS (rail unverified: NM8),,debug,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74
+AN35,TDI,I,CMOS (rail unverified: NM8),,debug,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74
+AN37,TDO,O,CMOS (rail unverified: NM8),,debug,yes,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74

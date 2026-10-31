@@ -1,0 +1,168 @@
+signal,ball,bank,vccio,io_standard,translator,distance_mm,socket_pin,source
+D29#,A12,7A,3.3 V,3.3-V LVTTL,T01c1,10.5,A3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D28#,A13,7A,3.3 V,3.3-V LVTTL,T01c2,10.6,A5,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D43#,A14,7A,3.3 V,3.3-V LVTTL,T01c3,10.8,A7,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D37#,A15,7A,3.3 V,3.3-V LVTTL,T01c4,11.1,A9,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D44#,B11,7A,3.3 V,3.3-V LVTTL,T01c5,9.5,A11,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D51#,B12,7A,3.3 V,3.3-V LVTTL,T01c6,9.5,A13,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D47#,B13,7A,3.3 V,3.3-V LVTTL,T01c7,9.6,A15,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D48#,B15,7A,3.3 V,3.3-V LVTTL,T01c8,10.1,A17,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D57#,B16,7A,3.3 V,3.3-V LVTTL,T02c1,10.5,A19,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D46#,B17,7A,3.3 V,3.3-V LVTTL,T02c2,11.0,A21,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D53#,B18,7A,3.3 V,3.3-V LVTTL,T02c3,11.5,A23,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D60#,B20,7A,3.3 V,3.3-V LVTTL,T02c4,12.7,A25,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D61#,B21,7A,3.3 V,3.3-V LVTTL,T02c5,13.4,A27,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DEP7#,P14,4A,3.3 V,3.3-V LVTTL,T02c6,3.5,A29,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DEP3#,R14,4A,3.3 V,3.3-V LVTTL,T02c7,4.3,A31,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DEP2#,T12,4A,3.3 V,3.3-V LVTTL,T02c8,4.5,A33,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+PRDY#,K17,5B,2.5 V,3.3-V LVTTL,T03c1,5.7,A35,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24; sockets/socket370/pentium3_pga370_245264-008.pdf p89 probe
+D35#,C11,7A,3.3 V,3.3-V LVTTL,T03c2,8.5,B2,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BINIT#,A5,8A,3.3 V,3.3-V LVTTL,T03c3,12.3,B36,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D33#,C13,7A,3.3 V,3.3-V LVTTL,T03c4,8.6,C1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D31#,C15,7A,3.3 V,3.3-V LVTTL,T03c5,9.2,C5,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D34#,C16,7A,3.3 V,3.3-V LVTTL,T03c6,9.6,C7,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D36#,C20,7A,3.3 V,3.3-V LVTTL,T03c7,12.0,C9,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D45#,C21,7A,3.3 V,3.3-V LVTTL,T03c8,12.7,C11,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D49#,D12,7A,3.3 V,3.3-V LVTTL,T04c1,7.5,C13,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D40#,D13,7A,3.3 V,3.3-V LVTTL,T04c2,7.6,C15,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D59#,D17,7A,3.3 V,3.3-V LVTTL,T04c3,9.3,C17,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D55#,D19,7A,3.3 V,3.3-V LVTTL,T04c4,10.6,C19,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D54#,D21,7A,3.3 V,3.3-V LVTTL,T04c5,12.1,C21,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D58#,E12,7A,3.3 V,3.3-V LVTTL,T04c6,6.5,C23,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D50#,E14,7A,3.3 V,3.3-V LVTTL,T04c7,7.0,C25,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D56#,E15,7A,3.3 V,3.3-V LVTTL,T04c8,7.4,C27,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DEP5#,T13,4A,3.3 V,3.3-V LVTTL,T05c1,4.7,C29,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DEP1#,T14,4A,3.3 V,3.3-V LVTTL,T05c2,5.1,C31,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DEP0#,U13,4A,3.3 V,3.3-V LVTTL,T05c3,5.7,C33,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BPM0#,U15,4A,3.3 V,3.3-V LVTTL,T05c4,6.5,C35,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+CPUPRES#,N8,3B,3.3 V,3.3-V LVTTL,T05c5,3.8,C37,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p88
+D38#,E16,7A,3.3 V,3.3-V LVTTL,T05c6,7.9,D8,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D39#,E19,7A,3.3 V,3.3-V LVTTL,T05c7,9.9,D10,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D42#,E21,7A,3.3 V,3.3-V LVTTL,T05c8,11.5,D12,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D41#,F12,7A,3.3 V,3.3-V LVTTL,T06c1,5.5,D14,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D52#,F13,7A,3.3 V,3.3-V LVTTL,T06c2,5.7,D16,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D26#,F14,7A,3.3 V,3.3-V LVTTL,T06c3,6.0,E1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D25#,F15,7A,3.3 V,3.3-V LVTTL,T06c4,6.5,E3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D62#,F22,7A,3.3 V,3.3-V LVTTL,T06c5,11.9,E25,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+SLEWCTRL,P8,3B,3.3 V,3.3-V LVTTL,T06c6,4.3,E27,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p91
+DEP6#,U16,4A,3.3 V,3.3-V LVTTL,T06c7,7.1,E29,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DEP4#,U17,4A,3.3 V,3.3-V LVTTL,T06c8,7.8,E31,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BPM1#,U20,4A,3.3 V,3.3-V LVTTL,T07c1,10.1,E35,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BP3#,U21,4A,3.3 V,3.3-V LVTTL,T07c2,11.0,E37,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D32#,G11,7A,3.3 V,3.3-V LVTTL,T07c3,4.5,F6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D22#,G12,7A,3.3 V,3.3-V LVTTL,T07c4,4.5,F8,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D27#,G15,7A,3.3 V,3.3-V LVTTL,T07c5,5.7,F12,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D63#,G16,7A,3.3 V,3.3-V LVTTL,T07c6,6.4,F16,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D21#,G17,7A,3.3 V,3.3-V LVTTL,T07c7,7.1,G1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D23#,G18,7A,3.3 V,3.3-V LVTTL,T07c8,7.9,G3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BP2#,U22,4A,3.3 V,3.3-V LVTTL,T08c1,11.9,G33,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D16#,G21,7A,3.3 V,3.3-V LVTTL,T08c2,10.5,H4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D19#,G22,7A,3.3 V,3.3-V LVTTL,T08c3,11.4,H6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D7#,V13,4A,3.3 V,3.3-V LVTTL,T08c4,6.7,J1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D30#,H10,7A,3.3 V,3.3-V LVTTL,T08c5,3.8,J3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+PICCLK,K21,5B,2.5 V,2.5 V,,9.6,J33,sockets/socket370/pentium3_pga370_245264-008.pdf p22 + p40 Table 19
+PICD0,V18,4A,3.3 V,3.3-V LVTTL,T08c6,9.2,J35,"sockets/socket370/pentium3_pga370_245264-008.pdf p22, p40 Table 19"
+PREQ#,K22,5B,2.5 V,3.3-V LVTTL,T08c7,10.6,J37,sockets/socket370/pentium3_pga370_245264-008.pdf p89 probe
+D24#,H11,7A,3.3 V,3.3-V LVTTL,T08c8,3.5,K6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D13#,V19,4A,3.3 V,3.3-V LVTTL,T09c1,9.9,L1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D20#,H14,7A,3.3 V,3.3-V LVTTL,T09c2,4.3,L3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+PICD1,V20,4A,3.3 V,3.3-V LVTTL,T09c3,10.7,L35,"sockets/socket370/pentium3_pga370_245264-008.pdf p22, p40 Table 19"
+LINT1,P16,5A,3.3 V,3.3-V LVTTL,T09c4,5.1,L37,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23; sockets/socket370/pentium3_pga370_245264-008.pdf p89
+D11#,V21,4A,3.3 V,3.3-V LVTTL,T09c5,11.5,M4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D3#,W19,4A,3.3 V,3.3-V LVTTL,T09c6,10.6,M6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+LINT0,P17,5A,3.3 V,3.3-V LVTTL,T09c7,6.0,M36,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23; sockets/socket370/pentium3_pga370_245264-008.pdf p89
+D2#,W21,4A,3.3 V,3.3-V LVTTL,T09c8,12.1,N1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D14#,W22,4A,3.3 V,3.3-V LVTTL,T10c1,12.9,N3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D18#,H18,7A,3.3 V,3.3-V LVTTL,T10c2,7.4,P4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D9#,Y14,4A,3.3 V,3.3-V LVTTL,T10c3,8.9,P6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D12#,Y15,4A,3.3 V,3.3-V LVTTL,T10c4,9.2,Q1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D10#,Y16,4A,3.3 V,3.3-V LVTTL,T10c5,9.6,Q3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D17#,H21,7A,3.3 V,3.3-V LVTTL,T10c6,10.1,R4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D8#,Y17,4A,3.3 V,3.3-V LVTTL,T10c7,10.1,S1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D5#,Y19,4A,3.3 V,3.3-V LVTTL,T10c8,11.3,S3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+RTTCTRL,P12,3B,3.3 V,3.3-V LVTTL,T11c1,2.5,S35,sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p91
+D1#,Y20,4A,3.3 V,3.3-V LVTTL,T11c2,12.0,T4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D6#,Y21,4A,3.3 V,3.3-V LVTTL,T11c3,12.7,T6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D4#,Y22,4A,3.3 V,3.3-V LVTTL,T11c4,13.5,U1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D15#,AA13,4A,3.3 V,3.3-V LVTTL,T11c5,9.6,U3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BERR#,A7,8A,3.3 V,3.3-V LVTTL,T11c6,11.4,V4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+D0#,AA14,4A,3.3 V,3.3-V LVTTL,T11c7,9.8,W1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A34#,R9,3B,3.3 V,3.3-V LVTTL,T11c8,4.3,W3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BCLK,N16,5B,2.5 V,2.5 V,,4.7,W37,"sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/14 p23,37"
+BR1#,A8,8A,3.3 V,3.3-V LVTTL,T12c1,11.1,X2,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A32#,R10,3B,3.3 V,3.3-V LVTTL,T12c2,3.8,X6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A26#,AA15,4A,3.3 V,3.3-V LVTTL,T12c3,10.1,Y3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A29#,AA17,4A,3.3 V,3.3-V LVTTL,T12c4,11.0,Z4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A18#,A9,8A,3.3 V,3.3-V LVTTL,T12c5,10.8,Z6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A27#,AA18,4A,3.3 V,3.3-V LVTTL,T12c6,11.5,AA1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A30#,R11,3B,3.3 V,3.3-V LVTTL,T12c7,3.5,AA3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A24#,A10,8A,3.3 V,3.3-V LVTTL,T12c8,10.6,AB4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A23#,B5,8A,3.3 V,3.3-V LVTTL,T13c1,11.5,AB6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A33#,R12,3B,3.3 V,3.3-V LVTTL,T13c2,3.5,AC1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A20#,B6,8A,3.3 V,3.3-V LVTTL,T13c3,11.0,AC3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+RSP#,B7,8A,3.3 V,3.3-V LVTTL,T13c4,10.5,AC37,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A31#,T9,3B,3.3 V,3.3-V LVTTL,T13c5,5.1,AD4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A17#,B10,8A,3.3 V,3.3-V LVTTL,T13c6,9.6,AE1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A22#,C6,8A,3.3 V,3.3-V LVTTL,T13c7,10.1,AE3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A20M#,P18,5A,3.3 V,3.3-V LVTTL,T13c8,7.0,AE33,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+FLUSH#,P19,5A,3.3 V,3.3-V LVTTL,T14c1,7.9,AE37,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+A35#,T10,3B,3.3 V,3.3-V LVTTL,T14c2,4.7,AF4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A25#,AA19,4A,3.3 V,3.3-V LVTTL,T14c3,12.1,AF6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A19#,C8,8A,3.3 V,3.3-V LVTTL,T14c4,9.2,AG3,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+INIT#,R15,5A,3.3 V,3.3-V LVTTL,T14c5,4.9,AG33,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+STPCLK#,R16,5A,3.3 V,3.3-V LVTTL,T14c6,5.7,AG35,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+IGNNE#,R17,5A,3.3 V,3.3-V LVTTL,T14c7,6.5,AG37,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+RESET#,C9,8A,3.3 V,3.3-V LVTTL,T14c8,8.9,AH4,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A10#,J11,7A,3.3 V,3.3-V LVTTL,T15c1,2.5,AH6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A5#,J13,7A,3.3 V,3.3-V LVTTL,T15c2,2.9,AH8,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A8#,J17,7A,3.3 V,3.3-V LVTTL,T15c3,6.0,AH10,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A4#,J18,7A,3.3 V,3.3-V LVTTL,T15c4,7.0,AH12,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BNR#,D6,8A,3.3 V,3.3-V LVTTL,T15c5,9.3,AH14,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+REQ1#,AA20,4A,3.3 V,3.3-V LVTTL,T15c6,12.7,AH16,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+REQ2#,AA22,4A,3.3 V,3.3-V LVTTL,T15c7,14.2,AH18,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+RS1#,D7,8A,3.3 V,3.3-V LVTTL,T15c8,8.7,AH22,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+RS0#,D9,8A,3.3 V,3.3-V LVTTL,T16c1,7.9,AH26,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+SLP#,AB12,4A,3.3 V,3.3-V LVTTL,T16c2,10.5,AH30,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+A21#,E7,8A,3.3 V,3.3-V LVTTL,T16c3,7.9,AJ1,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BSEL1,U10,3B,3.3 V,3.3-V LVTTL,T16c4,5.7,AJ31,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p25-26,87"
+BSEL0,U11,3B,3.3 V,3.3-V LVTTL,T16c5,5.5,AJ33,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p25-26,87"
+SMI#,T15,5A,3.3 V,3.3-V LVTTL,T16c6,5.7,AJ35,sockets/socket370/pentium3_pga370_245264-008.pdf Table 3 p23
+VID3,U12,3B,3.3 V,3.3-V LVTTL,T16c7,5.5,AJ37,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p20-21,92"
+A28#,AB13,4A,3.3 V,3.3-V LVTTL,T16c8,10.6,AK6,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A3#,J19,7A,3.3 V,3.3-V LVTTL,T17c1,7.9,AK8,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A11#,J21,7A,3.3 V,3.3-V LVTTL,T17c2,9.8,AK10,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A14#,J22,7A,3.3 V,3.3-V LVTTL,T17c3,10.8,AK14,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+REQ0#,AB15,4A,3.3 V,3.3-V LVTTL,T17c4,11.1,AK18,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+LOCK#,E9,8A,3.3 V,3.3-V LVTTL,T17c5,7.0,AK20,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AERR#,F7,8A,3.3 V,3.3-V LVTTL,T17c6,7.1,AK24,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+PWRGOOD,T19,5A,3.3 V,3.3-V LVTTL,T17c7,8.7,AK26,sockets/socket370/pentium3_pga370_245264-008.pdf p22 note 4
+RS2#,G6,8A,3.3 V,3.3-V LVTTL,T17c8,7.1,AK28,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+TMS,L17,5B,2.5 V,3.3-V LVTTL,T18c1,5.5,AK32,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74
+A15#,V9,3B,3.3 V,3.3-V LVTTL,T18c2,7.0,AL5,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A13#,K9,7A,3.3 V,3.3-V LVTTL,T18c3,2.9,AL7,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A9#,K16,7A,3.3 V,3.3-V LVTTL,T18c4,4.7,AL9,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AP0#,AB17,4A,3.3 V,3.3-V LVTTL,T18c5,11.9,AL11,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A7#,K19,7A,3.3 V,3.3-V LVTTL,T18c6,7.6,AL15,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+REQ4#,AB18,4A,3.3 V,3.3-V LVTTL,T18c7,12.3,AL17,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+REQ3#,AB20,4A,3.3 V,3.3-V LVTTL,T18c8,13.5,AL19,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+HITM#,G8,8A,3.3 V,3.3-V LVTTL,T19c1,5.7,AL23,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+HIT#,H6,8A,3.3 V,3.3-V LVTTL,T19c2,6.5,AL25,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DBSY#,H8,8A,3.3 V,3.3-V LVTTL,T19c3,4.9,AL27,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+TCK,L18,5B,2.5 V,3.3-V LVTTL,T19c4,6.5,AL33,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74
+VID0,V10,3B,3.3 V,3.3-V LVTTL,T19c5,6.7,AL35,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p20-21,92"
+VID2,Y9,3B,3.3 V,3.3-V LVTTL,T19c6,8.9,AL37,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p20-21,92"
+VID1,Y10,3B,3.3 V,3.3-V LVTTL,T19c7,8.6,AM36,"sockets/socket370/pentium3_pga370_245264-008.pdf p88-91 signal descriptions p20-21,92"
+A12#,K20,7A,3.3 V,3.3-V LVTTL,T19c8,8.6,AN5,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A16#,Y11,3B,3.3 V,3.3-V LVTTL,T20c1,8.5,AN7,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+A6#,L8,7A,3.3 V,3.3-V LVTTL,T20c2,3.5,AN9,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+AP1#,AB21,4A,3.3 V,3.3-V LVTTL,T20c3,14.2,AN13,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BPRI#,H9,8A,3.3 V,3.3-V LVTTL,T20c4,4.3,AN17,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DEFER#,J7,8A,3.3 V,3.3-V LVTTL,T20c5,5.1,AN19,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+RP#,AB22,4A,3.3 V,3.3-V LVTTL,T20c6,14.8,AN23,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+TRDY#,J8,8A,3.3 V,3.3-V LVTTL,T20c7,4.3,AN25,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+DRDY#,J9,8A,3.3 V,3.3-V LVTTL,T20c8,3.5,AN27,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+BR0#,K7,8A,3.3 V,3.3-V LVTTL,T21c1,4.7,AN29,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+ADS#,L7,8A,3.3 V,3.3-V LVTTL,T21c2,4.5,AN31,sockets/socket370/pentium3_pga370_245264-008.pdf Tables 3/4 p23-24
+TRST#,L19,5B,2.5 V,3.3-V LVTTL,T21c3,7.5,AN33,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74
+TDI,L22,5B,2.5 V,3.3-V LVTTL,T21c4,10.5,AN35,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74
+TDO,M18,5B,2.5 V,3.3-V LVTTL,T21c5,6.5,AN37,sockets/socket370/pentium3_pga370_245264-008.pdf Table 40 p74

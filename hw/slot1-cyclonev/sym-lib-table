@@ -1,0 +1,7 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "Interposer")(type "KiCad")(uri "${KIPRJMOD}/../lib/Interposer_Logic.kicad_sym")(options "")(descr "Translator"))
+  (lib (name "Slot1Parts")(type "KiCad")(uri "${KIPRJMOD}/../lib/Slot1_Parts.kicad_sym")(options "")(descr "DDR3 die + tracker"))
+  (lib (name "SocketFPGA")(type "KiCad")(uri "${KIPRJMOD}/../../hw/lib/FPGA_CycloneV_5CEFA9_F484.kicad_sym")(options "")(descr "FPGA"))
+  (lib (name "SocketCPU")(type "KiCad")(uri "${KIPRJMOD}/../../sockets/kicad/Intel_SC242_CardEdge.kicad_sym")(options "")(descr "CPU"))
+)

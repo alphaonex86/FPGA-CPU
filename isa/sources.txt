@@ -1,0 +1,4 @@
+# x86 ISA references — fetch with ../fetch.sh
+intel_sdm_combined_325462.pdf https://cdrdv2.intel.com/v1/dl/getContent/671200
+amd64_apm_combined_40332-r4.10.pdf https://kib.kiev.ua/x86docs/AMD/AMD64/40332-r4.10.pdf
+intel_ap485_cpuid_241618-018.pdf https://kib.kiev.ua/x86docs/Intel/AppNote485/241618-018.pdf

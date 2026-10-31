@@ -1,0 +1,27 @@
+signal,pin,class,required,reason
+TCK,B7,debug,yes,"cartridge tie: CPU test port, not routed to FPGA"
+TMS,B10,debug,yes,cartridge tie: CPU test port
+TDI,A9,debug,yes,cartridge tie: CPU test port
+TDO,A11,debug,yes,"no connect: test port output, board never listens"
+TRST#,B11,debug,yes,cartridge tie: TAP held reset (test port docs 24365703)
+PREQ#,A20,debug,yes,"no connect: debug port request, inactive"
+PRDY#,B23,debug,yes,no connect: debug port ready
+VID0,B120,strap,yes,strap divider 00001 = 2.00 V (hw/slot1-cyclonev/power.md)
+VID1,A120,strap,yes,strap divider 00001 = 2.00 V
+VID2,A119,strap,yes,strap divider 00001 = 2.00 V
+VID3,B119,strap,yes,strap divider 00001 = 2.00 V
+VID4,A121,strap,yes,strap divider 00001 = 2.00 V
+100/66#,B21,strap,yes,"left floating: high = 100 MHz capable (slot1_notes.md line 88, NM4)"
+TESTHI,A13,control,yes,cartridge tie per Table 35 (test mode strap)
+BP[2]#,B19,bus,yes,"no connect: breakpoint output, unused"
+BP[3]#,A21,bus,yes,"no connect: breakpoint output, unused"
+BPM[0]#,A23,bus,yes,tie inactive high: breakpoint enable ignored
+BPM[1]#,B24,bus,yes,tie inactive high: breakpoint enable ignored
+IERR#,A4,control,yes,undriven: board terminator keeps it high (no internal error report)
+FERR#,A7,control,yes,undriven: board terminator keeps it high (FPU reported internally)
+PICCLK,B18,clock,yes,no pin: local APIC timer clocked internally (NM21)
+SLOTOCC#,B101,sideband,no,cartridge tie low: CPU presence sampled by board (3.3 V OBD rail)
+PICD0,A19,sideband,no,cartridge tie: APIC ID 0
+PICD1,B22,sideband,no,cartridge tie: APIC ID 0
+THERMDP,B14,sideband,no,no connect: analog thermal diode (NM11 followup in S7)
+THERMDN,B15,sideband,no,no connect: analog thermal diode

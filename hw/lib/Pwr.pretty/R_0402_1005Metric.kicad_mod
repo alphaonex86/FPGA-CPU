@@ -1,0 +1,21 @@
+	(footprint "R_0402_1005Metric"
+		(layer "F.Cu")
+		(at 0.000000 0.000000)
+		(descr "S7 placement; nets assigned by S8")
+		(attr smd)
+		(fp_text reference "REF" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+		(fp_text value "REF" (at 0.0 2.670000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+		(fp_rect (start -0.930000 -0.470000) (end 0.930000 0.470000) (layer "F.CrtYd") (width 0.05))
+		(pad "1" smd roundrect
+		(at -0.51 0)
+		(size 0.54 0.64)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+	)
+		(pad "2" smd roundrect
+		(at 0.51 0)
+		(size 0.54 0.64)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(roundrect_rratio 0.25)
+	)
+	)

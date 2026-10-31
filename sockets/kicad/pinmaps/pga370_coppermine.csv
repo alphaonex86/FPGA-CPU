@@ -1,0 +1,371 @@
+pin,row,col,signal,group
+A3,A,3,D29#,AGTL+ I/O
+A5,A,5,D28#,AGTL+ I/O
+A7,A,7,D43#,AGTL+ I/O
+A9,A,9,D37#,AGTL+ I/O
+A11,A,11,D44#,AGTL+ I/O
+A13,A,13,D51#,AGTL+ I/O
+A15,A,15,D47#,AGTL+ I/O
+A17,A,17,D48#,AGTL+ I/O
+A19,A,19,D57#,AGTL+ I/O
+A21,A,21,D46#,AGTL+ I/O
+A23,A,23,D53#,AGTL+ I/O
+A25,A,25,D60#,AGTL+ I/O
+A27,A,27,D61#,AGTL+ I/O
+A29,A,29,DEP7#,AGTL+ I/O
+A31,A,31,DEP3#,AGTL+ I/O
+A33,A,33,DEP2#,AGTL+ I/O
+A35,A,35,PRDY#,AGTL+ Output
+A37,A,37,GND,Power/Other
+B2,B,2,D35#,AGTL+ I/O
+B4,B,4,GND,Power/Other
+B6,B,6,VCCCORE,Power/Other
+B8,B,8,GND,Power/Other
+B10,B,10,VCCCORE,Power/Other
+B12,B,12,GND,Power/Other
+B14,B,14,VCCCORE,Power/Other
+B16,B,16,GND,Power/Other
+B18,B,18,VCCCORE,Power/Other
+B20,B,20,GND,Power/Other
+B22,B,22,VCCCORE,Power/Other
+B24,B,24,GND,Power/Other
+B26,B,26,VCCCORE,Power/Other
+B28,B,28,GND,Power/Other
+B30,B,30,VCCCORE,Power/Other
+B32,B,32,GND,Power/Other
+B34,B,34,VCCCORE,Power/Other
+B36,B,36,BINIT#,AGTL+ I/O
+C1,C,1,D33#,AGTL+ I/O
+C3,C,3,VCCCORE,Power/Other
+C5,C,5,D31#,AGTL+ I/O
+C7,C,7,D34#,AGTL+ I/O
+C9,C,9,D36#,AGTL+ I/O
+C11,C,11,D45#,AGTL+ I/O
+C13,C,13,D49#,AGTL+ I/O
+C15,C,15,D40#,AGTL+ I/O
+C17,C,17,D59#,AGTL+ I/O
+C19,C,19,D55#,AGTL+ I/O
+C21,C,21,D54#,AGTL+ I/O
+C23,C,23,D58#,AGTL+ I/O
+C25,C,25,D50#,AGTL+ I/O
+C27,C,27,D56#,AGTL+ I/O
+C29,C,29,DEP5#,AGTL+ I/O
+C31,C,31,DEP1#,AGTL+ I/O
+C33,C,33,DEP0#,AGTL+ I/O
+C35,C,35,BPM0#,AGTL+ I/O
+C37,C,37,CPUPRES#,Power/Other
+D2,D,2,GND,Power/Other
+D4,D,4,GND,Power/Other
+D6,D,6,VCCCORE,Power/Other
+D8,D,8,D38#,AGTL+ I/O
+D10,D,10,D39#,AGTL+ I/O
+D12,D,12,D42#,AGTL+ I/O
+D14,D,14,D41#,AGTL+ I/O
+D16,D,16,D52#,AGTL+ I/O
+D18,D,18,GND,Power/Other
+D20,D,20,VCCCORE,Power/Other
+D22,D,22,GND,Power/Other
+D24,D,24,VCCCORE,Power/Other
+D26,D,26,GND,Power/Other
+D28,D,28,VCCCORE,Power/Other
+D30,D,30,GND,Power/Other
+D32,D,32,VCCCORE,Power/Other
+D34,D,34,GND,Power/Other
+D36,D,36,VCCCORE,Power/Other
+E1,E,1,D26#,AGTL+ I/O
+E3,E,3,D25#,AGTL+ I/O
+E5,E,5,VCCCORE,Power/Other
+E7,E,7,GND,Power/Other
+E9,E,9,VCCCORE,Power/Other
+E11,E,11,GND,Power/Other
+E13,E,13,VCCCORE,Power/Other
+E15,E,15,GND,Power/Other
+E17,E,17,VCCCORE,Power/Other
+E19,E,19,GND,Power/Other
+E21,E,21,Reserved1,Reserved for future use
+E23,E,23,VTT,Power/Other
+E25,E,25,D62#,AGTL+ I/O
+E27,E,27,SLEWCTRL,Power/Other
+E29,E,29,DEP6#,AGTL+ I/O
+E31,E,31,DEP4#,AGTL+ I/O
+E33,E,33,VREF,Power/Other
+E35,E,35,BPM1#,AGTL+ I/O
+E37,E,37,BP3#,AGTL+ I/O
+F2,F,2,VCCCORE,Power/Other
+F4,F,4,VCCCORE,Power/Other
+F6,F,6,D32#,AGTL+ I/O
+F8,F,8,D22#,AGTL+ I/O
+F10,F,10,Reserved,Reserved for future use
+F12,F,12,D27#,AGTL+ I/O
+F14,F,14,VCCCORE,Power/Other
+F16,F,16,D63#,AGTL+ I/O
+F18,F,18,VREF,Power/Other
+F20,F,20,GND,Power/Other
+F22,F,22,VCCCORE,Power/Other
+F24,F,24,GND,Power/Other
+F26,F,26,VCCCORE,Power/Other
+F28,F,28,GND,Power/Other
+F30,F,30,VCCCORE,Power/Other
+F32,F,32,GND,Power/Other
+F34,F,34,VCCCORE,Power/Other
+F36,F,36,GND,Power/Other
+G1,G,1,D21#,AGTL+ I/O
+G3,G,3,D23#,AGTL+ I/O
+G5,G,5,GND,Power/Other
+G33,G,33,BP2#,AGTL+ I/O
+G35,G,35,VTT,Power/Other
+G37,G,37,Reserved,Reserved for future use
+H2,H,2,GND,Power/Other
+H4,H,4,D16#,AGTL+ I/O
+H6,H,6,D19#,AGTL+ I/O
+H32,H,32,VCCCORE,Power/Other
+H34,H,34,GND,Power/Other
+H36,H,36,VCCCORE,Power/Other
+J1,J,1,D7#,AGTL+ I/O
+J3,J,3,D30#,AGTL+ I/O
+J5,J,5,VCCCORE,Power/Other
+J33,J,33,PICCLK,APIC Clock
+J35,J,35,PICD,APIC I/O
+J37,J,37,PREQ#,CMOS Input
+K2,K,2,VCCCORE,Power/Other
+K4,K,4,VREF,Power/Other
+K6,K,6,D24#,AGTL+ I/O
+K32,K,32,VCCCORE,Power/Other
+K34,K,34,VCCCORE,Power/Other
+K36,K,36,GND,Power/Other
+L1,L,1,D13#,AGTL+ I/O
+L3,L,3,D20#,AGTL+ I/O
+L5,L,5,GND,Power/Other
+L33,L,33,Reserved,Reserved for future use
+L35,L,35,PICD,APIC I/O
+L37,L,37,LINT1/NMI,CMOS Input
+M2,M,2,GND,Power/Other
+M4,M,4,D11#,AGTL+ I/O
+M6,M,6,D3#,AGTL+ I/O
+M32,M,32,VCCCORE,Power/Other
+M34,M,34,GND,Power/Other
+M36,M,36,LINT0/INTR,CMOS Input
+N1,N,1,D2#,AGTL+ I/O
+N3,N,3,D14#,AGTL+ I/O
+N5,N,5,VCCCORE,Power/Other
+N33,N,33,Reserved,Reserved for future use
+N35,N,35,Reserved,Reserved for future use
+N37,N,37,Reserved,Reserved for future use
+P2,P,2,VCCCORE,Power/Other
+P4,P,4,D18#,AGTL+ I/O
+P6,P,6,D9#,AGTL+ I/O
+P32,P,32,GND,Power/Other
+P34,P,34,VCCCORE,Power/Other
+P36,P,36,GND,Power/Other
+Q1,Q,1,D12#,AGTL+ I/O
+Q3,Q,3,D10#,AGTL+ I/O
+Q5,Q,5,GND,Power/Other
+Q33,Q,33,Reserved,Reserved for future use
+Q35,Q,35,Reserved,Reserved for future use
+Q37,Q,37,Reserved,Reserved for future use
+R2,R,2,Reserved,Reserved for future use
+R4,R,4,D17#,AGTL+ I/O
+R6,R,6,VREF,Power/Other
+R32,R,32,VCCCORE,Power/Other
+R34,R,34,GND,Power/Other
+R36,R,36,VCCCORE,Power/Other
+S1,S,1,D8#,AGTL+ I/O
+S3,S,3,D5#,AGTL+ I/O
+S5,S,5,VCCCORE,Power/Other
+S33,S,33,VTT,Power/Other
+S35,S,35,RTTCTRL,Power/Other
+S37,S,37,VTT,Power/Other
+T2,T,2,VCCCORE,Power/Other
+T4,T,4,D1#,AGTL+ I/O
+T6,T,6,D6#,AGTL+ I/O
+T32,T,32,GND,Power/Other
+T34,T,34,VCCCORE,Power/Other
+T36,T,36,GND,Power/Other
+U1,U,1,D4#,AGTL+ I/O
+U3,U,3,D15#,AGTL+ I/O
+U5,U,5,GND,Power/Other
+U33,U,33,PLL,Power/Other
+U35,U,35,VTT,Power/Other
+U37,U,37,VTT,Power/Other
+V2,V,2,GND,Power/Other
+V4,V,4,BERR#,AGTL+ I/O
+V6,V,6,VREF,Power/Other
+V32,V,32,VCCCORE,Power/Other
+V34,V,34,GND,Power/Other
+V36,V,36,VCCCORE,Power/Other
+W1,W,1,D0#,AGTL+ I/O
+W3,W,3,A34#,AGTL+ I/O
+W5,W,5,VCCCORE,Power/Other
+W33,W,33,PLL,Power/Other
+W35,W,35,Reserved,Reserved for future use
+W37,W,37,BCLK,System Bus Clock
+X2,X,2,BR1#,AGTL+ Input
+X4,X,4,RESET2#,AGTL+ I/O
+X6,X,6,A32#,AGTL+ I/O
+X32,X,32,GND,Power/Other
+X34,X,34,Reserved,Reserved for future use
+X36,X,36,GND,Power/Other
+Y1,Y,1,Reserved,Reserved for future use
+Y3,Y,3,A26#,AGTL+ I/O
+Y5,Y,5,GND,Power/Other
+Y33,Y,33,CLKREF,Power/Other
+Y35,Y,35,VCCCORE,Power/Other
+Y37,Y,37,GND,Power/Other
+Z2,Z,2,GND,Power/Other
+Z4,Z,4,A29#,AGTL+ I/O
+Z6,Z,6,A18#,AGTL+ I/O
+Z32,Z,32,VCCCORE,Power/Other
+Z34,Z,34,GND,Power/Other
+Z36,Z,36,VCC2.5,Power/Other
+AA1,AA,1,A27#,AGTL+ I/O
+AA3,AA,3,A30#,AGTL+ I/O
+AA5,AA,5,VCCCORE,Power/Other
+AA33,AA,33,VTT,Power/Other
+AA35,AA,35,VTT,Power/Other
+AA37,AA,37,VCCCORE,Power/Other
+AB2,AB,2,VCCCORE,Power/Other
+AB4,AB,4,A24#,AGTL+ I/O
+AB6,AB,6,A23#,AGTL+ I/O
+AB32,AB,32,GND,Power/Other
+AB34,AB,34,VCCCORE,Power/Other
+AB36,AB,36,VCCCMOS,Power/Other
+AC1,AC,1,A33#,AGTL+ I/O
+AC3,AC,3,A20#,AGTL+ I/O
+AC5,AC,5,GND,Power/Other
+AC33,AC,33,GND,Power/Other
+AC35,AC,35,FERR#,CMOS Output
+AC37,AC,37,RSP#,AGTL+ Input
+AD2,AD,2,GND,Power/Other
+AD4,AD,4,A31#,AGTL+ I/O
+AD6,AD,6,VREF,Power/Other
+AD32,AD,32,VCCCORE,Power/Other
+AD34,AD,34,GND,Power/Other
+AD36,AD,36,VCC1,Power/Other
+AE1,AE,1,A17#,AGTL+ I/O
+AE3,AE,3,A22#,AGTL+ I/O
+AE5,AE,5,VCCCORE,Power/Other
+AE33,AE,33,A20M#,CMOS Input
+AE35,AE,35,IERR#,CMOS Output
+AE37,AE,37,FLUSH#,CMOS Input
+AF2,AF,2,VCCCORE,Power/Other
+AF4,AF,4,A35#,AGTL+ I/O
+AF6,AF,6,A25#,AGTL+ I/O
+AF32,AF,32,GND,Power/Other
+AF34,AF,34,VCCCORE,Power/Other
+AF36,AF,36,GND,Power/Other
+AG1,AG,1,EDGCTRL,Power/Other
+AG3,AG,3,A19#,AGTL+ I/O
+AG5,AG,5,GND,Power/Other
+AG33,AG,33,INIT#,CMOS Input
+AG35,AG,35,STPCLK#,CMOS Input
+AG37,AG,37,IGNNE#,CMOS Input
+AH2,AH,2,GND,Power/Other
+AH4,AH,4,RESET#,AGTL+ Input
+AH6,AH,6,A10#,AGTL+ I/O
+AH8,AH,8,A5#,AGTL+ I/O
+AH10,AH,10,A8#,AGTL+ I/O
+AH12,AH,12,A4#,AGTL+ I/O
+AH14,AH,14,BNR#,AGTL+ I/O
+AH16,AH,16,REQ1#,AGTL+ I/O
+AH18,AH,18,REQ2#,AGTL+ I/O
+AH20,AH,20,VTT,Power/Other
+AH22,AH,22,RS1#,AGTL+ Input
+AH24,AH,24,VCCCORE,Power/Other
+AH26,AH,26,RS0#,AGTL + Input
+AH28,AH,28,THERMTRIP#,CMOS Output
+AH30,AH,30,SLP#,CMOS Input
+AH32,AH,32,VCCCORE,Power/Other
+AH34,AH,34,GND,Power/Other
+AH36,AH,36,VCCCORE,Power/Other
+AJ1,AJ,1,A21#,AGTL+ I/O
+AJ3,AJ,3,GND,Power/Other
+AJ5,AJ,5,VCCCORE,Power/Other
+AJ7,AJ,7,GND,Power/Other
+AJ9,AJ,9,VCCCORE,Power/Other
+AJ11,AJ,11,GND,Power/Other
+AJ13,AJ,13,VCCCORE,Power/Other
+AJ15,AJ,15,GND,Power/Other
+AJ17,AJ,17,VCCCORE,Power/Other
+AJ19,AJ,19,GND,Power/Other
+AJ21,AJ,21,VCCCORE,Power/Other
+AJ23,AJ,23,GND,Power/Other
+AJ25,AJ,25,VCCCORE,Power/Other
+AJ27,AJ,27,GND,Power/Other
+AJ29,AJ,29,VCCCORE,Power/Other
+AJ31,AJ,31,BSEL,Power/Other
+AJ33,AJ,33,BSEL,Power/Other
+AJ35,AJ,35,SMI#,CMOS Input
+AJ37,AJ,37,VID,Power/Other
+AK2,AK,2,VCCCORE,Power/Other
+AK4,AK,4,GND,Power/Other
+AK6,AK,6,A28#,AGTL+ I/O
+AK8,AK,8,A3#,AGTL+ I/O
+AK10,AK,10,A11#,AGTL+ I/O
+AK12,AK,12,VREF,Power/Other
+AK14,AK,14,A14#,AGTL+ I/O
+AK16,AK,16,VTT,Power/Other
+AK18,AK,18,REQ0#,AGTL+ I/O
+AK20,AK,20,LOCK#,AGTL+ I/O
+AK22,AK,22,VREF,Power/Other
+AK24,AK,24,AERR#,AGTL+ I/O
+AK26,AK,26,PWRGOOD,CMOS Input
+AK28,AK,28,RS2#,AGTL+ Input
+AK30,AK,30,Reserved,Reserved for future use
+AK32,AK,32,TMS,TAP Input
+AK34,AK,34,VCCCORE,Power/Other
+AK36,AK,36,GND,Power/Other
+AL1,AL,1,GND,Power/Other
+AL3,AL,3,GND,Power/Other
+AL5,AL,5,A15#,AGTL+ I/O
+AL7,AL,7,A13#,AGTL+ I/O
+AL9,AL,9,A9#,AGTL+ I/O
+AL11,AL,11,AP0#,AGTL+ I/O
+AL13,AL,13,VTT,Power/Other
+AL15,AL,15,A7#,AGTL+ I/O
+AL17,AL,17,REQ4#,AGTL+ I/O
+AL19,AL,19,REQ3#,AGTL+ I/O
+AL21,AL,21,VTT,Power/Other
+AL23,AL,23,HITM#,AGTL+ I/O
+AL25,AL,25,HIT#,AGTL+ I/O
+AL27,AL,27,DBSY#,AGTL+ I/O
+AL29,AL,29,THERMDN,Power/Other
+AL31,AL,31,THERMDP,Power/Other
+AL33,AL,33,TCK,TAP Input
+AL35,AL,35,VID,Power/Other
+AL37,AL,37,VID,Power/Other
+AM2,AM,2,Reserved,Reserved for future use
+AM4,AM,4,VCCCORE,Power/Other
+AM6,AM,6,GND,Power/Other
+AM8,AM,8,VCCCORE,Power/Other
+AM10,AM,10,GND,Power/Other
+AM12,AM,12,VCCCORE,Power/Other
+AM14,AM,14,GND,Power/Other
+AM16,AM,16,VCCCORE,Power/Other
+AM18,AM,18,GND,Power/Other
+AM20,AM,20,VCCCORE,Power/Other
+AM22,AM,22,GND,Power/Other
+AM24,AM,24,VCCCORE,Power/Other
+AM26,AM,26,GND,Power/Other
+AM28,AM,28,VCCCORE,Power/Other
+AM30,AM,30,GND,Power/Other
+AM32,AM,32,VCCCORE,Power/Other
+AM34,AM,34,GND,Power/Other
+AM36,AM,36,VID,Power/Other
+AN3,AN,3,GND,Power/Other
+AN5,AN,5,A12#,AGTL+ I/O
+AN7,AN,7,A16#,AGTL+ I/O
+AN9,AN,9,A6#,AGTL+ I/O
+AN11,AN,11,VTT,Power/Other
+AN13,AN,13,AP1#,AGTL+ I/O
+AN15,AN,15,VTT,Power/Other
+AN17,AN,17,BPRI#,AGTL+ Input
+AN19,AN,19,DEFER#,AGTL+ Input
+AN21,AN,21,VTT,Power/Other
+AN23,AN,23,RP#,AGTL+ I/O
+AN25,AN,25,TRDY#,AGTL+ Input
+AN27,AN,27,DRDY#,AGTL+ I/O
+AN29,AN,29,BR0#,AGTL+ I/O
+AN31,AN,31,ADS#,AGTL+ I/O
+AN33,AN,33,TRST#,TAP Input
+AN35,AN,35,TDI,TAP Input
+AN37,AN,37,TDO,TAP Output

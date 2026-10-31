@@ -77,9 +77,10 @@ Socket logic signals, counted from the CPU datasheets in `../sockets/`:
 
 | Socket | All signals | Without JTAG, debug, parity/ECC |
 |---|---|---|
-| Socket 3 (IntelDX4, 271329 table 3-2) | 113 | 104 |
+| Socket 3 (Am5x86 pin map, `../hw/common/socket3_signals.csv`; DX4 same set) | 114 | 105 |
 | Socket 7 (Pentium MMX, 243185 table 1) | 176 | 149 |
 | Socket 370 (Pentium III, 245264 table 28) | 161 + ~6 straps (BSEL, VID) | 139 |
+| Slot 1 (SC242, Pentium II 24365703 table 35, `../hw/common/slot1_signals.csv`, 2026-10-20) | 171 | 161 |
 
 Module side: HyperRAM x8 ~12, translator OE/DIR ~8, clock/UART/ID ~6 -> ~26
 (SDR SDRAM x16 instead of HyperRAM: ~53).

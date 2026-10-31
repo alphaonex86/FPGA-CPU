@@ -1,0 +1,11 @@
+	(footprint "Barrel2"
+		(layer "F.Cu")
+		(at 44.000000 44.000000)
+		(descr "S7 placement; nets assigned by S8")
+		(attr through_hole)
+		(fp_text reference "J3" (at 0.0 3.700000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+		(fp_text value "J3" (at 0.0 5.100000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+		(fp_rect (start -2.900000 -2.900000) (end 2.900000 2.900000) (layer "F.CrtYd") (width 0.05))
+			(pad "1" thru_hole circle (at -1.27 0.00) (size 1.5 1.5) (drill 0.9) (layers "*.Cu" "*.Mask"))
+			(pad "2" thru_hole circle (at 1.27 0.00) (size 1.5 1.5) (drill 0.9) (layers "*.Cu" "*.Mask"))
+	)

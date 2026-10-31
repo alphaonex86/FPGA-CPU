@@ -1,0 +1,297 @@
+pin,signal,dir,level,standard,class,required,source
+A03,INC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+A05,D41,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+A07,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A09,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A11,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A13,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A15,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A17,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A19,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A21,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A23,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A25,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A27,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A29,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+A31,D22,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+A33,D18,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+A35,D15,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+A37,NC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+B02,INC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+B04,D43,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+B06,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B08,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B10,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B12,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B14,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B16,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B18,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B20,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B22,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B24,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B26,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B28,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+B30,D20,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+B32,D16,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+B34,D13,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+B36,D11,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C01,INC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+C03,D47,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C05,D45,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C07,DP4,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C09,D38,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C11,D36,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C13,D34,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C15,D32,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C17,D31,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C19,D29,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C21,D27,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C23,D25,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C25,DP2,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C27,D24,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C29,D21,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C31,D17,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C33,D14,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C35,D10,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+C37,D9,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D02,D50,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D04,D48,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D06,D44,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D08,D40,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D10,D39,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D12,D37,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D14,D35,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D16,D33,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D18,DP3,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D20,D30,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D22,D28,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D24,D26,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D26,D23,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D28,D19,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D30,DP1,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D32,D12,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D34,D8,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+D36,DP0,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+E01,D54,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+E03,D52,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+E05,D49,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+E07,D46,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+E09,D42,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+E33,D7,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+E35,D6,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+E37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+F02,DP6,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+F04,D51,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+F06,DP5,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+F34,D5,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+F36,D4,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+G01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+G03,D55,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+G05,D53,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+G33,D3,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+G35,D1,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+G37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+H02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+H04,D56,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+H34,PICCLK,I,3.3 V TTL (VCC3),3.3 V TTL,clock,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+H36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+J01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+J03,D57,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+J05,D58,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+J33,PICD0,IO,3.3 V TTL (VCC3),3.3 V TTL,sideband,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+J35,D2,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+J37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+K02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+K04,D59,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+K34,D0,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+K36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+L01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+L03,D61,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+L05,D60,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+L33,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+L35,PICD1,IO,3.3 V TTL (VCC3),3.3 V TTL,sideband,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+L37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+M02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+M04,D62,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+M34,TCK,I,3.3 V TTL (VCC3),3.3 V TTL,debug,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+M36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+N01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+N03,D63,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+N05,DP7,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+N33,TDO,O,3.3 V TTL (VCC3),3.3 V TTL,debug,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+N35,TDI,I,3.3 V TTL (VCC3),3.3 V TTL,debug,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+N37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+P02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+P04,IERR#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+P34,TMS,I,3.3 V TTL (VCC3),3.3 V TTL,debug,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+P36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+Q01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+Q03,PM0/BP0,O,3.3 V TTL (VCC3),3.3 V TTL,sideband,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+Q05,FERR#,O,3.3 V TTL (VCC3),3.3 V TTL,sideband,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+Q33,TRST#,I,3.3 V TTL (VCC3),3.3 V TTL,debug,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+Q35,CPUTYP,I,3.3 V TTL (VCC3),3.3 V TTL,strap,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+Q37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+R02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+R04,PM1/BP1,O,3.3 V TTL (VCC3),3.3 V TTL,sideband,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+R34,NC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+R36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+S01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+S03,BP2,O,3.3 V TTL (VCC3),3.3 V TTL,sideband,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+S05,BP3,O,3.3 V TTL (VCC3),3.3 V TTL,sideband,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+S33,NC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+S35,NC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+S37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+T02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+T04,M/IO#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+T34,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+T36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+U01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+U03,CACHE#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+U05,INV,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+U33,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+U35,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+U37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+V02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+V04,AHOLD,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+V34,STPCLK#,I,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+V36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+W01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+W03,EWBE#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+W05,KEN#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+W33,NC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+W35,NC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+W37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+X02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+X04,BRDY#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+X34,[BF1],I,3.3 V TTL (VCC3),3.3 V TTL,strap,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+X36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+Y01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+Y03,BRDYC#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+Y05,NA#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+Y33,[BF0],I,3.3 V TTL (VCC3),3.3 V TTL,strap,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+Y35,FRCMC#1,I,3.3 V TTL (VCC3),3.3 V TTL,strap,no,sockets/socket7/pentium_family_developers_manual_241428-005.pdf p.4-11
+Y37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+Z02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+Z04,BOFF#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+Z34,PEN#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+Z36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AA01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AA03,PHIT#,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 7 p.26 (inter-processor I/O)
+AA05,WB/WT#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AA33,INIT,I,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AA35,IGNNE#,I,3.3 V TTL (VCC3),3.3 V TTL,sideband,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AA37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AB02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AB04,HOLD,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AB34,SMI#,I,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AB36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AC01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AC03,PHITM#,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 7 p.26 (inter-processor I/O)
+AC05,PRDY,O,3.3 V TTL (VCC3),3.3 V TTL,debug,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AC33,NMI/LINT1,I,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AC35,R/S#,I,3.3 V TTL (VCC3),3.3 V TTL,debug,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AC37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AD02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AD04,PBGNT#,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 7 p.26 (inter-processor I/O)
+AD34,INTR/LINT0,I,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AD36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AE01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AE03,PBREQ#,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 7 p.26 (inter-processor I/O)
+AE05,APCHK#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AE33,A23,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AE35,D/P#,O,3.3 V TTL (VCC3),3.3 V TTL,strap,no,"sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs); undefined in Dual, unused in UP"
+AE37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AF02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AF04,PCHK#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AF34,A21,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AF36,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AG01,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AG03,SMIACT#,O,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AG05,PCD,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AG33,A27,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AG35,A24,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AG37,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AH02,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AH04,LOCK#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AH34,A26,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AH36,A22,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AJ01,BREQ,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AJ03,HLDA,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AJ05,ADS#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AJ33,A31,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AJ35,A25,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AJ37,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AK02,AP,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK04,D/C#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AK06,HIT#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AK08,A20M#,I,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AK10,BE1#,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK12,BE3#,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK14,BE5#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AK16,BE7#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AK18,CLK,I,3.3 V TTL (VCC3),3.3 V TTL,clock,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AK20,RESET,I,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AK22,A19,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK24,A17,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK26,A15,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK28,A13,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK30,A9,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK32,A5,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK34,A29,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AK36,A28,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL01,VCC2DET#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AL03,PWT,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AL05,HITM#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AL07,BUSCHK#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AL09,BE0#,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL11,BE2#,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL13,BE4#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AL15,BE6#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AL17,SCYC,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AL19,NC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+AL21,A20,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL23,A18,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL25,A16,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL27,A14,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL29,A12,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL31,A11,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL33,A7,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL35,A3,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AL37,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM02,ADSC#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AM04,EADS#,I,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AM06,W/R#,O,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 4 p.24 (outputs)
+AM08,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM10,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM12,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM14,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM16,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM18,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM20,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM22,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM24,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM26,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM28,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM30,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AM32,A8,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AM34,A4,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AM36,A30,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AN01,INC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+AN03,INC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+AN05,INC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+AN07,FLUSH#,I,3.3 V TTL (VCC3),3.3 V TTL,control,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 5 pp.24-25 (inputs)
+AN09,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN11,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN13,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN15,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN17,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN19,VCC2,,"2.7-2.9 V (board 2.8 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN21,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN23,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN25,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN27,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN29,VCC3,,"3.135-3.6 V (board 3.4 V), sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10; board setting spec p.5",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10
+AN31,A10,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AN33,A6,IO,3.3 V TTL (VCC3),3.3 V TTL,bus,yes,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf Table 6 p.26 (I/O)
+AN35,NC,,,-,nc,no,pinmap group; sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf p.2-2 NC list context
+AN37,VSS,,"0 V, sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10",power,power,no,sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.28 sec. 3.1.2.1 pin counts; sockets/socket7/pentium_mmx_datasheet_243185-004.pdf p.31 Table 10

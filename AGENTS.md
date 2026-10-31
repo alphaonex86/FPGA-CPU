@@ -4,6 +4,9 @@ FPGA x86 CPU on an interposer that plugs into an original CPU socket and runs th
 board's stock BIOS, chipset, RAM and disks unmodified. Goal: best achievable
 performance on each platform.
 
+Linked project: https://github.com/alphaonex86/FPGAmotherboard (real CPU, FPGA
+chipset, same sockets; source of `sockets/kicad/`).
+
 ## Target platforms (only what the operator can test)
 
 | Socket | Board | Chipset | Host bus | Original CPU power |
@@ -16,6 +19,7 @@ performance on each platform.
 
 - Bus behaviour of an original CPU of each socket; CPUID and reset signature
   configurable per board so the stock BIOS accepts it.
+- Superscalar: at least 2 instructions per cycle (operator, 2026-10-31).
 - ISA baseline: i686 + x87 + MMX + SSE + SSE2 (modern software, e.g. Node.js,
   requires SSE2).
 - Must stay extensible to x86-64 long mode, then SSE3..SSE4.2/POPCNT (x86-64-v2).
@@ -32,6 +36,11 @@ performance on each platform.
 - Many configurations from one RTL tree (ISA level, cache sizes, clocks) to
   benchmark against each other.
 - Module variant with its own RAM next to the FPGA.
+- Stacked boards: 2-3 PCBs mounted on the base PCB (grow in height, not
+  sideways) are allowed when needed, mainly for the sockets, e.g. RAM >= 1 GB
+  (operator, 2026-10-31).
+- Components on both PCB sides wherever there is no mechanical conflict
+  (operator, 2026-10-31).
 - Possible ASIC if one model gets strong group demand: keep RTL vendor-neutral,
   vendor primitives only in thin wrappers.
 
@@ -47,9 +56,14 @@ performance on each platform.
 
 - `FPGAlist/` — FPGA survey (`README.md`), one subfolder per selected FPGA with
   datasheets, tools and board files for offline work.
-- `sockets/` — original CPU datasheets (bus, pinout, power).
+- `sockets/` — per socket CPU, chipset and board docs; `sockets/kicad/` socket
+  footprints, symbols, 3D models, pin maps.
+- `isa/` — x86 ISA manuals.
+- `plan/` — `interposers.md` (6 interposer boards, tasks, status), `slot1.md`,
+  `cpu_core.md` (base core evaluation) and `prompt.md`.
 - `fetch.sh <sources.txt>...` — (re)downloads every file listed in a
-  `sources.txt`; vendor-login software is listed in each folder's README.
+  `sources.txt` (`sockets/local-sources.txt`: local `file://` copies);
+  vendor-login software is listed in each folder's README.
 
 ## Rules
 

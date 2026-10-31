@@ -7,4 +7,14 @@ FPGAlist/*/reference/
 FPGAlist/*/software/*
 !FPGAlist/*/software/SHA1SUMS
 sockets/socket*/
+sockets/parts/
+isa/*
+!isa/sources.txt
 *.part
+__pycache__/
+# Built by sockets/kicad/tools/gen_base.py (~30 MB)
+sockets/kicad/3dmodels/*_Base_*.step
+# KiCad 10 local history (nested git repo)
+.history/
+sockets/slot1/
+*.kicad_prl
