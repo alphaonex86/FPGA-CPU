@@ -6,7 +6,7 @@ FPGAlist/*/boards/
 FPGAlist/*/reference/
 FPGAlist/*/software/*
 !FPGAlist/*/software/SHA1SUMS
-sockets/socket*/
+sockets/socket*/**/*.pdf
 sockets/parts/
 isa/*
 !isa/sources.txt
