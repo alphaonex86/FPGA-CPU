@@ -16,5 +16,6 @@ __pycache__/
 sockets/kicad/3dmodels/*_Base_*.step
 # KiCad 10 local history (nested git repo)
 .history/
-sockets/slot1/
+sockets/slot1/**/*.pdf
+sockets/slot1/**/*.html
 *.kicad_prl
