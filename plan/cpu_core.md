@@ -215,6 +215,34 @@ Questions before any work:
    (bus timing at 33-66 MHz over a cable) or the Agilex 5 chip on our own
    interposer; power vs the socket budgets in `AGENTS.md`.
 
+### E1 connection: DE25-Nano + multiplexer adapter (operator, 2026-11-01)
+
+The DE25-Nano exposes 72 user I/O at 3.3 V on two 2x20 headers (36 + 5 V,
+3.3 V, 2 GND each; 3.3 V max 1.5 A) [DE25-Nano user manual 2025-09-05
+p.22 sec. 3.7.2, Tables 3-11/3-12]; the sockets need 114 (S3), 166 (S7),
+167 (S370) FPGA signals (`hw/*/pins.csv`). Pin count, not speed, is the
+limit, so the adapter multiplexes. Line rate = mux ratio x bus clock:
+
+| socket | bus | wide signals per clock | ratio on ~24-40 lines | rate per line | verdict |
+|---|---|---|---|---|---|
+| S3 | 33 MHz | A30 + BE4 + D32 + DP4 = 70 | 3:1 | 100 MHz | feasible |
+| S7 | 66 MHz | ~110 | 3:1 | 200 MHz | doubtful on 0.1" headers with 2 GND / 40 pins |
+| S370 | 133 MHz | ~110 | >= 2:1 (8:1 = 1064 MHz) | >= 266 MHz | no; AGTL+ also needs GTL parts |
+
+Shape (S3): wide outputs go through two register stages: the FPGA fills
+stage 1 group by group during cycle N-1, stage 2 is clocked by the board
+CLK, so outputs switch with one flop delay, inside t6 3-14 ns at 33 MHz
+[intel486dx2_datasheet_1992.pdf Table 14.4.2]. Wide inputs are captured
+by registers on the board CLK (meets the t22 5 ns setup / t23 3 ns hold
+like the CPU does) and read out over the next cycle. Cost: inputs reach
+the core one clock late, so signals that need a next-clock reaction
+(AHOLD/BOFF#/HOLD float, RDY/BRDY, KEN#, EADS#) stay direct; slow ones
+(straps, A20M#, FLUSH#, IGNNE#, INTR, NMI, SMI#, STPCLK#) go through the
+mux. Budget: ~24 direct + 24 mux lines + ~8 group strobes + ~16 slow
+control = ~72: tight, a 4:1 ratio (133 MHz) frees pins. Parts: 5 V
+tolerant 74LVC 16-bit registers / buffers, no FPGA, 3.3 V from the
+header; the 3.3 V output level matches the S3 interposer's (CB3T) level.
+
 ## Next steps (each answers a concrete question)
 
 1. Generate VexiiRiscv dual-issue RV64 (no FPU, then with D) and run
