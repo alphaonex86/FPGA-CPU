@@ -153,6 +153,13 @@ socket3/docs/notes/design-decisions.md):
   an own micro-op format, not into RISC-V instruction words: the x86 front
   end bypasses the Vexii RISC-V decoder (wide uops, 32/64-bit immediates)
   and feeds the execute lanes directly.
+  **Amended 2026-11-01 by the operator (hybrid):** Vexii's execute
+  plugins decode their controls by mask-matching the UOP bits
+  (`ExecuteLanePlugin.scala` 267-290, `DecoderPlugin.scala` 274-278), so
+  the uop keeps a 32-bit RISC-V-shaped operation key (every Vexii execute
+  plugin reused unchanged; the RISC-V front end of C4 comes for free) and
+  the x86 fields ride beside it through `DispatchPlugin.addDispatchCtx`:
+  64-bit immediate, operand size 8/16/32/64, flag-write mask, segment.
 - **C2** (decided 2026-11-01 by the operator) EFLAGS in hardware: every
   flag-setting uop writes a flags register beside its result (new execute
   plugin, bypass between the two lanes); Jcc / ADC / SETcc read it in one
