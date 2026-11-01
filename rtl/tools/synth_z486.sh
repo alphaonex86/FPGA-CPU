@@ -5,6 +5,7 @@
 # does on the DE10-Nano (same sources, ROM images, 85 MHz target, every
 # port but clk virtual), for the base comparison in plan/cpu_core.md.
 set -eu
+[[ ${DEVICE:-5CEFA9F23C8} == 5CEFA9F23C8 ]] || { echo "z486 is measured on 5CEFA9F23C8 only"; exit 1; }
 . "$(dirname "$0")/quartus_run.sh"
 z=$(realpath "$(dirname "$0")/../ext/z486")
 [[ -f $z/z486.sv ]] || { echo "clone github.com/nand2mario/z486 into rtl/ext/z486"; exit 1; }

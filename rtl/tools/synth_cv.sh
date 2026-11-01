@@ -1,7 +1,8 @@
 #!/bin/bash
 # Usage: rtl/tools/synth_cv.sh <verilog> <out dir> [period ns] [recipe]
-# Compiles one SpinalHDL core netlist alone on 5CEFA9F23C8 (Quartus Lite,
-# every port but clk a virtual pin; recipe default | perf, quartus_run.sh)
+# Compiles one SpinalHDL core netlist alone on $DEVICE (default 5CEFA9F23C8;
+# A5EB013BB23BE4SCS = DE25-Nano), every port but clk a virtual pin; recipe
+# default | perf, quartus_run.sh)
 # and prints its area and slow-model fmax: plan/cpu_core.md.
 set -eu
 . "$(dirname "$0")/quartus_run.sh"
@@ -15,8 +16,8 @@ grep -q "input  *wire *clk\b\|input wire clk\b" "$src" || { echo "$top: no clk p
 mkdir -p "$out"
 cd "$out"
 cat > core.qsf <<EOF
-set_global_assignment -name FAMILY "Cyclone V"
-set_global_assignment -name DEVICE 5CEFA9F23C8
+set_global_assignment -name FAMILY "$FAMILY"
+set_global_assignment -name DEVICE $DEVICE
 set_global_assignment -name TOP_LEVEL_ENTITY $top
 set_global_assignment -name VERILOG_FILE $src
 set_global_assignment -name VERILOG_MACRO "SYNTHESIS=1"
