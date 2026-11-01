@@ -51,15 +51,25 @@ replicated per read port plus a live-value table.
    **First core 2026-11-01** (`rtl/tools/x86_core_test.sh`,
    `x86_rand_test.sh`): P6-style stepping stone, results in a 32-entry
    ROB, RAT -> ROB tag or architectural register, flags renamed as one
-   more register; 16-entry unified RS, 2 ALU/branch ports + 1 memory port,
-   oldest first; 8-entry store queue, stores write at retire, loads wait
-   for older store addresses and forward on an exact match; mispredicts
-   flush at retire; static BTFN + direct JMP/CALL redirect at decode;
-   frontend 16-byte blocks -> 4-block queue -> 3 instructions/cycle;
-   decode subset in `x86_decode.sv`. Matches Unicorn on x1/x2 and 400
-   random programs (`x86_rand.py`). IPC: 1.91 straight ALU code (2 ALU
-   ports), 1.38 in a 14-instruction loop (3 cycles lost per taken branch
-   redirected at decode: needs a fetch BTB), 0.65 on random programs.
+   more register. Pipeline: frontend (16-byte blocks, 2-stage predecode,
+   4-block queue, 3 instructions/cycle) -> decode -> 16-uop queue -> R
+   (rename, ROB/SQ allocation) -> D (operand read, RS write; stalls on a
+   full RS) -> S (16-entry RS, age matrix, oldest ready per port; each
+   ALU uop bound to one of 2 ALU ports at dispatch) -> X -> wb1 (ROB,
+   capture) -> wb2 (bypass only); memory port S -> A (AGU) -> M (8-entry
+   SQ, forward on an exact match, replay on a partial overlap, stores
+   write at retire). ALU grants wake dependents at once (back to back);
+   an uncaptured operand must be on wb1/wb2 (simulation check). Branches:
+   static BTFN at decode, a 32-entry fetch BTB that learns decode's taken
+   decisions, an 8-entry return stack; mispredicts flush the cycle after
+   they retire. Matches Unicorn on x1/x2 and 300 random programs
+   (`x86_rand.py`). IPC: 1.88 straight ALU code (2 ALU ports), 1.94 in a
+   14-instruction loop, 0.45 on random programs (random forward Jcc).
+   5CEFA9F23C8 (`rtl/tests/x86/synth/x86_core_synth.sv`,
+   `rtl/tools/synth_path.sh` for the worst path): single-cycle issue 5.88
+   MHz (serial oldest-first select + execute + capture); pipelined issue
+   45.9; registered flush 47.9; RS budget off the dispatch count 56.5
+   MHz at 38,946 ALMs (34 %), 17,056 registers.
 3. M3 loads/stores, LSQ, L1I/L1D, then L2; Dhrystone/CoreMark for x86 IPC.
 4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,
