@@ -13,7 +13,8 @@
 //   their dependents from wb1.
 // - Loads wait for every older store address, forward from an equal-address
 //   older store, replay on a partially overlapping one.
-// - Stores write memory at retire. Mispredicts flush at retire.
+// - Stores write memory at retire. A mispredicted branch retires, the
+//   pipeline flushes the next cycle.
 module x86_core
     import x86_pkg::*;
 (
@@ -160,6 +161,8 @@ module x86_core
     logic [1:0]  r_n;            // uops retired this cycle
     logic        r_flush, r_halt, r_ill, r_store;
     logic [31:0] r_flush_pc;
+    logic        flush;           // r_flush one cycle later: clears the pipeline
+    logic [31:0] flush_pc;
     always_comb begin
         logic stop;
         r_n = 2'd0;
@@ -168,7 +171,7 @@ module x86_core
         r_ill = 1'b0;
         r_store = 1'b0;
         r_flush_pc = 32'd0;
-        stop = halted;
+        stop = halted || flush;
         for (int k = 0; k < 3; k++) begin
             rob_t e;
             e = rob[TAG_W'(rob_head + TAG_W'(k))];
@@ -201,10 +204,10 @@ module x86_core
     // frontend redirect: retire flush first, else the first predicted-taken
     // branch of the decoded group
     always_comb begin
-        fe_redirect = r_flush;
-        fe_redirect_pc = r_flush_pc;
+        fe_redirect = flush;
+        fe_redirect_pc = flush_pc;
         if (rst) fe_redirect_pc = reset_eip;
-        else if (!r_flush && dec_take)
+        else if (!flush && dec_take)
             for (int k = 2; k >= 0; k--)
                 if (x_valid[k] && d_redirect[k]) begin
                     fe_redirect = 1'b1;
@@ -250,7 +253,7 @@ module x86_core
         for (int e = 0; e < RS_N; e++) used[e] = rs[e].valid;
         ds_n = 2'd0;
         par = 1'b0;
-        stop = r_flush || halted;
+        stop = halted;
         for (int k = 0; k < 3; k++) begin
             u = uq[4'(uq_head + 4'(k))];
             ds_alu_par[k] = par;
@@ -362,8 +365,12 @@ module x86_core
         end
         for (int p = 0; p < 3; p++)
             for (int e = 0; e < RS_N; e++)
-                grant[p][e] = req[p][e] && (req[p] & older[e]) == '0 && !r_flush && !halted;
-        for (int p = 0; p < 2; p++) gtag[p] = pick(grant[p]).tag;
+                grant[p][e] = req[p][e] && (req[p] & older[e]) == '0 && !halted;
+        for (int p = 0; p < 2; p++) begin
+            rs_t g;
+            g = pick(grant[p]);
+            gtag[p] = g.tag;
+        end
     end
 
     // ---------------- X / A: execute, address ----------------
@@ -500,7 +507,9 @@ module x86_core
 
     // ---------------- state update ----------------
     always_ff @(posedge clk) begin
-        if (rst || r_flush) begin
+        flush <= r_flush && !rst;
+        flush_pc <= r_flush_pc;
+        if (rst || flush) begin
             uq_head <= '0;
             uq_tail <= '0;
             uq_count <= '0;
@@ -545,7 +554,7 @@ module x86_core
                 end
             if (r_halt) halted <= 1'b1;
             if (r_ill) illegal <= 1'b1;
-            if (!r_flush) begin
+            if (!flush) begin
                 rob_head <= rob_head + TAG_W'(r_n);
                 if (r_store) sq_head <= sq_head + 1'b1;
                 // wb1 -> ROB
