@@ -1,0 +1,59 @@
+# x86 core: architecture (C6 from scratch, C7 SystemVerilog, C8 out-of-order)
+
+Goal: maximum x86 performance inside 5CEFA9F23C8 (113,560 ALMs, 1,220
+M10K = 12.5 Mbit, 342 DSP) (`AGENTS.md`, `plan/cpu_core.md` selection
+criterion). Numbers marked *proposed* are starting points, each tuned by a
+measurement (fmax x IPC on the target) before it is fixed.
+
+## Target and limits
+
+- ISA: i686 + x87 + MMX + SSE + SSE2, then x86-64 long mode and
+  x86-64-v2 (`AGENTS.md`); datapath width a parameter (32 now, 64 later).
+- Clock *proposed* 100 MHz on 5CEFA9F23C8, slow 1100 mV 85 C model (Vexii
+  reached 61 MHz, limited by pipeline depth, `plan/cpu_core.md` step 1).
+  Block ceilings on C8 are higher: M10K 240 MHz (180 MHz with old-data
+  read-during-write), MLAB 300 MHz [cvds p.44-45 Table 33]; the limit is
+  logic per stage, so stages stay short and RAM reads registered.
+- IPC: >= 2 x86 instructions per cycle sustained on cached integer code
+  (operator, 2026-10-31).
+
+## Pipeline (proposed)
+
+| stage group | function |
+|---|---|
+| fetch | 16 bytes/cycle from L1I 16 KB 4-way; BTB + gshare-class predictor + 16-entry RAS |
+| predecode | instruction-start and opcode marks per byte, computed on L1I fill and stored beside the line, so decode never searches lengths |
+| decode | 3 x86 instructions/cycle: 2 simple (1 uop) + 1 complex (<= 4 uops); longer ones from a microcode sequencer (M10K ROM, own code) |
+| uop cache | decoded uops by fetch address, bypasses fetch/decode in loops (milestone M4) |
+| rename | 3 uops/cycle; integer physical register file 64 x XLEN, each entry also holds the 6 arithmetic flags of the uop that wrote it, so EFLAGS renames with the result (C2); partial flag writes (INC/DEC keep CF) merge by reading the old flags as a source; AL/AH/AX writes merge the same way |
+| schedule | distributed reservation stations (ALU x2, AGU load, AGU store, branch, mul/div, FP/SIMD), 8 entries each, oldest-ready select; single-cycle wakeup only on the ALU loop |
+| execute | 2 ALU (flags), branch, load AGU + store AGU (base + index*scale + disp + segment base), mul (DSP), div (iterative), x87/SSE unit (later) |
+| memory | 16-entry load queue, 16-entry store queue with store-to-load forwarding; TSO: loads execute early and replay on a snoop hit or ordering violation; L1D 16 KB 4-way write-back, 4 misses in flight; L2 256 KB in M10K, then the socket bus unit |
+| retire | 64-entry ROB, 3 uops/cycle; an x86 instruction retires only when all its uops did (precise exceptions and interrupts at instruction boundaries) |
+
+Physical register file on Cyclone V: 6 reads + 3 writes per cycle do not
+map to one MLAB (simple dual-port); use per-write-port banks of MLAB
+replicated per read port plus a live-value table.
+
+## Milestones (each one ends with a Verilator lock-step run against Unicorn)
+
+1. M1 length decoder + predecode: every byte stream decoded to the same
+   instruction lengths as GNU objdump (i386, all prefixes, 0F maps).
+2. M2 integer core, flat 32-bit, no caches (ideal memory): fetch, decode,
+   rename, ALU/branch, ROB; `x86_trace_check` per retired instruction.
+3. M3 loads/stores, LSQ, L1I/L1D, then L2; Dhrystone/CoreMark for x86 IPC.
+4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
+5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,
+   interrupts, I/O ports, CPUID/MSRs; test386 and the single-step datasets
+   (z486 repo, reference only).
+6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
+7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
+   Socket 7 and Socket 370.
+
+## Layout
+
+- `rtl/x86/` SystemVerilog sources, one module per file.
+- `rtl/tests/x86/` assembly tests; `rtl/tools/x86_test.sh` +
+  `x86_trace_check.c` (Unicorn 2.1.4) for the reference.
+- The DE25-Nano (46,800 ALMs) hosts milestone subsets; the full core is
+  sized for the A9 (C5, selection criterion).
