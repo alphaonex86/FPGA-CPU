@@ -251,11 +251,8 @@ module x86_core
     } rn_t;
 
     logic [1:0] rn_n;     // uops renamed this cycle
-    logic [1:0] rn_nrs;   // of which need an RS entry
     rn_t [2:0]  rn;
-    // R needs 3 free RS entries beyond the group in D (registered,
-    // conservative: entries freed this cycle count from the next one)
-    logic       rs_free3;
+    logic       d_ok;     // D writes its group: enough free RS entries, else D and R stall
 
     function automatic logic is_alu(input kind_t k);
         return k == K_ALU || k == K_BR;
@@ -274,9 +271,8 @@ module x86_core
         rob_free = (TAG_W + 1)'(ROB_N) - rob_count;
         sqt = sq_tail;
         rn_n = 2'd0;
-        rn_nrs = 2'd0;
         par = 1'b0;
-        stop = halted;
+        stop = halted || !d_ok;
         for (int k = 0; k < 3; k++) begin
             u = uq[4'(uq_head + 4'(k))];
             rn[k] = '0;
@@ -303,11 +299,9 @@ module x86_core
                     rn[k].stag[3] = rn[j].tag;
                 end
             if (!stop && 5'(k) < uq_count && (TAG_W + 1)'(k) < rob_free
-                && (rs_free3 || !needs_rs(u.kind))
-                && !(u.kind == K_ST && sqt - sq_head >= (SQ_W + 1)'(SQ_N))) begin
+                && !(u.kind == K_ST && sqt - sq_head >= (SQ_W + 1)'(SQ_N)))
                 rn_n = 2'(k + 1);
-                rn_nrs = rn_nrs + 2'(needs_rs(u.kind));
-            end else stop = 1'b1;
+            else stop = 1'b1;
             if (u.kind == K_ST) sqt = sqt + 1'b1;
         end
     end
@@ -337,12 +331,20 @@ module x86_core
     always_comb begin
         logic [RS_N-1:0]      free;
         logic [2:0][RS_N-1:0] fs;   // the first 3 free RS entries, one-hot
-        logic [1:0]           nrs;
+        logic [1:0]           nrs, need;
+        logic [4:0]           nfree;
         logic [3:0]           sr [3];
         logic                 su [3];
         uop_t                 u;
         logic [TAG_W-1:0]     t;
-        for (int e = 0; e < RS_N; e++) free[e] = !rs[e].valid;
+        nfree = '0;
+        for (int e = 0; e < RS_N; e++) begin
+            free[e] = !rs[e].valid;
+            nfree = nfree + 5'(free[e]);
+        end
+        need = 2'd0;
+        for (int k = 0; k < 3; k++) need = need + 2'(dq_valid[k] && needs_rs(dq[k].u.kind));
+        d_ok = nfree >= 5'(need);
         for (int i = 0; i < 3; i++) begin
             fs[i] = free & -free;   // lowest set bit
             free = free & ~fs[i];
@@ -375,7 +377,7 @@ module x86_core
                     ds_rs[k].fsrc.value = wb_flags[p];
                 end
             ds_rs[k].fsrc.captured = ds_rs[k].fsrc.ready;
-            ds_to_rs[k] = dq_valid[k] && needs_rs(u.kind);
+            ds_to_rs[k] = d_ok && dq_valid[k] && needs_rs(u.kind);
             ds_slot[k] = fs[nrs];
             nrs = nrs + 2'(ds_to_rs[k]);
         end
@@ -581,7 +583,6 @@ module x86_core
             ix_valid <= '0;
             dq_valid <= '0;
             am_valid <= 1'b0;
-            rs_free3 <= 1'b1;
             wb_valid <= '0;
             wb2_valid <= '0;
         end
@@ -690,15 +691,11 @@ module x86_core
                 // D: RS (+ age matrix row)
                 begin
                     logic [RS_N-1:0] valid_now, new_slots, row;
-                    logic [4:0]      nfree;
                     for (int e = 0; e < RS_N; e++) valid_now[e] = rs[e].valid;
                     new_slots = '0;
                     for (int k = 0; k < 3; k++)
                         if (ds_to_rs[k]) new_slots = new_slots | ds_slot[k];
                     for (int e = 0; e < RS_N; e++) older[e] <= older[e] & ~new_slots;
-                    nfree = '0;
-                    for (int e = 0; e < RS_N; e++) nfree = nfree + 5'(!valid_now[e] && !new_slots[e]);
-                    rs_free3 <= nfree >= 5'd3 + 5'(rn_nrs);
                     row = valid_now;
                     for (int k = 0; k < 3; k++)
                         if (ds_to_rs[k]) begin
@@ -712,8 +709,10 @@ module x86_core
                 end
                 // R: ROB, RAT, store queue entry -> D
                 for (int k = 0; k < 3; k++) begin
-                    dq_valid[k] <= 2'(k) < rn_n;
-                    dq[k] <= rn[k];
+                    if (d_ok) begin
+                        dq_valid[k] <= 2'(k) < rn_n;
+                        dq[k] <= rn[k];
+                    end
                     if (2'(k) < rn_n) begin
                         uop_t u;
                         u = rn[k].u;
