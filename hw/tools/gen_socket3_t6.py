@@ -49,7 +49,8 @@ MSEL = {"MSEL4": "V3V3", "MSEL3": "GND", "MSEL2": "GND", "MSEL1": "GND",
 PULLS = [
     ("4k7", "S_HLDA", "GND", "socket3_notes R6"),
     ("4k7", "S_BREQ", "GND", "socket3_notes R6"),
-    ("4k7", "S_RESET", "GND", "socket3_notes R4 (C16, NM2)"),
+    # FPGAmotherboard: RESET high-Z, held by 8.2k to VCORE during the ramp
+    ("100k", "S_RESET", "GND", "socket3_notes R4 (C16, NM2)"),
     ("4k7", "HOLD", "GND", "socket3_notes R6 (FPGA side)"),
     ("10k", "UP#", "V3V3", "socket3_notes R4"),
     *[("10k", f"DP{k}", "V3V3", "socket3_notes R4, dx4 p.16")

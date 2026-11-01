@@ -129,7 +129,7 @@ real board (see Open items).
 | B10 | SMI# | I | driven by UM8886BF pin 32 [umc p.26] | FPGA input; SMM implemented later (optional) |
 | C12 | SMIACT# | O | UM8886BF pin 50 input [umc p.27] | pull-up-safe output |
 | C10 | SRESET | I | the chipset's CPU reset: CPURSTO, UM8886BF pin 29, "CPU reset (486 pin C10 SRST)" [umc p.26]; internal pull-down [am5x86 p.17] | reset input, ORed with the config-done gate (R6) |
-| C16 | RESET | I | not traced on this board; CPURSTO documented only for C10 [umc p.26]; RSTDRV is "reset to rest of system ... excluding CPU" [umc p.29] | treat as second reset input with pull-down on the interposer; verify on the board = NM2 |
+| C16 | RESET | I | not traced on this board; CPURSTO documented only for C10 [umc p.26]; RSTDRV is "reset to rest of system ... excluding CPU" [umc p.29] | treat as second reset input with a 100k pull-down on the interposer (weak: the FPGAmotherboard holds RESET asserted with only 8.2k to VCORE, plan/interposers.md); verify on the board = NM2 |
 | G15 | STPCLK# | I | UM8886BF pin 33 STCK# [umc p.26]; CPU needs the 10 k pull-up [dx4 p.19] | board keeps its pull-up; translator passes it through |
 | Q15 | BREQ | O | active HIGH, "never floated" [dx4 p.19]; board net near jumper J21 [umc p.12], exact destination NM3 | 4 k7 pull-down on the socket side (R6) |
 | D15 | A20M# | I | driven by UM8886BF pin 31 [umc p.26]; CPU samples it HIGH at the falling edge of RESET [dx4 p.21] | FPGA input, nothing to add |

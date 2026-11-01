@@ -1,0 +1,40 @@
+#!/bin/bash
+# Usage: rtl/tools/synth_cv.sh <verilog> <out dir> [period ns]
+# Compiles one core netlist alone on 5CEFA9F23C8 (Quartus Lite, every port
+# but clk a virtual pin) and prints ALMs, RAM blocks, DSPs and the slow-model
+# fmax: plan/cpu_core.md next step 1.
+set -eu
+QUARTUS=${QUARTUS:-$HOME/altera_lite/25.1std/quartus/bin}
+src=$(realpath "$1")
+out=$2
+period=${3:-10.0}
+top=$(sed -n 's/^module \([A-Za-z_0-9]*\).*/\1/p' "$src" | head -1)   # SpinalHDL: top first
+[[ -n $top ]] || { echo "no module in $src"; exit 1; }
+grep -q "input  *wire *clk\b\|input wire clk\b" "$src" || { echo "$top: no clk port"; exit 1; }
+mkdir -p "$out"
+cd "$out"
+cat > core.qsf <<EOF
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE 5CEFA9F23C8
+set_global_assignment -name TOP_LEVEL_ENTITY $top
+set_global_assignment -name VERILOG_FILE $src
+set_global_assignment -name VERILOG_MACRO "SYNTHESIS=1"
+set_global_assignment -name SDC_FILE core.sdc
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
+EOF
+# one VIRTUAL_PIN per top port but clk (a "*" wildcard also takes clk off
+# the global clock network)
+awk '/^module /{n++}
+     n == 1 && /^  (input|output|inout) / {
+         p = ($3 ~ /^\[/) ? $4 : $3; sub(/,$/, "", p)
+         if (p != "clk") print "set_instance_assignment -name VIRTUAL_PIN ON -to " p ($3 ~ /^\[/ ? "[*]" : "")
+     }
+     n == 1 && /^\);/ {exit}' "$src" >> core.qsf
+echo "create_clock -name clk -period $period [get_ports clk]" > core.sdc
+echo "PROJECT_REVISION = \"core\"" > core.qpf
+nice -n 19 "$QUARTUS/quartus_sh" --flow compile core > flow.log 2>&1 || {
+    grep -m5 "^Error" flow.log || true; echo "FAIL see $out/flow.log"; exit 1; }
+if grep -q "fed by virtual pin" flow.log; then echo "FAIL clk is a virtual pin"; exit 1; fi
+grep -E "Logic utilization|Total registers|Total block memory bits|Total RAM Blocks|Total DSP Blocks" \
+    core.fit.summary
+grep -A6 "Slow 1100mV 85C Model Fmax Summary" core.sta.rpt | grep MHz

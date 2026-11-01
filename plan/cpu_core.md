@@ -111,6 +111,21 @@ socket3/docs/notes/design-decisions.md):
    Quartus Lite 25.1 (installed, `~/altera_lite/25.1std`) on 5CEFA9F23C8:
    ALMs, fmax. Does the back end leave room for x86 decode + x87 + SSE +
    L2 >= 128 KB inside 301k LE, and at what clock?
+   **Done 2026-11-01** (`rtl/tools/setup.sh`, `gen_vexii.sh <config>`,
+   `synth_cv.sh`; VexiiRiscv 9f70315, core alone, ports virtual, 10 ns
+   target, slow 1100 mV 85 C model):
+
+   | config | ALMs | registers | M10K | DSP | fmax |
+   |---|---|---|---|---|---|
+   | rv64imac_dual (S/U + MMU, max-ipc, 16 KB L1 I/D) | 12,932 (11 %) | 16,360 | 105 | 17 | 60.7 MHz |
+   | rv64imafdc_dual (same + F/D) | 16,879 (15 %) | 19,848 | 115 | 17 | 52.0 MHz |
+
+   Room: yes, ~85 % of the ALMs and > 90 % of the M10K are left; a 128 KB
+   L2 is 1 Mbit of the 12.5 Mbit. Clock: 50-60 MHz as generated, already
+   above every Socket 3 bus clock (<= 40 MHz) but below Socket 7/370.
+   Critical paths: the max-ipc lane1 -> lane0 early-ALU bypass (rv64imac)
+   and the execute -> fetch TLB write (rv64imafdc), both inside the back
+   end; the next question is how much fmax a lighter bypass buys per IPC.
 2. Same netlist in Efinity for the Ti180 (176k LE): does it fit at all?
 3. Only then: an x86 decode plugin for the integer reg-reg / load-op
    subset, lock-stepped against an emulator, on the RISC-V back end.

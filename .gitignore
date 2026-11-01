@@ -21,3 +21,4 @@ sockets/slot1/**/*.html
 *.kicad_prl
 # rtl/tools/setup.sh downloads (VexiiRiscv, SpinalHDL, sbt)
 rtl/ext/
+rtl/build/

@@ -133,9 +133,10 @@ Done in T5/T6 (`gen_socket3_assign.py`, `gen_socket3_t6.py`,
    is high.
 3. UP#/DP3-DP0 pull-ups moved to the FPGA side of the switches.
 4. CLKMUL pull-up removed; FPGA weak pull-up in the .qsf instead.
-Open: our 4k7 RESET (C16) pull-down against the board's 8.2k pull-up to
-VCORE gives 1.26 V while their RESET pin is not driven (asked the other
-session).
+5. RESET (C16) pull-down 4k7 -> 100k: their RESET is high-Z for the whole
+   VCORE ramp, held asserted only by the 8.2k to VCORE (3.19 V with our
+   100k, 1.26 V = undefined with 4k7). On an original board where C16 is
+   undriven (NM2) 100k is weak against input leakage: check at NM2.
 
 ## Operator measurements (record the numbers in `sockets/kicad/README.md`)
 
@@ -219,7 +220,7 @@ Status socket3-cyclonev (`hw/tools/gen_socket3_t6.py`, 2026-11-01): 113
 signals via 16 SN74CB3T3245 (`hw/lib/Socket3_Parts.kicad_sym`, single VCC
 3.3 V, OE# = BUS_OE# from the VCORE-present TLV6700, see FPGAmotherboard
 compatibility); S4 tied to VSS; 16 resistors: socket-side 4k7 pull-downs
-HLDA, BREQ, RESET; FPGA-side 4k7 HOLD down, 10k UP#, DP0-3 up (notes
+HLDA, BREQ, 100k RESET; FPGA-side 4k7 HOLD down, 10k UP#, DP0-3 up (notes
 R4/R6); CLKMUL FPGA weak pull-up only; FPGA nSTATUS/CONF_DONE 10k up, DCLK
 10k down, TCK 1k down, TMS/TDI 10k up, RREF_TL 2k0 1% (PLL used) (cvpcg
 p.4-7, p.16); MSEL[4..0] = 10001 passive serial, standard POR (cvhb p.7-3
