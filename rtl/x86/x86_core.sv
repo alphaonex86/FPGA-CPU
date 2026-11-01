@@ -54,16 +54,32 @@ module x86_core
     logic [2:0][1:0]      d_n;
     logic [2:0]           d_redirect;
     logic [2:0][31:0]     d_target;
+    logic [2:0][31:0]     x_next, d_want;   // frontend / decode next EIP
+    logic [2:0]           d_mis;            // they differ: redirect after k
+    logic                 btb_we;
+    logic [1:0]           btb_k;
+    localparam int RAS_N = 8;
+    logic [31:0]          ras [RAS_N];      // return stack, decode-time, may be wrong
+    logic [$clog2(RAS_N)-1:0] ras_sp;       // top = ras[ras_sp - 1]
+    logic [2:0]           d_call, d_ret;
 
     x86_frontend fe (.clk(clk), .rst(rst), .redirect(fe_redirect), .redirect_pc(fe_redirect_pc),
                      .take(dec_take), .fetch_addr(fetch_addr), .fetch_data(fetch_data),
-                     .valid(x_valid), .bytes(x_bytes), .eip(x_eip), .len(x_len), .fault(x_fault));
+                     .valid(x_valid), .bytes(x_bytes), .eip(x_eip), .len(x_len), .fault(x_fault),
+                     .next(x_next), .btb_we(btb_we), .btb_set(d_redirect[btb_k]),
+                     .btb_pc(x_eip[btb_k]), .btb_target(d_target[btb_k]));
 
     genvar gi;
     generate for (gi = 0; gi < 3; gi = gi + 1) begin : dec
         x86_decode d (.bytes(x_bytes[gi]), .eip(x_eip[gi]), .len(x_len[gi]), .fault(x_fault[gi]),
+                      .ret_target(ras[ras_sp - 1'b1]), .call(d_call[gi]), .ret(d_ret[gi]),
                       .uop(d_uop[gi]), .n(d_n[gi]), .redirect(d_redirect[gi]), .target(d_target[gi]));
     end endgenerate
+    always_comb
+        for (int k = 0; k < 3; k++) begin
+            d_want[k] = d_redirect[k] ? d_target[k] : x_eip[k] + 32'(x_len[k]);
+            d_mis[k] = d_want[k] != x_next[k];
+        end
 
     // uop queue between decode and rename
     uop_t       uq [UQ_N];
@@ -152,7 +168,7 @@ module x86_core
         for (int k = 0; k < 3; k++)
             if (x_valid[k] && !stop) begin
                 d_total = d_total + 4'(d_n[k]);
-                stop = d_redirect[k];
+                stop = d_mis[k];
             end
     end
     assign dec_take = x_valid != 3'd0 && 5'(UQ_N) - uq_count >= 5'(d_total);
@@ -201,17 +217,22 @@ module x86_core
     assign store_addr = sq[sq_head[SQ_W-1:0]].addr;
     assign store_data = sq[sq_head[SQ_W-1:0]].data;
 
-    // frontend redirect: retire flush first, else the first predicted-taken
-    // branch of the decoded group
+    // frontend redirect: retire flush first, else the first instruction of
+    // the decoded group the frontend did not follow as decode predicts (the
+    // BTB learns it)
     always_comb begin
         fe_redirect = flush;
         fe_redirect_pc = flush_pc;
+        btb_we = 1'b0;
+        btb_k = 2'd0;
         if (rst) fe_redirect_pc = reset_eip;
         else if (!flush && dec_take)
             for (int k = 2; k >= 0; k--)
-                if (x_valid[k] && d_redirect[k]) begin
+                if (x_valid[k] && d_mis[k]) begin
                     fe_redirect = 1'b1;
-                    fe_redirect_pc = d_target[k];
+                    fe_redirect_pc = d_want[k];
+                    btb_we = 1'b1;
+                    btb_k = 2'(k);
                 end
     end
 
@@ -566,6 +587,7 @@ module x86_core
             halted <= 1'b0;
             illegal <= 1'b0;
             alu_port <= 1'b0;
+            ras_sp <= '0;
             for (int r = 0; r < NREG; r++) arch[r] <= 32'd0;
             arch[R_ESP] <= 32'h0010_0000;
             arch_flags <= '0;
@@ -714,6 +736,8 @@ module x86_core
                 begin
                     logic [3:0] t, pushed;
                     logic       stop;
+                    logic [$clog2(RAS_N)-1:0] sp;
+                    sp = ras_sp;
                     t = uq_tail;
                     stop = 1'b0;
                     if (dec_take)
@@ -724,8 +748,14 @@ module x86_core
                                         uq[t] <= d_uop[k][i];
                                         t = t + 4'd1;
                                     end
-                                stop = d_redirect[k];
+                                stop = d_mis[k];
+                                if (d_call[k]) begin
+                                    ras[sp] <= x_eip[k] + 32'(x_len[k]);
+                                    sp = sp + 1'b1;
+                                end
+                                if (d_ret[k]) sp = sp - 1'b1;
                             end
+                    ras_sp <= sp;
                     pushed = t - uq_tail;   // 4-bit: wraps with the pointers
                     uq_tail <= t;
                     uq_head <= uq_head + 4'(rn_n);

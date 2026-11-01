@@ -4,7 +4,8 @@
 // CALL rel32/r32, RET, JMP rel/r/m, Jcc rel8/rel32, NOP, HLT. Anything else
 // is one K_ILL uop.
 // Memory destinations: LD TMP; ALU TMP; ST TMP. Static prediction: direct
-// JMP/CALL and backward Jcc taken (redirect), the rest not taken.
+// JMP/CALL, backward Jcc and RET (to ret_target, the return stack top)
+// taken (redirect), the rest not taken.
 module x86_decode
     import x86_pkg::*;
 (
@@ -12,6 +13,9 @@ module x86_decode
     input  logic [31:0]     eip,
     input  logic [3:0]      len,
     input  logic            fault,      // predecode: #UD or > 15 bytes
+    input  logic [31:0]     ret_target,
+    output logic            call,       // pushes next EIP on the return stack
+    output logic            ret,        // pops it
     output uop_t [2:0]      uop,
     output logic [1:0]      n,          // valid uops: uop[0 .. n-1]
     output logic            redirect,   // frontend continues at target
@@ -256,6 +260,7 @@ module x86_decode
                 uop[0].s1 = R_ESP; uop[0].us1 = 1'b1;
                 uop[1] = esp_add(32'd4); uop[1].eop = 1'b0;
                 uop[2] = jmp_ind(R_TMP);
+                uop[2].pred_taken = 1'b1; uop[2].imm = ret_target;
                 n = 2'd3;
             end
             8'hC7: if (reg_f == 3'd0) alu_modrm(A_MOV, 1'b1, 1'b0, imm, uop, n);
@@ -296,7 +301,11 @@ module x86_decode
             endcase
             default: ;
         endcase
+        call = op == 8'hE8 || op == 8'hFF && reg_f == 3'd2 && !mem;
+        ret = op == 8'hC3;
         if (fault) begin
+            call = 1'b0;
+            ret = 1'b0;
             uop = '0;
             uop[0] = u;
             uop[0].kind = K_ILL;
