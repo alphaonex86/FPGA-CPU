@@ -1,13 +1,14 @@
 #!/bin/bash
-# Usage: rtl/tools/synth_cv.sh <verilog> <out dir> [period ns]
-# Compiles one core netlist alone on 5CEFA9F23C8 (Quartus Lite, every port
-# but clk a virtual pin) and prints ALMs, RAM blocks, DSPs and the slow-model
-# fmax: plan/cpu_core.md next step 1.
+# Usage: rtl/tools/synth_cv.sh <verilog> <out dir> [period ns] [recipe]
+# Compiles one SpinalHDL core netlist alone on 5CEFA9F23C8 (Quartus Lite,
+# every port but clk a virtual pin; recipe default | perf, quartus_run.sh)
+# and prints its area and slow-model fmax: plan/cpu_core.md.
 set -eu
-QUARTUS=${QUARTUS:-$HOME/altera_lite/25.1std/quartus/bin}
+. "$(dirname "$0")/quartus_run.sh"
 src=$(realpath "$1")
 out=$2
 period=${3:-10.0}
+recipe=${4:-default}
 top=$(sed -n 's/^module \([A-Za-z_0-9]*\).*/\1/p' "$src" | head -1)   # SpinalHDL: top first
 [[ -n $top ]] || { echo "no module in $src"; exit 1; }
 grep -q "input  *wire *clk\b\|input wire clk\b" "$src" || { echo "$top: no clk port"; exit 1; }
@@ -31,10 +32,4 @@ awk '/^module /{n++}
      }
      n == 1 && /^\);/ {exit}' "$src" >> core.qsf
 echo "create_clock -name clk -period $period [get_ports clk]" > core.sdc
-echo "PROJECT_REVISION = \"core\"" > core.qpf
-nice -n 19 "$QUARTUS/quartus_sh" --flow compile core > flow.log 2>&1 || {
-    grep -m5 "^Error" flow.log || true; echo "FAIL see $out/flow.log"; exit 1; }
-if grep -q "fed by virtual pin" flow.log; then echo "FAIL clk is a virtual pin"; exit 1; fi
-grep -E "Logic utilization|Total registers|Total block memory bits|Total RAM Blocks|Total DSP Blocks" \
-    core.fit.summary
-grep -A6 "Slow 1100mV 85C Model Fmax Summary" core.sta.rpt | grep MHz
+quartus_compile "$recipe"

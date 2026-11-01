@@ -50,19 +50,29 @@ no public RTL found.
 | | z486 | VexiiRiscv + own x86 front end (C1-C3) |
 |---|---|---|
 | runs x86 today | yes: DOS, Doom, Quake; real/protected mode, paging, segments | no: front end, flags, segments, x86 MMU, x87, system all to write |
-| measured here | not yet | rv64imac dual: 12,932 ALMs, 60.7 MHz, IPC 1.24 on RISC-V code |
+| measured here, default recipe | 17,955 ALMs, 50.17 MHz; with x87 24,051 ALMs, 49.89 MHz | rv64imac dual: 12,932 ALMs, 60.7 MHz |
+| measured here, perf recipe | 18,548 ALMs, 51.06 MHz | rv64imac dual: 14,976 ALMs, 61.19 MHz |
+| work per second (fmax x IPC, perf) | 51 x 0.5 = ~26 M instr/s (x86) | 61 x 1.24 = ~76 M instr/s (RISC-V; x86 lower) |
 | IPC | 0.5 (Dhrystone CPI 2.0) | 1.24 RISC-V; x86 IPC unknown until the cracker exists |
 | >= 2 instructions/cycle | no: scalar, needs a U/V-pipe redesign of an x86-native pipeline | dual issue already there |
 | x86-64 / SSE2 | none; 32-bit datapath | 64-bit datapath; SIMD lane still to add |
-| licence / ASIC | RTL Apache-2.0, but complex instructions run Intel's recovered microcode (excluded from the licence): blocks an ASIC and any redistributed board | MIT, all own code |
+| licence / ASIC | RTL Apache-2.0 covers only *.sv/*.svh/*.py/*.md, so `ucode.hex` and the .hex/.mif decode ROMs are not covered [z486 LICENSE-SCOPE.md]; even the "hardwired" common instructions are Intel microcode recipes issued from ROM port B (`hardwired_control.sv`, after US5293592): blocks an ASIC and any redistributed board | MIT, all own code |
 | x87 | experimental, incomplete | to write (80-bit unit) |
 
 Reading: z486 is far ahead on x86 semantics and could boot the Socket 3
 board soonest; it falls short on the hard requirements (>= 2 IPC, SSE2,
 x86-64, an ASIC-clean licence) and its microcode would have to be
-rewritten anyway. Its Apache-2.0 hardwired paths, decoder and test sets
-(test386.py, single-step real/protected-mode datasets) are usable as
-reference and test material in either plan.
+rewritten anyway, including the hardwired paths. Its test sets
+(test386.py, single-step real/protected-mode datasets) and its .sv as a
+behaviour reference are usable in either plan.
+
+Measured 2026-11-01 on 5CEFA9F23C8 (C8, slowest grade), core alone, ports
+virtual, slow 1100 mV 85 C model; `rtl/tools/synth_z486.sh <x87> <out>
+[default|perf]`, `synth_cv.sh` for Vexii, z486 at 62ae68e. The z486_MiSTer
+production recipe (`rtl/tools/quartus_perf.qsf`) adds only +1-2 % fmax on
+both cores. The author's 85 MHz is on the DE10-Nano's 5CSEBA6U23I7
+(grade 7); on our C8 part it gives 51 MHz, the speed grade being the likely
+main cause (grade 7 not compiled here).
 
 ## Recommendation: VexiiRiscv as the back end
 
