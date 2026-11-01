@@ -68,7 +68,7 @@ chipset, same sockets; source of `sockets/kicad/`).
 - `sockets/` — per socket CPU, chipset and board docs; `sockets/kicad/` socket
   footprints, symbols, 3D models, pin maps.
 - `isa/` — x86 ISA manuals.
-- `plan/` — `interposers.md` (4 interposer boards, tasks, status), `slot1.md`, `x86_core.md` (x86 core architecture),
+- `plan/` — `interposers.md` (4 interposer boards, tasks, status), `slot1.md`, `slot1_variants.md` (A/B/C1/C2 study), `x86_core.md` (x86 core architecture),
   `cpu_core.md` (base core evaluation) and `prompt.md`.
 - `fetch.sh <sources.txt>...` — (re)downloads every file listed in a
   `sources.txt` (`sockets/local-sources.txt`: local `file://` copies);

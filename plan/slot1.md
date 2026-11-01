@@ -498,6 +498,8 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   Table 5]; Slot 1 BSEL0 low [pentium3_secc2_24445201.pdf p.19 sec. 2.8.2])
   when that gives a large benefit, e.g. a DE25-Nano/Standard connection:
   board RAM bandwidth is not needed, it is used only for the minimum (DMA).
+- **D28** (decided 2026-11-01 by the operator) Board devices (IDE, PCI, ISA)
+  may be slower than the CPU and its RAM; only CPU + RAM speed counts.
 - **D22** (decided 2026-10-21, amended 2026-10-22 twice by operator: first
   6, then 8 copper layers, same answer as the D5 pattern) Slot 1
   cartridge = 8 layers: signals F&B (B.Cu gets the die escapes, F.Cu the
