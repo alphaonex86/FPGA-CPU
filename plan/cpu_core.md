@@ -164,6 +164,11 @@ socket3/docs/notes/design-decisions.md):
   flag-setting uop writes a flags register beside its result (new execute
   plugin, bypass between the two lanes); Jcc / ADC / SETcc read it in one
   cycle.
+  **Confirmed 2026-11-01 by the operator (directly, no interim x31 uop):**
+  Vexii uops have one RD and the dispatcher tracks hazards only on
+  RS1-3/RD, so the unit brings its own FLAGS register, forwarding from
+  every in-flight stage, and a dispatcher patch so a flag consumer never
+  issues in the same cycle as an older flag producer.
 - **C3** (decided 2026-11-01 by the operator) Lock-step reference: Unicorn
   (QEMU CPU core as a C library, one hook per instruction), testbench only
   (GPLv2, never in the RTL).
