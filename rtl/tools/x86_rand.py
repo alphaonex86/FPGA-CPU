@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+# Usage: rtl/tools/x86_rand.py <seed> <out.S>
+# Random terminating flat 32-bit program in the M2 decoder subset
+# (rtl/x86/x86_decode.sv): EDI = 64-byte buffer base, EBP = loop counter,
+# ESP = stack; EAX..ESI are free. Unaligned buffer offsets exercise
+# store-to-load forwarding and partial overlaps.
+import random
+import sys
+
+FREE = ["%eax", "%ebx", "%ecx", "%edx", "%esi"]
+ALU = ["add", "or", "adc", "sbb", "and", "sub", "xor", "cmp"]
+JCC = ["jo", "jno", "jb", "jae", "je", "jne", "jbe", "ja",
+       "js", "jns", "jp", "jnp", "jl", "jge", "jle", "jg"]
+
+
+def main():
+    if len(sys.argv) != 3:
+        sys.exit("usage: x86_rand.py <seed> <out.S>")
+    rnd = random.Random(int(sys.argv[1]))
+    labels = iter(range(1 << 30))
+    subs = []
+
+    def reg():
+        return rnd.choice(FREE)
+
+    def mem():
+        return "%d(%%edi)" % rnd.randrange(61)
+
+    def imm():
+        return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**31, 2**31)])
+
+    def insn():
+        k = rnd.randrange(14)
+        if k == 0:
+            return ["%s %s, %s" % (rnd.choice(ALU), reg(), reg())]
+        if k == 1:
+            return ["%s %s, %s" % (rnd.choice(ALU), imm(), reg())]
+        if k == 2:
+            return ["%s %s, %s" % (rnd.choice(ALU), mem(), reg())]
+        if k == 3:
+            return ["%s %s, %s" % (rnd.choice(ALU), reg(), mem())]
+        if k == 4:
+            return ["%sl %s, %s" % (rnd.choice(ALU), imm(), mem())]
+        if k == 5:
+            return ["test %s, %s" % (rnd.choice([reg(), imm()]), reg())]
+        if k == 6:
+            return ["%s %s" % (rnd.choice(["inc", "dec"]), reg())]
+        if k == 7:
+            return ["%sl %s" % (rnd.choice(["inc", "dec"]), mem())]
+        if k == 8:
+            return ["mov %s, %s" % (rnd.choice([reg(), imm(), mem()]), reg())]
+        if k == 9:
+            return ["movl %s, %s" % (rnd.choice([reg(), imm()]), mem())]
+        if k == 10:
+            return ["lea %d(%s,%s,%d), %s" % (rnd.randrange(-300, 300), reg(), reg(),
+                                             rnd.choice([1, 2, 4, 8]), reg())]
+        if k == 11:   # indexed buffer access
+            i = reg()
+            return ["and $15, %s" % i, "mov (%%edi,%s,4), %s" % (i, reg())]
+        if k == 12:
+            src = rnd.choice([reg(), imm(), mem()])
+            return ["push%s %s" % ("l" if src.startswith("$") or "(" in src else "", src),
+                    *run(rnd.randrange(3)), "pop %s" % reg()]
+        return ["nop"]
+
+    def run(n):
+        return [x for _ in range(n) for x in insn()]
+
+    def block():
+        k = rnd.randrange(5)
+        if k == 0:
+            l = next(labels)
+            return ["mov $%d, %%ebp" % rnd.randrange(1, 9), "L%d:" % l, *run(rnd.randrange(1, 8)),
+                    "dec %ebp", "jnz L%d" % l]
+        if k == 1:
+            l = next(labels)
+            return [*run(rnd.randrange(1, 3)), "%s L%d" % (rnd.choice(JCC), l),
+                    *run(rnd.randrange(1, 6)), "L%d:" % l]
+        if k == 2:
+            l = next(labels)
+            subs.append(["S%d:" % l, *run(rnd.randrange(1, 6)), "ret"])
+            if rnd.randrange(2):
+                return ["call S%d" % l]
+            r = reg()
+            return ["lea S%d, %s" % (l, r), "call *%s" % r]
+        if k == 3:
+            l, r = next(labels), reg()
+            return ["lea L%d, %s" % (l, r), "jmp *%s" % r, *run(2), "L%d:" % l]
+        return run(rnd.randrange(1, 10))
+
+    out = [".code32", ".globl _start", "_start:", "mov $0x9000, %edi"]
+    out += ["mov %s, %s" % (imm(), r) for r in FREE]
+    out += ["movl %s, %d(%%edi)" % (imm(), 4 * i) for i in range(17)]
+    for _ in range(40):
+        out += block()
+    out.append("hlt")
+    for s in subs:
+        out += s
+    with open(sys.argv[2], "w") as f:
+        f.write("".join((x if x.endswith(":") or x.startswith(".") else "        " + x) + "\n"
+                        for x in out))
+
+
+main()
