@@ -51,9 +51,12 @@ chipset, same sockets; source of `sockets/kicad/`).
 
 - Toolchain must be free with no limit that blocks a full CPU design, for the
   exact device + package; anything needing a paid licence is rejected.
+- The toolchain must be downloadable from Bolivia: efinixinc.com is blocked
+  there (HTTP 403) and Efinix has no free/open-source alternative flow, so
+  Efinix FPGAs are prohibited (operator, 2026-11-01).
 - Selected (authorized stock end of 2026): Altera Cyclone V E A9
-  5CEBA9/5CEFA9F23C8N (preferred: 1.0 mm pitch, more logic) and Efinix Ti180
-  TI180G400C3. Survey in `FPGAlist/README.md`.
+  5CEBA9/5CEFA9F23C8N (preferred: 1.0 mm pitch, more logic); the Efinix
+  Ti180 TI180G400C3 is dropped (rule above). Survey in `FPGAlist/README.md`.
 
 ## Layout
 

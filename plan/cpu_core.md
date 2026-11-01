@@ -7,8 +7,8 @@ end" that cracks opcodes into the back end's micro-ops.
 Requirements it must meet (`AGENTS.md`): >= 2 instructions per cycle,
 i686 + x87 + MMX + SSE + SSE2, extensible to x86-64 then x86-64-v2, L2
 >= 128 KB, per-socket bus behaviour, vendor-neutral RTL (ASIC option),
-many configurations from one tree, fits Cyclone V E A9 (301k LE) and Ti180
-(176k LE) (`FPGAlist/README.md`).
+many configurations from one tree, fits Cyclone V E A9 (301k LE) (the
+Ti180 is out: Efinix prohibited, `plan/interposers.md` D10) (`FPGAlist/README.md`).
 
 ## Candidates
 
@@ -75,7 +75,7 @@ reference and test material in either plan.
   framework, is the OoO step if the FSB-bound workloads need it later.
 - RV64 datapath already there: x86-64 long mode later is a decoder/MMU
   change, not a datapath rewrite.
-- Generates plain Verilog: vendor-neutral, same tree for Cyclone V, Ti180
+- Generates plain Verilog: vendor-neutral, same tree for Cyclone V
   and an ASIC; every option is a Scala parameter, which matches "many
   configurations from one RTL tree".
 - Cost: SpinalHDL/Scala knowledge and a JVM build (sbt or mill); the
@@ -192,6 +192,7 @@ socket3/docs/notes/design-decisions.md):
    path. More clock needs more stages (decoder/dispatcher/fetch fork
    placement), a later question. The F/D unit costs 14 % clock: keep the
    FPU off the integer critical loop when x87/SSE are added.
-2. Same netlist in Efinity for the Ti180 (176k LE): does it fit at all?
+2. ~~Same netlist in Efinity for the Ti180~~: dropped, Efinix is
+   prohibited (`plan/interposers.md` D10).
 3. Only then: an x86 decode plugin for the integer reg-reg / load-op
    subset, lock-stepped against an emulator, on the RISC-V back end.

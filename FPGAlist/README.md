@@ -64,9 +64,14 @@ AGTL+ (Socket 370, VREF ~1.0 V) is outside datasheet VREF range on all of these
 
 ## Selected
 
-Cyclone V E A9 F484 (preferred: 1.0 mm pitch, more logic) and Ti180 G400, both
-with authorized stock at end of 2026. Files: `CycloneV_A9/`, `Ti180_G400/`
-(re-fetch with `../fetch.sh */sources.txt`).
+Cyclone V E A9 F484 (preferred: 1.0 mm pitch, more logic), authorized stock at
+end of 2026. Files: `CycloneV_A9/` (re-fetch with `../fetch.sh */sources.txt`).
+
+Efinix is prohibited (operator, 2026-11-01): efinixinc.com answers HTTP 403
+from Bolivia, so Efinity cannot be downloaded, and no free/open-source flow
+makes Titanium/Trion bitstreams (yosys/nextpnr have no Efinix back end;
+LiteX drives Efinity itself). `Ti180_G400/` stays only as the record of the
+survey; the Ti180 and every other Efinix row above are out.
 
 ## I/O budget
 

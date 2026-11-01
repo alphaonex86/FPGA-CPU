@@ -9,13 +9,13 @@ plugs into the target board's ZIF socket, and the FPGA, its power, configuration
 | `socket3-cyclonev` (pilot) | Socket 3, Biostar MB-8433UUD-A, UMC 8881F/8886BF | 5CEBA9F23C8N / 5CEFA9F23C8N |
 | `socket7-cyclonev` | Socket 7, Biostar MB-8500TTD, Intel 430TX | same |
 | `socket370-cyclonev` | Socket 370, VIA VT82C694X + VT82C686B board | same |
-| `socket370-ti180` | as above | TI180G400C3 |
+| ~~`socket370-ti180`~~ | dropped (D10) | - |
 | ~~`socket3-ti180`, `socket7-ti180`~~ | dropped (D9) | - |
 | slot1 (see `plan/slot1.md`) | Slot 1 (SC242), board per slot1 D8 | per slot1 D9 |
 
 Order: the pilot first (simplest bus, 2.54 mm pins, 3.3 V I/O, ao486 is a 486
-core), then the other Cyclone V variants, then socket370-ti180 (it needs level
-translators). A variant starts only when the previous one passes all its checks.
+core), then the other Cyclone V variants. A variant starts only when the
+previous one passes all its checks.
 Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
 `hw/tools/` scripts, `hw/common/` per-socket tables and notes.
 
@@ -93,6 +93,10 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   2-3 PCBs stacked on the base PCB (growing in height, not sideways), above
   all for the sockets and RAM >= 1 GB. Both PCB sides carry components
   wherever nothing collides mechanically.
+- **D10** (decided 2026-11-01 by the operator) Efinix is prohibited:
+  efinixinc.com answers HTTP 403 from Bolivia, Efinity cannot be
+  downloaded and no free/open-source flow builds Titanium bitstreams, so
+  socket370-ti180 is dropped too; Cyclone V is the only FPGA.
 - **D9** (decided 2026-11-01 by the operator) socket3-ti180 and
   socket7-ti180 are dropped. Only 74 of the Ti180's 274 I/O are 3.3 V
   HVIO; HSIO stops at 1.8 V [tids p.84 Table 62]. Socket 7 (166 signals,
@@ -102,7 +106,7 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   1.8 -> 3.3 V <= 3.9 ns, 3.6 V max [avc8t245 p.8 Table 5.8];
   SN74LVC8T245 1.8 -> 5 V <= 7.1 ns but 5 -> 1.8 V <= 23.4 ns
   [lvc8t245 p.10 Table 5.7] (datasheets in `sockets/parts/`).
-  socket370-ti180 stays: AGTL+ is open-drain with VTT pull-ups (D3).
+  socket370-ti180 stayed (until D10): AGTL+ is open-drain with VTT pull-ups (D3).
 - **D7** (decided 2026-10-20 by the operator) JTAG header only (no USB
   bridge); TAP and PRDY#/PREQ# land on it; configuration via passive
   serial from the host.
@@ -300,4 +304,4 @@ with `kicad-cli` (gerbers, drill, positions, BOM).
 | socket3-cyclonev | done | done | done | done | done | done | done | | | | |
 | socket7-cyclonev | done | done | done | done | done | done | done | | | | |
 | socket370-cyclonev | done | done | done | done | done | done | done | | | | |
-| socket370-ti180 | done | done | done | done | done | done | done | | | | |
+| ~~socket370-ti180~~ | dropped (D10) after T6 | | | | | | | | | | |
