@@ -1,22 +1,23 @@
 // One x86 instruction -> up to 3 uops (plan/x86_core.md M2 subset, 32-bit
-// code; prefix 66 only): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
+// code; prefixes 66 and CS/DS/ES/SS, no-ops in the flat model): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
 // /0 /1, TEST 84/85/A8/A9/F6/F7 /0, NOT/NEG F6/F7 /2 /3, shifts and
 // rotates C0/C1/D0-D3 (not RCL/RCR), MOV 88-8B/B0-BF/C6/C7 /0,
-// MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, LEA, PUSH
+// MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
+// MUL/IMUL/DIV/IDIV F6/F7 /4-/7 (x86_muldiv), LEA, PUSH
 // r32/imm/r/m, POP r32, CALL rel32/r32, RET, LEAVE, JMP rel/r/m, Jcc
 // rel8/rel32, NOP, HLT. Anything else is one K_ILL uop.
 // 8/16-bit results merge into the old register (s1, or s3 for loads).
 // Memory destinations: LD TMP; ALU TMP; ST TMP. Static prediction: direct
-// JMP/CALL, backward Jcc and RET (to ret_target, the return stack top)
-// taken (redirect), the rest not taken.
+// JMP/CALL, backward Jcc and RET taken (redirect), the rest not taken; the
+// RET target (uop[2].imm) is the return stack top, filled in by the core.
 module x86_decode
     import x86_pkg::*;
 (
     input  logic [8*15-1:0] bytes,
     input  logic [31:0]     eip,
     input  logic [3:0]      len,
+    input  logic [3:0]      npfx,       // prefix bytes before the opcode
     input  logic            fault,      // predecode: #UD or > 15 bytes
-    input  logic [31:0]     ret_target,
     output logic            call,       // pushes next EIP on the return stack
     output logic            ret,        // pops it
     output uop_t [2:0]      uop,
@@ -25,6 +26,7 @@ module x86_decode
     output logic [31:0]     target
 );
     logic            p66;       // operand-size prefix
+    logic            pbad;      // another prefix: K_ILL
     logic [8*15-1:0] ib;        // the instruction after the prefix
 
     function automatic logic [7:0] b(input int i);
@@ -209,6 +211,70 @@ module x86_decode
         end
     endtask
 
+    // x86_muldiv uop: a = s1, b = s2 (hi2) or imm, c = s3
+    function automatic uop_t md(input aop_t a, input logic [1:0] sz, input logic [3:0] dr,
+                                input logic [3:0] r1, input logic us2, input logic [3:0] r2,
+                                input logic h2, input logic [31:0] i,
+                                input logic [3:0] r3, input logic us3);
+        uop_t x = u;
+        x.kind = K_MD; x.aop = a; x.osz = sz;
+        x.dst = dr; x.wdst = 1'b1;
+        x.s1 = r1; x.us1 = 1'b1;
+        x.s2 = r2; x.hi2 = h2; x.us2 = us2; x.imm = i;
+        x.s3 = r3; x.us3 = us3;
+        x.wflags = (a == A_MUL || a == A_IMUL || a == A_IMUL2);
+        return x;
+    endfunction
+
+    // IMUL reg, r/m (* reg, or * imm when !by_reg)
+    task automatic imul2(input logic by_reg, input logic [31:0] i,
+                         output uop_t [2:0] uo, output logic [1:0] no);
+        logic [3:0] rg;
+        rg = gpr(reg_f, wsz);
+        uo = '0;
+        if (!mem) begin
+            uo[0] = md(A_IMUL2, wsz, rg, gpr(rm, wsz), by_reg, rg, 1'b0, i, rg, wsz != SZ32);
+            no = 2'd1;
+        end else begin
+            uo[0] = load_tmp(wsz);
+            uo[1] = md(A_IMUL2, wsz, rg, R_TMP, by_reg, rg, 1'b0, i, rg, wsz != SZ32);
+            no = 2'd2;
+        end
+    endtask
+
+    // MUL / IMUL / DIV / IDIV r/m (F6/F7 /4../7): eDX:eAX or AX
+    task automatic grp3_md(input logic [1:0] sz, output uop_t [2:0] uo, output logic [1:0] no);
+        logic [3:0] sr;
+        logic       sh, sgn, dv;
+        int         k;
+        sgn = reg_f[0];
+        dv = reg_f[1];
+        uo = '0;
+        k = 0;
+        sr = gpr(rm, sz);
+        sh = ghi(rm, sz);
+        if (mem) begin
+            uo[0] = load_tmp(sz);
+            sr = R_TMP;
+            sh = 1'b0;
+            k = 1;
+        end
+        if (sz == SZ8) begin   // AX = AL * src, or AL, AH = AX / src
+            uo[k] = md(dv ? (sgn ? A_IDIV : A_DIV) : (sgn ? A_IMUL : A_MUL), SZ8, 4'd0, 4'd0,
+                       1'b1, sr, sh, 32'd0, 4'd0, 1'b0);
+            no = 2'(k + 1);
+        end else if (!dv) begin   // EAX = low + flags (reads EDX: order); EDX = high (s1 = that EAX)
+            uo[k] = md(sgn ? A_IMUL : A_MUL, sz, 4'd0, 4'd0, 1'b1, sr, 1'b0, 32'd0, 4'd2, 1'b1);
+            uo[k + 1] = md(sgn ? A_IMULH : A_MULH, sz, 4'd2, 4'd0, 1'b0, 4'd0, 1'b0, 32'd0, 4'd2, 1'b1);
+            no = 2'(k + 2);
+        end else begin   // EAX = quotient; EDX = remainder (its s1 = that EAX: order)
+            uo[k] = md(sgn ? A_IDIV : A_DIV, sz, 4'd0, 4'd0, 1'b1, sr, 1'b0, 32'd0, 4'd2, 1'b1);
+            uo[k + 1] = md(sgn ? A_IDIVR : A_DIVR, sz, 4'd2, 4'd0, 1'b0, 4'd0, 1'b0, 32'd0, 4'd2, 1'b1);
+            no = 2'(k + 2);
+        end
+        for (int j = 0; j < 2; j++) if (j < int'(no) - 1) uo[j].eop = 1'b0;
+    endtask
+
     // XCHG r/m, reg: TMP <- reg; reg <- r/m; r/m <- TMP
     task automatic xchg(input logic [1:0] sz, input logic [2:0] r, input logic [2:0] m,
                         input logic m_mem, output uop_t [2:0] uo, output logic [1:0] no);
@@ -249,8 +315,16 @@ module x86_decode
     endtask
 
     always_comb begin
-        p66 = bytes[7:0] == 8'h66;
-        ib = p66 ? bytes >> 8 : bytes;
+        p66 = 1'b0;
+        pbad = 1'b0;
+        for (int i = 0; i < 14; i++)
+            if (i < int'(npfx)) begin
+                logic [7:0] x;
+                x = bytes[8*i +: 8];
+                p66 = p66 || x == 8'h66;
+                pbad = pbad || !(x == 8'h66 || x == 8'h26 || x == 8'h2E || x == 8'h36 || x == 8'h3E);
+            end
+        ib = bytes >> (8 * npfx);
         wsz = p66 ? SZ16 : SZ32;
         op = b(0);
         op2 = b(1);
@@ -371,12 +445,15 @@ module x86_decode
                     end
                     uop[0].cond = op2[3:0];
                 end
+                8'hAF: imul2(1'b1, 32'd0, uop, n);
                 8'hB6: movx(1'b0, SZ8, uop, n);
                 8'hB7: movx(1'b0, SZ16, uop, n);
                 8'hBE: movx(1'b1, SZ8, uop, n);
                 8'hBF: movx(1'b1, SZ16, uop, n);
                 default: ;
             endcase
+            8'h69: imul2(1'b0, imm_at(ipos, wsz), uop, n);
+            8'h6B: imul2(1'b0, sx8(ipos), uop, n);
             8'h80: alu_modrm(grp1(reg_f), SZ8, 1'b1, 1'b0, sx8(ipos), uop, n);
             8'h81: alu_modrm(grp1(reg_f), wsz, 1'b1, 1'b0, imm_at(ipos, wsz), uop, n);
             8'h83: alu_modrm(grp1(reg_f), wsz, 1'b1, 1'b0, sx8(ipos), uop, n);
@@ -409,7 +486,7 @@ module x86_decode
                 uop[0].s1 = R_ESP; uop[0].us1 = 1'b1;
                 uop[1] = esp_add(32'd4); uop[1].eop = 1'b0;
                 uop[2] = jmp_ind(R_TMP);
-                uop[2].pred_taken = 1'b1; uop[2].imm = ret_target;
+                uop[2].pred_taken = 1'b1;
                 n = 2'd3;
             end
             8'hC0: if (reg_f != 3'd2 && reg_f != 3'd3) shift_rm(grp2(reg_f), SZ8, 1'b0, sx8(ipos), uop, n);
@@ -442,6 +519,7 @@ module x86_decode
                                 op[0] ? imm_at(ipos, wsz) : sx8(ipos), uop, n);
                 3'd2: alu_modrm(A_NOT, op[0] ? wsz : SZ8, 1'b1, 1'b0, 32'd0, uop, n);
                 3'd3: alu_modrm(A_NEG, op[0] ? wsz : SZ8, 1'b1, 1'b0, 32'd0, uop, n);
+                3'd4, 3'd5, 3'd6, 3'd7: grp3_md(op[0] ? wsz : SZ8, uop, n);
                 default: ;
             endcase
             8'hFE: if (reg_f == 3'd0 || reg_f == 3'd1)
@@ -478,7 +556,7 @@ module x86_decode
         endcase
         call = !p66 && (op == 8'hE8 || op == 8'hFF && reg_f == 3'd2 && !mem);
         ret = !p66 && op == 8'hC3;
-        if (fault) begin
+        if (fault || pbad) begin
             uop = '0;
             uop[0] = u;
             uop[0].kind = K_ILL;

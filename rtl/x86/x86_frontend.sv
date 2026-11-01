@@ -23,6 +23,7 @@ module x86_frontend
     output logic [2:0][8*15-1:0]  bytes,
     output logic [2:0][31:0]      eip,
     output logic [2:0][3:0]       len,
+    output logic [2:0][3:0]       npfx,          // prefix bytes before the opcode
     output logic [2:0]            fault,
     output logic [2:0][31:0]      next,
     input  logic                  btb_we,        // set (btb_set) or clear the
@@ -51,7 +52,7 @@ module x86_frontend
     typedef struct packed {
         logic [31:0]       pc;
         logic [8*30-1:0]   bytes;
-        logic [15:0][3:0]  len;
+        logic [15:0][3:0]  len, npfx;
         logic [15:0]       fault;
         mark_t             mark;
     } block_t;
@@ -137,7 +138,7 @@ module x86_frontend
             f2_bytes <= f1_bytes;
             f2_mark <= f1_mark;
             if (push) begin
-                fq[fq_tail] <= {f2_pc, f2_bytes, pd_len, pd_fault, f2_mark};   // block_t order
+                fq[fq_tail] <= {f2_pc, f2_bytes, pd_len, pd_npfx, pd_fault, f2_mark};   // block_t order
                 fq_tail <= fq_tail + 2'd1;
             end
             if (pop) fq_head <= fq_head + 2'd1;
@@ -150,6 +151,7 @@ module x86_frontend
                     next[k] <= fq[fq_head].mark.taken && last[k] ? fq[fq_head].mark.target
                                : fq[fq_head].pc + 32'(s[k][3:0]) + 32'(fq[fq_head].len[s[k][3:0]]);
                     len[k] <= fq[fq_head].len[s[k][3:0]];
+                    npfx[k] <= fq[fq_head].npfx[s[k][3:0]];
                     fault[k] <= fq[fq_head].fault[s[k][3:0]];
                 end
                 if (x_valid[0]) begin

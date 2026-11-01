@@ -11,16 +11,18 @@ package x86_pkg;
     localparam logic [3:0] R_ESP = 4'd4, R_TMP = 4'd8;
     localparam int NREG = 9;
 
-    typedef enum logic [2:0] {K_ALU, K_LD, K_ST, K_BR, K_HLT, K_ILL} kind_t;
+    typedef enum logic [2:0] {K_ALU, K_LD, K_ST, K_BR, K_HLT, K_ILL, K_MD} kind_t;   // K_MD: x86_muldiv
     // A_LEA: s1 + s2 << scale + imm, no flags; A_ZX8..A_SX16: zero / sign
     // extend b from 8 / 16 bits, no flags; shifts / rotates: a by b[4:0];
     // A_SETCC: cond (uop.cond) as 0/1; A_CMOV: cond ? b : a; A_SIGN: the
-    // sign of b (osz) in every bit (CDQ / CWD)
-    typedef enum logic [4:0] {A_ADD, A_OR, A_ADC, A_SBB, A_AND, A_SUB, A_XOR, A_CMP,
+    // sign of b (osz) in every bit (CDQ / CWD); A_MUL..A_IDIVR: x86_muldiv
+    typedef enum logic [5:0] {A_ADD, A_OR, A_ADC, A_SBB, A_AND, A_SUB, A_XOR, A_CMP,
                               A_TEST, A_INC, A_DEC, A_MOV, A_LEA,
                               A_ZX8, A_ZX16, A_SX8, A_SX16,
                               A_SHL, A_SHR, A_SAR, A_ROL, A_ROR, A_NOT, A_NEG,
-                              A_SETCC, A_CMOV, A_SIGN} aop_t;
+                              A_SETCC, A_CMOV, A_SIGN,
+                              A_MUL, A_IMUL, A_MULH, A_IMULH, A_IMUL2,
+                              A_DIV, A_IDIV, A_DIVR, A_IDIVR} aop_t;
 
     // operand size: ALU width, memory access size
     localparam logic [1:0] SZ8 = 2'd0, SZ16 = 2'd1, SZ32 = 2'd2;

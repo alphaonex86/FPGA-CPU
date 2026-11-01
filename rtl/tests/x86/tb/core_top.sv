@@ -1,7 +1,8 @@
 // M2 testbench top: x86_core with an ideal 1 MB memory loaded from
 // +image=<hex> at 0x1000, writing the retire trace (one line per x86
 // instruction, x86_trace_check format) to +trace=<file>; +debug prints the
-// frontend redirects, the extracted instructions and the retired uops.
+// frontend redirects, the extracted instructions, mul/div starts and results
+// and the retired uops.
 module core_top (
     input  logic clk,
     input  logic rst,
@@ -76,8 +77,13 @@ module core_top (
             if (debug) begin
                 if (core.fe_redirect) $display("%0d redirect %08x", cycles, core.fe_redirect_pc);
                 for (int k = 0; k < 3; k++)
-                    if (core.x_valid[k] && core.dec_take)
+                    if (core.x_valid[k] && core.p_load)
                         $display("%0d decode %08x len %0d", cycles, core.x_eip[k], core.x_len[k]);
+                if (core.ix_valid[3])
+                    $display("%0d md start op %0d tag %0d a %08x b %08x c %08x", cycles, core.xr[3].u.aop,
+                             core.xr[3].tag, core.xr[3].src[0].value, core.u_md.b, core.u_md.c);
+                if (core.md_done)
+                    $display("%0d md done tag %0d value %08x", cycles, core.md_tag, core.md_value);
                 for (int k = 0; k < 3; k++)
                     if (ret_valid[k])
                         $display("%0d retire eop %0d next %08x dst %0d=%08x", cycles, ret_eop[k],

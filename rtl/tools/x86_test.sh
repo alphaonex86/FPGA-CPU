@@ -1,6 +1,7 @@
 #!/bin/bash
-# Usage: rtl/tools/x86_test.sh <test.S> [trace.txt]
-# Assembles a flat 32-bit x86 test (loaded at 0x1000) into rtl/build/x86/<name>.bin;
+# Usage: rtl/tools/x86_test.sh <test.S | test.c> [trace.txt]
+# Builds a flat 32-bit x86 test (loaded at 0x1000) into rtl/build/x86/<name>.bin
+# (C: gcc i686 freestanding, entered by tests/x86/lib/crt0.S at main);
 # without a trace prints the Unicorn reference trace, with one checks it
 # (rtl/tools/x86_trace_check.c, built by setup.sh).
 set -eu
@@ -9,10 +10,18 @@ trace=${2:+$(realpath "$2")}
 cd "$(dirname "$0")/.."
 check=ext/x86_trace_check
 [[ -x $check ]] || { echo "run rtl/tools/setup.sh first"; exit 1; }
-name=$(basename "$src" .S)
+name=$(basename "${src%.*}")
 mkdir -p build/x86
-as --32 -o "build/x86/$name.o" "$src"
-ld -m elf_i386 -Ttext=0x1000 --oformat binary -o "build/x86/$name.bin" "build/x86/$name.o"
+objs=()
+if [[ $src == *.c ]]; then
+    as --32 -o build/x86/crt0.o tests/x86/lib/crt0.S
+    gcc -m32 -march=i686 -mno-sse -O2 -ffreestanding -fno-pic -fno-stack-protector -fno-reorder-functions \
+        -fno-asynchronous-unwind-tables -c -o "build/x86/$name.o" "$src"
+    objs=(build/x86/crt0.o)
+else
+    as --32 -o "build/x86/$name.o" "$src"
+fi
+ld -m elf_i386 -Ttext=0x1000 --oformat binary -o "build/x86/$name.bin" "${objs[@]}" "build/x86/$name.o"
 if [[ -n $trace ]]; then
     "$check" "build/x86/$name.bin" 1000 "$trace"
 else

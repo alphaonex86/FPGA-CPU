@@ -37,7 +37,7 @@ def main():
         return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(21)
+        k = rnd.randrange(24)
         x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
         a = rnd.choice(ALU) + x
         if k == 0:
@@ -90,10 +90,36 @@ def main():
             return [rnd.choice(["cltd", "cwtl", "cbtw", "cwtd"])]
         if k == 19:
             return ["xchg%s %s, %s" % (x, sreg(x), rnd.choice([sreg(x), mem()]))]
+        if k == 20:   # 2/3-operand IMUL
+            y = rnd.choice("lw")
+            src = rnd.choice([sreg(y), mem()])
+            return [rnd.choice(["imul%s %s, %s" % (y, src, sreg(y)),
+                                "imul%s %s, %s, %s" % (y, imm(y), src, sreg(y))])]
+        if k == 21:   # one-operand MUL / IMUL: eDX:eAX or AX
+            return ["%s%s %s" % (rnd.choice(["mul", "imul"]), x, rnd.choice([sreg(x), mem()]))]
+        if k == 22:   # DIV / IDIV, set up so no divide error can occur
+            sgn = rnd.randrange(2)
+            m = rnd.randrange(2)
+            d = mem() if m else {"b": rnd.choice(["%cl", "%bl", "%ch", "%bh"]),
+                                 "w": rnd.choice(["%cx", "%bx", "%si"]),
+                                 "l": rnd.choice(["%ecx", "%ebx", "%esi"])}[x]
+            setup = {"b": ["cbtw"] if sgn else ["movzbl %al, %eax"],
+                     "w": ["cwtd"] if sgn else ["xorw %dx, %dx"],
+                     "l": ["cltd"] if sgn else ["xorl %edx, %edx"]}[x]
+            mask = {"b": "$0x7f", "w": "$0x7fff", "l": "$0x7fff"}[x]
+            fix = ["and%s %s, %s" % (x, mask, d), "or%s $2, %s" % (x, d)] if sgn \
+                else ["or%s $1, %s" % (x, d)]
+            return [*fix, *setup, "%s%s %s" % ("idiv" if sgn else "div", x, d)]
         return ["nop"]
 
     def run(n):
-        return [x for _ in range(n) for x in insn()]
+        out = []
+        for _ in range(n):
+            x = insn()
+            if rnd.randrange(16) == 0:   # segment prefix, a no-op in the flat model
+                x.insert(len(x) - 1, ".byte 0x%x" % rnd.choice([0x26, 0x2E, 0x36, 0x3E]))
+            out += x
+        return out
 
     def block():
         k = rnd.randrange(5)

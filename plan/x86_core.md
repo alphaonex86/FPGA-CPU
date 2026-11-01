@@ -52,24 +52,35 @@ replicated per read port plus a live-value table.
    `x86_rand_test.sh`): P6-style stepping stone, results in a 32-entry
    ROB, RAT -> ROB tag or architectural register, flags renamed as one
    more register. Pipeline: frontend (16-byte blocks, 2-stage predecode,
-   4-block queue, 3 instructions/cycle) -> decode -> 16-uop queue -> R
+   4-block queue, 3 instructions/cycle) -> decode -> P (decoded group
+   registered: RET targets from the return stack, decode redirect, push)
+   -> 16-uop queue -> R
    (rename, ROB/SQ allocation) -> D (operand read, RS write; stalls on a
    full RS) -> S (16-entry RS, age matrix, oldest ready per port; each
    ALU uop bound to one of 2 ALU ports at dispatch) -> X -> wb1 (ROB,
    capture) -> wb2 (bypass only); memory port S -> A (AGU) -> M (8-entry
    SQ, forward on an exact match, replay on a partial overlap, stores
-   write at retire). ALU grants wake dependents at once (back to back);
+   write at retire); mul/div port (`x86_muldiv`: 3-stage multiply,
+   1 bit/cycle divider, issued in order since MULH/DIVR read the unit's
+   last high half / remainder). ALU grants wake dependents at once (back to back);
    an uncaptured operand must be on wb1/wb2 (simulation check). Branches:
    static BTFN at decode, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
-   they retire. Matches Unicorn on x1/x2 and 300 random programs
-   (`x86_rand.py`). IPC: 1.88 straight ALU code (2 ALU ports), 1.94 in a
+   they retire. Subset: ALU/shift/rotate/SETcc/CMOVcc/MUL/IMUL/DIV/IDIV
+   on 8/16/32-bit operands (QEMU flag semantics), loads/stores, stack,
+   branches; prefixes 66 and CS/DS/ES/SS. Matches Unicorn on x1/x2, 2000
+   random programs (`x86_rand.py`) and compiled C (`tests/x86/c1_mix.c`,
+   gcc -O2 i686: records, strings, sort, CRC-32, recursion; 23,879
+   instructions, IPC 0.716). IPC: 1.88 straight ALU code (2 ALU ports), 1.94 in a
    14-instruction loop, 0.45 on random programs (random forward Jcc).
    5CEFA9F23C8 (`rtl/tests/x86/synth/x86_core_synth.sv`,
    `rtl/tools/synth_path.sh` for the worst path): single-cycle issue 5.88
    MHz (serial oldest-first select + execute + capture); pipelined issue
    45.9; registered flush 47.9; RS budget off the dispatch count 56.5
-   MHz at 38,946 ALMs (34 %), 17,056 registers. DE25-Nano
+   MHz at 38,946 ALMs (34 %), 17,056 registers; with 8/16-bit operands,
+   shifts and the BTB (registered update) 40.99 MHz, 43,639 ALMs (38 %),
+   20,086 registers, worst path decode -> branch target -> redirect
+   compare -> uop queue push, hence the P stage. DE25-Nano
    A5EB013BB23BE4SCS (Quartus Pro 26.1.1, R/D split, before the BTB):
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.

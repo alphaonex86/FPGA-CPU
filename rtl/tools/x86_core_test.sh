@@ -11,11 +11,11 @@ out=build/x86/core
 mkdir -p "$out"
 nice -n 19 verilator --cc --exe --build -j 0 -Wall -Wno-UNUSEDSIGNAL --top-module core_top \
     --Mdir "$out/obj" x86/x86_pkg.sv x86/x86_opdecode.sv x86/x86_predecode.sv x86/x86_alu.sv \
-    x86/x86_decode.sv x86/x86_frontend.sv x86/x86_core.sv tests/x86/tb/core_top.sv \
+    x86/x86_decode.sv x86/x86_frontend.sv x86/x86_muldiv.sv x86/x86_core.sv tests/x86/tb/core_top.sv \
     tests/x86/tb/core_tb.cpp -o core_tb > "$out/build.log" 2>&1 || { grep -m20 -A3 "%Error\|%Warning" "$out/build.log"; exit 1; }
 rc=0
 for t in "${tests[@]}"; do
-    name=$(basename "$t" .S)
+    name=$(basename "${t%.*}")
     tools/x86_test.sh "$t" > /dev/null   # assembles build/x86/<name>.bin
     python3 -I -c "import sys; d = open(sys.argv[1], 'rb').read(); open(sys.argv[2], 'w').write(''.join('%02x\n' % b for b in d))" \
         "build/x86/$name.bin" "$out/$name.hex"
