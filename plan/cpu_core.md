@@ -215,6 +215,13 @@ Questions before any work:
    (bus timing at 33-66 MHz over a cable) or the Agilex 5 chip on our own
    interposer; power vs the socket budgets in `AGENTS.md`.
 
+Fabric speed (2026-11-01): the rv64imac_dual netlist of step 1, same
+virtual-pin setup, Quartus Pro 26.1.1 on A5EB013BB23BE4SCS, 5 ns target:
+13,568 / 46,800 ALMs (29 %), 94 / 358 M20K, 8 DSP, fmax 162.87 MHz (worst
+multicorner, slow fix4 0C model), vs 61 MHz / 11 % on 5CEFA9F23C8: 2.7x
+the clock, but 2.6x less room for x86 + x87 + SSE + L2 (7.3 Mbit RAM: a
+128 KB L2 still fits).
+
 ### E1 connection: DE25-Nano + multiplexer adapter (operator, 2026-11-01)
 
 The DE25-Nano exposes 72 user I/O at 3.3 V on two 2x20 headers (36 + 5 V,
