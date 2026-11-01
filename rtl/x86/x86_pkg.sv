@@ -21,7 +21,7 @@ package x86_pkg;
                               A_ZX8, A_ZX16, A_SX8, A_SX16,
                               A_SHL, A_SHR, A_SAR, A_ROL, A_ROR, A_NOT, A_NEG,
                               A_SETCC, A_CMOV, A_SIGN, A_SHLD, A_SHRD,
-                              A_BSF, A_BSR, A_BSWAP,
+                              A_BSF, A_BSR, A_BSWAP, A_BT, A_BTS, A_BTR, A_BTC,
                               A_MUL, A_IMUL, A_MULH, A_IMULH, A_IMUL2,
                               A_DIV, A_IDIV, A_DIVR, A_IDIVR} aop_t;
 
@@ -43,6 +43,7 @@ package x86_pkg;
         logic        indirect;   // K_BR: target = s1 (RET)
         logic        pred_taken; // K_BR: frontend followed the target
         logic        ecxz;       // K_BR: taken when s1 is 0, else s1 - 1 written (REP)
+        logic        loopc;      // K_BR: s1 - 1 written, taken when s1 != 1 (and cond if rflags)
         logic [3:0]  dst;
         logic        wdst;
         logic [3:0]  s1, s2, s3; // ALU a/b; memory base/index/store data

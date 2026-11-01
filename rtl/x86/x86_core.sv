@@ -295,7 +295,16 @@ module x86_core
         bp_rhist <= rst ? '0 : bp_rhist_n;
     end
 
-    // branch table: read with the P load, written at retire
+    // branch table: read with the P load, written the cycle after retire
+    // (registered: off the retire -> M10K address path)
+    logic            bq_we;
+    logic [BP_W-1:0] bq_idx;
+    logic [1:0]      bq_ctr;
+    always_ff @(posedge clk) begin
+        bq_we <= bp_we && !rst;
+        bq_idx <= bp_widx;
+        bq_ctr <= bp_wctr;
+    end
     initial for (int i = 0; i < 1 << BP_W; i++) begin
         bht0[i] = 2'd1;
         bht1[i] = 2'd1;
@@ -304,15 +313,15 @@ module x86_core
     always_comb for (int k = 0; k < 3; k++) bp_idx[k] = x_eip[k][BP_W-1:0] ^ {bp_hist, 2'b00};
     always_ff @(posedge clk) begin
         if (dec_take) p_bctr[0] <= bht0[bp_idx[0]];
-        if (bp_we) bht0[bp_widx] <= bp_wctr;
+        if (bq_we) bht0[bq_idx] <= bq_ctr;
     end
     always_ff @(posedge clk) begin
         if (dec_take) p_bctr[1] <= bht1[bp_idx[1]];
-        if (bp_we) bht1[bp_widx] <= bp_wctr;
+        if (bq_we) bht1[bq_idx] <= bq_ctr;
     end
     always_ff @(posedge clk) begin
         if (dec_take) p_bctr[2] <= bht2[bp_idx[2]];
-        if (bp_we) bht2[bp_widx] <= bp_wctr;
+        if (bq_we) bht2[bq_idx] <= bq_ctr;
     end
 
     // ---------------- retire ----------------
@@ -750,7 +759,9 @@ module x86_core
                         : r.u.ecxz && r.src[0].value == 32'd0 ? 32'd0   // REP exit: ECX stays 0
                         : merge(r.src[0].value, alu_y[p], r.u.osz, r.u.dhi);
             ex_flags[p] = r.u.wflags ? alu_f[p] : r.fsrc.value;
-            taken = r.u.ecxz ? r.src[0].value == 32'd0 : r.u.uncond || cond_taken(r.u.cond, r.fsrc.value);
+            taken = r.u.ecxz ? r.src[0].value == 32'd0
+                  : r.u.loopc ? r.src[0].value != 32'd1 && (!r.u.rflags || cond_taken(r.u.cond, r.fsrc.value))
+                  : r.u.uncond || cond_taken(r.u.cond, r.fsrc.value);
             pc = !taken ? r.u.next_eip : r.u.indirect ? r.src[0].value : r.u.imm;
             pred = r.u.pred_taken ? r.u.imm : r.u.next_eip;
             ex_mispred[p] = r.u.kind == K_BR && pc != pred;

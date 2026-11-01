@@ -3,10 +3,11 @@
 // ops and RET): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
 // /0 /1, TEST 84/85/A8/A9/F6/F7 /0, NOT/NEG F6/F7 /2 /3, shifts and
 // rotates C0/C1/D0-D3 (not RCL/RCR), MOV 88-8B/B0-BF/C6/C7 /0,
-// SHLD/SHRD, BSF/BSR, BSWAP, MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
+// SHLD/SHRD, BSF/BSR, BSWAP, BT/BTS/BTR/BTC (r/m with a register offset:
+// register only), MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
 // MUL/IMUL/DIV/IDIV F6/F7 /4-/7 (x86_muldiv), LEA, PUSH
 // r32/imm/r/m, POP r32, CALL rel32/r32, RET, LEAVE, JMP rel/r/m, Jcc
-// rel8/rel32, NOP, HLT, [REP] MOVS/STOS/LODS (DF = 0: CLD is a NOP, STD
+// rel8/rel32, LOOP/LOOPE/LOOPNE/JECXZ, NOP, HLT, [REP] MOVS/STOS/LODS (DF = 0: CLD is a NOP, STD
 // K_ILL), up to 6 uops: uop then uop_b. Anything else is one K_ILL uop.
 // 8/16-bit results merge into the old register (s1, or s3 for loads).
 // Memory destinations: LD TMP; ALU TMP; ST TMP. Static prediction: direct
@@ -82,13 +83,18 @@ module x86_decode
     // shift / rotate count 0 and partial flag writes pass the old flags
     function automatic logic reads_flags(input aop_t a);
         return (a == A_ADC || a == A_SBB || a == A_INC || a == A_DEC || a == A_SHL || a == A_SHR
-                || a == A_SAR || a == A_ROL || a == A_ROR || a == A_SHLD || a == A_SHRD || a == A_SETCC || a == A_CMOV);
+                || a == A_SAR || a == A_ROL || a == A_ROR || a == A_SHLD || a == A_SHRD || a == A_SETCC || a == A_CMOV
+                || a == A_BT || a == A_BTS || a == A_BTR || a == A_BTC);
     endfunction
 
     // d = f(src): d is read only to merge
     function automatic logic moves(input aop_t a);
         return (a == A_MOV || a == A_ZX8 || a == A_ZX16 || a == A_SX8 || a == A_SX16
                 || a == A_SIGN || a == A_SETCC);
+    endfunction
+
+    function automatic logic writes_dst(input aop_t a);
+        return !(a == A_CMP || a == A_TEST || a == A_BT);
     endfunction
 
     function automatic logic writes_flags(input aop_t a);
@@ -117,7 +123,7 @@ module x86_decode
         x.osz = sz;
         x.dst = dr;
         x.dhi = dh;
-        x.wdst = !(a == A_CMP || a == A_TEST);
+        x.wdst = writes_dst(a);
         x.s1 = dr;
         x.hi1 = dh;
         x.us1 = !moves(a) || sz != SZ32;
@@ -197,7 +203,7 @@ module x86_decode
             uo[0] = ld;
             uo[1] = alu(a, sz, R_TMP, 1'b0, us, rg, hg, i);
             no = 2'd2;
-            if (a != A_CMP && a != A_TEST) begin
+            if (writes_dst(a)) begin
                 uo[1].eop = 1'b0;
                 uo[2] = st;
                 no = 2'd3;
@@ -394,7 +400,7 @@ module x86_decode
             end
         end
         mop.imm = disp;
-        rel = op == 8'h0F ? imm32_at(2) : op[7:4] == 4'h7 || op == 8'hEB ? sx8(1) : imm32_at(1);
+        rel = op == 8'h0F ? imm32_at(2) : op[7:4] == 4'h7 || op == 8'hEB || op[7:2] == 6'b111000 ? sx8(1) : imm32_at(1);
         aop = grp1(op[5:3]);
 
         uop[0] = u;
@@ -429,6 +435,19 @@ module x86_decode
                 uop[0] = push_st(1'b0, 4'd0, op[1] ? sx8(1) : imm32_at(1));
                 uop[1] = esp_add(-32'd4);
                 n = 2'd2;
+            end
+            8'b111000??: if (!p66) begin   // LOOPNE / LOOPE / LOOP / JECXZ rel8
+                uop[0] = u; uop[0].kind = K_BR;
+                uop[0].s1 = 4'd1; uop[0].us1 = 1'b1;
+                uop[0].imm = next_eip + rel;
+                uop[0].pred_taken = rel[31];
+                if (op[1:0] == 2'd3) uop[0].ecxz = 1'b1;
+                else begin
+                    uop[0].loopc = 1'b1; uop[0].aop = A_DEC;
+                    uop[0].dst = 4'd1; uop[0].wdst = 1'b1;
+                    uop[0].cond = {3'b010, !op[0]};   // LOOPE: E (ZF), LOOPNE: NE
+                    uop[0].rflags = !op[1];
+                end
             end
             8'b0111????, 8'hEB, 8'hE9: if (!p66) begin   // Jcc rel8, JMP rel8 / rel32
                 uop[0] = u; uop[0].kind = K_BR;
@@ -470,6 +489,12 @@ module x86_decode
                         end
                 end
                 8'hAF: imul2(1'b1, 32'd0, uop, n);
+                8'b101?_?011: if (!mem)   // A3/AB/B3/BB BT/BTS/BTR/BTC r/m, reg
+                    alu_modrm(op2[4:3] == 2'd0 ? A_BT : op2[4:3] == 2'd1 ? A_BTS : op2[4:3] == 2'd2 ? A_BTR : A_BTC,
+                              wsz, 1'b1, 1'b1, 32'd0, uop, n);
+                8'hBA: if (reg_f[2])   // BT/BTS/BTR/BTC r/m, imm8
+                    alu_modrm(reg_f[1:0] == 2'd0 ? A_BT : reg_f[1:0] == 2'd1 ? A_BTS : reg_f[1:0] == 2'd2 ? A_BTR : A_BTC,
+                              wsz, 1'b1, 1'b0, 32'(b(ipos)), uop, n);
                 8'hBC: alu_modrm(A_BSF, wsz, 1'b0, 1'b1, 32'd0, uop, n);   // reg = f(old reg, r/m)
                 8'hBD: alu_modrm(A_BSR, wsz, 1'b0, 1'b1, 32'd0, uop, n);
                 8'b11001???: if (!p66) uop[0] = alu(A_BSWAP, SZ32, {1'b0, op2[2:0]}, 1'b0, 1'b0, 4'd0, 1'b0, 32'd0);

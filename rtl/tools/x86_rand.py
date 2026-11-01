@@ -37,7 +37,7 @@ def main():
         return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(27)
+        k = rnd.randrange(28)
         x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
         a = rnd.choice(ALU) + x
         if k == 0:
@@ -131,6 +131,12 @@ def main():
             src = rnd.choice([sreg(y), mem()])
             zero = ["mov%s $0, %s" % (y, src)] if rnd.randrange(4) == 0 else []
             return [*zero, "%s%s %s, %s" % (rnd.choice(["bsf", "bsr"]), y, src, sreg(y))]
+        if k == 26:   # BT / BTS / BTR / BTC; a register offset on a register only
+            y = rnd.choice("lw")
+            op = rnd.choice(["bt", "bts", "btr", "btc"]) + y
+            if rnd.randrange(2):
+                return ["%s %s, %s" % (op, sreg(y), sreg(y))]
+            return ["%s $%d, %s" % (op, rnd.randrange(256), rnd.choice([sreg(y), mem()]))]
         return ["nop"]
 
     def run(n):
@@ -143,7 +149,7 @@ def main():
         return out
 
     def block():
-        k = rnd.randrange(5)
+        k = rnd.randrange(6)
         if k == 0:
             l = next(labels)
             return ["mov $%d, %%ebp" % rnd.randrange(1, 9), "L%d:" % l, *run(rnd.randrange(1, 8)),
@@ -165,6 +171,14 @@ def main():
         if k == 3:
             l, r = next(labels), reg()
             return ["lea L%d, %s" % (l, r), "jmp *%s" % r, *run(2), "L%d:" % l]
+        if k == 4:   # LOOP / LOOPE / LOOPNE: ECX - 1 = EBP, so it ends; JECXZ
+            l = next(labels)
+            if rnd.randrange(3) == 0:
+                return [*(["mov $0, %ecx"] if rnd.randrange(2) else []), "jecxz L%d" % l,
+                        *run(rnd.randrange(1, 4)), "L%d:" % l]
+            return ["mov $%d, %%ebp" % rnd.randrange(1, 9), "L%d:" % l, *run(rnd.randrange(1, 6)),
+                    "dec %ebp", *run(rnd.randrange(2)), "lea 1(%ebp), %ecx",
+                    "%s L%d" % (rnd.choice(["loop", "loope", "loopne"]), l)]
         return run(rnd.randrange(1, 10))
 
     out = [".code32", ".globl _start", "_start:", "mov $0x9000, %edi"]

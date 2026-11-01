@@ -67,9 +67,11 @@ replicated per read port plus a live-value table.
    an uncaptured operand must be on wb1/wb2 (simulation check). Branches:
    gshare + static BTFN at decode / P, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
-   they retire. Subset: ALU/shift/rotate/SHLD/SHRD/BSF/BSR/BSWAP/SETcc/CMOVcc/
+   they retire. Subset: ALU/shift/rotate/SHLD/SHRD/BSF/BSR/BSWAP/BT/BTS/BTR/BTC
+   (a register bit offset on a register only)/SETcc/CMOVcc/
    MUL/IMUL/DIV/IDIV on 8/16/32-bit operands (QEMU flag semantics), loads/stores,
-   stack, branches, [REP] MOVS/STOS/LODS (DF = 0); prefixes 66, F3 and
+   stack, branches (LOOP/LOOPE/LOOPNE: ECX - 1 written, taken when ECX != 1;
+   JECXZ), [REP] MOVS/STOS/LODS (DF = 0); prefixes 66, F3 and
    CS/DS/ES/SS. A REP iteration is the instruction looping on itself: uop 0
    leaves when ECX = 0 (else ECX -= 1), decode predicts the loop, the BTB
    learns it; up to 6 uops per instruction (P pushes a long slot 0 in two
@@ -100,6 +102,9 @@ replicated per read port plus a live-value table.
    in-group return stack index -> serial redirect compares (then: RET
    reads the top before its group, parallel compares): 56.83 MHz, 48,457
    ALMs, worst path wb tag -> operand bypass mux -> ALU shift -> ZF.
+   With gshare: 54.95 MHz, 49,476 ALMs, 3 M10K, worst path ROB head ->
+   retire valid -> gshare write index -> M10K address (then: the table
+   write registered).
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div
