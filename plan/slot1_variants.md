@@ -123,6 +123,8 @@ What the FPGA translator buys, and what it does not:
   an Agilex 5 SoC on our own cartridge.
 - Measure first (cheap, answers "how far from native"): FEX or Box64 on
   the DE25 A76 under Linux, same benchmark natively (CoreMark, 7-zip).
+  Script: `rtl/tools/bench_dbt.sh` (run on the board; not run yet, the
+  host build of the external benchmark was blocked here).
 - Status: feasible, kept as the research variant; the claim "FPGA
   translator = native ARM speed" holds only for the translation time; the
   steady-state speed comes from points 1-5, all in A76 software.
