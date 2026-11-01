@@ -98,7 +98,8 @@ replicated per read port plus a live-value table.
    enable no longer waits for the compare; frontend next-start chain
    precomputed per byte at queue push): 52.36 MHz, 49,725 ALMs; worst path
    in-group return stack index -> serial redirect compares (then: RET
-   reads the top before its group, parallel compares).
+   reads the top before its group, parallel compares): 56.83 MHz, 48,457
+   ALMs, worst path wb tag -> operand bypass mux -> ALU shift -> ZF.
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div
@@ -113,10 +114,18 @@ replicated per read port plus a live-value table.
    redirects rose (c1 216 -> 889); not BTB capacity (32, 128 and 512
    entries give the same IPC) but direction thrash: c1 542 taken branches
    the frontend did not follow + 345 it followed but P predicts not taken
-   (the BTB entry is set / cleared on each disagreement). Next: direction
-   from the same gshare at fetch (fetch-time history passed with the
-   block), so P agrees on BTB-marked branches and only BTB misses redirect
-   at decode. DE25-Nano
+   (the BTB entry is set / cleared on each disagreement). Tried: direction
+   of BTB-marked Jcc from a gshare copy read at fetch (block pc ^ history
+   of marked branches, the only history fetch knows: unmarked not-taken Jcc
+   are invisible to it): decode redirects c1 889 -> 258 but flushes 287 ->
+   441, IPC 1.174 -> 1.081 (c2 1.134 -> 1.094): rejected. Measured costs:
+   a decode redirect about 1.6 cycles (the backend hides most of it), a
+   mispredict about 15 (`+stats`, c1: 3.3 from the branch result to its
+   retire, 11.5 from the flush to the next retire: r_flush, flush, F0, F1,
+   F2, extract, decode, P, R, D, S, X, wb, retire). Offline predictor
+   sweep (c1 3,350 Jcc): gshare 14-bit / longer history no better (272 ->
+   292), tournament 258: these short tests are bound by cold and
+   data-dependent branches. DE25-Nano
    A5EB013BB23BE4SCS (Quartus Pro 26.1.1, R/D split, before the BTB):
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.

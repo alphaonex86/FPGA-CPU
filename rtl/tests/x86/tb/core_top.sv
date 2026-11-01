@@ -32,6 +32,9 @@ module core_top (
     logic [31:0] st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush;
     logic [31:0] st_wait_kind [8];   // head waits by the head uop kind (kind_t)
     logic [31:0] st_dr [4];          // decode redirects: not followed, falsely taken, target, cut
+    logic [31:0] st_mp_wait, st_refill;   // flushing branch: result -> retire; flush -> next retire
+    logic [31:0] mp_cycle [ROB_N];
+    logic        refill;
 
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000),
                    .fetch_addr(fetch_addr), .fetch_data(fetch_data),
@@ -72,7 +75,8 @@ module core_top (
             flags <= '0;
             cycles <= 32'd0;
             insns <= 32'd0;
-            {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush} <= '0;
+            {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush, st_mp_wait, st_refill} <= '0;
+            refill <= 1'b0;
             for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
             for (int i = 0; i < 4; i++) st_dr[i] <= 32'd0;
         end else begin
@@ -100,6 +104,13 @@ module core_top (
                 st_dr[c] <= st_dr[c] + 32'd1;
             end
             if (core.flush) st_flush <= st_flush + 32'd1;
+            for (int p = 0; p < core.NW; p++)
+                if (core.wb_valid[p] && core.wb_mispred[p]) mp_cycle[core.wb_tag[p]] <= cycles;
+            if (core.r_flush)
+                st_mp_wait <= st_mp_wait + cycles - mp_cycle[core.rob_head + TAG_W'(core.r_n - 2'd1)];
+            if (core.flush) refill <= 1'b1;
+            else if (ret_valid != 3'd0) refill <= 1'b0;
+            if (refill && ret_valid == 3'd0) st_refill <= st_refill + 32'd1;
             if (debug) begin
                 if (core.fe_redirect) $display("%0d redirect %08x", cycles, core.fe_redirect_pc);
                 for (int k = 0; k < 3; k++)
@@ -147,5 +158,8 @@ module core_top (
         if (stats)
             $display("stats: decode redirects: taken not followed %0d, falsely taken %0d, target %0d, cut %0d",
                      st_dr[0], st_dr[1], st_dr[2], st_dr[3]);
+        if (stats)
+            $display("stats: flushing branch result -> retire %0d cycles, flush -> next retire %0d cycles",
+                     st_mp_wait, st_refill);
     end
 endmodule
