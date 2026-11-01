@@ -27,3 +27,5 @@ if [[ ! -f ext/unicorn/build/libunicorn.a ]]; then
         -DUNICORN_ARCH=x86 -DUNICORN_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF
     nice -n 19 ninja -C ext/unicorn/build
 fi
+cc -O2 -Wall -Werror -Iext/unicorn/include -o ext/x86_trace_check tools/x86_trace_check.c \
+    ext/unicorn/build/libunicorn.a -lpthread -lm
