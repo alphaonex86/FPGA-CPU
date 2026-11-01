@@ -17,8 +17,7 @@ Input: 12 V barrel jack 5.5x2.1 mm, centre-positive, 2 A fuse. All
 converter outputs are strictly monotonic ramps (see sequencing).
 
 FPGA tags: cvds = `FPGAlist/CycloneV_A9/docs/cv_51002_device_datasheet.pdf`,
-cvhb = `FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf`,
-tids = `FPGAlist/Ti180_G400/docs/ti180_datasheet.pdf`.
+cvhb = `FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf`.
 
 ## Rails
 
@@ -69,6 +68,10 @@ enables the core 1.1 V, whose PGOOD (threshold per the T9 part) enables the 2.5,
 converters together; then the 4-12 ms (fast) / 100-300 ms (standard) POR
 [cvds p.69 Table 55] before configuration; CONF_DONE gating is T6's job
 (`hw/common/socket370_notes.md` R6).
+No load switch (operator, 2026-11-01; socket 7 needs one, its I/O
+rail is the board's VCC3): VCCIO33, which also powers the translators'
+A side, comes from our 3.3 V converter that the core PGOOD already
+enables, so a switch in series would add nothing.
 
 
 ## Budget check (D1)

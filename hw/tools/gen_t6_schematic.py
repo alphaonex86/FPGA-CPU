@@ -33,11 +33,7 @@ DIRECT = {"BCLK", "PICCLK"}
 V = {"socket370-cyclonev": dict(
         fpgacsv="FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv",
         fsym="hw/lib/FPGA_CycloneV_5CEFA9_F484_FPGA.kicad_sym",
-     ),
-     "socket370-ti180": dict(
-        fpgacsv="FPGAlist/Ti180_G400/pins/ti180g400.csv",
-        fsym="hw/lib/FPGA_Ti180_TI180G400_FPGA.kicad_sym",
-     )}
+     )}                                  # socket370-ti180 dropped (D10)
 CPUSYM = ROOT / "sockets/kicad/CPU_Intel_PGA370.kicad_sym"
 LOGIC = ROOT / "hw/lib/Interposer_Logic.kicad_sym"
 
@@ -169,7 +165,7 @@ def stock_defs(specs):
     return out
 
 
-def fpga_net(variant, ball, func, conf):
+def fpga_net(ball, func, conf):
     """net for an FPGA ball not carrying a T5-assigned signal"""
     if func in ("TCK", "TMS", "TDI", "TDO"):
         return "F_" + func
@@ -180,9 +176,7 @@ def fpga_net(variant, ball, func, conf):
     if func in ("NC", "DNU"):
         return "NC_" + ball
     if func == "VCC":
-        return "VCC_1V1" if variant == "socket370-cyclonev" else "VCC_0V95"
-    if func == "VCCAUX":
-        return "VCCAUX_1V8"
+        return "VCC_1V1"
     if func == "VCC_AUX":
         return "VCC_AUX25"               # 2.375-2.625 V, abs max 3.25 V [cvds p.5, p.8]
     if func == "VCCA_FPLL":
@@ -191,20 +185,12 @@ def fpga_net(variant, ball, func, conf):
         return "VCC_AUX25"
     if func == "VCCPGM":
         return "VCCPGM18"
-    if func.startswith("VCCA_"):
-        return "VCCA_0V95"
-    if func == "VQPS":
-        return "VQPS"
-    if func.startswith("VCC"):
-        # banks per assign_pins.py: Cyclone V 5B at 2.5 V, its VCCPD5B at
-        # 2.5 V (cvds p.8 Table 4 note 4); Ti180 TL at 2.5 V, HSIO at 1.8 V
-        if variant == "socket370-cyclonev":
-            if func.startswith("VCCPD"):
-                return "VCC_AUX25" if func.endswith("5B") else "VCCPD33"
-            return "VCCIO25" if func.endswith("5B") else "VCCIO33"
-        if func.startswith("VCCIO33_"):
-            return "VCCIO25" if func.endswith("TL") else "VCCIO33"
-        return "VCCIO18"
+    # banks per assign_pins.py: 5B at 2.5 V, its VCCPD5B at 2.5 V
+    # (cvds p.8 Table 4 note 4)
+    if func.startswith("VCCPD"):
+        return "VCC_AUX25" if func.endswith("5B") else "VCCPD33"
+    if func.startswith("VCCIO"):
+        return "VCCIO25" if func.endswith("5B") else "VCCIO33"
     return "MF_" + ball
 
 
@@ -435,13 +421,11 @@ def cv_supply_errors(func_by, net_of, volts):
     return errs
 
 
-VCCIO_NET = {"1.8 V": "VCCIO18", "2.5 V": "VCCIO25", "3.3 V": "VCCIO33"}
+VCCIO_NET = {"2.5 V": "VCCIO25", "3.3 V": "VCCIO33"}
 
 
 def bank_of_supply(func):
-    """bank a VCCIO ball powers: CV/Ti VCCIO3B -> 3B, Ti VCCIO33_TL -> TL"""
-    if func.startswith("VCCIO33_"):
-        return func[8:]
+    """bank a VCCIO ball powers: VCCIO3B -> 3B"""
     return func[5:] if re.fullmatch(r"VCCIO\d[A-Z]", func) else None
 
 
@@ -466,8 +450,7 @@ S370_CV_VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5,
 def main():
     variant = sys.argv[1] if len(sys.argv) > 1 else ""
     if variant not in V:
-        sys.exit("usage: gen_t6_schematic.py socket370-cyclonev"
-                 "|socket370-ti180")
+        sys.exit("usage: gen_t6_schematic.py socket370-cyclonev")
     cfg = V[variant]
     outdir = ROOT / "hw" / variant
     t1 = list(csvmod.DictReader(open(ROOT / "hw/common/socket370_signals.csv")))
@@ -483,12 +466,11 @@ def main():
     fsym, csym, tsym = (parse_lib(ROOT / cfg["fsym"])[0],
                         parse_lib(CPUSYM)[0], parse_lib(LOGIC)[0])
 
-    fpganet_of = {b: sig_of_ball.get(b) or fpga_net(variant, b, f,
+    fpganet_of = {b: sig_of_ball.get(b) or fpga_net(b, f,
                                                     conf_by.get(b, ""))
                   for b, f in func_by.items()}
     errs = bank_vccio_errors(pinsrows, func_by, fpganet_of)
-    if variant == "socket370-cyclonev":
-        errs += cv_supply_errors(func_by, fpganet_of, S370_CV_VOLTS)
+    errs += cv_supply_errors(func_by, fpganet_of, S370_CV_VOLTS)
     if errs:
         print(f"SUPPLY ERRORS ({len(errs)}):", *errs, sep="\n   ")
         sys.exit(1)
@@ -522,7 +504,7 @@ def main():
     # ---- FPGA units ----
     fpnick = "hw_n:" + fsym[0]
     uids = sorted(fsym[2], key=int)
-    ncols = 2 if variant == "socket370-cyclonev" else 3
+    ncols = 2
     for i, uid in enumerate(uids):
         pins = fsym[2][uid]
         lab = {p["num"]: fpganet_of[p["num"]] for p in pins}
@@ -595,11 +577,8 @@ def main():
           ("J2", "Connector_Generic:Conn_02x03_Odd_Even",
            ["F_TCK", "GND", "F_TMS", "GND", "F_TDI", "F_TDO"]),
           ("J3", "Connector_Generic:Conn_02x05_Odd_Even",
-           (["CFG_nCONFIG", "GND", "CFG_nSTATUS", "GND", "CFG_CONF_DONE",
-             "GND", "CFG_DCLK", "GND", "CFG_DATA0", "GND"]
-            if variant == "socket370-cyclonev" else
-            ["CFG_CRESET_N", "GND", "CFG_CDONE", "GND", "CFG_CCK", "GND",
-             "CFG_CDI0", "GND", "CFG_CSO", "GND"])),
+           ["CFG_nCONFIG", "GND", "CFG_nSTATUS", "GND", "CFG_CONF_DONE",
+            "GND", "CFG_DCLK", "GND", "CFG_DATA0", "GND"]),
           ("J4", "Connector:Barrel_Jack", ["V12", "GND"]),
           ("J5", "Connector_Generic:Conn_01x05",
            ["S_VCCCORE", "VTT15", "VCC3", "VCC25", "GND"])]

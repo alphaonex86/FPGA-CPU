@@ -9,7 +9,7 @@ plugs into the target board's ZIF socket, and the FPGA, its power, configuration
 | `socket3-cyclonev` (pilot) | Socket 3, Biostar MB-8433UUD-A, UMC 8881F/8886BF | 5CEBA9F23C8N / 5CEFA9F23C8N |
 | `socket7-cyclonev` | Socket 7, Biostar MB-8500TTD, Intel 430TX | same |
 | `socket370-cyclonev` | Socket 370, VIA VT82C694X + VT82C686B board | same |
-| ~~`socket370-ti180`~~ | dropped (D10) | - |
+| ~~`socket370-ti180`~~ | dropped (D10), files deleted 2026-11-01 | - |
 | ~~`socket3-ti180`, `socket7-ti180`~~ | dropped (D9) | - |
 | slot1 (see `plan/slot1.md`) | Slot 1 (SC242), board per slot1 D8 | per slot1 D9 |
 
@@ -290,12 +290,10 @@ B-pin (BCLK/PICCLK direct). Netlist audit 167/167 required signals; ERC
   sheet also had VCC_AUX on VCCIO33 (3.3 V > 3.25 V abs max, cvds p.5
   Table 2) and 6 signals on VREFB/GND balls; both are gone (T5 user-I/O
   filter in `assign_pins.py`). ~18 I/O free.
-- socket370-ti180 (fixed 2026-10-31): T5 had 7 signals on REF_RES_* balls
-  (HSIO reference resistors, not GPIO) and labelled the HSIO banks 2A-4C
-  "3.3 V", while HSIO VCCIO stops at 1.8 V (tids p.84 Table 62). Now the
-  HSIO banks run 1.8 V (net VCCIO18: 22 VCCIO balls + the A side of 15
-  translators), the 7 signals moved to 3A/3C/BR, ~3 I/O free. T6 checks
-  that every used bank's VCCIO balls sit on the rail of its pins.csv
+- socket370-ti180: deleted 2026-11-01 (operator, D10): `hw/socket370-ti180/`
+  and its branches in `assign_pins.py`, `gen_t6_schematic.py`,
+  `gen_power.py`; last version in git at 3dc042f. Shared fix kept: T6
+  checks that every used bank's VCCIO balls sit on the rail of its pins.csv
   VCCIO (`bank_vccio_errors`). Quartus .qsf: the BCLK standard is now
   "2.5 V" (no "2.5-V LVTTL" exists, cvhb p.5-7 Table 5-7).
 - Headers: J1 CPU TAP 2x6 (TCK/TMS/TDI/TDO/TRST#/PRDY#/PREQ#), J2 FPGA JTAG

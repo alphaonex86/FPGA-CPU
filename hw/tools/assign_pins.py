@@ -4,7 +4,7 @@
 Usage: python3 hw/tools/assign_pins.py <variant>
 Outputs:
   hw/<variant>/pins.csv
-  hw/socket370-cyclonev/assignment_quartus.qsf / assignment_efinity.csv
+  hw/socket370-cyclonev/assignment_quartus.qsf
 
 Bank plans: every bus signal lands on the FPGA side of a level translator
 (D3), so those banks run 3.3 V; BCLK and PICCLK are direct receivers whose
@@ -12,9 +12,7 @@ socket levels are 2.5 V (hw/common/socket370_notes.md R5; 245264-008
 Tables 12/14; ics94241 pp.4-11), so they share the one 2.5 V bank. On the
 Cyclone V that bank is 5B (own VCCPD5B ball, BCLK on N16 = CLK6p): 3B
 shares VCCPD3B4A with 4A and so runs 3.3 V like 4A (cvds p.8 Table 4
-note 4; operator 2026-10-31). Ti180 HSIO banks (BANK2A-4C) stop at 1.8 V
-(hw/socket370-ti180/power.md, tids p.84 Table 62): their translators run
-a 1.8 V A side; only the HVIO banks TL/TR/BL/BR take 2.5/3.3 V.
+note 4; operator 2026-10-31). The Ti180 variant was dropped (D10).
 
 Checks (exit 1 on failure): every ball a user I/O; no ball used twice; every T1 signal marked
 required=yes assigned; per-bank VCCIO consistent; BCLK on a clock-capable
@@ -30,15 +28,13 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 T1 = ROOT / "hw/common/socket370_signals.csv"
-OUTDIR = {"socket370-cyclonev": ROOT / "hw/socket370-cyclonev",
-          "socket370-ti180": ROOT / "hw/socket370-ti180"}
+OUTDIR = {"socket370-cyclonev": ROOT / "hw/socket370-cyclonev"}
 FPGACSV = {
     "socket370-cyclonev":
         ROOT / "FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv",
-    "socket370-ti180": ROOT / "FPGAlist/Ti180_G400/pins/ti180g400.csv",
 }
-SIZE = {"socket370-cyclonev": (22, 22), "socket370-ti180": (20, 20)}
-PITCH = {"socket370-cyclonev": 1.0, "socket370-ti180": 0.8}
+SIZE = {"socket370-cyclonev": (22, 22)}
+PITCH = {"socket370-cyclonev": 1.0}
 DIRECT = ("BCLK", "PICCLK")          # socket nets that skip translators
 
 CV_PLAN = [
@@ -67,50 +63,10 @@ CV_PLAN = [
     ("TRST#", "5B"), ("PREQ#", "5B"), ("PRDY#", "5B"),
 ]
 
-TI_PLAN = [
-    ("BCLK", "TL:P11"), ("PICCLK", "TL"),
-    ("D[0-9]#", "BANK2C"), ("D1[0-5]#", "BANK2C"),
-    ("D1[6-9]#", "BANK2A"), ("D2[0-9]#", "BANK2A"), ("D3[0-1]#", "BANK2A"),
-    ("D3[2-9]#", "BANK3A"), ("D4[0-7]#", "BANK3A"),
-    ("D4[8-9]#", "BANK3C"), ("D5[0-9]#", "BANK3C"), ("D6[0-9]#", "BANK3C"),
-    ("A[3-9]#", "BANK3B"), ("A1[0-5]#", "BANK3B"),
-    ("A1[6-9]#", "BL"), ("A2[0-9]#", "BL"), ("A3[0-4]#", "BL"),
-    ("AP[0-1]#", "TR"), ("BP[2-3]#", "TR"),
-    ("BPM[0-1]#", "TR"), ("SLP#", "TR"), ("RP#", "TR"),
-    ("DEP[0-7]#", "BANK2B"),
-    ("REQ[0-4]#", "TL"), ("A35#", "TL"), ("LOCK#", "TL"), ("HIT#", "TL"),
-    ("HITM#", "TL"), ("PICD[01]", "TL"),
-    ("RS[0-2]#", "BANK4C"), ("RSP#", "BANK4C"), ("DBSY#", "BANK4C"),
-    ("DRDY#", "BANK4C"), ("TRDY#", "BANK4C"), ("DEFER#", "BANK4C"),
-    ("BPRI#", "BANK4C"), ("BR0#", "BANK4C"),
-    ("BR1#", "BANK4B"), ("BINIT#", "BANK4B"), ("AERR#", "BANK4B"),
-    ("BERR#", "BANK4A"), ("RESET#", "BANK4A"), ("ADS#", "BANK4A"),
-    ("BNR#", "BANK4A"),
-    ("LINT[01]", "BANK2C"), ("PWRGOOD", "BANK2C"), ("A20M#", "BANK2C"),
-    ("FLUSH#", "BANK2A"), ("IGNNE#", "BANK2A"), ("INIT#", "BANK2A"),
-    ("STPCLK#", "BANK2A"),
-    ("SMI#", "BANK3A"), ("FERR#", "BANK3A"), ("IERR#", "BANK3A"),
-    ("THERMTRIP#", "BANK3A"),
-    ("BSEL[01]", "TL"), ("VID[0-3]", "TL"), ("SLEWCTRL", "TL"),
-    ("RTTCTRL", "TL"), ("CPUPRES#", "TL"),
-    ("TCK", "BR"), ("TMS", "BR"), ("TDI", "BR"), ("TDO", "BR"),
-    ("TRST#", "BR"), ("PREQ#", "BR"), ("PRDY#", "BR"),
-    # overflow: the REF_RES_* balls are not GPIO
-    ("IGNNE#", "BANK3A"), ("PWRGOOD", "BANK3A"), ("DEP[0-7]#", "BANK3C"),
-    ("A[3-9]#", "BANK3C"), ("ADS#", "BANK3C"), ("AERR#", "BR"),
-    ("BR0#", "BR"),
-]
-
 VCCIO = {
     "socket370-cyclonev": {"3A": "3.3 V", "3B": "3.3 V", "4A": "3.3 V",
                            "5A": "3.3 V", "5B": "2.5 V", "7A": "3.3 V",
                            "8A": "3.3 V", "9A": "3.3 V"},
-    "socket370-ti180": {"TL": "2.5 V", "BANK2A": "1.8 V", "BANK2B": "1.8 V",
-                        "BANK2C": "1.8 V", "BANK3A": "1.8 V",
-                        "BANK3B": "1.8 V", "BANK3C": "1.8 V",
-                        "BANK4A": "1.8 V", "BANK4B": "1.8 V",
-                        "BANK4C": "1.8 V",
-                        "BL": "3.3 V", "BR": "3.3 V", "TR": "3.3 V"},
 }
 
 
@@ -122,8 +78,8 @@ def ball_key(b):
 def main():
     variant = sys.argv[1] if len(sys.argv) > 1 else ""
     if variant not in OUTDIR:
-        sys.exit("usage: assign_pins.py socket370-cyclonev|socket370-ti180")
-    plan = CV_PLAN if variant == "socket370-cyclonev" else TI_PLAN
+        sys.exit("usage: assign_pins.py socket370-cyclonev")
+    plan = CV_PLAN
     rows = list(csv.reader(open(FPGACSV[variant])))[1:]
     (ncols, nrows) = SIZE[variant]
     pitch = PITCH[variant]
@@ -145,9 +101,9 @@ def main():
     for ball, bank, func, conf, _vref, clock, _pair, _uio in rows:
         func_of[ball] = func
         if ball in userio:
-            # dedicated config balls and clock-capable network pins (Ti
-            # *_CLK* P/N pairs, CV explicit clock column) stay out of the
-            # user-I/O pools; exact plan specs bypass this on purpose
+            # dedicated config balls and clock-capable pins (explicit
+            # clock column) stay out of the user-I/O pools; exact plan
+            # specs bypass this on purpose
             if conf or clock or re.search(r"_CLK[0-9]|PLL", func):
                 reserved.add(ball)
             else:
@@ -181,11 +137,8 @@ def main():
         used[ball] = signal
         vccio = VCCIO[variant][bank]
         direct = signal in DIRECT
-        # Quartus names [cvhb p.5-7 Table 5-7]; Efinity: "<V> LVCMOS"
-        if variant == "socket370-cyclonev":
-            iostd = "2.5 V" if direct else "3.3-V LVTTL"
-        else:
-            iostd = vccio + " LVCMOS"
+        # Quartus names [cvhb p.5-7 Table 5-7]
+        iostd = "2.5 V" if direct else "3.3-V LVTTL"
         n = len(out_rows) - sum(1 for r in out_rows if not r[5])
         tnum = "" if direct else f"T{n // 8 + 1:02d}c{n % 8 + 1}"
         out_rows.append([signal, ball, bank, vccio, iostd, tnum,
@@ -216,22 +169,13 @@ def main():
                     "translator", "distance_mm", "socket_pin", "source"])
         w.writerows(out_rows)
 
-    # vendor constraint files
-    dir_of = {row[1]: row[2] for row in list(csv.reader(open(T1)))[1:]}
-    if variant == "socket370-cyclonev":
-        q = ['set_global_assignment -name FAMILY "Cyclone V"']
-        for r in out_rows:
-            q.append(f'set_location_assignment PIN_{r[1]} -to "{r[0]}"')
-            q.append(f'set_instance_assignment -name IO_STANDARD '
-                     f'"{r[4]}" -to "{r[0]}"')
-        v = OUTDIR[variant] / "assignment_quartus.qsf"
-    else:
-        q = ["io_name,pin,mode,io_standard"]
-        for r in out_rows:
-            mode = {"I": "input", "O": "output"}.get(dir_of.get(r[0], ""),
-                                                     "bidir")
-            q.append(f"{r[0]},{r[1]},{mode},{r[4]}")
-        v = OUTDIR[variant] / "assignment_efinity.csv"
+    # vendor constraint file
+    q = ['set_global_assignment -name FAMILY "Cyclone V"']
+    for r in out_rows:
+        q.append(f'set_location_assignment PIN_{r[1]} -to "{r[0]}"')
+        q.append(f'set_instance_assignment -name IO_STANDARD '
+                 f'"{r[4]}" -to "{r[0]}"')
+    v = OUTDIR[variant] / "assignment_quartus.qsf"
     v.write_text("\n".join(q) + "\n")
 
     usedn = len(used)

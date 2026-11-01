@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/user/Desktop/CatchChallenger/FPGA-CPU/hw/socket370-cyclonev/socket370-cyclonev.kicad_sch")
-		(date "2026-10-31T08:41:23")
+		(date "2026-11-01T10:45:42")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -93,7 +93,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "08e3760a-c17b-4cc3-b606-dbc4c2b2f1d1")
+			(tstamps "6f7f4e63-1ca4-4be1-9e7f-866c7c7f182d")
 			(units
 				(unit
 					(name "A")
@@ -177,7 +177,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "07863301-26b4-4320-89c3-c887745778bf")
+			(tstamps "c996dad9-7ae8-4b0f-bdc2-ace2f00ad873")
 			(units
 				(unit
 					(name "A")
@@ -243,7 +243,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "09c0a2eb-32fa-46cb-8619-2d0d4990e615")
+			(tstamps "6f932efd-4beb-43b3-86ed-eb2b3926c28a")
 			(units
 				(unit
 					(name "A")
@@ -321,7 +321,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2f2d364d-88d2-444e-bbab-ec32f227218c")
+			(tstamps "4045e449-82c1-41d6-bd97-956b83eb80c9")
 			(units
 				(unit
 					(name "A")
@@ -375,7 +375,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bfb12aad-22d8-4960-ade1-7b183de1b9b2")
+			(tstamps "38aeaf70-a036-4cec-8ec2-ebc3ce5c7a70")
 			(units
 				(unit
 					(name "A")
@@ -430,7 +430,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "39925068-36ec-43aa-8f76-488a636abc1e")
+			(tstamps "9a135769-a359-4b27-87c7-df60f758b85c")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -527,7 +527,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fc62d43d-d9a3-484a-8281-0bba7d8a2927")
+			(tstamps "95b8e482-4584-43c0-9843-6768fd460db9")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -624,7 +624,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f62d10fc-9752-4761-8f5e-ddfaa8f48fc6")
+			(tstamps "f2ae263d-3928-4b75-9685-5554ded1db33")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -721,7 +721,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "343afc7b-7a29-43b7-8192-84d96e8c5be4")
+			(tstamps "f51670f4-7918-42f7-998c-992a4c26fc4d")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -818,7 +818,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "aaf3b8ed-30dd-47ce-9af6-1fc4394130fd")
+			(tstamps "0fac63f0-49cd-47a6-abea-8715daf069c5")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -915,7 +915,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ec207fc5-59b5-4def-a8bf-8230ec560be4")
+			(tstamps "6eb3a5f6-0945-43f3-bf12-8ffab74f9df3")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1012,7 +1012,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f7d2ee58-f765-42b9-8909-05802528f6ca")
+			(tstamps "fe25444b-bc83-41ca-8e6e-40be302b749e")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1109,7 +1109,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "466b3e16-deb5-4c05-a5ea-19f70129ae23")
+			(tstamps "929579e6-2dea-49a4-b9b0-781f474d40f0")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1206,7 +1206,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d11bd872-eeec-42ba-b254-a6c126b215d7")
+			(tstamps "810db794-78a2-4b75-aaf1-c5cbcf4391a6")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1303,7 +1303,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e9c2a841-9c9e-4c1b-9d40-6c372954c9b4")
+			(tstamps "2bedebf5-14ac-456d-af14-66a4853baac0")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1400,7 +1400,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2b79b287-b1b6-490f-8cc6-09cfaa6f33a6")
+			(tstamps "0e05ac89-2fc7-40d9-acdd-8a0edd592624")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1497,7 +1497,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d8ca4830-d78a-4aae-9130-048bcc33a3a7")
+			(tstamps "3d40ff8f-aeed-408c-999b-c454b3c4a36a")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1594,7 +1594,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d9f81139-2fa8-4b83-927f-708a3e5c43da")
+			(tstamps "368e6b4c-2c8c-4c0c-82fe-2473695d2c34")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1691,7 +1691,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9ac7d20b-efde-4907-9c3f-5249633b9631")
+			(tstamps "18c0427b-cfcc-46aa-a3fc-33e4165972eb")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1788,7 +1788,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "02efc399-7a59-4d0a-aa2d-b7a775d4d6d6")
+			(tstamps "b2b828a8-9bda-4e6e-84bc-60c4900286e6")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1885,7 +1885,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7d269cb6-8feb-410c-a27b-d6a97f450d13")
+			(tstamps "1593c4f3-4633-4818-80d1-6b83462ccb87")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -1982,7 +1982,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b17df4bd-2cf9-45ec-90a6-e2d8b4f4b68e")
+			(tstamps "ce8b174a-f918-4799-87e9-53d16e8ef53e")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -2079,7 +2079,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "de1e4789-5ab3-4192-9f42-a8f4c6fa9c3a")
+			(tstamps "745869f7-fd02-4547-9f88-0864aa08f4c3")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -2176,7 +2176,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "000faf91-c370-44b9-ad0d-afa16b858d57")
+			(tstamps "3765e4c1-859d-4d66-ac6b-7635f68eb2b8")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -2273,7 +2273,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "585bf026-c0d7-422e-b2c5-679594b821f3")
+			(tstamps "6ea2e164-5f34-4796-b59c-070411143e27")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -2370,7 +2370,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "882e06cc-d9bd-43c3-ac7f-8eb550e2beec")
+			(tstamps "cdee6d14-766d-4339-8845-1f0ccb24d83b")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -2467,7 +2467,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4c421eba-48a3-4b66-8046-499f7f519f00")
+			(tstamps "168ae6c0-e213-40ee-b75e-949837da2ec6")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -2564,7 +2564,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f68fd682-3add-4c28-afdc-8c375d4cc0a9")
+			(tstamps "6297f8f3-67ac-42d7-902c-4cbd6977658f")
 			(units
 				(unit
 					(name "A=FPGA B=socket")
@@ -2661,11 +2661,11 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6e978d17-34a0-454a-9793-677ca75737e2" "2632d13f-1fab-4592-8a32-8977110f0454"
-				"649eec68-5a7e-4754-8f9c-3bef1fdb3d06" "58b82681-34a2-4655-a5cc-9ed39ee7d4c7"
-				"45481326-d3e1-4f6b-93d4-3adf168cec00" "4943fdc2-177c-4de2-a70f-7d289f4762db"
-				"9cf532b1-5b93-4dbf-986c-26d3b37da745" "651f9e7a-a023-46f8-8fed-d3505421f694"
-				"7202d68f-c117-4131-bc7a-7b5475f2e869" "039a272f-ef6c-4c8b-881c-de1024cb5a0e"
+			(tstamps "ddca68bd-8c55-4392-be0d-2b0ea7c9a783" "92e6f8ed-78d1-4058-9ae1-53a2190ec2a0"
+				"e6c13a97-1507-4906-a745-05df01582476" "c62d7f5d-f3e3-4a41-9ac0-0b162121eaf5"
+				"2fa5be02-decb-455d-a74e-b6c55755190f" "adec2d35-6a1e-4794-9ddd-659ec36b7479"
+				"ac89ed1f-00e3-4e75-a233-f4623f1dbdb2" "13dc2d7a-c0ff-4f74-ab13-42cc97d602e3"
+				"e24f7548-9447-44f8-b8df-49666ac96aa7" "13b4bca2-e79d-497a-a843-7bd48efabfa0"
 			)
 			(units
 				(unit
@@ -4203,11 +4203,11 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4ade3113-5f09-4a6c-962f-837f09c56170" "db61cb30-46e1-4fcb-80f4-7d153932f983"
-				"418aab45-c737-43c4-aab5-9c51a4a2f085" "54d63f56-a71e-4486-ab92-7b20034f63ee"
-				"91ad3978-310e-4c45-9359-b8ea84e7d38a" "4812d0bb-0b12-4cb0-af2d-8db5ca26564b"
-				"4c70d50c-77a8-403c-84e4-f0fd5964bbf0" "dbcf08e0-9c9d-4e74-ae66-47d7c0a74ecd"
-				"3e16979b-60fb-45a7-8cd5-fbbf7aa0a8b5"
+			(tstamps "a673efed-e4f8-4b42-9c8c-bb4741949ecf" "d907e2fc-f72d-4a86-a940-f1828f251a6c"
+				"5d08ef0f-2068-4e7c-88c6-43d435f4e0e7" "491ce4b9-52de-4186-b3da-8e04103bfc1c"
+				"0440d2d7-05be-4761-bf2f-489c834c639a" "7190317f-110c-4f75-9f17-d8828def5c97"
+				"2cfd47de-48b8-402e-a82e-dccfe6ea57ae" "7d25f860-6712-4fa7-b7c7-6fa42c4c9ac5"
+				"01aacd8a-1410-4063-a34b-ca44f98d7278"
 			)
 			(units
 				(unit

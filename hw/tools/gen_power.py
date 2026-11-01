@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Task T3 (plan/interposers.md): generate hw/<variant>/power.md for the
-socket 370 variants and socket3-cyclonev. Rail requirements are cited from the FPGA datasheets
-(Cyclone V CV-51002, Ti180); regulator part numbers are proposals left to
+socket370-cyclonev and socket3-cyclonev (socket370-ti180 dropped: D10).
+Rail requirements are cited from the FPGA datasheet (Cyclone V CV-51002);
+regulator part numbers are proposals left to
 the T9 BOM (no regulator datasheets in repo). Regenerate with this script.
 """
 import pathlib
@@ -30,8 +31,7 @@ HEAD = """# {name} power (plan/interposers.md task T3)
 
 {intro}
 FPGA tags: cvds = `FPGAlist/CycloneV_A9/docs/cv_51002_device_datasheet.pdf`,
-cvhb = `FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf`,
-tids = `FPGAlist/Ti180_G400/docs/ti180_datasheet.pdf`.
+cvhb = `FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf`.
 
 ## Rails
 
@@ -92,45 +92,6 @@ CV_BUDGET_T = """D1 moved to external supply, so the socket 32 W budget no longe
   power) converted at ~85% buck efficiency: 12 V input draw stays below
   1.5 A"""
 
-TI_RAILS = """| rail | where | required band | source |
-|---|---|---|---|
-| VCC | core (C3 speed grade part) | 0.92-0.98 V (typ 0.95 V) | tids p.84 Table 62 |
-| VCCA | PLL analog power supply | 0.92-0.98 V (C3) | tids p.84 Table 62 |
-| VCCAUX | auxiliary supply | 1.75-1.85 V (typ 1.8 V) | tids p.84 Table 62 |
-| VQPS | security fuse supply | stays low unless fuse blowing; 1.71-1.89 V when used | tids p.75 fuse note, p.76 note 1, p.84 Table 62 |
-| VCCIO | HSIO banks | 1.14-1.26 V for 1.2 V band ... 1.71-1.89 V for 1.8 V band; unused HSIO banks tie 1.2/1.35/1.5/1.8 V | tids p.84 Table 62, p.79 Table 58 |
-| VCCIO33 | HVIO banks | 1.8/2.5/3.0/3.3 V bands (2.5 V on the BCLK bank per R5, 3.3 V CMOS banks) | tids p.84 Table 62 |
-| VCC minimum transient | momentum reserve for power-up | >= 1500 mA transient on VCC | tids p.79 Table 57 |
-| tRAMP | all supplies | 0.1xVsupply/s to 10 V/ms | tids p.85 Table 63 |
-"""
-
-TI_TOPO = """Rail plan (regulator part numbers are T9 BOM items, no datasheets in repo):
-- 12 V -> 5 V intermediate buck (2 A class).
-- 5 V -> 0.95 V "core rail" buck (VCC), >= 3 A capable (honours the 1.5 A
-  minimum power-up transient of tids p.79 Table 57 plus margin; exact
-  current NM9).
-- core-rail output -> VCCA through a PI filter (the unused-resources table
-  allows "PLL VCCA: Connect to VCC" [tids p.79 Table 58]) - same rail
-  value 0.92-0.98 V.
-- 5 V -> 1.8 V "aux rail" (VCCAUX) and the VCCIO of all nine HSIO banks
-  (HSIO stops at the 1.8 V band [tids p.84 Table 62]; T5 lands 15
-  translator A sides there, unused HSIO banks tie 1.8 V [tids p.79 Table
-  58]), buck class sized at T9 (NM9).
-- 5 V -> 2.5 V and 3.3 V "I/O rails" for VCCIO33 banks (3.3 V also feeds
-  the translator high side); BCLK bank TL at 2.5 V per R5.
-- VQPS: tied low (must stay low unless fuse blowing [tids p.76 note 1]).
-"""
-
-TI_SEQ = """Group 1 (VCC, VCCA) ramps first, any order within the group; group 2
-(VCCAUX, VCCIO, VCCIO33) starts >= 10 us after group 1 reaches 90%; then
-CRESET_N releases >= 10 us after all supplies reach 90%, and configuration
-starts after a 4.5 ms minimum delay [tids p.76-77 Figure 47 + steps 2-6].
-Implement with a shared PGOOD ripple: 5 V PGOOD -> core buck enable ->
-VCCAUX enable chain; the FPGA's CRESET_N generation comes from the 1.8 V
-rail supervisor and config logic of T6. Ramp rates inside
-0.1xVsupply/s to 10 V/ms [tids p.85 Table 63].
-"""
-
 def cv_seq(core_pg, group2):
     """Cyclone V order; core_pg: the core PGOOD threshold, group2: the
     converters it enables"""
@@ -144,11 +105,6 @@ converters together; then the 4-12 ms (fast) / 100-300 ms (standard) POR
 [cvds p.69 Table 55] before configuration; CONF_DONE gating is T6's job
 (`{{notes}}` R6).
 """
-
-TI_BUDGET = """D1 moved to external supply, so the socket 32 W budget no longer bounds
-  the FPGA; the limit that applies is the AGENTS preference (< 10 W FPGA
-  power) converted at ~85% buck efficiency: 12 V input draw stays below
-  1.5 A"""
 
 S3_INTRO = """Source per D1 (decided 2026-10-31, `plan/interposers.md`): external 12 V
 supply on the interposer. The socket's 23 VCC pins feed only the
@@ -208,16 +164,13 @@ FILES = {
     "intro": INTRO_370, "notes": "hw/common/socket370_notes.md",
     "est_ref": "NM9, `hw/common/socket370_notes.md`",
     "rails": CV_RAILS, "core": "1.1", "topo": CV_TOPO,
-    "seq": cv_seq("threshold per the T9 part", "2.5, 3.3 and 1.8 V"),
+    "seq": cv_seq("threshold per the T9 part", "2.5, 3.3 and 1.8 V")
+           + "No load switch (operator, 2026-11-01; socket 7 needs one, its I/O\n"
+           "rail is the board's VCC3): VCCIO33, which also powers the translators'\n"
+           "A side, comes from our 3.3 V converter that the core PGOOD already\n"
+           "enables, so a switch in series would add nothing.\n",
     "budget": CV_BUDGET_T,
     "est": "Cyclone V E A9 in this role (no transceivers, low-density logic)\n  core ~1-2 W class + banks; all converted power < 10 W => true"},
- "socket370-ti180": {
-    "name": "Socket 370 + Efinix Ti180G400C3 interposer",
-    "intro": INTRO_370, "notes": "hw/common/socket370_notes.md",
-    "est_ref": "NM9, `hw/common/socket370_notes.md`",
-    "rails": TI_RAILS, "core": "0.95", "topo": TI_TOPO, "seq": TI_SEQ,
-    "budget": TI_BUDGET,
-    "est": "Ti180 in this role (no DDR/MIPI; HSIO as 1.8 V GPIO)\n  core ~2-4 W class + banks; all converted power < 10 W => true"},
 }
 
 for variant, spec in FILES.items():

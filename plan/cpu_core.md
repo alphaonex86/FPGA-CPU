@@ -74,7 +74,7 @@ both cores. The author's 85 MHz is on the DE10-Nano's 5CSEBA6U23I7
 (grade 7); on our C8 part it gives 51 MHz, the speed grade being the likely
 main cause (grade 7 not compiled here).
 
-## Recommendation: VexiiRiscv as the back end
+## Recommendation: VexiiRiscv as the back end (chosen, C0)
 
 - Its pipeline is a set of plugins (fetch, decode, lanes, LSU, MMU, FPU),
   so an x86 decoder is "one more decode plugin" feeding the same lanes; a
@@ -145,6 +145,10 @@ socket3/docs/notes/design-decisions.md):
 
 ## Decisions (core)
 
+- **C0** (decided 2026-11-01 by the operator, after the measured z486
+  comparison above) Base: VexiiRiscv back end + own x86 front end (C1-C3).
+  z486 is used only as a behaviour reference and test source (test386,
+  single-step datasets), never as RTL in the tree.
 - **C1** (decided 2026-11-01 by the operator) x86 instructions crack into
   an own micro-op format, not into RISC-V instruction words: the x86 front
   end bypasses the Vexii RISC-V decoder (wide uops, 32/64-bit immediates)

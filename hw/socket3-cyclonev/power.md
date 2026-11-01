@@ -19,8 +19,7 @@ Input: 12 V barrel jack CUI PJ-063AH (2.0 mm centre pin), centre-positive,
 2 A fuse. All converter outputs are strictly monotonic ramps (see sequencing).
 
 FPGA tags: cvds = `FPGAlist/CycloneV_A9/docs/cv_51002_device_datasheet.pdf`,
-cvhb = `FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf`,
-tids = `FPGAlist/Ti180_G400/docs/ti180_datasheet.pdf`.
+cvhb = `FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf`.
 
 ## Rails
 
