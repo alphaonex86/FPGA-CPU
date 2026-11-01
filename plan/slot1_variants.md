@@ -51,7 +51,10 @@ PCI, ISA) may be slower than CPU and RAM, D12 board RAM used only as needed
   before a write); HITM# -> implicit writeback (RS=110) lands in DRAM
   before the DMA proceeds, else No Data. The mirror fits it as is: HITM#
   on every MDR of a line newer locally (snoop stall while the local RAM
-  reads it), record every MRI line for the copy-back.
+  reads it), record every MRI line for the copy-back. The stall is
+  unbounded and tested (FPGAcommon a0e2176, 40 stalls); BPRI# stays held
+  meanwhile, so the local RAM read must never need an FSB transaction (it
+  does not: the local RAM is the FPGA's own).
 - Pins for a DE25 board at 66 MHz (D27): the S370 FPGA signals are D64,
   DEP8, A33, REQ5, AP2 (wide) + ~20 phase signals needing same-clock
   reaction + ~30 slow ones (`hw/socket370-cyclonev/pins.csv`). 2:1 on the
