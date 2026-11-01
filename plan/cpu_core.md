@@ -158,6 +158,13 @@ taken partly on the dropped criteria, to re-check on performance alone:
 
 ## Decisions (core)
 
+- **C6** (decided 2026-11-01 by the operator, under the performance
+  criterion) The x86 core is a new x86-native superscalar design built for
+  Cyclone V timing (more stages, uop cache, out-of-order as the design
+  decides), from scratch. VexiiRiscv stays only as the separate RISC-V core
+  (C4). Supersedes for x86: C0's base, the C1 hybrid uop and the
+  Vexii-specific parts of C2 (EFLAGS stays in hardware) and X1. Kept from
+  X1: Unicorn lock-step (`x86_trace_check`, `x86_test.sh`, tests).
 - **C0** (decided 2026-11-01 by the operator, after the measured z486
   comparison above) Base: VexiiRiscv back end + own x86 front end (C1-C3).
   z486 is used only as a behaviour reference and test source (test386,
@@ -345,7 +352,7 @@ on a connector built for high-speed signals, plus one 2x20 GPIO header,
    prohibited (`plan/interposers.md` D10).
 3. Only then: an x86 decode plugin for the integer reg-reg / load-op
    subset, lock-stepped against an emulator, on the RISC-V back end.
-   Increment X1 (2026-11-01; C0, C1 hybrid, C2, C3, C5): does the hybrid
+   Increment X1 (superseded by C6, kept for the record; C0, C1 hybrid, C2, C3, C5): does the hybrid
    uop run x86 code on the Vexii lanes, and at what IPC? 32-bit flat
    mode only (segment bases 0, no paging, no faults), in Verilator:
    - `X86AlignerPlugin` (replaces AlignerPlugin): byte-granular length
