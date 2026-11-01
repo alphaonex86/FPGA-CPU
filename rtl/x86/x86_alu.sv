@@ -15,9 +15,9 @@ module x86_alu
     logic        sub, carry_in, logic_op;
 
     always_comb begin
-        sub = op inside {A_SUB, A_SBB, A_CMP, A_DEC};
+        sub = (op == A_SUB || op == A_SBB || op == A_CMP || op == A_DEC);
         carry_in = op == A_ADC || op == A_SBB ? fin.cf : 1'b0;
-        logic_op = op inside {A_OR, A_AND, A_XOR, A_TEST};
+        logic_op = (op == A_OR || op == A_AND || op == A_XOR || op == A_TEST);
         case (op)
             A_INC:  sum = {1'b0, a} + 33'd1;
             A_DEC:  sum = {1'b0, a} - 33'd1;
@@ -40,11 +40,11 @@ module x86_alu
             f.af = 1'b0;
         end else begin
             logic [31:0] bb;
-            bb = op inside {A_INC, A_DEC} ? 32'd1 : b;
+            bb = (op == A_INC || op == A_DEC) ? 32'd1 : b;
             f.af = (a[4] ^ bb[4] ^ y[4]);
             f.of = sub ? (a[31] ^ bb[31]) & (a[31] ^ y[31])
                        : ~(a[31] ^ bb[31]) & (a[31] ^ y[31]);
-            f.cf = op inside {A_INC, A_DEC} ? fin.cf : sum[32];
+            f.cf = (op == A_INC || op == A_DEC) ? fin.cf : sum[32];
         end
     end
 endmodule

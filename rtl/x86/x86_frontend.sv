@@ -88,7 +88,7 @@ module x86_frontend
             f2_pc <= f1_pc;
             f2_bytes <= f1_bytes;
             if (push) begin
-                fq[fq_tail] <= '{pc: f2_pc, bytes: f2_bytes, len: pd_len, fault: pd_fault};
+                fq[fq_tail] <= {f2_pc, f2_bytes, pd_len, pd_fault};   // block_t order
                 fq_tail <= fq_tail + 2'd1;
             end
             if (pop) fq_head <= fq_head + 2'd1;

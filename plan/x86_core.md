@@ -48,6 +48,18 @@ replicated per read port plus a live-value table.
    1,093 registers, 101.09 MHz slow 1100 mV 85 C (one stage: 46 MHz).
 2. M2 integer core, flat 32-bit, no caches (ideal memory): fetch, decode,
    rename, ALU/branch, ROB; `x86_trace_check` per retired instruction.
+   **First core 2026-11-01** (`rtl/tools/x86_core_test.sh`,
+   `x86_rand_test.sh`): P6-style stepping stone, results in a 32-entry
+   ROB, RAT -> ROB tag or architectural register, flags renamed as one
+   more register; 16-entry unified RS, 2 ALU/branch ports + 1 memory port,
+   oldest first; 8-entry store queue, stores write at retire, loads wait
+   for older store addresses and forward on an exact match; mispredicts
+   flush at retire; static BTFN + direct JMP/CALL redirect at decode;
+   frontend 16-byte blocks -> 4-block queue -> 3 instructions/cycle;
+   decode subset in `x86_decode.sv`. Matches Unicorn on x1/x2 and 400
+   random programs (`x86_rand.py`). IPC: 1.91 straight ALU code (2 ALU
+   ports), 1.38 in a 14-instruction loop (3 cycles lost per taken branch
+   redirected at decode: needs a fetch BTB), 0.65 on random programs.
 3. M3 loads/stores, LSQ, L1I/L1D, then L2; Dhrystone/CoreMark for x86 IPC.
 4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,

@@ -236,7 +236,7 @@ module x86_core
         stop = r_flush || halted;
         for (int k = 0; k < 3; k++) begin
             u = uq[4'(uq_head + 4'(k))];
-            need_rs = !(u.kind inside {K_HLT, K_ILL});
+            need_rs = !(u.kind == K_HLT || u.kind == K_ILL);
             need_sq = u.kind == K_ST;
             ds_rs[k] = '0;
             ds_rs[k].valid = 1'b1;
@@ -340,8 +340,8 @@ module x86_core
             logic srcs;
             srcs = rs[e].valid && rs[e].src[0].ready && rs[e].src[1].ready && rs[e].src[2].ready
                    && rs[e].fsrc.ready;
-            alu_ready[e] = srcs && rs[e].u.kind inside {K_ALU, K_BR};
-            mem_ready[e] = srcs && rs[e].u.kind inside {K_LD, K_ST};
+            alu_ready[e] = srcs && (rs[e].u.kind == K_ALU || rs[e].u.kind == K_BR);
+            mem_ready[e] = srcs && (rs[e].u.kind == K_LD || rs[e].u.kind == K_ST);
         end
         alu_pick_v = '0;
         alu_pick = '0;
@@ -487,7 +487,7 @@ module x86_core
                     if (2'(k) < ds_n) begin
                         uop_t u;
                         u = ds_rs[k].u;
-                        rob[ds_rs[k].tag] <= '{done: u.kind inside {K_HLT, K_ILL}, kind: u.kind,
+                        rob[ds_rs[k].tag] <= '{done: (u.kind == K_HLT || u.kind == K_ILL), kind: u.kind,
                             dst: u.dst, wdst: u.wdst, wflags: u.wflags, eop: u.eop, value: 32'd0,
                             flags: '0, next_eip: u.next_eip, mispred: 1'b0, redirect_pc: 32'd0};
                         if (ds_to_rs[k])

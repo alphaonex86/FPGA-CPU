@@ -54,7 +54,7 @@ module x86_decode
     endfunction
 
     function automatic logic reads_flags(input aop_t a);
-        return a inside {A_ADC, A_SBB, A_INC, A_DEC};
+        return (a == A_ADC || a == A_SBB || a == A_INC || a == A_DEC);
     endfunction
 
     // ALU uop "d = d op src" (src = register s or immediate); CMP/TEST do not
@@ -65,7 +65,7 @@ module x86_decode
         x.kind = K_ALU;
         x.aop = a;
         x.dst = dr;
-        x.wdst = !(a inside {A_CMP, A_TEST});
+        x.wdst = !(a == A_CMP || a == A_TEST);
         x.s1 = dr;
         x.us1 = a != A_MOV;
         x.s2 = s;
