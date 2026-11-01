@@ -256,8 +256,9 @@ NM3). Power tree + decoupling drawn from `socket3_pdn.py` (147 parts,
 `pdn.csv` for T7). Audit 113/113 + VCORE_OK, ERC 0.
 Status socket7-cyclonev (`hw/tools/gen_socket7_t6.py`, 2026-11-01): 166
 signals direct, FPGA ball net = socket pin net (3.3 V TTL bus, no
-translators, notes R1); every bank, VCCPD and VCCPGM on S_VCC3 (board
-3.4 V [spec p.5], inside 3.465 V); 14 resistors: 4k7 socket-side
+translators, notes R1); every bank, VCCPD and VCCPGM on VCCIO33, the
+board's S_VCC3 (3.4 V [spec p.5], inside 3.465 V) behind a load switch
+enabled by the core PGOOD (operator 2026-11-01, power.md Sequencing); 14 resistors: 4k7 socket-side
 pull-downs BREQ, SCYC, PM0/BP0, PM1/BP1, BP2, BP3 (outputs whose
 configuration pull-up is unsafe, notes R6) and A27 (refresh-rate strap
 the chipset samples at RESET, notes R4); FPGA configuration pulls as

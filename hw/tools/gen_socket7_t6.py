@@ -7,8 +7,9 @@ One sheet: FPGA symbol (one instance per bank unit), the Socket 7 CPU
 symbol, pull resistors, FPGA JTAG / passive-serial headers. The bus is
 3.3 V TTL [socket7_notes R1], so every signal is one net from its FPGA
 ball to its socket pin (no translators, T5). Power comes from the socket
-(D1): VCC2 feeds the core buck, VCC3 (3.4 V on this board, power.md) is
-VCCIO/VCCPD/VCCPGM directly. Power tree and decoupling are not drawn yet:
+(D1): VCC2 feeds the core buck, VCC3 (3.4 V on this board, power.md)
+reaches VCCIO/VCCPD/VCCPGM as VCCIO33 through a load switch enabled by the
+core PGOOD (power.md Sequencing). Power tree and decoupling are not drawn yet:
 rail nets get a PWR_FLAG (power.md lists the regulators).
 
 Every FPGA supply ball is checked against its Cyclone V band before the
@@ -31,25 +32,25 @@ FCSV = ROOT / "FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv"
 FSYM = ROOT / "hw/lib/FPGA_CycloneV_5CEFA9_F484_FPGA.kicad_sym"
 CPUSYM = ROOT / "sockets/kicad/CPU_Intel_Socket7.kicad_sym"
 
-# S_VCC3 at its 3.3 V class: the board's 3.4 V [spec p.5] is inside the
+# VCCIO33 = switched S_VCC3: the board's 3.4 V [spec p.5] is inside the
 # 3.135-3.465 V VCCIO band [cvds p.8-9 Table 4]
-VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5, "S_VCC3": 3.3}
+VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5, "VCCIO33": 3.3}
 
 # passive serial, standard POR: MSEL[4..0] = 10001 [cvhb p.7-3 Table 7-2]
-MSEL = {"MSEL4": "S_VCC3", "MSEL3": "GND", "MSEL2": "GND", "MSEL1": "GND",
-        "MSEL0": "S_VCC3"}
+MSEL = {"MSEL4": "VCCIO33", "MSEL3": "GND", "MSEL2": "GND", "MSEL1": "GND",
+        "MSEL0": "VCCIO33"}
 
 # (value, net 1, net 2, source); socket nets = FPGA nets (direct bus)
 PULLS = [
     *[("4k7", s, "GND", "socket7_notes R6 (active-high output)")
       for s in ("BREQ", "SCYC", "PM0/BP0", "PM1/BP1", "BP2", "BP3")],
     ("4k7", "A27", "GND", "socket7_notes R4/R6 (refresh strap at RESET)"),
-    ("10k", "CFG_nSTATUS", "S_VCC3", "cvpcg p.5"),
-    ("10k", "CFG_CONF_DONE", "S_VCC3", "cvpcg p.4"),
+    ("10k", "CFG_nSTATUS", "VCCIO33", "cvpcg p.5"),
+    ("10k", "CFG_CONF_DONE", "VCCIO33", "cvpcg p.4"),
     ("10k", "CFG_DCLK", "GND", "cvpcg p.7 (never floating)"),
     ("1k", "F_TCK", "GND", "cvpcg p.6"),
-    ("10k", "F_TMS", "S_VCC3", "cvpcg p.6"),
-    ("10k", "F_TDI", "S_VCC3", "cvpcg p.7"),
+    ("10k", "F_TMS", "VCCIO33", "cvpcg p.6"),
+    ("10k", "F_TDI", "VCCIO33", "cvpcg p.7"),
     ("2k0 1%", "RREF_TL", "GND", "cvpcg p.16 (PLL used)"),
 ]
 SOCKET_RAIL = {"VCC2": "S_VCC2", "VCC3": "S_VCC3", "VSS": "GND"}
@@ -78,7 +79,7 @@ def fpga_net(ball, func, conf):
     if func == "VCCA_FPLL":
         return "VCCA_FPLL25"
     if func.startswith(("VCCIO", "VCCPD", "VCCPGM")):
-        return "S_VCC3"                      # every bank at 3.3 V (T5)
+        return "VCCIO33"                     # every bank at 3.3 V (T5)
     return "NC_" + ball                      # NC, DNU, unused user I/O
 
 

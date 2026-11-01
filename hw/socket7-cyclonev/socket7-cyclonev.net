@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/user/Desktop/CatchChallenger/FPGA-CPU/hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
-		(date "2026-11-01T06:52:21")
+		(date "2026-11-01T10:38:49")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -79,7 +79,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -93,7 +93,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "285f1901-b66a-4101-9ec0-7bd59e47eb8d")
+			(tstamps "a2f10cdb-85bc-4b7e-a45e-c9bb5d5d6320")
 			(units
 				(unit
 					(name "A")
@@ -145,7 +145,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -159,7 +159,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d2c7b439-c0ba-4ed9-9886-c95db281992d")
+			(tstamps "65237512-e1cf-43f0-b3ef-0b84dc4cfc20")
 			(units
 				(unit
 					(name "A")
@@ -223,7 +223,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -237,7 +237,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3332ee62-178c-4dbc-b1c3-afd371e2c19a")
+			(tstamps "92fb16c2-b5b0-41dd-a537-5f82c8717053")
 			(units
 				(unit
 					(name "A")
@@ -277,7 +277,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -291,7 +291,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4e42aee2-fe4f-43a4-be3f-33739b2f239f")
+			(tstamps "d0859c34-2982-43a1-a64c-461d4dc7199f")
 			(units
 				(unit
 					(name "A")
@@ -331,7 +331,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -345,7 +345,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9c725c54-4d96-46c2-b601-a194d7a0e543")
+			(tstamps "f56420c6-ad8d-4fbb-ae7d-3ae3ceff89ac")
 			(units
 				(unit
 					(name "A")
@@ -385,7 +385,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -399,7 +399,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d9535b38-c890-4b17-b82d-7d557a9d9cdc")
+			(tstamps "16ebe759-31ec-442a-836b-3964d0499806")
 			(units
 				(unit
 					(name "A")
@@ -439,7 +439,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -453,7 +453,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8bb63166-9350-49b4-a147-4ee90038caa9")
+			(tstamps "b03df462-83e5-4731-8405-517f6958df77")
 			(units
 				(unit
 					(name "A")
@@ -493,7 +493,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -507,7 +507,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "417f1d69-0179-4175-b398-3491df637111")
+			(tstamps "6799cce5-1bd7-4c10-aeca-086c9580fddd")
 			(units
 				(unit
 					(name "A")
@@ -547,7 +547,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -561,7 +561,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f2810fc5-653f-4d53-9e7c-2c19e5fe8e71")
+			(tstamps "ca771bf4-616a-435b-94fc-ac6bd8d63768")
 			(units
 				(unit
 					(name "A")
@@ -601,7 +601,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -615,7 +615,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2bd98c2e-9f2e-4a5c-93bb-1d7bec78b524")
+			(tstamps "8d488a79-1012-43f7-b1fc-49ca7091362b")
 			(units
 				(unit
 					(name "A")
@@ -655,7 +655,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -669,7 +669,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6d8ab53e-5fb4-4aba-831e-62127b0deb87")
+			(tstamps "2c9678a8-59d8-40e3-84dd-c62693b5289e")
 			(units
 				(unit
 					(name "A")
@@ -709,7 +709,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -723,7 +723,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f86ed5d4-6ca3-4760-a2c5-31b853a451fb")
+			(tstamps "70d3c083-3a8a-4055-af11-6b4e317be10f")
 			(units
 				(unit
 					(name "A")
@@ -763,7 +763,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -777,7 +777,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e98b2e45-5926-4815-892c-1cc510709648")
+			(tstamps "bcefbc11-0a49-4dc8-a9a8-c8cf649b3667")
 			(units
 				(unit
 					(name "A")
@@ -817,7 +817,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -831,7 +831,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2eb97ef8-32be-4c14-99ae-7d82d82189e1")
+			(tstamps "6d1b8dfe-27e7-4b31-8e96-a99efa64693f")
 			(units
 				(unit
 					(name "A")
@@ -871,7 +871,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -885,7 +885,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fab2f381-e6f6-4849-8f84-0c0876a204e7")
+			(tstamps "3661b553-b810-4d6a-8b72-8fd1b4eac2bc")
 			(units
 				(unit
 					(name "A")
@@ -925,7 +925,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -939,7 +939,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bcbcbb94-3b72-42ea-b8ac-2a4e5fa41e26")
+			(tstamps "4d25cd30-200d-4f35-b4a9-a8b36dcba061")
 			(units
 				(unit
 					(name "A")
@@ -979,17 +979,17 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c79c3320-8567-4ac8-92c6-023cefea71a8" "63dddbd6-a8b0-454b-8991-42f39e2bc137"
-				"df79419f-8c34-4594-bf0e-a69ae1dbd1aa" "48759a51-9f50-4af8-9bd7-460c3828a731"
-				"754cee04-bf25-4540-84b6-5d9732b37574" "63b26423-b868-42a4-ae67-75d198ae5d88"
-				"6d26ef1e-2d36-442d-a1e7-6c18a958f2b0" "a0fbc95c-b5a0-447c-af2f-a822f57635a6"
-				"d9094e01-ad28-4534-bbb4-357be17e19de" "29dfbd22-8809-4f32-8cb0-2b1d16aaae62"
+			(tstamps "c2f341ab-265d-4273-bcfe-aa228f7287ad" "1ef71461-b37a-4a9b-b966-ceb14ffbd3a2"
+				"504a1782-dd50-4916-9b0e-680c8bb28809" "1015ac10-5b7f-4990-8271-35e271516fff"
+				"66e122c2-64ab-434c-bcbb-2652862b1d45" "660ad2eb-a332-479a-98a1-35a7d279472a"
+				"cbcb0e0a-19e7-4f85-a094-b2c8fa26f70a" "936e58b4-0774-4858-ae6a-258046c2e466"
+				"be5d1f0d-88ed-4593-8f0f-3e9eed0dd4d0" "02ab87db-c00d-4c18-b621-b4df92aa1dbf"
 			)
 			(units
 				(unit
@@ -2521,18 +2521,18 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
+				(value "socket7-cyclonev.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d93df397-4d2d-4eaf-bc72-a960dfbb8ccc" "b789f093-6d3e-4bcf-b210-23837557f3e5"
-				"76415931-f7a8-420d-aa51-77c7c345c407" "fa7ed18e-6b94-46d7-82a4-f81e7238581e"
-				"2ca14743-b888-4caa-99af-93124a2b79a7" "2b953dcb-2a98-4030-bd2c-06e189c05f01"
-				"b668dc6a-abae-4402-8538-bbe782474d24" "f7be387e-5c33-45b9-97e8-cde218941846"
-				"ed0fdb8c-5af3-4126-95ba-eb7eb88567f6" "be4d7745-22a3-482f-85ea-1e5160f91286"
-				"0a185aca-bd8e-4a10-a311-6df25b11c890"
+			(tstamps "e9b446d0-1339-4d33-a56e-44c1abee2191" "6b96984b-afcd-48d5-968e-f8cf1b3e8e31"
+				"bcb262d9-a551-411a-840a-cd9c53e898e0" "e66050a9-a99c-4624-b991-795b95fd582c"
+				"a59c7246-1b7a-4e98-9357-41b0db843f65" "b72da258-95a3-4476-aff2-3edbfac7948d"
+				"87c1a291-603d-4ad3-bdd3-14f8fc822686" "93a6c52d-595e-4d2a-81a2-e5d002efae37"
+				"a331d967-b01b-4fbe-b739-9aebc219892f" "f41ceeaf-ae3f-4088-ad02-3aa0382aa90c"
+				"2a78cfca-01bd-4253-af5f-2f8cb8dc0751"
 			)
 			(units
 				(unit
@@ -12959,314 +12959,6 @@
 			(name "/S_VCC3")
 			(class "Default")
 			(node
-				(ref "R12")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R13")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R8")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R9")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "A16")
-				(pinfunction "A16_A16")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "A6")
-				(pinfunction "A6_A6")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "AA16")
-				(pinfunction "AA16_AA16")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "AA21")
-				(pinfunction "AA21_AA21")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "B19")
-				(pinfunction "B19_B19")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "C10")
-				(pinfunction "C10_C10")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "C12")
-				(pinfunction "C12_C12")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "C22")
-				(pinfunction "C22_C22")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "C7")
-				(pinfunction "C7_C7")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "D14")
-				(pinfunction "D14_D14")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "D15")
-				(pinfunction "D15_D15")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "D16")
-				(pinfunction "D16_D16")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "D8")
-				(pinfunction "D8_D8")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "E11")
-				(pinfunction "E11_E11")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "E18")
-				(pinfunction "E18_E18")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "E8")
-				(pinfunction "E8_E8")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "F11")
-				(pinfunction "F11_F11")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "F21")
-				(pinfunction "F21_F21")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "F3")
-				(pinfunction "F3_F3")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "F8")
-				(pinfunction "F8_F8")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "G14")
-				(pinfunction "G14_G14")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "G7")
-				(pinfunction "G7_G7")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "H17")
-				(pinfunction "H17_H17")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "K18")
-				(pinfunction "K18_K18")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "L6")
-				(pinfunction "L6_L6")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "M17")
-				(pinfunction "M17_M17")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "M19")
-				(pinfunction "M19_M19")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "N18")
-				(pinfunction "N18_N18")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "P20")
-				(pinfunction "P20_P20")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "P21")
-				(pinfunction "P21_P21")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "R18")
-				(pinfunction "R18_R18")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "R19")
-				(pinfunction "R19_R19")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "R8")
-				(pinfunction "R8_R8")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "T11")
-				(pinfunction "T11_T11")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "T6")
-				(pinfunction "T6_T6")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "U14")
-				(pinfunction "U14_U14")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "U19")
-				(pinfunction "U19_U19")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "V8")
-				(pinfunction "V8_V8")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "W10")
-				(pinfunction "W10_W10")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "W11")
-				(pinfunction "W11_W11")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "W12")
-				(pinfunction "W12_W12")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "W14")
-				(pinfunction "W14_W14")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "W15")
-				(pinfunction "W15_W15")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "W17")
-				(pinfunction "W17_W17")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "W20")
-				(pinfunction "W20_W20")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "W6")
-				(pinfunction "W6_W6")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "Y13")
-				(pinfunction "Y13_Y13")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "Y8")
-				(pinfunction "Y8_Y8")
-				(pintype "passive")
-			)
-			(node
 				(ref "U2")
 				(pin "A19")
 				(pinfunction "VCC3_A19")
@@ -13580,6 +13272,319 @@
 		)
 		(net
 			(code "287")
+			(name "/VCCIO33")
+			(class "Default")
+			(node
+				(ref "R12")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R13")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R8")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R9")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "A16")
+				(pinfunction "A16_A16")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "A6")
+				(pinfunction "A6_A6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "AA16")
+				(pinfunction "AA16_AA16")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "AA21")
+				(pinfunction "AA21_AA21")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "B19")
+				(pinfunction "B19_B19")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "C10")
+				(pinfunction "C10_C10")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "C12")
+				(pinfunction "C12_C12")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "C22")
+				(pinfunction "C22_C22")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "C7")
+				(pinfunction "C7_C7")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "D14")
+				(pinfunction "D14_D14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "D15")
+				(pinfunction "D15_D15")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "D16")
+				(pinfunction "D16_D16")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "D8")
+				(pinfunction "D8_D8")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "E11")
+				(pinfunction "E11_E11")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "E18")
+				(pinfunction "E18_E18")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "E8")
+				(pinfunction "E8_E8")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "F11")
+				(pinfunction "F11_F11")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "F21")
+				(pinfunction "F21_F21")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "F3")
+				(pinfunction "F3_F3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "F8")
+				(pinfunction "F8_F8")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "G14")
+				(pinfunction "G14_G14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "G7")
+				(pinfunction "G7_G7")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "H17")
+				(pinfunction "H17_H17")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "K18")
+				(pinfunction "K18_K18")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "L6")
+				(pinfunction "L6_L6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "M17")
+				(pinfunction "M17_M17")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "M19")
+				(pinfunction "M19_M19")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "N18")
+				(pinfunction "N18_N18")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "P20")
+				(pinfunction "P20_P20")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "P21")
+				(pinfunction "P21_P21")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "R18")
+				(pinfunction "R18_R18")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "R19")
+				(pinfunction "R19_R19")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "R8")
+				(pinfunction "R8_R8")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "T11")
+				(pinfunction "T11_T11")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "T6")
+				(pinfunction "T6_T6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "U14")
+				(pinfunction "U14_U14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "U19")
+				(pinfunction "U19_U19")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "V8")
+				(pinfunction "V8_V8")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "W10")
+				(pinfunction "W10_W10")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "W11")
+				(pinfunction "W11_W11")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "W12")
+				(pinfunction "W12_W12")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "W14")
+				(pinfunction "W14_W14")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "W15")
+				(pinfunction "W15_W15")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "W17")
+				(pinfunction "W17_W17")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "W20")
+				(pinfunction "W20_W20")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "W6")
+				(pinfunction "W6_W6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "Y13")
+				(pinfunction "Y13_Y13")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "Y8")
+				(pinfunction "Y8_Y8")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "288")
 			(name "/VCC_1V1")
 			(class "Default")
 			(node
@@ -13740,7 +13745,7 @@
 			)
 		)
 		(net
-			(code "288")
+			(code "289")
 			(name "/VCC_AUX25")
 			(class "Default")
 			(node
@@ -13787,7 +13792,7 @@
 			)
 		)
 		(net
-			(code "289")
+			(code "290")
 			(name "/WB{slash}WT#")
 			(class "Default")
 			(node
@@ -13804,7 +13809,7 @@
 			)
 		)
 		(net
-			(code "290")
+			(code "291")
 			(name "/W{slash}R#")
 			(class "Default")
 			(node
@@ -13821,7 +13826,7 @@
 			)
 		)
 		(net
-			(code "291")
+			(code "292")
 			(name "unconnected-(U2F-FRCMC#1-PadY35)")
 			(class "Default")
 			(node
@@ -13832,7 +13837,7 @@
 			)
 		)
 		(net
-			(code "292")
+			(code "293")
 			(name "unconnected-(U2F-R{slash}S#-PadAC35)")
 			(class "Default")
 			(node
@@ -13843,7 +13848,7 @@
 			)
 		)
 		(net
-			(code "293")
+			(code "294")
 			(name "unconnected-(U2G-D{slash}P#-PadAE35)")
 			(class "Default")
 			(node
@@ -13854,7 +13859,7 @@
 			)
 		)
 		(net
-			(code "294")
+			(code "295")
 			(name "unconnected-(U2G-PBGNT#-PadAD04)")
 			(class "Default")
 			(node
@@ -13865,7 +13870,7 @@
 			)
 		)
 		(net
-			(code "295")
+			(code "296")
 			(name "unconnected-(U2G-PBREQ#-PadAE03)")
 			(class "Default")
 			(node
@@ -13876,7 +13881,7 @@
 			)
 		)
 		(net
-			(code "296")
+			(code "297")
 			(name "unconnected-(U2G-PHIT#-PadAA03)")
 			(class "Default")
 			(node
@@ -13887,7 +13892,7 @@
 			)
 		)
 		(net
-			(code "297")
+			(code "298")
 			(name "unconnected-(U2G-PHITM#-PadAC03)")
 			(class "Default")
 			(node
@@ -13898,7 +13903,7 @@
 			)
 		)
 		(net
-			(code "298")
+			(code "299")
 			(name "unconnected-(U2G-PICCLK-PadH34)")
 			(class "Default")
 			(node
@@ -13909,7 +13914,7 @@
 			)
 		)
 		(net
-			(code "299")
+			(code "300")
 			(name "unconnected-(U2G-PICD0-PadJ33)")
 			(class "Default")
 			(node
@@ -13920,7 +13925,7 @@
 			)
 		)
 		(net
-			(code "300")
+			(code "301")
 			(name "unconnected-(U2G-PICD1-PadL35)")
 			(class "Default")
 			(node
@@ -13931,7 +13936,7 @@
 			)
 		)
 		(net
-			(code "301")
+			(code "302")
 			(name "unconnected-(U2K-INC-PadA03)")
 			(class "Default")
 			(node
@@ -13942,7 +13947,7 @@
 			)
 		)
 		(net
-			(code "302")
+			(code "303")
 			(name "unconnected-(U2K-INC-PadAN01)")
 			(class "Default")
 			(node
@@ -13953,7 +13958,7 @@
 			)
 		)
 		(net
-			(code "303")
+			(code "304")
 			(name "unconnected-(U2K-INC-PadAN03)")
 			(class "Default")
 			(node
@@ -13964,7 +13969,7 @@
 			)
 		)
 		(net
-			(code "304")
+			(code "305")
 			(name "unconnected-(U2K-INC-PadAN05)")
 			(class "Default")
 			(node
@@ -13975,7 +13980,7 @@
 			)
 		)
 		(net
-			(code "305")
+			(code "306")
 			(name "unconnected-(U2K-INC-PadB02)")
 			(class "Default")
 			(node
@@ -13986,7 +13991,7 @@
 			)
 		)
 		(net
-			(code "306")
+			(code "307")
 			(name "unconnected-(U2K-INC-PadC01)")
 			(class "Default")
 			(node
@@ -13997,7 +14002,7 @@
 			)
 		)
 		(net
-			(code "307")
+			(code "308")
 			(name "unconnected-(U2K-NC-PadA37)")
 			(class "Default")
 			(node
@@ -14008,7 +14013,7 @@
 			)
 		)
 		(net
-			(code "308")
+			(code "309")
 			(name "unconnected-(U2K-NC-PadAL19)")
 			(class "Default")
 			(node
@@ -14019,7 +14024,7 @@
 			)
 		)
 		(net
-			(code "309")
+			(code "310")
 			(name "unconnected-(U2K-NC-PadAN35)")
 			(class "Default")
 			(node
@@ -14030,7 +14035,7 @@
 			)
 		)
 		(net
-			(code "310")
+			(code "311")
 			(name "unconnected-(U2K-NC-PadR34)")
 			(class "Default")
 			(node
@@ -14041,7 +14046,7 @@
 			)
 		)
 		(net
-			(code "311")
+			(code "312")
 			(name "unconnected-(U2K-NC-PadS33)")
 			(class "Default")
 			(node
@@ -14052,7 +14057,7 @@
 			)
 		)
 		(net
-			(code "312")
+			(code "313")
 			(name "unconnected-(U2K-NC-PadS35)")
 			(class "Default")
 			(node
@@ -14063,7 +14068,7 @@
 			)
 		)
 		(net
-			(code "313")
+			(code "314")
 			(name "unconnected-(U2K-NC-PadW33)")
 			(class "Default")
 			(node
@@ -14074,7 +14079,7 @@
 			)
 		)
 		(net
-			(code "314")
+			(code "315")
 			(name "unconnected-(U2K-NC-PadW35)")
 			(class "Default")
 			(node

@@ -56,7 +56,7 @@ transceivers and no HSIO/MIPI, so the class is "fabric + light I/O".
 - VCC2 branch (feeds only the {core_buck} core buck): {vcc2_a} A at
   2.8 V against ICC2 6.5 A [mmx p.31 Table 12]; {per_pin} A average per
   VCC2 pin against the 1 A Mill-Max 550 rating [mmpins p.188-189]. PASS.
-- VCC3 branch: VCCIO/VCCPD/VCCPGM{pgm_extra} direct + the aux buck:
+- VCC3 branch: VCCIO/VCCPD/VCCPGM{pgm_extra} through the load switch + the aux buck:
   {vcc3_a} A estimate against ICC3 750 mA [mmx p.31 Table 12] - the
   binding limit of the three. PASS if the estimator confirms; if it comes
   back over, the VCCIO dynamic estimate must be refined per-bank before
@@ -93,7 +93,8 @@ def topo_cv():
 
 ```
 VCC2 2.8 V (25 header pins) --[bulk+bulk]--> SYNC BUCK --> VCC 1.1 V
-VCC3 3.4 V board (28 header pins) --+--> VCCIO / VCCPD / VCCPGM (direct)
+VCC3 3.4 V board (28 header pins) --+--> LOAD SWITCH (EN = core PGOOD)
+                                    |      --> VCCIO33: VCCIO / VCCPD / VCCPGM
                                     +--> 2.5 V aux (VCCAUX; ferrite
                                              branch to VCCA_FPLL;
                                              VCCBAT tied here)
@@ -106,8 +107,13 @@ datasheets in repo):
   is the one part whose Vin range is a hard requirement). Power-up
   current reserve for the CV POR [cvds p.9].
 - VCC3 -> 2.5 V aux, 1 A class (input covers 3.135-3.6 V).
-- VCC3 direct for VCCIO/VCCPD/VCCPGM: the board's 3.4 V is inside the
-  3.465 V band max [cvds p.8-9 Table 4]; decouple per bank.
+- VCC3 -> load switch -> VCCIO33 (VCCIO/VCCPD/VCCPGM): the board's 3.4 V
+  is inside the 3.465 V band max [cvds p.8-9 Table 4]; decouple per bank.
+  Switch class: input 3.135-3.6 V, >= 1 A, on-resistance <= 80 mOhm
+  (<= 50 mV drop at the 0.6 A VCC3 estimate, 3.35 V left), controlled
+  monotonic rise inside 200 us-100 ms [cvds p.9 Table 4], output
+  discharge when off; EN from the core buck PGOOD (open drain, pull-up to
+  S_VCC3).
 - VCCBAT: tied to the 2.5 V aux rail (1.2-3.0 V band) [cvds p.9 Table 4].
 """
 
@@ -120,15 +126,21 @@ def seq_cv():
   >= 80 % before group 2 (VCCPGM, VCCIO, VCCPD, VCCA_FPLL, VCC_AUX),
   VCCIO together with VCCPD. The core buck's PGOOD enables the 2.5 V
   aux buck (VCC_AUX, VCCA_FPLL).
-- Not met as drawn: VCCIO/VCCPD/VCCPGM sit directly on the board's VCC3,
-  which rises together with VCC2 [mmx p.28], i.e. before the core buck
-  fed from VCC2 is up. Cost: a VCCPD current transient up to 1000 mA,
-  ~50 us typical, that appears only when the order is not followed
-  [cvhb p.10-4/10-5 Table 10-1 note 33]; VCCIO and VCCPD share the net,
-  so no VCCIO transient [cvhb Table 10-1 note 35]. The CPU's VCC3 rating is ICC3 750 mA
-  [mmx p.31 Table 12]; the board regulator's own limit is unknown.
-  Open (operator): a load switch VCC3 -> VCCIO/VCCPD/VCCPGM enabled by
-  the core PGOOD, or accept the 50 us transient.
+- The board's VCC3 rises together with VCC2 [mmx p.28], i.e. before the
+  core buck fed from VCC2 is up; a direct VCCIO/VCCPD/VCCPGM feed would
+  break the order and cost a VCCPD current transient up to 1000 mA, ~50 us
+  typical [cvhb p.10-4/10-5 Table 10-1 note 33] on a VCC3 rated ICC3
+  750 mA [mmx p.31 Table 12]. Hence the load switch (operator,
+  2026-11-01): the same core PGOOD enables it and the aux buck, so all of
+  group 2 starts together; VCCIO and VCCPD share VCCIO33, so they ramp
+  together [cvhb Table 10-1 note 35].
+- Until the switch closes, the board drives the 3.3 V bus into unpowered
+  banks (direct bus, no translators): allowed, the I/O, dedicated input
+  and clock pins take signals before or during power up without damage or
+  back-powering [cvhb p.10-2], at most 300 uA DC / 8 mA AC per pin
+  [cvds p.17 Table 13]. CONF_DONE and nSTATUS have no hot-socket circuit
+  and may drive during power up [cvhb p.10-3]: they only reach our
+  pull-ups and the config header.
 - POR after all supplies are valid: 100-300 ms (standard POR) before
   configuration is accepted [cvds p.69 Table 55]; nSTATUS/CONF_DONE and
   the board-reset stretch handle the handshake with CPURST ([notes] R6).
