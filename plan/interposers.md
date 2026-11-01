@@ -9,6 +9,7 @@ plugs into the target board's ZIF socket, and the FPGA, its power, configuration
 | `socket3-cyclonev` (pilot) | Socket 3, Biostar MB-8433UUD-A, UMC 8881F/8886BF | 5CEBA9F23C8N / 5CEFA9F23C8N |
 | `socket7-cyclonev` | Socket 7, Biostar MB-8500TTD, Intel 430TX | same |
 | `socket370-cyclonev` | Socket 370, VIA VT82C694X + VT82C686B board | same |
+| `socket3-de25mux` | Socket 3, MB-8433UUD-A, adapter to a DE25-Nano (D11) | none on the adapter (74LVC mux); DE25-Nano Agilex 5 |
 | ~~`socket370-ti180`~~ | dropped (D10), files deleted 2026-11-01 | - |
 | ~~`socket3-ti180`, `socket7-ti180`~~ | dropped (D9) | - |
 | slot1 (see `plan/slot1.md`) | Slot 1 (SC242), board per slot1 D8 | per slot1 D9 |
@@ -93,6 +94,12 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   2-3 PCBs stacked on the base PCB (growing in height, not sideways), above
   all for the sockets and RAM >= 1 GB. Both PCB sides carry components
   wherever nothing collides mechanically.
+- **D11** (decided 2026-11-01 by the operator) `socket3-de25mux`: a
+  Socket 3 adapter without FPGA that links the DE25-Nano's 72 header I/O
+  to the socket through 74LVC registers multiplexed 3:1 or 4:1, the
+  next-clock control signals direct (analysis and per-socket verdict in
+  `plan/cpu_core.md` E1). Quick bring-up with the stock BIOS; the
+  socket3-cyclonev interposer stays the product.
 - **D10** (decided 2026-11-01 by the operator) Efinix is prohibited:
   efinixinc.com answers HTTP 403 from Bolivia, Efinity cannot be
   downloaded and no free/open-source flow builds Titanium bitstreams, so

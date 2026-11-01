@@ -167,6 +167,11 @@ socket3/docs/notes/design-decisions.md):
   tree + i8259, 8250, i8042, IDE, CF8/CFC PCI drivers, x86 option ROMs via
   an emulator like U-Boot bios_emulator). Not a milestone now.
 
+- **C5** (decided 2026-11-01 by the operator) x86 front-end development
+  runs on the DE25-Nano first (Agilex 5, 163 MHz vs 61 MHz, no PCB
+  needed); the RTL stays vendor-neutral so it still builds for the
+  Cyclone V interposers.
+
 ## Exploration E1: x86 on a real ARM64 core, FPGA as the socket bridge (operator, 2026-11-01)
 
 Idea (operator): a multiplexer <-> FPGA converting x86 <-> real ARM64 on a
