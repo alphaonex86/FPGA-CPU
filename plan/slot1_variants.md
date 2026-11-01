@@ -166,6 +166,16 @@ the DMA mirror.
   (in the free Vivado ML Standard device list [AMD UG973]; PCIe block
   licence to confirm in Vivado). Logic need is small (bus unit + PCIe +
   mirror), so a small GX part may do.
+  The C2 cartridge cannot reuse the slot1-cyclonev PCB with a GX part:
+  Quartus rejects 5CEFA9F23C8 -> 5CGXFC9C7F23C8 as a migration pair (Error
+  119016, test 2026-11-01), although 5CGXFC9 (same 301K LE as the A9)
+  exists in F23 in C6/C7/C8 grades (Quartus 25.1 part list).
+  Bench boards with PCIe edge + wide I/O (prices DigiKey 2026-11-01):
+  Numato Tagus NLFX1005 (XC7A200T, FMC, 1,397 USD, in stock); AMD AC701
+  (XC7A200T, PCIe x4, FMC HPC, 1.5-2.8 kUSD); ALINX AX7A200B (XC7A200T,
+  PCIe 2.0 x2/x4, 2x 40-pin headers, price unverified). The LattePanda Mu
+  Lite carrier has a PCIe 3.0 x4 slot (12 V input only) [docs.lattepanda.com
+  mu_edition/lite_carrier]; coreboot supports the Mu [doc.coreboot.org].
 - x86 module: LattePanda Mu (N100, 8 GB LPDDR5, 60 x 69.6 mm, up to 9 PCIe
   3.0 lanes, TDP 6-35 W, ~161 EUR at Mouser [cnx-software 2024-04-11;
   Mouser DFR1146]) could sit on the cartridge itself (stacked board, AGENTS

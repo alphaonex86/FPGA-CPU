@@ -500,6 +500,12 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   board RAM bandwidth is not needed, it is used only for the minimum (DMA).
 - **D28** (decided 2026-11-01 by the operator) Board devices (IDE, PCI, ISA)
   may be slower than the CPU and its RAM; only CPU + RAM speed counts.
+- **D29** (decided 2026-11-01 by the operator) C2 prototype hardware: a
+  LattePanda Mu (N100) on its carrier + an FPGA board with PCIe, on the
+  bench before the C2 cartridge (board choice: `slot1_variants.md` C2).
+- **D30** (decided 2026-11-01 by the operator) The operator buys a
+  DE25-Nano; B's first step is measuring FEX/Box64 vs native on its A76
+  (script prepared before it arrives).
 - **D22** (decided 2026-10-21, amended 2026-10-22 twice by operator: first
   6, then 8 copper layers, same answer as the D5 pattern) Slot 1
   cartridge = 8 layers: signals F&B (B.Cu gets the die escapes, F.Cu the
