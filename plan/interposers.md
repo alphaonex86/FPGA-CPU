@@ -128,8 +128,8 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   (~12.3 MiB), recommended EPCQ256 [cvds p.78 Table 65]; EPCQ devices
   support AS x1 and x4 [cvhb p.7-23], but AS x4 is not supported in the
   EPCQ512 (Intel EPCQ datasheet 683078, online); the current EPCQ-A line
-  stops at EPCQ128A [FPGAlist/CycloneV_A9 EPCQ-A datasheet CF52014 p.4
-  Table 1, source cdn.components.ru/media/PDF/8034479.pdf]; EPCQ-L is for
+  stops at EPCQ128A [FPGAlist/CycloneV_A9/docs/cf52014_epcq-a_datasheet.pdf
+  p.4 Table 1]; EPCQ-L is for
   Arria 10 / Stratix 10 / Cyclone 10 GX only. Quartus 25.1 `quartus_cpf`
   builds a 5CEFA9F23C8 .jic for EPCQ128A, EPCQ256, EPCQ512, EPCQL1024,
   MT25QL256/512/01G, MT25QU01G (refuses Macronix MX25L/MX66 and Spansion

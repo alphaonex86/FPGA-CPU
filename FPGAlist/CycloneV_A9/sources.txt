@@ -26,3 +26,4 @@ boards/cyclone_v_e_devkit_ug.pdf https://docs.altera.com/api/khub/maps/KHyMEjUhx
 boards/cyclone_v_e_devkit_5cefa7f31_installer.zip https://docs.altera.com/api/khub/documents/CuE94HKMKncKyE7LFqziyw/content
 reference/ao486 git+https://github.com/alfikpl/ao486.git
 reference/ao486_MiSTer git+https://github.com/MiSTer-devel/ao486_MiSTer.git
+docs/cf52014_epcq-a_datasheet.pdf https://cdn.components.ru/media/PDF/8034479.pdf
