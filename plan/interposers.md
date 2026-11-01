@@ -121,7 +121,13 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
 - **D6** Maximum interposer outline and height per board (needs M1, M2) - advanced with an estimated outline, to be re-checked.
 - **D7** ~~Debug/config: JTAG connector type, UART, on-board USB-JTAG or not~~ (decided above).
 - **Flash** (requirement, operator 2026-11-01; scheme decided by the
-  operator 2026-11-01: one large flash, Active Serial x4; open: size/part)
+  operator 2026-11-01: one large flash, Active Serial x4; size decided by
+  the operator 2026-11-01: one SOIC-16 footprint, MT25QL01G (1 Gbit,
+  128 MiB) fitted, MT25QL256 (EPCQ256 class) the fallback if AS x4 does
+  not boot from the 1 Gbit part on the bench; before T7: confirm from the
+  Micron datasheets that both are pin-compatible in SOIC-16, 300 mil
+  (not downloadable by script: Micron's pages render by JavaScript, the
+  Arrow copy resets the connection))
   every variant carries a flash large enough for the FPGA bitstream and
   also BIOS and/or UEFI images, option ROMs and other firmware to
   experiment with; JTAG kept. One 5CEA9 bitstream is 102,871,776 bits
