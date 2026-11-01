@@ -22,6 +22,7 @@ All figures are the projects' own claims, not measured here.
 | biRISC-V | RV32IM | in-order dual issue | 4.1 CoreMark/MHz, 1.9 DMIPS/MHz [biri] | "fits Artix-7, > 50 MHz" | Verilog | no FPU, no 64-bit: too small |
 | ao486 | x86 486SX (no x87) | scalar, microcoded | Win95/Linux boot; fmax 39 MHz on Cyclone IV [ao486] | CPU 36,517 LE, SoC 91,256 LE (EP4CE115, `FPGAlist/README.md`) | Verilog | reference model for x86 semantics, not a base for 2 IPC |
 | z386 | 80386 | rebuilt around Intel's recovered microcode | ~ao486 class [z386] | - | SystemVerilog | uses Intel's microcode: unusable for an ASIC / redistributed design |
+| z486 (z386 successor, 2026-08) | 80486 + x87 (experimental, "sufficient to run DOS Quake"); no MMX/SSE | scalar pipelined: D1/D2 decode, hardwired common instructions, microsequencer for complex ones | Dhrystone CPI 2.8 -> 2.0 (IPC 0.36 -> 0.5); "roughly 486DX2-66-class"; Doom timedemo 29.1 FPS vs 21.0 ao486; 85 MHz on MiSTer [z486] | 16,329 ALMs, 21,906 with x87 (DE10-Nano Cyclone V) [z486] | SystemVerilog, Apache-2.0, except the "recovered microcode image" [z486 LICENSE-SCOPE.md] | best x86 reference; same microcode problem as z386 |
 | BOOM, CVA6, XiangShan | RV64 | OoO / in-order | - | ASIC-oriented, no FPGA area claim found | Chisel / SV | too large or unmeasured for these parts |
 
 Sources: [vexii] https://github.com/SpinalHDL/VexiiRiscv and
@@ -30,11 +31,38 @@ https://github.com/SpinalHDL/NaxRiscv ; [soom]
 https://github.com/git-mathis/SoomRV ; [biri]
 https://github.com/ultraembedded/biriscv ; [ao486]
 https://github.com/alfikpl/ao486 , https://opencores.org/project/ao486 ;
+[z486] https://github.com/nand2mario/z486 , https://github.com/nand2mario/z486_MiSTer
+(read 2026-11-01) ;
 [z386] https://linuxiac.com/open-source-z386-brings-intel-80386-microcode-back-to-life/ ,
 https://misterfpga.org/viewtopic.php?p=107765 .
 No published design does hardware x86 -> RISC-V micro-op cracking; the
 nearest is an FPGA binary-translation research poster (HABITAT, St Andrews,
 SICSA 2026), which is software-assisted translation, not a decoder.
+
+## z486 vs the VexiiRiscv back end (operator question, 2026-11-01)
+
+Other cores looked at and dropped: S80186 (80186, GPL-3.0, ~1,800 ALMs,
+60 MHz on Cyclone V: 16-bit only) [https://github.com/jamieiles/80x86];
+a 2-way out-of-order x86 soft processor at ~200 MHz (Stanford EE380 talk,
+2019) [https://web.stanford.edu/class/ee380/Abstracts/190605-slides.pdf],
+no public RTL found.
+
+| | z486 | VexiiRiscv + own x86 front end (C1-C3) |
+|---|---|---|
+| runs x86 today | yes: DOS, Doom, Quake; real/protected mode, paging, segments | no: front end, flags, segments, x86 MMU, x87, system all to write |
+| measured here | not yet | rv64imac dual: 12,932 ALMs, 60.7 MHz, IPC 1.24 on RISC-V code |
+| IPC | 0.5 (Dhrystone CPI 2.0) | 1.24 RISC-V; x86 IPC unknown until the cracker exists |
+| >= 2 instructions/cycle | no: scalar, needs a U/V-pipe redesign of an x86-native pipeline | dual issue already there |
+| x86-64 / SSE2 | none; 32-bit datapath | 64-bit datapath; SIMD lane still to add |
+| licence / ASIC | RTL Apache-2.0, but complex instructions run Intel's recovered microcode (excluded from the licence): blocks an ASIC and any redistributed board | MIT, all own code |
+| x87 | experimental, incomplete | to write (80-bit unit) |
+
+Reading: z486 is far ahead on x86 semantics and could boot the Socket 3
+board soonest; it falls short on the hard requirements (>= 2 IPC, SSE2,
+x86-64, an ASIC-clean licence) and its microcode would have to be
+rewritten anyway. Its Apache-2.0 hardwired paths, decoder and test sets
+(test386.py, single-step real/protected-mode datasets) are usable as
+reference and test material in either plan.
 
 ## Recommendation: VexiiRiscv as the back end
 
@@ -104,6 +132,20 @@ socket3/docs/notes/design-decisions.md):
   interface ignores every socket pin and keeps the CPU parked until the
   board input VCORE_OK is high, and parks again when it falls
   (plan/interposers.md FPGAmotherboard compatibility).
+
+## Decisions (core)
+
+- **C1** (decided 2026-11-01 by the operator) x86 instructions crack into
+  an own micro-op format, not into RISC-V instruction words: the x86 front
+  end bypasses the Vexii RISC-V decoder (wide uops, 32/64-bit immediates)
+  and feeds the execute lanes directly.
+- **C2** (decided 2026-11-01 by the operator) EFLAGS in hardware: every
+  flag-setting uop writes a flags register beside its result (new execute
+  plugin, bypass between the two lanes); Jcc / ADC / SETcc read it in one
+  cycle.
+- **C3** (decided 2026-11-01 by the operator) Lock-step reference: Unicorn
+  (QEMU CPU core as a C library, one hook per instruction), testbench only
+  (GPLv2, never in the RTL).
 
 ## Next steps (each answers a concrete question)
 
