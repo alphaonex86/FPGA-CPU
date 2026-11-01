@@ -31,6 +31,9 @@ chipset, same sockets; source of `sockets/kicad/`).
 - Power within the socket's budget (table above); Socket 3 is the tightest.
   FPGA < 10 W preferred; 10-40 W with an external supply only for a large gain
   (an ASIC of the same design would draw much less).
+- On-board flash larger than the FPGA bitstream: it also holds BIOS and/or
+  UEFI images, option ROMs and other firmware for experiments (operator,
+  2026-11-01).
 - Voltage level translators allowed (wider FPGA choice, easier routing); prefer
   compact ones.
 
