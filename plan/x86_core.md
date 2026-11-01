@@ -110,8 +110,13 @@ replicated per read port plus a live-value table.
    test, cold code stays at BTFN). Built (4K x 2-bit, 10-bit history,
    read as the group enters P, updated at retire): flushes c1 824 -> 287,
    c2 129 -> 57, c4 72 -> 18; IPC c1 1.174, c2 1.134, c4 1.049. Decode
-   redirects rose (c1 216 -> 889): forward taken branches until the
-   32-entry BTB learns them. DE25-Nano
+   redirects rose (c1 216 -> 889); not BTB capacity (32, 128 and 512
+   entries give the same IPC) but direction thrash: c1 542 taken branches
+   the frontend did not follow + 345 it followed but P predicts not taken
+   (the BTB entry is set / cleared on each disagreement). Next: direction
+   from the same gshare at fetch (fetch-time history passed with the
+   block), so P agrees on BTB-marked branches and only BTB misses redirect
+   at decode. DE25-Nano
    A5EB013BB23BE4SCS (Quartus Pro 26.1.1, R/D split, before the BTB):
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.

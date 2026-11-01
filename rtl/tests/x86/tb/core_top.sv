@@ -31,6 +31,7 @@ module core_top (
     // queue empty, decode redirects, retire flushes
     logic [31:0] st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush;
     logic [31:0] st_wait_kind [8];   // head waits by the head uop kind (kind_t)
+    logic [31:0] st_dr [4];          // decode redirects: not followed, falsely taken, target, cut
 
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000),
                    .fetch_addr(fetch_addr), .fetch_data(fetch_data),
@@ -73,6 +74,7 @@ module core_top (
             insns <= 32'd0;
             {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush} <= '0;
             for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
+            for (int i = 0; i < 4; i++) st_dr[i] <= 32'd0;
         end else begin
             logic [31:0] r [8];
             flags_t      f;
@@ -89,7 +91,14 @@ module core_top (
                 end
             end
             if (core.uq_count == '0) st_uq_empty <= st_uq_empty + 32'd1;
-            if (core.fe_redirect && !core.flush) st_dec_redir <= st_dec_redir + 32'd1;
+            if (core.fe_redirect && !core.flush) begin
+                int c;
+                logic ft;
+                ft = core.p_next[core.p_btb_k] != core.p_seq[core.p_btb_k];
+                c = !core.p_btb ? 3 : !ft ? 0 : !core.p_dir[core.p_btb_k] ? 1 : 2;
+                st_dec_redir <= st_dec_redir + 32'd1;
+                st_dr[c] <= st_dr[c] + 32'd1;
+            end
             if (core.flush) st_flush <= st_flush + 32'd1;
             if (debug) begin
                 if (core.fe_redirect) $display("%0d redirect %08x", cycles, core.fe_redirect_pc);
@@ -135,5 +144,8 @@ module core_top (
         if (stats)
             $display("stats: head waits by kind: ALU %0d LD %0d ST %0d BR %0d MD %0d",
                      st_wait_kind[K_ALU], st_wait_kind[K_LD], st_wait_kind[K_ST], st_wait_kind[K_BR], st_wait_kind[K_MD]);
+        if (stats)
+            $display("stats: decode redirects: taken not followed %0d, falsely taken %0d, target %0d, cut %0d",
+                     st_dr[0], st_dr[1], st_dr[2], st_dr[3]);
     end
 endmodule
