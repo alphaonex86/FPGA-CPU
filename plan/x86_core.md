@@ -49,6 +49,15 @@ replicated per read port plus a live-value table.
 6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
 7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
    Socket 7 and Socket 370.
+   Socket 3 must honour STPCLK# (Am5x86 contract, AMD 19751C sec.
+   5.2-5.5.3; the FPGAmotherboard chipset uses it for DVFS): at an
+   instruction boundary issue the Stop Grant special cycle (M/IO#=0, D/C#=0,
+   W/R#=1, address 0000_0010h, BE3#-BE0#=1011b, ended by BRDY#); CLK may then
+   stop and return at 33.33/25/20/16.67 MHz, resume when STPCLK# rises
+   (>= 1 ms of stable CLK before); only INTR moves while CLK is stopped;
+   STPCLK# stays high >= 8 clocks between assertions. Socket 7 (P55C)
+   follows later, with A4 in the special-cycle decode (peer session
+   "motherboard FPGA", 2026-11-01).
 
 ## Layout
 

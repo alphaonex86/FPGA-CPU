@@ -173,7 +173,32 @@ the DMA mirror.
   Bench boards with PCIe edge + wide I/O (prices DigiKey 2026-11-01):
   Numato Tagus NLFX1005 (XC7A200T, FMC, 1,397 USD, in stock); AMD AC701
   (XC7A200T, PCIe x4, FMC HPC, 1.5-2.8 kUSD); ALINX AX7A200B (XC7A200T,
-  PCIe 2.0 x2/x4, 2x 40-pin headers, price unverified). The LattePanda Mu
+  PCIe 2.0 x2/x4, 2x 40-pin headers, price unverified).
+  Filter (operator, 2026-11-01: drop boards without accessible software or
+  a software alternative, then the 2 best by price):
+  - Toolchains: Quartus Lite works here (Cyclone V GX/GT). Vivado 2025.2 ML
+    Standard is licence-free and lists XC7A200T [AMD UG973], but the
+    download is behind an AMD account + export form, not verified from
+    Bolivia; alternative openXC7 (yosys + nextpnr-xilinx) has Artix
+    PCIE_2_1 + GTP support in release 0.9.0, PCIe hardware-verified only on
+    Kintex-7 [github.com/openXC7/nextpnr-xilinx releases 0.9.0].
+    Update 2026-11-01 (operator): the Vivado download from Bolivia works
+    (in progress); board choice after it finishes.
+  - Dropped: LiteFury/NiteFury (M.2, too few I/O); Tagus, AC701, Cyclone V
+    GX/GT Intel kits (945-2,800 USD; GX kit stock 0, GT kit -B 1,380-1,558
+    USD, stock 0) on price.
+  - Best 2 by price: Puzhi PZ-A7200T-KFB (XC7A200T-2FGG484I, PCIe 2.0 x2,
+    2x 40-pin, ~62-64 single-ended I/O, 1 GB DDR3, 343 USD eBay listing)
+    and ALINX AX7A200B (XC7A200T, PCIe 2.0, 2x 40-pin, documented manual,
+    ~60,400 RUB at serverflow.ru, out of stock). Both need Vivado or
+    openXC7.
+  - I/O: ~64 lines do not carry the full 66 MHz 2:1 Slot 1 bus (~86, see
+    common facts). They do carry a transaction link to a cartridge FPGA
+    that owns the bus pins (e.g. the slot1-cyclonev cartridge plus a link
+    header): ~20-40 lines at 100 MHz move one bus transaction in well
+    under the ~2-3 us device-access budget. The bench steps before the
+    cartridge (PCIe + VMM forwarding latency) need no bus pins at all.
+  The LattePanda Mu
   Lite carrier has a PCIe 3.0 x4 slot (12 V input only) [docs.lattepanda.com
   mu_edition/lite_carrier]; coreboot supports the Mu [doc.coreboot.org].
 - x86 module: LattePanda Mu (N100, 8 GB LPDDR5, 60 x 69.6 mm, up to 9 PCIe
