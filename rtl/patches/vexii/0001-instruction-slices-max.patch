@@ -1,0 +1,26 @@
+diff --git a/src/main/scala/vexiiriscv/decode/Decode.scala b/src/main/scala/vexiiriscv/decode/Decode.scala
+index e00f64f1..b76ac418 100644
+--- a/src/main/scala/vexiiriscv/decode/Decode.scala
++++ b/src/main/scala/vexiiriscv/decode/Decode.scala
+@@ -34,7 +34,8 @@ object Decode extends AreaObject {
+   val STORE_ID = Payload(UInt(STORE_ID_WIDTH bits))
+   def laneIds = 0 until LANES
+ 
+-  def INSTRUCTION_SLICE_COUNT_MAX = INSTRUCTION_WIDTH / Fetch.SLICE_WIDTH
++  val INSTRUCTION_SLICES_MAX = blocking[Int] // set by the ISA plugin (x86: 15 byte slices)
++  def INSTRUCTION_SLICE_COUNT_MAX = INSTRUCTION_SLICES_MAX.get
+   def INSTRUCTION_SLICE_COUNT_WIDTH = log2Up(INSTRUCTION_SLICE_COUNT_MAX)
+   val INSTRUCTION_SLICE_COUNT = Payload(UInt(INSTRUCTION_SLICE_COUNT_WIDTH bits)) // minus one => RVC => 0, normal => 1
+ }
+diff --git a/src/main/scala/vexiiriscv/riscv/RiscvPlugin.scala b/src/main/scala/vexiiriscv/riscv/RiscvPlugin.scala
+index ae85c198..15ef775a 100644
+--- a/src/main/scala/vexiiriscv/riscv/RiscvPlugin.scala
++++ b/src/main/scala/vexiiriscv/riscv/RiscvPlugin.scala
+@@ -43,6 +43,7 @@ class RiscvPlugin(var xlen : Int,
+     Fetch.SLICE_BYTES.set(if(Riscv.RVC) 2 else 4)
+     Fetch.SLICE_COUNT.set(Fetch.WORD_WIDTH/Fetch.SLICE_WIDTH)
+     Fetch.SLICE_RANGE_LOW.set(if (Riscv.RVC) 1 else 2)
++    Decode.INSTRUCTION_SLICES_MAX.set(if (Riscv.RVC) 2 else 1)
+     Fetch.SLICE_RANGE.set((Fetch.SLICE_RANGE_LOW.get + log2Up(Fetch.SLICE_COUNT.get) - 1) downto Fetch.SLICE_RANGE_LOW.get)
+     Fetch.ID_WIDTH.set(10)
+     Decode.DOP_ID_WIDTH.set(10)

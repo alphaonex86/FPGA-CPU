@@ -13,6 +13,14 @@ if [[ ! -d ext/VexiiRiscv ]]; then
 fi
 git -C ext/VexiiRiscv checkout -q "$VEXII_COMMIT"
 git -C ext/VexiiRiscv submodule update --init ext/SpinalHDL ext/rvls ext/NaxSoftware  # rvls: Scala bindings; NaxSoftware: bench ELFs
+# our changes to the pinned VexiiRiscv, in order; already applied ones are skipped
+for p in patches/vexii/*.patch; do
+    if git -C ext/VexiiRiscv apply --check "$PWD/$p" 2>/dev/null; then
+        git -C ext/VexiiRiscv apply "$PWD/$p"
+    elif ! git -C ext/VexiiRiscv apply --check -R "$PWD/$p" 2>/dev/null; then
+        echo "FAIL $p applies neither forward nor reversed on ext/VexiiRiscv"; exit 1
+    fi
+done
 if [[ ! -x ext/sbt/bin/sbt ]]; then
     curl -sfL -o ext/sbt.tgz \
         "https://github.com/sbt/sbt/releases/download/v$SBT_VERSION/sbt-$SBT_VERSION.tgz"
