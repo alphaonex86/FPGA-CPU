@@ -527,7 +527,11 @@ module x86_core
     logic        m_ok, m_fwd;
     logic [31:0] m_fdata;
     assign load_addr = am_addr;
-    always_comb m_ok = am_store || load_ok(am_sq_snap, am_addr, m_fwd, m_fdata);
+    always_comb begin
+        logic ld_ok;
+        ld_ok = load_ok(am_sq_snap, am_addr, m_fwd, m_fdata);
+        m_ok = am_store || ld_ok;
+    end
 
     // ---------------- results of X and M ----------------
     logic [2:0]             ex_valid;
