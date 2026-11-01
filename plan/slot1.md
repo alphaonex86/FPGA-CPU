@@ -330,6 +330,20 @@ connector footprint (card-edge, from the connector drawing).
   class (0.15 clearance) - without it KiCad applied 0.2 mm and S8c's
   0.15 mm tracks gave 501 DRC errors; S9 printed "PASS audit" even with a
   failing gate.
+  Second D23 pass (2026-10-31, chain S7 -> S9 twice, same result both
+  times): ERC 0, DRC 0 errors (323 warnings: 199 via_dangling = rail
+  pad vias over a foreign In2 strip, 87 lib_footprint_mismatch, 37
+  isolated_copper; the 199 B.Fab text warnings fixed by mirroring B-side
+  texts in S7), BOM 278 == PCB 278, S8c **133/184** die jobs (pass 1
+  routes 141; the rip-up pass leaves 133 - the router keeps its last
+  pass, not its best), 499 unconnected = 259 slot/translator signals +
+  113 rail/GND pads + 81 DDR3 + 46 regulator internal. The drop from
+  160 is the real die land: the 160 was routed on the wrong 1.0 mm,
+  mirrored ball map; S8c's 0.35/0.20 die vias (D24) were already sized
+  for 0.8 mm (one 0.15 track per 0.45 gap). Chain guards: S8a refuses an
+  already netted board, S8b a board without a fresh S8a net table
+  (each needs the fresh output of the step before; S8a also accepts the
+  jack's unnamed NPTH peg).
   Board facts at audit time: 8 copper layers, 530 nets, 4160 tracks,
   1064 vias, 287/291 zones filled, 1500 bound pads (276 DDR3, 126 NC,
   1098 socket/AGTL+/power), U1 484 + dies 368 bound pads.
@@ -344,12 +358,13 @@ routing (AGTL+ rules, memory byte lanes matched), verification audit + BOM.
 
 | Task | S0 | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| slot1 (slot1-cyclonev per D9) | done | done | done | done | done | done | done | done | in prog (160/184 after D23, DRC 0, 499 unconn) | done | done |
+| slot1 (slot1-cyclonev per D9) | done | done | done | done | done | done | done | done | in prog (133/184 on the real 0.8 mm die land, DRC 0, 499 unconn) | done | done |
 
-Not on the board yet (2026-10-31 audit): S8c routes only the DDR3 die nets;
-the SC242 -> translator -> FPGA nets are unrouted (220 nets without a track);
-the S3 power tree (regulators, inductors, bulk) and all decoupling are not
-placed (BOM = 31 refs, none of them).
+Not on the board yet (2026-10-31, after D23): S8c routes only the DDR3 die
+nets (133/184); the SC242 -> translator -> FPGA nets are unrouted (259
+unconnected items); the power tree and decoupling are placed (278 refs)
+but their internal nets and 113 rail/GND pads are not routed; U7 is
+still the generic VTT tracker placeholder.
 
 ## S10 Report (2026-10-22, to the operator)
 

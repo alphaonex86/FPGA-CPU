@@ -76,6 +76,7 @@ def fp(name, refdes, x, y, pads, cyd, attr="smd", side="F"):
     crossed a zone outline; this flat board carries no silkscreen yet --
     silk labels are the S9 polish)."""
     ref_y = cyd[3] + 0.8
+    mirror = " (justify mirror)" if side == "B" else ""
     lines = [
         '\t(footprint "%s"' % name,
         '\t\t(layer "%s.Cu")' % side,
@@ -83,10 +84,11 @@ def fp(name, refdes, x, y, pads, cyd, attr="smd", side="F"):
         '\t\t(descr "S7 placement; nets assigned by S8")',
         '\t\t(attr %s)' % attr,
         '\t\t(fp_text reference "%s" (at 0.0 %f) (layer "%s.Fab") '
-        '(effects (font (size 1 1) (thickness 0.15))))' % (refdes, ref_y, side),
+        '(effects (font (size 1 1) (thickness 0.15))%s))'
+        % (refdes, ref_y, side, mirror),
         '\t\t(fp_text value "%s" (at 0.0 %f) (layer "%s.Fab") '
-        '(effects (font (size 1 1) (thickness 0.15))))'
-        % (refdes, ref_y + 1.4, side),
+        '(effects (font (size 1 1) (thickness 0.15))%s))'
+        % (refdes, ref_y + 1.4, side, mirror),
     ]
     lines.append('\t\t(fp_rect (start %f %f) (end %f %f) (layer "%s.CrtYd") '
                  '(width 0.05))' % (*cyd, side))
