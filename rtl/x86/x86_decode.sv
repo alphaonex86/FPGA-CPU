@@ -3,7 +3,7 @@
 // ops and RET): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
 // /0 /1, TEST 84/85/A8/A9/F6/F7 /0, NOT/NEG F6/F7 /2 /3, shifts and
 // rotates C0/C1/D0-D3 (not RCL/RCR), MOV 88-8B/B0-BF/C6/C7 /0,
-// SHLD/SHRD, MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
+// SHLD/SHRD, BSF/BSR, BSWAP, MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
 // MUL/IMUL/DIV/IDIV F6/F7 /4-/7 (x86_muldiv), LEA, PUSH
 // r32/imm/r/m, POP r32, CALL rel32/r32, RET, LEAVE, JMP rel/r/m, Jcc
 // rel8/rel32, NOP, HLT, [REP] MOVS/STOS/LODS (DF = 0: CLD is a NOP, STD
@@ -92,7 +92,7 @@ module x86_decode
     endfunction
 
     function automatic logic writes_flags(input aop_t a);
-        return !(moves(a) || a == A_NOT || a == A_CMOV);
+        return !(moves(a) || a == A_NOT || a == A_CMOV || a == A_BSWAP);
     endfunction
 
     function automatic aop_t grp2(input logic [2:0] g);
@@ -324,6 +324,9 @@ module x86_decode
         end
     endtask
 
+    // the latch lint gives up on this block's path count (false
+    // positives); Quartus checks latches (quartus_run.sh)
+    /* verilator lint_off LATCH */
     always_comb begin
         p66 = 1'b0;
         prep = 1'b0;
@@ -467,6 +470,9 @@ module x86_decode
                         end
                 end
                 8'hAF: imul2(1'b1, 32'd0, uop, n);
+                8'hBC: alu_modrm(A_BSF, wsz, 1'b0, 1'b1, 32'd0, uop, n);   // reg = f(old reg, r/m)
+                8'hBD: alu_modrm(A_BSR, wsz, 1'b0, 1'b1, 32'd0, uop, n);
+                8'b11001???: if (!p66) uop[0] = alu(A_BSWAP, SZ32, {1'b0, op2[2:0]}, 1'b0, 1'b0, 4'd0, 1'b0, 32'd0);
                 8'hB6: movx(1'b0, SZ8, uop, n);
                 8'hB7: movx(1'b0, SZ16, uop, n);
                 8'hBE: movx(1'b1, SZ8, uop, n);
@@ -645,4 +651,5 @@ module x86_decode
                 target = uop[k].imm;
             end
     end
+    /* verilator lint_on LATCH */
 endmodule

@@ -12,7 +12,9 @@
 // The value is merged into the old register: a for MUL/IMUL/DIV/IDIV,
 // c otherwise; SZ8 results are 16 bits. Flags (QEMU compute_all_mul):
 // CF = OF = high half significant, ZF/SF/PF of the low half, AF = 0; DIV
-// leaves flags alone (the uop does not write them).
+// leaves flags alone (the uop does not write them). The inputs are
+// registered first (s_*): the unit, its DSP blocks included, then places
+// away from the issue / bypass logic (unregistered, the core did not route).
 module x86_muldiv
     import x86_pkg::*;
 (
@@ -68,21 +70,35 @@ module x86_muldiv
     logic [31:0]      last_r;   // remainder of the last division
     logic [31:0]      last_hi;  // high half of the last A_MUL / A_IMUL
 
-    assign busy = d_run || d_fin;
+    // ---------------- input register ----------------
+    logic             s_v;
+    aop_t             s_op;
+    logic [1:0]       s_sz;
+    logic [31:0]      s_a, s_b, s_c;
+    logic [TAG_W-1:0] s_tag;
+
+    assign busy = s_v && is_div(s_op) || d_run || d_fin;
 
     always_ff @(posedge clk) begin
+        s_v <= start && !kill;
+        s_op <= op;
+        s_sz <= sz;
+        s_a <= a;
+        s_b <= b;
+        s_c <= c;
+        s_tag <= tag;
         // stage 1: operands extended to 33 bits
-        m1_v <= start && !kill && !is_div(op);
-        m1_op <= op;
-        m1_sz <= sz;
-        m1_tag <= tag;
-        m1_old <= old_of(op, a, c);
+        m1_v <= s_v && !kill && !is_div(s_op);
+        m1_op <= s_op;
+        m1_sz <= s_sz;
+        m1_tag <= s_tag;
+        m1_old <= old_of(s_op, s_a, s_c);
         begin
             logic [31:0] ea, eb;
-            ea = extend(a, sz, is_signed(op));
-            eb = extend(b, sz, is_signed(op));
-            m1_a <= {is_signed(op) & ea[31], ea};
-            m1_b <= {is_signed(op) & eb[31], eb};
+            ea = extend(s_a, s_sz, is_signed(s_op));
+            eb = extend(s_b, s_sz, is_signed(s_op));
+            m1_a <= {is_signed(s_op) & ea[31], ea};
+            m1_b <= {is_signed(s_op) & eb[31], eb};
         end
         // stage 2: product
         m2_v <= m1_v && !kill;
@@ -119,39 +135,39 @@ module x86_muldiv
         // divider: setup, then one quotient bit per cycle, then fix-up
         d_fin <= 1'b0;
         if (kill) d_run <= 1'b0;
-        else if (start && is_div(op)) begin
+        else if (s_v && is_div(s_op)) begin
             logic [31:0] nhi, nlo, dv;
             logic [63:0] n;
             logic        sn, sd, sgn;
             logic [5:0]  w;
-            w = width(sz);
-            sgn = op == A_IDIV;
-            dv = extend(b, sz, sgn);
-            if (sz == SZ8) begin
-                nhi = extend(a >> 8, SZ8, 1'b0);
-                nlo = extend(a, SZ8, 1'b0);
+            w = width(s_sz);
+            sgn = s_op == A_IDIV;
+            dv = extend(s_b, s_sz, sgn);
+            if (s_sz == SZ8) begin
+                nhi = extend(s_a >> 8, SZ8, 1'b0);
+                nlo = extend(s_a, SZ8, 1'b0);
             end else begin
-                nhi = extend(c, sz, 1'b0);
-                nlo = extend(a, sz, 1'b0);
+                nhi = extend(s_c, s_sz, 1'b0);
+                nlo = extend(s_a, s_sz, 1'b0);
             end
-            sn = sgn && msb(nhi, sz);
+            sn = sgn && msb(nhi, s_sz);
             sd = sgn && dv[31];
             if (sn) begin   // dividend magnitude, 2w bits
                 n = -(({32'd0, nhi} << w) | {32'd0, nlo});
-                nhi = extend(32'(n >> w), sz, 1'b0);
-                nlo = extend(n[31:0], sz, 1'b0);
+                nhi = extend(32'(n >> w), s_sz, 1'b0);
+                nlo = extend(n[31:0], s_sz, 1'b0);
             end
-            d_div <= sd ? extend(-dv, sz, 1'b0) : extend(dv, sz, 1'b0);
+            d_div <= sd ? extend(-dv, s_sz, 1'b0) : extend(dv, s_sz, 1'b0);
             d_rem <= {1'b0, nhi};
             d_lo <= nlo << (6'd32 - w);
             d_q <= '0;
             d_cnt <= w;
             d_negq <= sn ^ sd;
             d_negr <= sn;
-            d_op <= op;
-            d_sz <= sz;
-            d_tag <= tag;
-            d_old <= old_of(op, a, c);
+            d_op <= s_op;
+            d_sz <= s_sz;
+            d_tag <= s_tag;
+            d_old <= old_of(s_op, s_a, s_c);
             d_run <= 1'b1;
             d_fault <= 1'b0;
         end else if (d_run) begin

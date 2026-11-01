@@ -37,7 +37,7 @@ def main():
         return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(26)
+        k = rnd.randrange(27)
         x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
         a = rnd.choice(ALU) + x
         if k == 0:
@@ -124,6 +124,13 @@ def main():
                      "lea %d(%%edi), %%edi" % rnd.randrange(65 - w), "mov $%d, %%ecx" % n,
                      ("rep " if r else "") + rnd.choice(["movs", "stos", "lods"]) + sz, "pop %edi"]
             return (["cld"] if rnd.randrange(4) == 0 else []) + lines
+        if k == 25:   # BSF / BSR (zero sources included), BSWAP
+            if rnd.randrange(3) == 0:
+                return ["bswap %s" % reg()]
+            y = rnd.choice("lw")
+            src = rnd.choice([sreg(y), mem()])
+            zero = ["mov%s $0, %s" % (y, src)] if rnd.randrange(4) == 0 else []
+            return [*zero, "%s%s %s, %s" % (rnd.choice(["bsf", "bsr"]), y, src, sreg(y))]
         return ["nop"]
 
     def run(n):

@@ -21,6 +21,7 @@ package x86_pkg;
                               A_ZX8, A_ZX16, A_SX8, A_SX16,
                               A_SHL, A_SHR, A_SAR, A_ROL, A_ROR, A_NOT, A_NEG,
                               A_SETCC, A_CMOV, A_SIGN, A_SHLD, A_SHRD,
+                              A_BSF, A_BSR, A_BSWAP,
                               A_MUL, A_IMUL, A_MULH, A_IMULH, A_IMUL2,
                               A_DIV, A_IDIV, A_DIVR, A_IDIVR} aop_t;
 

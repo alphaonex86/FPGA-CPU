@@ -67,8 +67,8 @@ replicated per read port plus a live-value table.
    an uncaptured operand must be on wb1/wb2 (simulation check). Branches:
    static BTFN at decode, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
-   they retire. Subset: ALU/shift/rotate/SHLD/SHRD/SETcc/CMOVcc/MUL/IMUL/
-   DIV/IDIV on 8/16/32-bit operands (QEMU flag semantics), loads/stores,
+   they retire. Subset: ALU/shift/rotate/SHLD/SHRD/BSF/BSR/BSWAP/SETcc/CMOVcc/
+   MUL/IMUL/DIV/IDIV on 8/16/32-bit operands (QEMU flag semantics), loads/stores,
    stack, branches, [REP] MOVS/STOS/LODS (DF = 0); prefixes 66, F3 and
    CS/DS/ES/SS. A REP iteration is the instruction looping on itself: uop 0
    leaves when ECX = 0 (else ECX -= 1), decode predicts the loop, the BTB
@@ -76,8 +76,9 @@ replicated per read port plus a live-value table.
    cycles). Matches Unicorn on x1/x2, 2000 random programs (`x86_rand.py`)
    and compiled C (`tests/x86/c*.c`, gcc i686 freestanding): `c1_mix`
    (records, strings, sort, CRC-32, recursion) 23,879 instructions, IPC
-   0.808; `c2_core` (list, matrix, switch jump table, 64-bit arithmetic)
-   9,369, IPC 0.942; `c3_string` (-Os: REP MOVS/STOS) 10,033, IPC 0.748.
+   0.805; `c2_core` (list, matrix, switch jump table, 64-bit arithmetic)
+   9,369, IPC 0.891; `c3_string` (-Os: REP MOVS/STOS) 10,033, IPC 0.677;
+   `c4_bits` (BSF/BSR/BSWAP) 3,363, IPC 0.831.
    IPC: 1.88 straight ALU code (2 ALU ports), 1.94 in a 14-instruction
    loop, 0.35 on random programs (random forward Jcc, string ops).
    5CEFA9F23C8 (`rtl/tests/x86/synth/x86_core_synth.sv`,
@@ -87,7 +88,11 @@ replicated per read port plus a live-value table.
    MHz at 38,946 ALMs (34 %), 17,056 registers; with 8/16-bit operands,
    shifts and the BTB (registered update) 40.99 MHz, 43,639 ALMs (38 %),
    20,086 registers, worst path decode -> branch target -> redirect
-   compare -> uop queue push, hence the P stage. DE25-Nano
+   compare -> uop queue push, hence the P stage. With P and mul/div the
+   default fit failed routing (43 % ALMs, local congestion); bisect: mul/div
+   stubbed 53.87 MHz at 47,132 ALMs; perf recipe (aggressive routability)
+   57.74 MHz at 52,085 ALMs. Fix: mul/div inputs registered (one more cycle
+   of latency) so its DSP blocks place away from the issue / bypass logic. DE25-Nano
    A5EB013BB23BE4SCS (Quartus Pro 26.1.1, R/D split, before the BTB):
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.

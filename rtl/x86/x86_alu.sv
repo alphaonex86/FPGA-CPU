@@ -7,7 +7,9 @@
 // count - 1 (cc_helper_template.h compute_all_shl/sar); rotates set only
 // CF/OF (translate.c gen_rot_rm_T1); count 0 changes nothing. SHLD/SHRD
 // shift a with bits of c (gen_shiftd_rm_T1: 64-bit concatenation; 16-bit
-// a:c:a, so counts above 16 match), flags as SHL/SHR.
+// a:c:a, so counts above 16 match), flags as SHL/SHR. BSF/BSR: index of
+// the lowest / highest set bit of b, a when b is 0; flags of a logic op on b
+// (QEMU CC_OP_LOGIC).
 module x86_alu
     import x86_pkg::*;
 (
@@ -128,6 +130,20 @@ module x86_alu
             A_SETCC: y = {31'd0, cond_taken(cond, fin)};
             A_CMOV:  y = cond_taken(cond, fin) ? b : a;
             A_SIGN:  y = {32{sz == SZ16 ? b[15] : b[31]}};
+            A_BSWAP: y = {a[7:0], a[15:8], a[23:16], a[31:24]};
+            A_BSF, A_BSR: begin
+                logic [31:0] src;
+                src = extend(b, sz, 1'b0);
+                y = a;
+                if (op == A_BSF) begin
+                    for (int i = 31; i >= 0; i--) if (src[i]) y = 32'(i);
+                end else
+                    for (int i = 0; i < 32; i++) if (src[i]) y = 32'(i);
+                f = '0;
+                f.zf = src == 32'd0;
+                f.sf = src[msb];
+                f.pf = parity(src[7:0]);
+            end
             default: ;
         endcase
     end
