@@ -180,13 +180,18 @@ Questions before any work:
    **Answered 2026-11-01:** Quartus Prime Pro 26.1.1 Build 130 installed at
    `~/altera_pro/26.1.1` (installers, Agilex 3/5/7 device .qdz, DE25-Nano
    revA/revB resource packages, user manual and SD card image in
-   `/mnt/data/perso/FPGA/DE25-Nano/`). With no licence file and no
-   LM_LICENSE_FILE, a counter on A5EB013BB23BE4SCS with the golden_top
-   pins (clk BF23, LEDs) ran synthesis, fit, timing and assembler and wrote
-   the .sof: free and offline for this device. Without pin assignments the
-   assembler skips the .sof (Critical Warning 25196/25207); the kit licence
-   is not needed. (The Agilex 3 rejection in `FPGAlist/README.md` predates
-   this check.)
+   `/mnt/data/perso/FPGA/DE25-Nano/`). A counter on A5EB013BB23BE4SCS with
+   the golden_top pins (clk BF23, LEDs) ran synthesis, fit, timing and
+   assembler and wrote the .sof (without pin assignments the assembler
+   skips it, Critical Warning 25196/25207). Licence: `LICENSE_FREE_MODE = on`
+   (`~/.altera.quartus/quartus2.ini`); Quartus fetches a free node-locked
+   licence online into `~/.altera.quartus/quartus2_lic.dat` (issued
+   2026-10-31): `quartus_agilex5e` 2027.10 and `quartus_agilex3` 2027.11,
+   both "permanent uncounted". The Agilex 3 feature was added during an
+   A3CW135BM16AE6S test compile (2026-11-01), so the fetch works from
+   Bolivia; once fetched it is permanent, the version date only caps the
+   Quartus release. The kit licence is not needed. This weakens the Agilex 3
+   rejection in `FPGAlist/README.md` ("licence fetched online").
 2. Speed: x86 full-system DBT on one A76 (clock to check) vs the 50-60 MHz
    soft cores measured above; measure QEMU-TCG i386 on an A76 first.
 3. Memory: guest RAM in the HPS LPDDR4 (fast) with the board RAM only for

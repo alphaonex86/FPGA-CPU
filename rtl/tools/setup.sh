@@ -10,7 +10,7 @@ if [[ ! -d ext/VexiiRiscv ]]; then
     git clone https://github.com/SpinalHDL/VexiiRiscv.git ext/VexiiRiscv
 fi
 git -C ext/VexiiRiscv checkout -q "$VEXII_COMMIT"
-git -C ext/VexiiRiscv submodule update --init ext/SpinalHDL ext/rvls  # rvls: Scala bindings compiled in
+git -C ext/VexiiRiscv submodule update --init ext/SpinalHDL ext/rvls ext/NaxSoftware  # rvls: Scala bindings; NaxSoftware: bench ELFs
 if [[ ! -x ext/sbt/bin/sbt ]]; then
     curl -sfL -o ext/sbt.tgz \
         "https://github.com/sbt/sbt/releases/download/v$SBT_VERSION/sbt-$SBT_VERSION.tgz"
