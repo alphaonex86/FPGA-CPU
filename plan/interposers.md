@@ -120,17 +120,21 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
 - **D5** ~~Layer count, fab, HDI or not~~ (decided above: 4 layers).
 - **D6** Maximum interposer outline and height per board (needs M1, M2) - advanced with an estimated outline, to be re-checked.
 - **D7** ~~Debug/config: JTAG connector type, UART, on-board USB-JTAG or not~~ (decided above).
-- **Flash** (requirement, operator 2026-11-01; open: part and scheme) every
-  variant carries a flash large enough for the FPGA bitstream and also
-  BIOS and/or UEFI images, option ROMs and other firmware to experiment
-  with. One 5CEA9 bitstream is 102,871,776 bits (~12.3 MiB), recommended
-  EPCQ256 [cvds p.78 Table 65]; room for a factory + an application image
-  plus firmware points to 512 Mbit-1 Gbit. Conflicts with D7 (passive
-  serial from the host, no flash): to settle with the operator, e.g.
-  Active Serial x4 from an EPCQ-class quad SPI flash (EPCQ devices support
-  AS x1 and x4 [cvhb p.7-23]) that the core also reads after
-  configuration, JTAG kept.
-
+- **Flash** (requirement, operator 2026-11-01; scheme decided by the
+  operator 2026-11-01: one large flash, Active Serial x4; open: size/part)
+  every variant carries a flash large enough for the FPGA bitstream and
+  also BIOS and/or UEFI images, option ROMs and other firmware to
+  experiment with; JTAG kept. One 5CEA9 bitstream is 102,871,776 bits
+  (~12.3 MiB), recommended EPCQ256 [cvds p.78 Table 65]; EPCQ devices
+  support AS x1 and x4 [cvhb p.7-23], but AS x4 is not supported in the
+  EPCQ512 (Intel EPCQ datasheet 683078, online); the current EPCQ-A line
+  stops at EPCQ128A [FPGAlist/CycloneV_A9 EPCQ-A datasheet CF52014 p.4
+  Table 1, source cdn.components.ru/media/PDF/8034479.pdf]; EPCQ-L is for
+  Arria 10 / Stratix 10 / Cyclone 10 GX only. Quartus 25.1 `quartus_cpf`
+  builds a 5CEFA9F23C8 .jic for EPCQ128A, EPCQ256, EPCQ512, EPCQL1024,
+  MT25QL256/512/01G, MT25QU01G (refuses Macronix MX25L/MX66 and Spansion
+  S25FL): that proves JTAG programming, not AS x4 boot (it also takes
+  EPCQL1024).
 ## FPGAmotherboard compatibility (decided 2026-11-01 by the operator)
 
 socket3-cyclonev on the FPGAmotherboard Socket 3 board (contract from the
