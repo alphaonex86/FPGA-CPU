@@ -2,12 +2,15 @@
 # Usage: rtl/tools/x86_rand.py <seed> <out.S>
 # Random terminating flat 32-bit program in the M2 decoder subset
 # (rtl/x86/x86_decode.sv): EDI = 64-byte buffer base, EBP = loop counter,
-# ESP = stack; EAX..ESI are free. Unaligned buffer offsets exercise
-# store-to-load forwarding and partial overlaps.
+# ESP = stack; EAX..ESI are free (8/16-bit forms included). Unaligned
+# buffer offsets and mixed sizes exercise store-to-load forwarding and
+# partial overlaps.
 import random
 import sys
 
 FREE = ["%eax", "%ebx", "%ecx", "%edx", "%esi"]
+REGS = {"b": ["%al", "%cl", "%dl", "%bl", "%ah", "%ch", "%dh", "%bh"],
+        "w": ["%ax", "%cx", "%dx", "%bx", "%si"], "l": FREE}
 ALU = ["add", "or", "adc", "sbb", "and", "sub", "xor", "cmp"]
 JCC = ["jo", "jno", "jb", "jae", "je", "jne", "jbe", "ja",
        "js", "jns", "jp", "jnp", "jl", "jge", "jle", "jg"]
@@ -23,34 +26,40 @@ def main():
     def reg():
         return rnd.choice(FREE)
 
+    def sreg(sfx):
+        return rnd.choice(REGS[sfx])
+
     def mem():
         return "%d(%%edi)" % rnd.randrange(61)
 
-    def imm():
-        return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**31, 2**31)])
+    def imm(sfx="l"):
+        lim = {"b": 7, "w": 15, "l": 31}[sfx]
+        return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(14)
+        k = rnd.randrange(15)
+        x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
+        a = rnd.choice(ALU) + x
         if k == 0:
-            return ["%s %s, %s" % (rnd.choice(ALU), reg(), reg())]
+            return ["%s %s, %s" % (a, sreg(x), sreg(x))]
         if k == 1:
-            return ["%s %s, %s" % (rnd.choice(ALU), imm(), reg())]
+            return ["%s %s, %s" % (a, imm(x), sreg(x))]
         if k == 2:
-            return ["%s %s, %s" % (rnd.choice(ALU), mem(), reg())]
+            return ["%s %s, %s" % (a, mem(), sreg(x))]
         if k == 3:
-            return ["%s %s, %s" % (rnd.choice(ALU), reg(), mem())]
+            return ["%s %s, %s" % (a, sreg(x), mem())]
         if k == 4:
-            return ["%sl %s, %s" % (rnd.choice(ALU), imm(), mem())]
+            return ["%s %s, %s" % (a, imm(x), mem())]
         if k == 5:
-            return ["test %s, %s" % (rnd.choice([reg(), imm()]), reg())]
+            return ["test%s %s, %s" % (x, rnd.choice([sreg(x), imm(x)]), sreg(x))]
         if k == 6:
-            return ["%s %s" % (rnd.choice(["inc", "dec"]), reg())]
+            return ["%s%s %s" % (rnd.choice(["inc", "dec"]), x, sreg(x))]
         if k == 7:
-            return ["%sl %s" % (rnd.choice(["inc", "dec"]), mem())]
+            return ["%s%s %s" % (rnd.choice(["inc", "dec"]), x, mem())]
         if k == 8:
-            return ["mov %s, %s" % (rnd.choice([reg(), imm(), mem()]), reg())]
+            return ["mov%s %s, %s" % (x, rnd.choice([sreg(x), imm(x), mem()]), sreg(x))]
         if k == 9:
-            return ["movl %s, %s" % (rnd.choice([reg(), imm()]), mem())]
+            return ["mov%s %s, %s" % (x, rnd.choice([sreg(x), imm(x)]), mem())]
         if k == 10:
             return ["lea %d(%s,%s,%d), %s" % (rnd.randrange(-300, 300), reg(), reg(),
                                              rnd.choice([1, 2, 4, 8]), reg())]
@@ -61,6 +70,10 @@ def main():
             src = rnd.choice([reg(), imm(), mem()])
             return ["push%s %s" % ("l" if src.startswith("$") or "(" in src else "", src),
                     *run(rnd.randrange(3)), "pop %s" % reg()]
+        if k == 13:   # movzx / movsx: from 8 or 16 bits into 32, from 8 into 16
+            src, dst = rnd.choice(["bl", "wl", "bw"])
+            return ["mov%s%s%s %s, %s" % (rnd.choice("zs"), src, dst,
+                                          rnd.choice([sreg(src), mem()]), sreg(dst))]
         return ["nop"]
 
     def run(n):

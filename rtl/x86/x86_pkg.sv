@@ -12,8 +12,16 @@ package x86_pkg;
     localparam int NREG = 9;
 
     typedef enum logic [2:0] {K_ALU, K_LD, K_ST, K_BR, K_HLT, K_ILL} kind_t;
-    typedef enum logic [3:0] {A_ADD, A_OR, A_ADC, A_SBB, A_AND, A_SUB, A_XOR, A_CMP,
-                              A_TEST, A_INC, A_DEC, A_MOV, A_LEA} aop_t;   // A_LEA: s1 + s2 << scale + imm, no flags
+    // A_LEA: s1 + s2 << scale + imm, no flags; A_ZX8..A_SX16: zero / sign
+    // extend b from 8 / 16 bits, no flags
+    typedef enum logic [4:0] {A_ADD, A_OR, A_ADC, A_SBB, A_AND, A_SUB, A_XOR, A_CMP,
+                              A_TEST, A_INC, A_DEC, A_MOV, A_LEA,
+                              A_ZX8, A_ZX16, A_SX8, A_SX16} aop_t;
+
+    // operand size: ALU width, memory access size
+    localparam logic [1:0] SZ8 = 2'd0, SZ16 = 2'd1, SZ32 = 2'd2;
+    // loads: merge into the old destination (s3), zero or sign extend
+    localparam logic [1:0] LX_MERGE = 2'd0, LX_ZERO = 2'd1, LX_SIGN = 2'd2;
 
     // arithmetic flags as the core keeps them, EFLAGS bit order is in eflags()
     typedef struct packed {
@@ -32,12 +40,35 @@ package x86_pkg;
         logic [3:0]  s1, s2, s3; // ALU a/b; memory base/index/store data
         logic        us1, us2, us3;
         logic [1:0]  scale;      // memory index scale
+        logic [1:0]  osz;        // SZ8 / SZ16 / SZ32
+        logic        hi1, hi2, hi3;   // SZ8 source is AH..BH: bits 15:8
+        logic        dhi;        // SZ8 result goes to bits 15:8 of dst
+        logic [1:0]  lext;       // K_LD: LX_*
         logic [31:0] imm;        // ALU b when !us2; memory displacement; branch target
         logic [31:0] imm2;       // store data when !us3
         logic        rflags, wflags;
         logic        eop;        // last uop of its x86 instruction
         logic [31:0] next_eip;   // EIP after the instruction (branch fall-through)
     } uop_t;
+
+    // a SZ8 / SZ16 result written into the old 32-bit register value
+    function automatic logic [31:0] merge(input logic [31:0] old, input logic [31:0] v,
+                                          input logic [1:0] sz, input logic hi);
+        case (sz)
+            SZ8:     return hi ? {old[31:16], v[7:0], old[7:0]} : {old[31:8], v[7:0]};
+            SZ16:    return {old[31:16], v[15:0]};
+            default: return v;
+        endcase
+    endfunction
+
+    function automatic logic [31:0] extend(input logic [31:0] v, input logic [1:0] sz,
+                                           input logic sx);
+        case (sz)
+            SZ8:     return {{24{sx & v[7]}}, v[7:0]};
+            SZ16:    return {{16{sx & v[15]}}, v[15:0]};
+            default: return v;
+        endcase
+    endfunction
 
     function automatic logic [31:0] eflags(input flags_t f);
         return {20'd0, f.of, 3'd0, f.sf, f.zf, 1'b0, f.af, 1'b0, f.pf, 1'b1, f.cf};

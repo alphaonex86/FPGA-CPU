@@ -28,6 +28,7 @@ module x86_core
     output logic                  store_en,
     output logic [31:0]           store_addr,
     output logic [31:0]           store_data,
+    output logic [1:0]            store_size,    // SZ8 / SZ16 / SZ32
     // retire trace: up to 3 uops per cycle, in order
     output logic [2:0]            ret_valid,
     output logic [2:0]            ret_eop,
@@ -126,6 +127,7 @@ module x86_core
 
     typedef struct packed {
         logic        addr_valid;
+        logic [1:0]  size;
         logic [31:0] addr, data;
     } sq_t;
 
@@ -216,6 +218,7 @@ module x86_core
     assign store_en = r_store;
     assign store_addr = sq[sq_head[SQ_W-1:0]].addr;
     assign store_data = sq[sq_head[SQ_W-1:0]].data;
+    assign store_size = sq[sq_head[SQ_W-1:0]].size;
 
     // frontend redirect: retire flush first, else the first instruction of
     // the decoded group the frontend did not follow as decode predicts (the
@@ -471,9 +474,15 @@ module x86_core
     flags_t [1:0]     alu_f;
     always_comb for (int p = 0; p < 3; p++) xr[p] = resolve(ix[p]);
 
+    // a source value, AH..BH moved down
+    function automatic logic [31:0] byte_hi(input logic [31:0] v, input logic hi);
+        return hi ? v >> 8 : v;
+    endfunction
+
     generate for (gi = 0; gi < 2; gi = gi + 1) begin : alu
-        x86_alu u_alu (.op(xr[gi].u.aop), .a(xr[gi].src[0].value),
-                       .b(xr[gi].u.us2 ? xr[gi].src[1].value : xr[gi].u.imm),
+        x86_alu u_alu (.op(xr[gi].u.aop), .sz(xr[gi].u.osz),
+                       .a(byte_hi(xr[gi].src[0].value, xr[gi].u.hi1)),
+                       .b(xr[gi].u.us2 ? byte_hi(xr[gi].src[1].value, xr[gi].u.hi2) : xr[gi].u.imm),
                        .fin(xr[gi].fsrc.value), .y(alu_y[gi]), .f(alu_f[gi]));
     end endgenerate
 
@@ -496,17 +505,19 @@ module x86_core
 `endif
 
     // memory port A -> M register
-    logic             am_valid, am_store;
+    logic             am_valid, am_store, am_dhi;
     logic [TAG_W-1:0] am_tag;
-    logic [31:0]      am_addr, am_data;
+    logic [31:0]      am_addr, am_data;   // store data, or a load's merge source
+    logic [1:0]       am_osz, am_lext;
     logic [SQ_W:0]    am_sq_snap;
     logic [SQ_W-1:0]  am_sq_idx;
     logic [RS_W-1:0]  am_slot;
 
     // ---------------- M: memory ----------------
-    // loads: forward from an equal-address older store, replay on a partial
-    // overlap
+    // loads: forward from an older store at the same address at least as
+    // wide, replay on any other overlap
     function automatic logic load_ok(input logic [SQ_W:0] snap, input logic [31:0] a,
+                                     input logic [1:0] lsz,
                                      output logic fwd, output logic [31:0] fdata);
         logic ok = 1'b1;
         fwd = 1'b0;
@@ -514,14 +525,12 @@ module x86_core
         for (int k = 0; k < SQ_N; k++)
             if ((SQ_W + 1)'(k) < snap - sq_head) begin
                 sq_t s;
-                logic [31:0] d;
                 s = sq[SQ_W'(sq_head[SQ_W-1:0] + SQ_W'(k))];
-                d = s.addr - a;
                 if (!s.addr_valid) ok = 1'b0;
-                else if (s.addr == a) begin
+                else if (s.addr == a && s.size >= lsz) begin
                     fwd = 1'b1;
                     fdata = s.data;
-                end else if (d < 32'd4 || d > 32'hFFFF_FFFC) ok = 1'b0;
+                end else if (a - s.addr < 32'd1 << s.size || s.addr - a < 32'd1 << lsz) ok = 1'b0;
             end
         return ok;
     endfunction
@@ -531,7 +540,7 @@ module x86_core
     assign load_addr = am_addr;
     always_comb begin
         logic ld_ok;
-        ld_ok = load_ok(am_sq_snap, am_addr, m_fwd, m_fdata);
+        ld_ok = load_ok(am_sq_snap, am_addr, am_osz, m_fwd, m_fdata);
         m_ok = am_store || ld_ok;
     end
 
@@ -547,7 +556,7 @@ module x86_core
             logic [31:0] pc, pred;
             r = xr[p];
             ex_valid[p] = ix_valid[p];
-            ex_value[p] = r.u.aop == A_LEA ? agu(r) : alu_y[p];
+            ex_value[p] = r.u.aop == A_LEA ? agu(r) : merge(r.src[0].value, alu_y[p], r.u.osz, r.u.dhi);
             ex_flags[p] = r.u.wflags ? alu_f[p] : r.fsrc.value;
             taken = r.u.uncond || cond_taken(r.u.cond, r.fsrc.value);
             pc = !taken ? r.u.next_eip : r.u.indirect ? r.src[0].value : r.u.imm;
@@ -557,7 +566,12 @@ module x86_core
             ex_br[p] = r.u.kind == K_BR;
         end
         ex_valid[2] = am_valid && m_ok;
-        ex_value[2] = m_fwd ? m_fdata : load_data;
+        begin
+            logic [31:0] raw;
+            raw = m_fwd ? m_fdata : load_data;
+            ex_value[2] = am_lext == LX_MERGE ? merge(am_data, raw, am_osz, am_dhi)
+                                              : extend(raw, am_osz, am_lext == LX_SIGN);
+        end
         ex_flags[2] = '0;
         ex_mispred[2] = 1'b0;
         ex_redirect_pc[2] = 32'd0;
@@ -657,7 +671,10 @@ module x86_core
                 am_store <= ix[2].u.kind == K_ST;
                 am_tag <= ix[2].tag;
                 am_addr <= agu(xr[2]);
-                am_data <= ix[2].u.us3 ? xr[2].src[2].value : ix[2].u.imm2;
+                am_data <= ix[2].u.us3 ? byte_hi(xr[2].src[2].value, ix[2].u.hi3) : ix[2].u.imm2;
+                am_osz <= ix[2].u.osz;
+                am_lext <= ix[2].u.lext;
+                am_dhi <= ix[2].u.dhi;
                 am_sq_snap <= ix[2].sq_snap;
                 am_sq_idx <= ix[2].sq_idx;
                 am_slot <= ix_slot;
@@ -665,7 +682,7 @@ module x86_core
                 if (am_valid) begin
                     if (m_ok) rs[am_slot].valid <= 1'b0;
                     else rs[am_slot].issued <= 1'b0;
-                    if (am_store) sq[am_sq_idx] <= '{addr_valid: 1'b1, addr: am_addr, data: am_data};
+                    if (am_store) sq[am_sq_idx] <= '{addr_valid: 1'b1, size: am_osz, addr: am_addr, data: am_data};
                 end
                 // wakeup: ALU grants (ready), wb1 (ready + capture)
                 for (int e = 0; e < RS_N; e++) begin

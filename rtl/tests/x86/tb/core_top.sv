@@ -17,6 +17,7 @@ module core_top (
     logic [31:0] fetch_addr, load_addr, load_data, store_addr, store_data;
     logic [8*30-1:0] fetch_data;
     logic        store_en;
+    logic [1:0]  store_size;
     logic [2:0]  ret_valid, ret_eop, ret_wdst, ret_wflags;
     logic [2:0][31:0] ret_next_eip, ret_value;
     logic [2:0][3:0]  ret_dst;
@@ -30,6 +31,7 @@ module core_top (
                    .fetch_addr(fetch_addr), .fetch_data(fetch_data),
                    .load_addr(load_addr), .load_data(load_data),
                    .store_en(store_en), .store_addr(store_addr), .store_data(store_data),
+                   .store_size(store_size),
                    .ret_valid(ret_valid), .ret_eop(ret_eop), .ret_next_eip(ret_next_eip),
                    .ret_wdst(ret_wdst), .ret_dst(ret_dst), .ret_value(ret_value),
                    .ret_wflags(ret_wflags), .ret_flags(ret_flags),
@@ -82,7 +84,8 @@ module core_top (
                                  ret_next_eip[k], ret_wdst[k] ? 32'(ret_dst[k]) : -1, ret_value[k]);
             end
             if (store_en)
-                for (int i = 0; i < 4; i++) mem[20'(store_addr + 32'(i))] <= store_data[8*i +: 8];
+                for (int i = 0; i < 4; i++)
+                    if (i < 1 << store_size) mem[20'(store_addr + 32'(i))] <= store_data[8*i +: 8];
             for (int k = 0; k < 3; k++)
                 if (ret_valid[k]) begin
                     if (ret_wdst[k] && ret_dst[k] < 4'd8) r[ret_dst[k][2:0]] = ret_value[k];
