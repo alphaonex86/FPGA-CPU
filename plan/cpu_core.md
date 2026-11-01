@@ -146,11 +146,12 @@ socket3/docs/notes/design-decisions.md):
 - **C3** (decided 2026-11-01 by the operator) Lock-step reference: Unicorn
   (QEMU CPU core as a C library, one hook per instruction), testbench only
   (GPLv2, never in the RTL).
-- **C4** (decided 2026-11-01 by the operator) The target stays x86. Rejected:
-  a RISC-V CPU with own firmware in the interposer (board BIOS never run)
-  and RISC-V Linux (Debian riscv64 is RV64GC; device tree + i8259, 8250,
-  i8042, IDE, CF8/CFC PCI drivers, x86 option ROMs via an emulator like
-  U-Boot bios_emulator), also as a first milestone.
+- **C4** (decided 2026-11-01 by the operator) x86 first, but the RISC-V
+  front end stays selectable at generation time (a config option, its code
+  never deleted) for later experiments: e.g. RISC-V Linux with own firmware
+  in the interposer (board BIOS never run; Debian riscv64 is RV64GC; device
+  tree + i8259, 8250, i8042, IDE, CF8/CFC PCI drivers, x86 option ROMs via
+  an emulator like U-Boot bios_emulator). Not a milestone now.
 
 ## Next steps (each answers a concrete question)
 
