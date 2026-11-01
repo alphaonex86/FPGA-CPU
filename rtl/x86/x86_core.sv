@@ -54,7 +54,8 @@ module x86_core
     logic [2:0][3:0]      x_len, x_npfx;
     logic                 dec_take;
     uop_t [2:0][2:0]      d_uop;
-    logic [2:0][1:0]      d_n;
+    logic [2:0][1:0]      d_n, d_n_b;
+    uop_t [2:0][2:0]      d_uop_b;
     logic [2:0]           d_redirect;
     logic [2:0][31:0]     d_target;
     logic [2:0][31:0]     x_next;           // frontend next EIP
@@ -71,13 +72,20 @@ module x86_core
     logic [2:0]           p_take;           // pushed: valid, up to the first p_mis
     logic [3:0]           p_total;          // uops of the p_take slots
     logic                 p_push, p_load;
+    logic                 p_long;           // slot 0 is long: p_uop_b follows its p_uop
+    uop_t [2:0]           p_uop_b;
+    logic [1:0]           p_n_b;
+    logic [2:0]           p_lk;             // slot k is long: from slot 0 only (refetch)
+    logic                 p_redir, p_btb;   // the push redirects the frontend; the BTB
+    logic [31:0]          p_redir_pc;       // learns slot p_btb_k
+    logic [1:0]           p_btb_k;
     logic [31:0]          p_ras [RAS_N];    // return stack after the pushed group
     logic [$clog2(RAS_N)-1:0] p_sp;
 
     x86_frontend fe (.clk(clk), .rst(rst), .redirect(fe_redirect), .redirect_pc(fe_redirect_pc),
                      .take(dec_take), .fetch_addr(fetch_addr), .fetch_data(fetch_data),
                      .valid(x_valid), .bytes(x_bytes), .eip(x_eip), .len(x_len), .npfx(x_npfx), .fault(x_fault),
-                     .next(x_next), .btb_we(btb_we), .btb_set(d_redirect[btb_k]),
+                     .next(x_next), .btb_we(btb_we), .btb_set(p_redirect[btb_k]),
                      .btb_pc(p_eip[btb_k]), .btb_target(p_want[btb_k]));
 
     genvar gi;
@@ -85,28 +93,46 @@ module x86_core
         x86_decode d (.bytes(x_bytes[gi]), .eip(x_eip[gi]), .len(x_len[gi]), .npfx(x_npfx[gi]),
                       .fault(x_fault[gi]),
                       .call(d_call[gi]), .ret(d_ret[gi]),
-                      .uop(d_uop[gi]), .n(d_n[gi]), .redirect(d_redirect[gi]), .target(d_target[gi]));
+                      .uop(d_uop[gi]), .n(d_n[gi]), .uop_b(d_uop_b[gi]), .n_b(d_n_b[gi]),
+                      .redirect(d_redirect[gi]), .target(d_target[gi]));
     end endgenerate
 
     // P: the decoded group, registered. P fills in RET targets from the return
     // stack, finds the first instruction the frontend did not follow as decode
     // predicts (redirect after it, the BTB learns it) and pushes the group up
-    // to there into the uop queue.
+    // to there into the uop queue. A long slot 0 pushes p_uop first, alone,
+    // then p_uop_b with the rest of the group; a long slot 1 / 2 ends the group
+    // and is fetched again as slot 0.
     always_comb begin
         logic stop;
         p_ras = ras;
         p_sp = ras_sp;
         p_uop_ret = p_uop;
         p_total = 4'd0;
+        p_redir = 1'b0;
+        p_redir_pc = 32'd0;
+        p_btb = 1'b0;
+        p_btb_k = 2'd0;
         stop = 1'b0;
         for (int k = 0; k < 3; k++) begin
             p_want[k] = p_ret[k] ? p_ras[p_sp - 1'b1] : p_redirect[k] ? p_target[k] : p_seq[k];
             p_uop_ret[k][2].imm = p_ret[k] ? p_want[k] : p_uop[k][2].imm;
             p_mis[k] = p_want[k] != p_next[k];
-            p_take[k] = p_valid[k] && !stop;
+            p_take[k] = p_valid[k] && !stop && !(k != 0 && p_lk[k]);
+            if (p_valid[k] && !stop && k != 0 && p_lk[k]) begin
+                p_redir = 1'b1;
+                p_redir_pc = p_eip[k];
+                stop = 1'b1;
+            end
             if (p_take[k]) begin
                 p_total = p_total + 4'(p_n[k]);
-                stop = p_mis[k];
+                if (p_mis[k] && !p_long) begin
+                    p_redir = 1'b1;
+                    p_redir_pc = p_want[k];
+                    p_btb = 1'b1;
+                    p_btb_k = 2'(k);
+                end
+                stop = p_mis[k] || p_long;
                 if (p_call[k]) begin
                     p_ras[p_sp] = p_seq[k];
                     p_sp = p_sp + 1'b1;
@@ -198,7 +224,7 @@ module x86_core
 
     // ---------------- decode -> P -> uop queue ----------------
     assign p_push = p_valid != 3'd0 && !flush && 5'(UQ_N) - uq_count >= 5'(p_total);
-    assign dec_take = x_valid != 3'd0 && (p_valid == 3'd0 || p_push);
+    assign dec_take = x_valid != 3'd0 && (p_valid == 3'd0 || p_push && !p_long);
     assign p_load = dec_take && !fe_redirect;   // a redirect drops the decoded group
     always_ff @(posedge clk) begin
         if (rst || flush) p_valid <= '0;
@@ -212,8 +238,20 @@ module x86_core
             p_eip <= x_eip;
             p_target <= d_target;
             p_next <= x_next;
-            for (int k = 0; k < 3; k++) p_seq[k] <= x_eip[k] + 32'(x_len[k]);
-        end else if (p_push) p_valid <= '0;
+            for (int k = 0; k < 3; k++) begin
+                p_seq[k] <= x_eip[k] + 32'(x_len[k]);
+                p_lk[k] <= d_n_b[k] != 2'd0;
+            end
+            p_long <= d_n_b[0] != 2'd0;
+            p_uop_b <= d_uop_b[0];
+            p_n_b <= d_n_b[0];
+        end else if (p_push) begin
+            if (p_long) begin
+                p_uop[0] <= p_uop_b;
+                p_n[0] <= p_n_b;
+                p_long <= 1'b0;
+            end else p_valid <= '0;
+        end
         if (rst) ras_sp <= '0;
         else if (p_push) begin
             ras <= p_ras;
@@ -252,7 +290,7 @@ module x86_core
                     stop = 1'b1;
                 end
             end else stop = 1'b1;
-            ret_eop[k] = e.eop;
+            ret_eop[k] = e.eop || e.kind == K_BR && e.mispred;   // REP exit: ends at uop 0
             ret_next_eip[k] = e.next_eip;
             ret_wdst[k] = e.wdst;
             ret_dst[k] = e.dst;
@@ -275,14 +313,12 @@ module x86_core
         btb_we = 1'b0;
         btb_k = 2'd0;
         if (rst) fe_redirect_pc = reset_eip;
-        else if (p_push)
-            for (int k = 2; k >= 0; k--)
-                if (p_take[k] && p_mis[k]) begin
-                    fe_redirect = 1'b1;
-                    fe_redirect_pc = p_want[k];
-                    btb_we = 1'b1;
-                    btb_k = 2'(k);
-                end
+        else if (p_push && p_redir) begin
+            fe_redirect = 1'b1;
+            fe_redirect_pc = p_redir_pc;
+            btb_we = p_btb;
+            btb_k = p_btb_k;
+        end
     end
 
     // ---------------- R: rename ----------------
@@ -623,9 +659,11 @@ module x86_core
             logic [31:0] pc, pred;
             r = xr[p];
             ex_valid[p] = ix_valid[p];
-            ex_value[p] = r.u.aop == A_LEA ? agu(r) : merge(r.src[0].value, alu_y[p], r.u.osz, r.u.dhi);
+            ex_value[p] = r.u.aop == A_LEA ? agu(r)
+                        : r.u.ecxz && r.src[0].value == 32'd0 ? 32'd0   // REP exit: ECX stays 0
+                        : merge(r.src[0].value, alu_y[p], r.u.osz, r.u.dhi);
             ex_flags[p] = r.u.wflags ? alu_f[p] : r.fsrc.value;
-            taken = r.u.uncond || cond_taken(r.u.cond, r.fsrc.value);
+            taken = r.u.ecxz ? r.src[0].value == 32'd0 : r.u.uncond || cond_taken(r.u.cond, r.fsrc.value);
             pc = !taken ? r.u.next_eip : r.u.indirect ? r.src[0].value : r.u.imm;
             pred = r.u.pred_taken ? r.u.imm : r.u.next_eip;
             ex_mispred[p] = r.u.kind == K_BR && pc != pred;

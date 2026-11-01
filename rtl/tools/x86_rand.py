@@ -37,7 +37,7 @@ def main():
         return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(25)
+        k = rnd.randrange(26)
         x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
         a = rnd.choice(ALU) + x
         if k == 0:
@@ -115,6 +115,15 @@ def main():
             cnt = rnd.choice(["$%d" % rnd.randrange(32), "%cl"])
             return ["%s%s %s, %s, %s" % (rnd.choice(["shld", "shrd"]), y, cnt, sreg(y),
                                          rnd.choice([sreg(y), mem()]))]
+        if k == 24:   # [REP] MOVS / STOS / LODS (DF = 0), ESI / EDI inside the buffer
+            sz = rnd.choice("bwl")
+            n = rnd.randrange(7)
+            r = rnd.randrange(3) != 0
+            w = {"b": 1, "w": 2, "l": 4}[sz] * (n if r else 1)
+            lines = ["push %edi", "lea %d(%%edi), %%esi" % rnd.randrange(65 - w),
+                     "lea %d(%%edi), %%edi" % rnd.randrange(65 - w), "mov $%d, %%ecx" % n,
+                     ("rep " if r else "") + rnd.choice(["movs", "stos", "lods"]) + sz, "pop %edi"]
+            return (["cld"] if rnd.randrange(4) == 0 else []) + lines
         return ["nop"]
 
     def run(n):
@@ -141,7 +150,7 @@ def main():
             body = run(rnd.randrange(1, 6))
             if rnd.randrange(2):   # frame pointer: LEAVE restores ESP, EBP
                 body = ["push %ebp", "mov %esp, %ebp", *body, "pushl $7", "leave"]
-            subs.append(["S%d:" % l, *body, "ret"])
+            subs.append(["S%d:" % l, *body, "rep ret" if rnd.randrange(4) == 0 else "ret"])
             if rnd.randrange(2):
                 return ["call S%d" % l]
             r = reg()

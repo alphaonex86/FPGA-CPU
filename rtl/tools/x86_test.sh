@@ -1,7 +1,8 @@
 #!/bin/bash
 # Usage: rtl/tools/x86_test.sh <test.S | test.c> [trace.txt]
 # Builds a flat 32-bit x86 test (loaded at 0x1000) into rtl/build/x86/<name>.bin
-# (C: gcc i686 freestanding, entered by tests/x86/lib/crt0.S at main);
+# (C: gcc i686 freestanding, -O2 or the flags of a "// cflags: ..." line,
+# entered by tests/x86/lib/crt0.S at main);
 # without a trace prints the Unicorn reference trace, with one checks it
 # (rtl/tools/x86_trace_check.c, built by setup.sh).
 set -eu
@@ -15,7 +16,9 @@ mkdir -p build/x86
 objs=()
 if [[ $src == *.c ]]; then
     as --32 -o build/x86/crt0.o tests/x86/lib/crt0.S
-    gcc -m32 -march=i686 -mno-sse -O2 -ffreestanding -fno-pic -fno-stack-protector -fno-reorder-functions \
+    cflags=$(sed -n 's|^// cflags: ||p' "$src")
+    # shellcheck disable=SC2086
+    gcc -m32 -march=i686 -mno-sse ${cflags:--O2} -ffreestanding -fno-pic -fno-stack-protector -fno-reorder-functions \
         -fno-asynchronous-unwind-tables -c -o "build/x86/$name.o" "$src"
     objs=(build/x86/crt0.o)
 else

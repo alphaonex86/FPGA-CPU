@@ -67,14 +67,19 @@ replicated per read port plus a live-value table.
    an uncaptured operand must be on wb1/wb2 (simulation check). Branches:
    static BTFN at decode, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
-   they retire. Subset: ALU/shift/rotate/SHLD/SHRD/SETcc/CMOVcc/MUL/IMUL/DIV/IDIV
-   on 8/16/32-bit operands (QEMU flag semantics), loads/stores, stack,
-   branches; prefixes 66 and CS/DS/ES/SS. Matches Unicorn on x1/x2, 2000
-   random programs (`x86_rand.py`) and compiled C (`tests/x86/c1_mix.c`,
-   gcc -O2 i686: records, strings, sort, CRC-32, recursion; 23,879
-   instructions, IPC 0.716; `c2_core.c`: list, matrix, switch jump table,
-   64-bit arithmetic; 9,369 instructions, IPC 0.754). IPC: 1.88 straight ALU code (2 ALU ports), 1.94 in a
-   14-instruction loop, 0.45 on random programs (random forward Jcc).
+   they retire. Subset: ALU/shift/rotate/SHLD/SHRD/SETcc/CMOVcc/MUL/IMUL/
+   DIV/IDIV on 8/16/32-bit operands (QEMU flag semantics), loads/stores,
+   stack, branches, [REP] MOVS/STOS/LODS (DF = 0); prefixes 66, F3 and
+   CS/DS/ES/SS. A REP iteration is the instruction looping on itself: uop 0
+   leaves when ECX = 0 (else ECX -= 1), decode predicts the loop, the BTB
+   learns it; up to 6 uops per instruction (P pushes a long slot 0 in two
+   cycles). Matches Unicorn on x1/x2, 2000 random programs (`x86_rand.py`)
+   and compiled C (`tests/x86/c*.c`, gcc i686 freestanding): `c1_mix`
+   (records, strings, sort, CRC-32, recursion) 23,879 instructions, IPC
+   0.808; `c2_core` (list, matrix, switch jump table, 64-bit arithmetic)
+   9,369, IPC 0.942; `c3_string` (-Os: REP MOVS/STOS) 10,033, IPC 0.748.
+   IPC: 1.88 straight ALU code (2 ALU ports), 1.94 in a 14-instruction
+   loop, 0.35 on random programs (random forward Jcc, string ops).
    5CEFA9F23C8 (`rtl/tests/x86/synth/x86_core_synth.sv`,
    `rtl/tools/synth_path.sh` for the worst path): single-cycle issue 5.88
    MHz (serial oldest-first select + execute + capture); pipelined issue
@@ -103,6 +108,13 @@ replicated per read port plus a live-value table.
    STPCLK# stays high >= 8 clocks between assertions. Socket 7 (P55C)
    follows later, with A4 in the special-cycle decode (peer session
    "motherboard FPGA", 2026-11-01).
+   All sockets: honour A20M# (mask physical address bit 20 while asserted;
+   inactive at the first fetch and across RESET; the FPGAmotherboard
+   chipset drives it from 8042 output port bit 1 OR port 0x92 bit 1) and
+   INIT# (S370) / INIT (S7), a 15-bus-clock pulse on 8042 command 0xFE or a
+   port 0x92 bit 0 write: soft reset to the reset vector, caches and DRAM
+   kept (peer session "motherboard FPGA", FPGAcommon 4d2f944 / d547ce2,
+   2026-11-01).
 
 ## Layout
 

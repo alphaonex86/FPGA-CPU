@@ -1,11 +1,13 @@
 // One x86 instruction -> up to 3 uops (plan/x86_core.md M2 subset, 32-bit
-// code; prefixes 66 and CS/DS/ES/SS, no-ops in the flat model): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
+// code; prefixes 66, CS/DS/ES/SS (no-ops in the flat model), F3 on string
+// ops and RET): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
 // /0 /1, TEST 84/85/A8/A9/F6/F7 /0, NOT/NEG F6/F7 /2 /3, shifts and
 // rotates C0/C1/D0-D3 (not RCL/RCR), MOV 88-8B/B0-BF/C6/C7 /0,
 // SHLD/SHRD, MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
 // MUL/IMUL/DIV/IDIV F6/F7 /4-/7 (x86_muldiv), LEA, PUSH
 // r32/imm/r/m, POP r32, CALL rel32/r32, RET, LEAVE, JMP rel/r/m, Jcc
-// rel8/rel32, NOP, HLT. Anything else is one K_ILL uop.
+// rel8/rel32, NOP, HLT, [REP] MOVS/STOS/LODS (DF = 0: CLD is a NOP, STD
+// K_ILL), up to 6 uops: uop then uop_b. Anything else is one K_ILL uop.
 // 8/16-bit results merge into the old register (s1, or s3 for loads).
 // Memory destinations: LD TMP; ALU TMP; ST TMP. Static prediction: direct
 // JMP/CALL, backward Jcc and RET taken (redirect), the rest not taken; the
@@ -22,11 +24,14 @@ module x86_decode
     output logic            ret,        // pops it
     output uop_t [2:0]      uop,
     output logic [1:0]      n,          // valid uops: uop[0 .. n-1]
+    output uop_t [2:0]      uop_b,      // long instructions: uops 3 ..
+    output logic [1:0]      n_b,
     output logic            redirect,   // frontend continues at target
     output logic [31:0]     target
 );
     logic            p66;       // operand-size prefix
     logic            pbad;      // another prefix: K_ILL
+    logic            prep;      // F3 (REP)
     logic [8*15-1:0] ib;        // the instruction after the prefix
 
     function automatic logic [7:0] b(input int i);
@@ -138,6 +143,11 @@ module x86_decode
         x.kind = K_ALU; x.aop = A_LEA;
         x.dst = R_ESP; x.wdst = 1'b1;
         x.s1 = R_ESP; x.us1 = 1'b1; x.imm = delta;
+        return x;
+    endfunction
+    function automatic uop_t reg_add(input logic [3:0] r, input logic [31:0] delta);
+        uop_t x = esp_add(delta);
+        x.dst = r; x.s1 = r;
         return x;
     endfunction
     function automatic uop_t jmp_ind(input logic [3:0] s);
@@ -316,13 +326,16 @@ module x86_decode
 
     always_comb begin
         p66 = 1'b0;
+        prep = 1'b0;
         pbad = 1'b0;
         for (int i = 0; i < 14; i++)
             if (i < int'(npfx)) begin
                 logic [7:0] x;
                 x = bytes[8*i +: 8];
                 p66 = p66 || x == 8'h66;
-                pbad = pbad || !(x == 8'h66 || x == 8'h26 || x == 8'h2E || x == 8'h36 || x == 8'h3E);
+                prep = prep || x == 8'hF3;
+                pbad = pbad || !(x == 8'h66 || x == 8'hF3 || x == 8'h26 || x == 8'h2E || x == 8'h36
+                                 || x == 8'h3E);
             end
         ib = bytes >> (8 * npfx);
         wsz = p66 ? SZ16 : SZ32;
@@ -477,7 +490,7 @@ module x86_decode
                 uop[0] = mop; uop[0].kind = K_ALU; uop[0].aop = A_LEA;
                 uop[0].dst = {1'b0, reg_f}; uop[0].wdst = 1'b1;
             end
-            8'h90: uop[0].kind = K_ALU;   // NOP: A_ADD writing nothing
+            8'h90, 8'hFC: uop[0].kind = K_ALU;   // NOP, CLD: A_ADD writing nothing
             8'h91, 8'h92, 8'h93, 8'h94, 8'h95, 8'h96, 8'h97:   // XCHG eAX, r
                 xchg(wsz, 3'd0, op[2:0], 1'b0, uop, n);
             8'h98: uop[0] = p66 ? alu(A_SX8, SZ16, 4'd0, 1'b0, 1'b1, 4'd0, 1'b0, 32'd0)    // CBW
@@ -562,6 +575,57 @@ module x86_decode
             endcase
             default: ;
         endcase
+        // string ops: [REP] uop 0 leaves for next_eip when ECX is 0, else
+        // ECX -= 1; one iteration follows and the instruction continues at
+        // itself (predicted, the BTB learns the loop)
+        uop_b = '0;
+        n_b = 2'd0;
+        if (op == 8'hA4 || op == 8'hA5 || op == 8'hAA || op == 8'hAB || op == 8'hAC || op == 8'hAD) begin
+            uop_t [5:0]  s;
+            uop_t        m;
+            logic [1:0]  sz;
+            logic [31:0] w;
+            int          c;
+            sz = op[0] ? wsz : SZ8;
+            w = sz == SZ8 ? 32'd1 : sz == SZ16 ? 32'd2 : 32'd4;
+            s = '0;
+            m = u; m.osz = sz;
+            m.us1 = 1'b1; m.s1 = {1'b0, op[3] && op[2] ? 3'd6 : 3'd7};   // LODS: ESI, else EDI
+            if (op[3] && !op[2]) begin   // STOS: ST [EDI] <- eAX; EDI += w
+                s[0] = m; s[0].kind = K_ST; s[0].s3 = 4'd0; s[0].us3 = 1'b1;
+                s[1] = reg_add(4'd7, w);
+                c = 2;
+            end else if (op[3]) begin    // LODS: eAX <- [ESI]; ESI += w
+                s[0] = m; s[0].kind = K_LD; s[0].dst = 4'd0; s[0].wdst = 1'b1; s[0].lext = LX_MERGE;
+                s[0].s3 = 4'd0; s[0].us3 = sz != SZ32;
+                s[1] = reg_add(4'd6, w);
+                c = 2;
+            end else begin               // MOVS: TMP <- [ESI]; [EDI] <- TMP; ESI, EDI += w
+                s[0] = m; s[0].kind = K_LD; s[0].s1 = 4'd6; s[0].dst = R_TMP; s[0].wdst = 1'b1;
+                s[0].lext = LX_ZERO;
+                s[1] = m; s[1].kind = K_ST; s[1].s3 = R_TMP; s[1].us3 = 1'b1;
+                s[2] = reg_add(4'd6, w);
+                s[3] = reg_add(4'd7, w);
+                c = 4;
+            end
+            if (prep) begin
+                s = {s[4:0], u};
+                s[0].kind = K_BR; s[0].ecxz = 1'b1; s[0].aop = A_DEC;
+                s[0].dst = 4'd1; s[0].wdst = 1'b1; s[0].s1 = 4'd1; s[0].us1 = 1'b1;
+                s[0].imm = next_eip;
+                c = c + 1;
+            end
+            for (int i = 0; i < 6; i++) begin
+                s[i].eop = i == c - 1;
+                if (prep) s[i].next_eip = eip;
+            end
+            uop = s[2:0];
+            n = 2'(c > 3 ? 3 : c);
+            uop_b = s[5:3];
+            n_b = 2'(c > 3 ? c - 3 : 0);
+            redirect = prep;
+            target = eip;
+        end else if (prep && op != 8'hC3) pbad = 1'b1;   // REP RET is RET
         call = !p66 && (op == 8'hE8 || op == 8'hFF && reg_f == 3'd2 && !mem);
         ret = !p66 && op == 8'hC3;
         if (fault || pbad) begin
@@ -569,6 +633,9 @@ module x86_decode
             uop[0] = u;
             uop[0].kind = K_ILL;
             n = 2'd1;
+            uop_b = '0;
+            n_b = 2'd0;
+            redirect = 1'b0;
             call = 1'b0;
             ret = 1'b0;
         end

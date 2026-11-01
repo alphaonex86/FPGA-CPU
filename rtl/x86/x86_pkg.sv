@@ -41,6 +41,7 @@ package x86_pkg;
         logic        uncond;     // K_BR: JMP/CALL/RET
         logic        indirect;   // K_BR: target = s1 (RET)
         logic        pred_taken; // K_BR: frontend followed the target
+        logic        ecxz;       // K_BR: taken when s1 is 0, else s1 - 1 written (REP)
         logic [3:0]  dst;
         logic        wdst;
         logic [3:0]  s1, s2, s3; // ALU a/b; memory base/index/store data
