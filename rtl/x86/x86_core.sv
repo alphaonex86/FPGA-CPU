@@ -215,12 +215,88 @@ module x86_core
                 end
     end
 
-    // ---------------- rename / dispatch ----------------
-    logic [1:0]           ds_n;      // uops dispatched this cycle
+    // ---------------- R: rename ----------------
+    // R reads the uop queue and the RAT and allocates the ROB entry, the
+    // store queue entry and the RS budget; D (next cycle) reads the operand
+    // values and writes the RS. A producer renamed in the same group needs
+    // no special case in D: its ROB entry is allocated, not done.
+    typedef struct packed {
+        uop_t                  u;
+        logic [TAG_W-1:0]      tag;
+        logic                  port;
+        logic [SQ_W:0]         sq_snap;
+        logic [3:0]            in_rob;   // s1, s2, s3, flags
+        logic [3:0][TAG_W-1:0] stag;
+    } rn_t;
+
+    logic [1:0] rn_n;     // uops renamed this cycle
+    logic [1:0] rn_nrs;   // of which need an RS entry
+    rn_t [2:0]  rn;
+    // R needs 3 free RS entries beyond the group in D (registered,
+    // conservative: entries freed this cycle count from the next one)
+    logic       rs_free3;
+
+    function automatic logic is_alu(input kind_t k);
+        return k == K_ALU || k == K_BR;
+    endfunction
+
+    function automatic logic needs_rs(input kind_t k);
+        return !(k == K_HLT || k == K_ILL);
+    endfunction
+
+    always_comb begin
+        logic [TAG_W:0] rob_free;
+        logic [SQ_W:0]  sqt;
+        logic           stop, par;
+        logic [3:0]     sr;
+        uop_t           u;
+        rob_free = (TAG_W + 1)'(ROB_N) - rob_count;
+        sqt = sq_tail;
+        rn_n = 2'd0;
+        rn_nrs = 2'd0;
+        par = 1'b0;
+        stop = halted;
+        for (int k = 0; k < 3; k++) begin
+            u = uq[4'(uq_head + 4'(k))];
+            rn[k] = '0;
+            rn[k].u = u;
+            rn[k].tag = TAG_W'(rob_tail + TAG_W'(k));
+            rn[k].port = alu_port ^ par;
+            par = par ^ is_alu(u.kind);
+            rn[k].sq_snap = sqt;
+            for (int i = 0; i < 3; i++) begin
+                sr = i == 0 ? u.s1 : i == 1 ? u.s2 : u.s3;
+                rn[k].in_rob[i] = rat_rob[sr];
+                rn[k].stag[i] = rat_tag[sr];
+                for (int j = 0; j < k; j++)
+                    if (rn[j].u.wdst && rn[j].u.dst == sr) begin
+                        rn[k].in_rob[i] = 1'b1;
+                        rn[k].stag[i] = rn[j].tag;
+                    end
+            end
+            rn[k].in_rob[3] = frat_rob;
+            rn[k].stag[3] = frat_tag;
+            for (int j = 0; j < k; j++)
+                if (rn[j].u.wflags) begin
+                    rn[k].in_rob[3] = 1'b1;
+                    rn[k].stag[3] = rn[j].tag;
+                end
+            if (!stop && 5'(k) < uq_count && (TAG_W + 1)'(k) < rob_free
+                && (rs_free3 || !needs_rs(u.kind))
+                && !(u.kind == K_ST && sqt - sq_head >= (SQ_W + 1)'(SQ_N))) begin
+                rn_n = 2'(k + 1);
+                rn_nrs = rn_nrs + 2'(needs_rs(u.kind));
+            end else stop = 1'b1;
+            if (u.kind == K_ST) sqt = sqt + 1'b1;
+        end
+    end
+
+    // ---------------- D: operand read, RS write ----------------
+    logic [2:0]           dq_valid;
+    rn_t [2:0]            dq;
     rs_t  [2:0]           ds_rs;
-    logic [2:0][RS_N-1:0] ds_slot;   // one-hot RS entry per dispatched uop
+    logic [2:0][RS_N-1:0] ds_slot;   // one-hot RS entry per uop
     logic [2:0]           ds_to_rs;
-    logic [2:0]           ds_alu_par;   // parity of ALU uops before k in the group
 
     function automatic src_t read_src(input logic [3:0] r, input logic in_rob,
                                       input logic [TAG_W-1:0] t);
@@ -238,95 +314,51 @@ module x86_core
     endfunction
 
     always_comb begin
-        logic [RS_N-1:0]  used;
-        logic [TAG_W:0]   rob_free;
-        logic [SQ_W:0]    sqt;
-        logic             stop, need_rs, need_sq, got, in_rob, par;
-        uop_t             u;
-        logic [3:0]       sr [3];
-        logic             su [3];
-        logic [TAG_W-1:0] t;
-        src_t             x;
-        rob_free = (TAG_W + 1)'(ROB_N) - rob_count;
-        sqt = sq_tail;
-        used = '0;
-        for (int e = 0; e < RS_N; e++) used[e] = rs[e].valid;
-        ds_n = 2'd0;
-        par = 1'b0;
-        stop = halted;
+        logic [RS_N-1:0]      free;
+        logic [2:0][RS_N-1:0] fs;   // the first 3 free RS entries, one-hot
+        logic [1:0]           nrs;
+        logic [3:0]           sr [3];
+        logic                 su [3];
+        uop_t                 u;
+        logic [TAG_W-1:0]     t;
+        for (int e = 0; e < RS_N; e++) free[e] = !rs[e].valid;
+        for (int i = 0; i < 3; i++) begin
+            fs[i] = free & -free;   // lowest set bit
+            free = free & ~fs[i];
+        end
+        nrs = 2'd0;
         for (int k = 0; k < 3; k++) begin
-            u = uq[4'(uq_head + 4'(k))];
-            ds_alu_par[k] = par;
-            par = par ^ is_alu(u.kind);
-            need_rs = !(u.kind == K_HLT || u.kind == K_ILL);
-            need_sq = u.kind == K_ST;
+            u = dq[k].u;
             ds_rs[k] = '0;
             ds_rs[k].valid = 1'b1;
-            ds_rs[k].port = alu_port ^ ds_alu_par[k];
+            ds_rs[k].port = dq[k].port;
             ds_rs[k].u = u;
-            ds_rs[k].tag = TAG_W'(rob_tail + TAG_W'(k));
-            ds_rs[k].sq_snap = sqt;
-            ds_rs[k].sq_idx = sqt[SQ_W-1:0];
-            ds_slot[k] = '0;
-            got = 1'b0;
-            for (int e = 0; e < RS_N; e++)
-                if (need_rs && !got && !used[e]) begin
-                    got = 1'b1;
-                    ds_slot[k][e] = 1'b1;
-                end
-            // sources: arch, an in-flight ROB entry, or an older uop of this group
+            ds_rs[k].tag = dq[k].tag;
+            ds_rs[k].sq_snap = dq[k].sq_snap;
+            ds_rs[k].sq_idx = dq[k].sq_snap[SQ_W-1:0];
             sr[0] = u.s1; su[0] = u.us1;
             sr[1] = u.s2; su[1] = u.us2;
             sr[2] = u.s3; su[2] = u.us3;
             for (int i = 0; i < 3; i++) begin
-                in_rob = rat_rob[sr[i]];
-                t = rat_tag[sr[i]];
-                for (int j = 0; j < k; j++)
-                    if (ds_rs[j].u.wdst && ds_rs[j].u.dst == sr[i]) begin
-                        in_rob = 1'b1;
-                        t = ds_rs[j].tag;
-                    end
-                ds_rs[k].src[i] = read_src(sr[i], in_rob, t);
-                if (in_rob && in_group(k, t)) ds_rs[k].src[i].ready = 1'b0;
+                ds_rs[k].src[i] = read_src(sr[i], dq[k].in_rob[i], dq[k].stag[i]);
                 if (!su[i]) ds_rs[k].src[i].ready = 1'b1;
                 ds_rs[k].src[i].captured = ds_rs[k].src[i].ready;
             end
-            in_rob = frat_rob;
-            t = frat_tag;
-            for (int j = 0; j < k; j++)
-                if (ds_rs[j].u.wflags) begin
-                    in_rob = 1'b1;
-                    t = ds_rs[j].tag;
-                end
-            x = read_src(4'd0, in_rob, t);
+            t = dq[k].stag[3];
             ds_rs[k].fsrc.tag = t;
-            ds_rs[k].fsrc.ready = x.ready && !(in_rob && in_group(k, t)) || !u.rflags;
-            ds_rs[k].fsrc.captured = ds_rs[k].fsrc.ready;
-            ds_rs[k].fsrc.value = !in_rob ? arch_flags : rob[t].flags;
+            ds_rs[k].fsrc.ready = !dq[k].in_rob[3] || rob[t].done || !u.rflags;
+            ds_rs[k].fsrc.value = !dq[k].in_rob[3] ? arch_flags : rob[t].flags;
             for (int p = 0; p < 3; p++)
-                if (in_rob && wb_valid[p] && wb_tag[p] == t) ds_rs[k].fsrc.value = wb_flags[p];
-            ds_to_rs[k] = need_rs;
-            if (!stop && 5'(k) < uq_count && (TAG_W + 1)'(k) < rob_free && (got || !need_rs)
-                && !(need_sq && sqt - sq_head >= (SQ_W + 1)'(SQ_N))) begin
-                ds_n = 2'(k + 1);
-                used = used | ds_slot[k];
-                if (need_sq) sqt = sqt + 1'b1;
-            end else stop = 1'b1;
+                if (dq[k].in_rob[3] && wb_valid[p] && wb_tag[p] == t) begin
+                    ds_rs[k].fsrc.ready = 1'b1;
+                    ds_rs[k].fsrc.value = wb_flags[p];
+                end
+            ds_rs[k].fsrc.captured = ds_rs[k].fsrc.ready;
+            ds_to_rs[k] = dq_valid[k] && needs_rs(u.kind);
+            ds_slot[k] = fs[nrs];
+            nrs = nrs + 2'(ds_to_rs[k]);
         end
     end
-
-    function automatic logic is_alu(input kind_t k);
-        return k == K_ALU || k == K_BR;
-    endfunction
-
-    // a tag written by an older uop of the same dispatch group: not ready
-    function automatic logic in_group(input int k, input logic [TAG_W-1:0] t);
-        logic r = 1'b0;
-        for (int j = 0; j < 3; j++)
-            if (j < k && TAG_W'(rob_tail + TAG_W'(j)) == t) r = 1'b1;
-        return r;
-    endfunction
-
 
     // ---------------- S: select ----------------
     localparam int RS_W = $clog2(RS_N);
@@ -522,7 +554,9 @@ module x86_core
             for (int r = 0; r < NREG; r++) rat_rob[r] <= 1'b0;
             frat_rob <= 1'b0;
             ix_valid <= '0;
+            dq_valid <= '0;
             am_valid <= 1'b0;
+            rs_free3 <= 1'b1;
             wb_valid <= '0;
             wb2_valid <= '0;
         end
@@ -627,46 +661,55 @@ module x86_core
                             rs[e].fsrc.value <= wb_flags[p];
                         end
                 end
-                // dispatch: ROB, RS (+ age matrix row), RAT
+                // D: RS (+ age matrix row)
                 begin
                     logic [RS_N-1:0] valid_now, new_slots, row;
+                    logic [4:0]      nfree;
                     for (int e = 0; e < RS_N; e++) valid_now[e] = rs[e].valid;
                     new_slots = '0;
                     for (int k = 0; k < 3; k++)
-                        if (2'(k) < ds_n && ds_to_rs[k]) new_slots = new_slots | ds_slot[k];
+                        if (ds_to_rs[k]) new_slots = new_slots | ds_slot[k];
                     for (int e = 0; e < RS_N; e++) older[e] <= older[e] & ~new_slots;
+                    nfree = '0;
+                    for (int e = 0; e < RS_N; e++) nfree = nfree + 5'(!valid_now[e] && !new_slots[e]);
+                    rs_free3 <= nfree >= 5'd3 + 5'(rn_nrs);
                     row = valid_now;
                     for (int k = 0; k < 3; k++)
-                        if (2'(k) < ds_n) begin
-                            uop_t u;
-                            u = ds_rs[k].u;
-                            rob[ds_rs[k].tag] <= '{done: (u.kind == K_HLT || u.kind == K_ILL), kind: u.kind,
-                                dst: u.dst, wdst: u.wdst, wflags: u.wflags, eop: u.eop, value: 32'd0,
-                                flags: '0, next_eip: u.next_eip, mispred: 1'b0, redirect_pc: 32'd0};
-                            if (ds_to_rs[k]) begin
-                                for (int e = 0; e < RS_N; e++)
-                                    if (ds_slot[k][e]) begin
-                                        rs[e] <= ds_rs[k];
-                                        older[e] <= row;
-                                    end
-                                row = row | ds_slot[k];
-                            end
-                            if (u.kind == K_ST) sq[ds_rs[k].sq_idx].addr_valid <= 1'b0;
-                            if (u.wdst) begin
-                                rat_rob[u.dst] <= 1'b1;
-                                rat_tag[u.dst] <= ds_rs[k].tag;
-                            end
-                            if (u.wflags) begin
-                                frat_rob <= 1'b1;
-                                frat_tag <= ds_rs[k].tag;
-                            end
-                            if (is_alu(u.kind)) alu_port <= alu_port ^ ds_alu_par[k] ^ 1'b1;
+                        if (ds_to_rs[k]) begin
+                            for (int e = 0; e < RS_N; e++)
+                                if (ds_slot[k][e]) begin
+                                    rs[e] <= ds_rs[k];
+                                    older[e] <= row;
+                                end
+                            row = row | ds_slot[k];
                         end
                 end
-                rob_tail <= rob_tail + TAG_W'(ds_n);
-                rob_count <= rob_count + (TAG_W + 1)'(ds_n) - (TAG_W + 1)'(r_n);
-                if (ds_n != 2'd0) sq_tail <= ds_rs[ds_n - 2'd1].sq_snap
-                                             + (SQ_W + 1)'(ds_rs[ds_n - 2'd1].u.kind == K_ST);
+                // R: ROB, RAT, store queue entry -> D
+                for (int k = 0; k < 3; k++) begin
+                    dq_valid[k] <= 2'(k) < rn_n;
+                    dq[k] <= rn[k];
+                    if (2'(k) < rn_n) begin
+                        uop_t u;
+                        u = rn[k].u;
+                        rob[rn[k].tag] <= '{done: !needs_rs(u.kind), kind: u.kind,
+                            dst: u.dst, wdst: u.wdst, wflags: u.wflags, eop: u.eop, value: 32'd0,
+                            flags: '0, next_eip: u.next_eip, mispred: 1'b0, redirect_pc: 32'd0};
+                        if (u.kind == K_ST) sq[rn[k].sq_snap[SQ_W-1:0]].addr_valid <= 1'b0;
+                        if (u.wdst) begin
+                            rat_rob[u.dst] <= 1'b1;
+                            rat_tag[u.dst] <= rn[k].tag;
+                        end
+                        if (u.wflags) begin
+                            frat_rob <= 1'b1;
+                            frat_tag <= rn[k].tag;
+                        end
+                        if (is_alu(u.kind)) alu_port <= !rn[k].port;
+                    end
+                end
+                rob_tail <= rob_tail + TAG_W'(rn_n);
+                rob_count <= rob_count + (TAG_W + 1)'(rn_n) - (TAG_W + 1)'(r_n);
+                if (rn_n != 2'd0) sq_tail <= rn[rn_n - 2'd1].sq_snap
+                                             + (SQ_W + 1)'(rn[rn_n - 2'd1].u.kind == K_ST);
                 // uop queue
                 begin
                     logic [3:0] t, pushed;
@@ -685,8 +728,8 @@ module x86_core
                             end
                     pushed = t - uq_tail;   // 4-bit: wraps with the pointers
                     uq_tail <= t;
-                    uq_head <= uq_head + 4'(ds_n);
-                    uq_count <= uq_count + 5'(pushed) - 5'(ds_n);
+                    uq_head <= uq_head + 4'(rn_n);
+                    uq_count <= uq_count + 5'(pushed) - 5'(rn_n);
                 end
             end
         end
