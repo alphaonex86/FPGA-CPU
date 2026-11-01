@@ -43,6 +43,10 @@ PCI, ISA) may be slower than CPU and RAM, D12 board RAM used only as needed
   transaction generator, DMA buffers are UC until then; its snoop stall is
   unbounded and unfiltered (peer session "motherboard FPGA", 2026-11-01,
   FPGAcommon/rtl p6_bif.v). The mirror needs that generator there.
+  Scheduled 2026-11-01 by the operator (peer session): p6_bif as request
+  agent under BPRI#, one Memory Read Invalidate per DMA write and one
+  Memory Data Read per DMA read before the DRAM access completes, implicit
+  writeback on those reads accepted (data to the DMA master and DRAM).
 - Pins for a DE25 board at 66 MHz (D27): the S370 FPGA signals are D64,
   DEP8, A33, REQ5, AP2 (wide) + ~20 phase signals needing same-clock
   reaction + ~30 slow ones (`hw/socket370-cyclonev/pins.csv`). 2:1 on the
