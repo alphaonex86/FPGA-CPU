@@ -158,6 +158,13 @@ taken partly on the dropped criteria, to re-check on performance alone:
 
 ## Decisions (core)
 
+- **C7** (decided 2026-11-01 by the operator) The x86 core is written in
+  SystemVerilog (Quartus Lite/Pro and Verilator read it directly, no JVM,
+  ASIC-neutral; configurations as parameters / generate).
+- **C8** (decided 2026-11-01 by the operator) Microarchitecture class:
+  out-of-order, 2-3 uops per cycle (P6/K7 style: x86 decoders to uops,
+  uop cache, renaming including EFLAGS, ROB, load/store queues). Spec in
+  `plan/x86_core.md`.
 - **C6** (decided 2026-11-01 by the operator, under the performance
   criterion) The x86 core is a new x86-native superscalar design built for
   Cyclone V timing (more stages, uop cache, out-of-order as the design
