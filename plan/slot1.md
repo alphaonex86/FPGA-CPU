@@ -484,6 +484,20 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   B.Cu inside U1's shadow, each on one supply/GND via-in-pad pair; the
   rest of the decoupling goes on F.Cu or B.Cu wherever it collides with
   nothing (D16 amendment).
+- **D26** (decided 2026-11-01 by the operator) CPU variants for Slot 1, all
+  to be studied in depth (feasibility verified, the infeasible ones
+  discarded with the reason) and kept as separate versions where feasible:
+  A own x86 core in the cartridge FPGA (current plan); B real ARM64 core +
+  x86 translation, the FPGA as the translator so the guest runs at native
+  ARM speed (feasibility to verify; operator: software-only QEMU-TCG class
+  is too slow); C1 low-power x86 with its own FSB + FPGA bus translator;
+  C2 modern ~6 W x86 (N100 class) + FPGA PCIe <-> P6 bridge, the board's
+  BIOS and OS in a VM (operator: "me gusta mucho"). Study: `slot1_variants.md`.
+- **D27** (decided 2026-11-01 by the operator) Slot 1 and Socket 370 may run
+  the FSB at 66 MHz (BSEL[1:0] = 00 [pentium3_pga370_245264-008.pdf p.26
+  Table 5]; Slot 1 BSEL0 low [pentium3_secc2_24445201.pdf p.19 sec. 2.8.2])
+  when that gives a large benefit, e.g. a DE25-Nano/Standard connection:
+  board RAM bandwidth is not needed, it is used only for the minimum (DMA).
 - **D22** (decided 2026-10-21, amended 2026-10-22 twice by operator: first
   6, then 8 copper layers, same answer as the D5 pattern) Slot 1
   cartridge = 8 layers: signals F&B (B.Cu gets the die escapes, F.Cu the
