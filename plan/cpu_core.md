@@ -153,6 +153,42 @@ socket3/docs/notes/design-decisions.md):
   tree + i8259, 8250, i8042, IDE, CF8/CFC PCI drivers, x86 option ROMs via
   an emulator like U-Boot bios_emulator). Not a milestone now.
 
+## Exploration E1: x86 on a real ARM64 core, FPGA as the socket bridge (operator, 2026-11-01)
+
+Idea (operator): a multiplexer <-> FPGA converting x86 <-> real ARM64 on a
+Terasic DE25-Nano, for good x86 performance: the x86 side runs single
+threaded, natively on one ARM core. Not a decision, to explore.
+
+Board facts (Terasic / distributors, not yet in the repo): Agilex 5 SoC
+A5EB013BB23BE4SR1, 138K LE; HPS 2x Cortex-A76 + 2x Cortex-A55; 1 GB
+LPDDR4 for the FPGA + 1 GB LPDDR4 for the HPS (shared with the FPGA),
+128 MB SDRAM; BSP on Quartus 25.1.1 Pro; the kit includes a free Quartus
+Pro licence tied to the kit [terasic.com.tw DE25-Nano page; DE25-Nano
+user manual 2025-09-05, mm.digikey.com/.../P0804.pdf;
+linuxgizmos.com DE25-Nano article].
+
+Shape: the FPGA fabric is the socket bus unit (486 / P5 / P6 cycles, as in
+the soft-core plan); one A76 runs the x86 machine. A hard ARM core has no
+port to inject instructions, so x86 -> ARM64 has to be software dynamic
+binary translation on the A76 (full system: BIOS, real/protected mode,
+paging, interrupts, I/O), the FPGA at most assisting (e.g. bus cycles,
+predecode). Box64 / FEX translate Linux user space only; a full-system
+translator is QEMU-TCG class.
+
+Questions before any work:
+1. Toolchain rule: Agilex 5 needs Quartus Prime Pro; is the kit licence
+   obtainable from Bolivia, offline-usable, and not time-limited?
+   (Agilex 3 was rejected for an online-fetched Pro licence,
+   `FPGAlist/README.md`.)
+2. Speed: x86 full-system DBT on one A76 (clock to check) vs the 50-60 MHz
+   soft cores measured above; measure QEMU-TCG i386 on an A76 first.
+3. Memory: guest RAM in the HPS LPDDR4 (fast) with the board RAM only for
+   DMA-visible ranges, or all accesses over HPS -> FPGA -> socket (bridge
+   latency per access); board DMA (IDE busmaster, ISA DMA) coherence.
+4. Form factor and power: DE25-Nano by a cable/adapter to the socket
+   (bus timing at 33-66 MHz over a cable) or the Agilex 5 chip on our own
+   interposer; power vs the socket budgets in `AGENTS.md`.
+
 ## Next steps (each answers a concrete question)
 
 1. Generate VexiiRiscv dual-issue RV64 (no FPU, then with D) and run
