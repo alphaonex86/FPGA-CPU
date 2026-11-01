@@ -480,7 +480,7 @@ module x86_core
     endfunction
 
     generate for (gi = 0; gi < 2; gi = gi + 1) begin : alu
-        x86_alu u_alu (.op(xr[gi].u.aop), .sz(xr[gi].u.osz),
+        x86_alu u_alu (.op(xr[gi].u.aop), .sz(xr[gi].u.osz), .cond(xr[gi].u.cond),
                        .a(byte_hi(xr[gi].src[0].value, xr[gi].u.hi1)),
                        .b(xr[gi].u.us2 ? byte_hi(xr[gi].src[1].value, xr[gi].u.hi2) : xr[gi].u.imm),
                        .fin(xr[gi].fsrc.value), .y(alu_y[gi]), .f(alu_f[gi]));

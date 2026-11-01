@@ -37,7 +37,7 @@ def main():
         return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(15)
+        k = rnd.randrange(21)
         x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
         a = rnd.choice(ALU) + x
         if k == 0:
@@ -74,6 +74,22 @@ def main():
             src, dst = rnd.choice(["bl", "wl", "bw"])
             return ["mov%s%s%s %s, %s" % (rnd.choice("zs"), src, dst,
                                           rnd.choice([sreg(src), mem()]), sreg(dst))]
+        if k == 14:   # shifts / rotates by imm, CL or 1
+            cnt = rnd.choice(["$%d" % rnd.randrange(32), "%cl", ""])
+            dst = rnd.choice([sreg(x), mem()])
+            op = rnd.choice(["shl", "sal", "shr", "sar", "rol", "ror"]) + x
+            return ["%s %s%s" % (op, cnt + ", " if cnt else "", dst)]
+        if k == 15:
+            return ["%s%s %s" % (rnd.choice(["not", "neg"]), x, rnd.choice([sreg(x), mem()]))]
+        if k == 16:
+            return ["set%s %s" % (rnd.choice(JCC)[1:], rnd.choice([sreg("b"), mem()]))]
+        if k == 17:
+            y = rnd.choice("lw")
+            return ["cmov%s%s %s, %s" % (rnd.choice(JCC)[1:], y, rnd.choice([sreg(y), mem()]), sreg(y))]
+        if k == 18:
+            return [rnd.choice(["cltd", "cwtl", "cbtw", "cwtd"])]
+        if k == 19:
+            return ["xchg%s %s, %s" % (x, sreg(x), rnd.choice([sreg(x), mem()]))]
         return ["nop"]
 
     def run(n):
@@ -91,7 +107,10 @@ def main():
                     *run(rnd.randrange(1, 6)), "L%d:" % l]
         if k == 2:
             l = next(labels)
-            subs.append(["S%d:" % l, *run(rnd.randrange(1, 6)), "ret"])
+            body = run(rnd.randrange(1, 6))
+            if rnd.randrange(2):   # frame pointer: LEAVE restores ESP, EBP
+                body = ["push %ebp", "mov %esp, %ebp", *body, "pushl $7", "leave"]
+            subs.append(["S%d:" % l, *body, "ret"])
             if rnd.randrange(2):
                 return ["call S%d" % l]
             r = reg()

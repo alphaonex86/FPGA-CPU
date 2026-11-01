@@ -161,8 +161,16 @@ module x86_frontend
         end
     end
 
-    always_ff @(posedge clk)
+    // BTB update registered first: off the decode -> redirect path
+    logic        bu_we, bu_set;
+    logic [31:0] bu_pc, bu_target;
+    always_ff @(posedge clk) begin
+        bu_we <= btb_we && !rst;
+        bu_set <= btb_set;
+        bu_pc <= btb_pc;
+        bu_target <= btb_target;
         if (rst) for (int i = 0; i < BTB_N; i++) btb[i].valid <= 1'b0;
-        else if (btb_we && (btb_set || btb[btb_pc[4 +: BI_W]].tag == btb_pc[31:4+BI_W]))
-            btb[btb_pc[4 +: BI_W]] <= {btb_set, btb_pc[31:4+BI_W], btb_pc[3:0], btb_target};   // btb_t order
+        else if (bu_we && (bu_set || btb[bu_pc[4 +: BI_W]].tag == bu_pc[31:4+BI_W]))
+            btb[bu_pc[4 +: BI_W]] <= {bu_set, bu_pc[31:4+BI_W], bu_pc[3:0], bu_target};   // btb_t order
+    end
 endmodule

@@ -1,7 +1,9 @@
 // One x86 instruction -> up to 3 uops (plan/x86_core.md M2 subset, 32-bit
 // code; prefix 66 only): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
-// /0 /1, TEST 84/85/A8/A9/F6/F7 /0, MOV 88-8B/B0-BF/C6/C7 /0, MOVZX/MOVSX,
-// LEA, PUSH r32/imm/r/m, POP r32, CALL rel32/r32, RET, JMP rel/r/m, Jcc
+// /0 /1, TEST 84/85/A8/A9/F6/F7 /0, NOT/NEG F6/F7 /2 /3, shifts and
+// rotates C0/C1/D0-D3 (not RCL/RCR), MOV 88-8B/B0-BF/C6/C7 /0,
+// MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, LEA, PUSH
+// r32/imm/r/m, POP r32, CALL rel32/r32, RET, LEAVE, JMP rel/r/m, Jcc
 // rel8/rel32, NOP, HLT. Anything else is one K_ILL uop.
 // 8/16-bit results merge into the old register (s1, or s3 for loads).
 // Memory destinations: LD TMP; ALU TMP; ST TMP. Static prediction: direct
@@ -70,13 +72,30 @@ module x86_decode
         endcase
     endfunction
 
+    // shift / rotate count 0 and partial flag writes pass the old flags
     function automatic logic reads_flags(input aop_t a);
-        return (a == A_ADC || a == A_SBB || a == A_INC || a == A_DEC);
+        return (a == A_ADC || a == A_SBB || a == A_INC || a == A_DEC || a == A_SHL || a == A_SHR
+                || a == A_SAR || a == A_ROL || a == A_ROR || a == A_SETCC || a == A_CMOV);
     endfunction
 
-    // MOV, MOVZX, MOVSX: d = f(src), no flags; d is read only to merge
+    // d = f(src): d is read only to merge
     function automatic logic moves(input aop_t a);
-        return (a == A_MOV || a == A_ZX8 || a == A_ZX16 || a == A_SX8 || a == A_SX16);
+        return (a == A_MOV || a == A_ZX8 || a == A_ZX16 || a == A_SX8 || a == A_SX16
+                || a == A_SIGN || a == A_SETCC);
+    endfunction
+
+    function automatic logic writes_flags(input aop_t a);
+        return !(moves(a) || a == A_NOT || a == A_CMOV);
+    endfunction
+
+    function automatic aop_t grp2(input logic [2:0] g);
+        case (g)
+            3'd0: return A_ROL;
+            3'd1: return A_ROR;
+            3'd5: return A_SHR;
+            3'd7: return A_SAR;
+            default: return A_SHL;   // 4 SHL, 6 SAL (2 RCL, 3 RCR: not decoded)
+        endcase
     endfunction
 
     // ALU uop "d = d op src" of size sz (src = register s or immediate);
@@ -100,7 +119,7 @@ module x86_decode
         x.us2 = us;
         x.imm = i;
         x.rflags = reads_flags(a);
-        x.wflags = !moves(a);
+        x.wflags = writes_flags(a);
         return x;
     endfunction
 
@@ -172,6 +191,41 @@ module x86_decode
                 no = 2'd3;
             end
         end
+    endtask
+
+    // shift / rotate r/m by CL (by_cl) or by cnt
+    task automatic shift_rm(input aop_t a, input logic [1:0] sz, input logic by_cl,
+                            input logic [31:0] cnt, output uop_t [2:0] uo, output logic [1:0] no);
+        uo = '0;
+        if (!mem) begin
+            uo[0] = alu(a, sz, gpr(rm, sz), ghi(rm, sz), by_cl, 4'd1, 1'b0, cnt);
+            no = 2'd1;
+        end else begin
+            uo[0] = load_tmp(sz);
+            uo[1] = alu(a, sz, R_TMP, 1'b0, by_cl, 4'd1, 1'b0, cnt);
+            uo[1].eop = 1'b0;
+            uo[2] = mop; uo[2].kind = K_ST; uo[2].osz = sz; uo[2].s3 = R_TMP; uo[2].us3 = 1'b1;
+            no = 2'd3;
+        end
+    endtask
+
+    // XCHG r/m, reg: TMP <- reg; reg <- r/m; r/m <- TMP
+    task automatic xchg(input logic [1:0] sz, input logic [2:0] r, input logic [2:0] m,
+                        input logic m_mem, output uop_t [2:0] uo, output logic [1:0] no);
+        uo = '0;
+        no = 2'd3;
+        if (!m_mem) begin
+            uo[0] = alu(A_MOV, SZ32, R_TMP, 1'b0, 1'b1, gpr(r, sz), ghi(r, sz), 32'd0);
+            uo[1] = alu(A_MOV, sz, gpr(r, sz), ghi(r, sz), 1'b1, gpr(m, sz), ghi(m, sz), 32'd0);
+            uo[2] = alu(A_MOV, sz, gpr(m, sz), ghi(m, sz), 1'b1, R_TMP, 1'b0, 32'd0);
+        end else begin
+            uo[0] = load_tmp(sz);
+            uo[1] = mop; uo[1].kind = K_ST; uo[1].osz = sz; uo[1].eop = 1'b0;
+            uo[1].s3 = gpr(r, sz); uo[1].hi3 = ghi(r, sz); uo[1].us3 = 1'b1;
+            uo[2] = alu(A_MOV, sz, gpr(r, sz), ghi(r, sz), 1'b1, R_TMP, 1'b0, 32'd0);
+        end
+        uo[0].eop = 1'b0;
+        uo[1].eop = 1'b0;
     endtask
 
     // MOVZX / MOVSX reg, r/m (source size ssz)
@@ -302,6 +356,21 @@ module x86_decode
                     uop[0].imm = next_eip + rel;
                     uop[0].pred_taken = rel[31];
                 end
+                8'b0100????: begin   // CMOVcc reg, r/m
+                    alu_modrm(A_CMOV, wsz, 1'b0, 1'b1, 32'd0, uop, n);
+                    for (int k = 0; k < 2; k++) uop[k].cond = op2[3:0];
+                end
+                8'b1001????: begin   // SETcc r/m8
+                    if (!mem) uop[0] = alu(A_SETCC, SZ8, gpr(rm, SZ8), ghi(rm, SZ8), 1'b0, 4'd0, 1'b0, 32'd0);
+                    else begin
+                        uop[0] = alu(A_SETCC, SZ32, R_TMP, 1'b0, 1'b0, 4'd0, 1'b0, 32'd0);
+                        uop[0].eop = 1'b0;
+                        uop[1] = mop; uop[1].kind = K_ST; uop[1].osz = SZ8;
+                        uop[1].s3 = R_TMP; uop[1].us3 = 1'b1;
+                        n = 2'd2;
+                    end
+                    uop[0].cond = op2[3:0];
+                end
                 8'hB6: movx(1'b0, SZ8, uop, n);
                 8'hB7: movx(1'b0, SZ16, uop, n);
                 8'hBE: movx(1'b1, SZ8, uop, n);
@@ -313,6 +382,8 @@ module x86_decode
             8'h83: alu_modrm(grp1(reg_f), wsz, 1'b1, 1'b0, sx8(ipos), uop, n);
             8'h84: alu_modrm(A_TEST, SZ8, 1'b1, 1'b1, 32'd0, uop, n);
             8'h85: alu_modrm(A_TEST, wsz, 1'b1, 1'b1, 32'd0, uop, n);
+            8'h86: xchg(SZ8, reg_f, rm, mem, uop, n);
+            8'h87: xchg(wsz, reg_f, rm, mem, uop, n);
             8'h88: alu_modrm(A_MOV, SZ8, 1'b1, 1'b1, 32'd0, uop, n);
             8'h89: alu_modrm(A_MOV, wsz, 1'b1, 1'b1, 32'd0, uop, n);
             8'h8A: alu_modrm(A_MOV, SZ8, 1'b0, 1'b1, 32'd0, uop, n);
@@ -322,6 +393,11 @@ module x86_decode
                 uop[0].dst = {1'b0, reg_f}; uop[0].wdst = 1'b1;
             end
             8'h90: uop[0].kind = K_ALU;   // NOP: A_ADD writing nothing
+            8'h91, 8'h92, 8'h93, 8'h94, 8'h95, 8'h96, 8'h97:   // XCHG eAX, r
+                xchg(wsz, 3'd0, op[2:0], 1'b0, uop, n);
+            8'h98: uop[0] = p66 ? alu(A_SX8, SZ16, 4'd0, 1'b0, 1'b1, 4'd0, 1'b0, 32'd0)    // CBW
+                                : alu(A_SX16, SZ32, 4'd0, 1'b0, 1'b1, 4'd0, 1'b0, 32'd0);  // CWDE
+            8'h99: uop[0] = alu(A_SIGN, wsz, 4'd2, 1'b0, 1'b1, 4'd0, 1'b0, 32'd0);        // CWD / CDQ
             8'hA8: uop[0] = alu(A_TEST, SZ8, 4'd0, 1'b0, 1'b0, 4'd0, 1'b0, sx8(1));
             8'hA9: uop[0] = alu(A_TEST, wsz, 4'd0, 1'b0, 1'b0, 4'd0, 1'b0, imm_at(1, wsz));
             8'b10110???: uop[0] = alu(A_MOV, SZ8, gpr(op[2:0], SZ8), ghi(op[2:0], SZ8),
@@ -336,6 +412,21 @@ module x86_decode
                 uop[2].pred_taken = 1'b1; uop[2].imm = ret_target;
                 n = 2'd3;
             end
+            8'hC0: if (reg_f != 3'd2 && reg_f != 3'd3) shift_rm(grp2(reg_f), SZ8, 1'b0, sx8(ipos), uop, n);
+            8'hC1: if (reg_f != 3'd2 && reg_f != 3'd3) shift_rm(grp2(reg_f), wsz, 1'b0, sx8(ipos), uop, n);
+            8'hD0: if (reg_f != 3'd2 && reg_f != 3'd3) shift_rm(grp2(reg_f), SZ8, 1'b0, 32'd1, uop, n);
+            8'hD1: if (reg_f != 3'd2 && reg_f != 3'd3) shift_rm(grp2(reg_f), wsz, 1'b0, 32'd1, uop, n);
+            8'hD2: if (reg_f != 3'd2 && reg_f != 3'd3) shift_rm(grp2(reg_f), SZ8, 1'b1, 32'd0, uop, n);
+            8'hD3: if (reg_f != 3'd2 && reg_f != 3'd3) shift_rm(grp2(reg_f), wsz, 1'b1, 32'd0, uop, n);
+            8'hC9: if (!p66) begin   // LEAVE: ESP <- EBP; EBP <- [ESP]; ESP += 4
+                uop[0] = alu(A_MOV, SZ32, R_ESP, 1'b0, 1'b1, 4'd5, 1'b0, 32'd0);
+                uop[0].eop = 1'b0;
+                uop[1] = u; uop[1].kind = K_LD; uop[1].eop = 1'b0;
+                uop[1].dst = 4'd5; uop[1].wdst = 1'b1;
+                uop[1].s1 = R_ESP; uop[1].us1 = 1'b1;
+                uop[2] = esp_add(32'd4);
+                n = 2'd3;
+            end
             8'hC6: if (reg_f == 3'd0) alu_modrm(A_MOV, SZ8, 1'b1, 1'b0, sx8(ipos), uop, n);
             8'hC7: if (reg_f == 3'd0) alu_modrm(A_MOV, wsz, 1'b1, 1'b0, imm_at(ipos, wsz), uop, n);
             8'hE8: if (!p66) begin   // CALL rel32: ST [ESP-4] <- next; ESP -= 4; JMP
@@ -346,8 +437,13 @@ module x86_decode
                 n = 2'd3;
             end
             8'hF4: uop[0].kind = K_HLT;
-            8'hF6: if (reg_f == 3'd0) alu_modrm(A_TEST, SZ8, 1'b1, 1'b0, sx8(ipos), uop, n);
-            8'hF7: if (reg_f == 3'd0) alu_modrm(A_TEST, wsz, 1'b1, 1'b0, imm_at(ipos, wsz), uop, n);
+            8'hF6, 8'hF7: case (reg_f)
+                3'd0: alu_modrm(A_TEST, op[0] ? wsz : SZ8, 1'b1, 1'b0,
+                                op[0] ? imm_at(ipos, wsz) : sx8(ipos), uop, n);
+                3'd2: alu_modrm(A_NOT, op[0] ? wsz : SZ8, 1'b1, 1'b0, 32'd0, uop, n);
+                3'd3: alu_modrm(A_NEG, op[0] ? wsz : SZ8, 1'b1, 1'b0, 32'd0, uop, n);
+                default: ;
+            endcase
             8'hFE: if (reg_f == 3'd0 || reg_f == 3'd1)
                 alu_modrm(reg_f == 3'd0 ? A_INC : A_DEC, SZ8, 1'b1, 1'b0, 32'd0, uop, n);
             8'hFF: case (reg_f)

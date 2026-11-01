@@ -13,10 +13,14 @@ package x86_pkg;
 
     typedef enum logic [2:0] {K_ALU, K_LD, K_ST, K_BR, K_HLT, K_ILL} kind_t;
     // A_LEA: s1 + s2 << scale + imm, no flags; A_ZX8..A_SX16: zero / sign
-    // extend b from 8 / 16 bits, no flags
+    // extend b from 8 / 16 bits, no flags; shifts / rotates: a by b[4:0];
+    // A_SETCC: cond (uop.cond) as 0/1; A_CMOV: cond ? b : a; A_SIGN: the
+    // sign of b (osz) in every bit (CDQ / CWD)
     typedef enum logic [4:0] {A_ADD, A_OR, A_ADC, A_SBB, A_AND, A_SUB, A_XOR, A_CMP,
                               A_TEST, A_INC, A_DEC, A_MOV, A_LEA,
-                              A_ZX8, A_ZX16, A_SX8, A_SX16} aop_t;
+                              A_ZX8, A_ZX16, A_SX8, A_SX16,
+                              A_SHL, A_SHR, A_SAR, A_ROL, A_ROR, A_NOT, A_NEG,
+                              A_SETCC, A_CMOV, A_SIGN} aop_t;
 
     // operand size: ALU width, memory access size
     localparam logic [1:0] SZ8 = 2'd0, SZ16 = 2'd1, SZ32 = 2'd2;
