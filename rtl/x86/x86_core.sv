@@ -70,7 +70,7 @@ module x86_core
     logic [2:0][1:0]      p_n;
     logic [2:0][31:0]     p_eip, p_seq, p_target, p_next, p_want;
     logic [2:0]           p_take;           // pushed: valid, up to the first p_mis
-    logic [3:0]           p_total;          // uops of the p_take slots
+    logic [3:0]           p_all;            // uops of all valid slots: queue space check
     logic                 p_push, p_load;
     logic                 p_long;           // slot 0 is long: p_uop_b follows its p_uop
     uop_t [2:0]           p_uop_b;
@@ -108,7 +108,7 @@ module x86_core
         p_ras = ras;
         p_sp = ras_sp;
         p_uop_ret = p_uop;
-        p_total = 4'd0;
+        p_all = 4'd0;
         p_redir = 1'b0;
         p_redir_pc = 32'd0;
         p_btb = 1'b0;
@@ -124,8 +124,8 @@ module x86_core
                 p_redir_pc = p_eip[k];
                 stop = 1'b1;
             end
+            if (p_valid[k]) p_all = p_all + 4'(p_n[k]);   // not up to p_mis: off its path
             if (p_take[k]) begin
-                p_total = p_total + 4'(p_n[k]);
                 if (p_mis[k] && !p_long) begin
                     p_redir = 1'b1;
                     p_redir_pc = p_want[k];
@@ -223,13 +223,15 @@ module x86_core
     flags_t [NW-1:0]           wb2_flags;
 
     // ---------------- decode -> P -> uop queue ----------------
-    assign p_push = p_valid != 3'd0 && !flush && 5'(UQ_N) - uq_count >= 5'(p_total);
+    assign p_push = p_valid != 3'd0 && !flush && 5'(UQ_N) - uq_count >= 5'(p_all);
     assign dec_take = x_valid != 3'd0 && (p_valid == 3'd0 || p_push && !p_long);
     assign p_load = dec_take && !fe_redirect;   // a redirect drops the decoded group
+    // the data registers load on dec_take: only p_valid waits for the redirect
     always_ff @(posedge clk) begin
         if (rst || flush) p_valid <= '0;
-        else if (p_load) begin
-            p_valid <= x_valid;
+        else if (dec_take) p_valid <= fe_redirect ? 3'd0 : x_valid;
+        else if (p_push && !p_long) p_valid <= '0;
+        if (dec_take) begin
             p_uop <= d_uop;
             p_n <= d_n;
             p_redirect <= d_redirect;
@@ -245,12 +247,10 @@ module x86_core
             p_long <= d_n_b[0] != 2'd0;
             p_uop_b <= d_uop_b[0];
             p_n_b <= d_n_b[0];
-        end else if (p_push) begin
-            if (p_long) begin
-                p_uop[0] <= p_uop_b;
-                p_n[0] <= p_n_b;
-                p_long <= 1'b0;
-            end else p_valid <= '0;
+        end else if (p_push && p_long) begin
+            p_uop[0] <= p_uop_b;
+            p_n[0] <= p_n_b;
+            p_long <= 1'b0;
         end
         if (rst) ras_sp <= '0;
         else if (p_push) begin

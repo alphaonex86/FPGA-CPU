@@ -92,7 +92,11 @@ replicated per read port plus a live-value table.
    default fit failed routing (43 % ALMs, local congestion); bisect: mul/div
    stubbed 53.87 MHz at 47,132 ALMs; perf recipe (aggressive routability)
    57.74 MHz at 52,085 ALMs. Fix: mul/div inputs registered (one more cycle
-   of latency) so its DSP blocks place away from the issue / bypass logic. DE25-Nano
+   of latency) so its DSP blocks place away from the issue / bypass logic:
+   54.91 MHz, 49,173 ALMs (43 %), 22,976 registers, default recipe; worst
+   path return stack -> P redirect compare -> P load enable (then the load
+   enable no longer waits for the compare; frontend next-start chain
+   precomputed per byte at queue push). DE25-Nano
    A5EB013BB23BE4SCS (Quartus Pro 26.1.1, R/D split, before the BTB):
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.

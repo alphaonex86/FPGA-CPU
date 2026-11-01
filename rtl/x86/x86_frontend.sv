@@ -53,6 +53,7 @@ module x86_frontend
         logic [31:0]       pc;
         logic [8*30-1:0]   bytes;
         logic [15:0][3:0]  len, npfx;
+        logic [15:0][4:0]  nx;          // next instruction start: i + len[i]
         logic [15:0]       fault;
         mark_t             mark;
     } block_t;
@@ -99,15 +100,15 @@ module x86_frontend
         block_t h;
         h = fq[fq_head];
         s[0] = off;
-        s[1] = s[0] + 5'(h.len[s[0][3:0]]);
-        s[2] = s[1][4] ? 5'd16 : s[1] + 5'(h.len[s[1][3:0]]);
+        s[1] = h.nx[s[0][3:0]];
+        s[2] = s[1][4] ? 5'd16 : h.nx[s[1][3:0]];
         for (int k = 0; k < 3; k++)
             last[k] = h.mark.taken && s[k][3:0] >= h.mark.moff
-                      || (k < 2 ? s[k + 1][4] : s[2] + 5'(h.len[s[2][3:0]]) > 5'd15);
+                      || (k < 2 ? s[k + 1][4] : h.nx[s[2][3:0]][4]);
         x_valid[0] = fq_count != 3'd0 && !stopped;
         x_valid[1] = x_valid[0] && !last[0] && !h.fault[s[0][3:0]];
         x_valid[2] = x_valid[1] && !last[1] && !h.fault[s[1][3:0]];
-        x_next = !x_valid[1] ? s[1] : !x_valid[2] ? s[2] : s[2] + 5'(h.len[s[2][3:0]]);
+        x_next = !x_valid[1] ? s[1] : !x_valid[2] ? s[2] : h.nx[s[2][3:0]];
     end
     // the last valid instruction ends the block
     assign pop = out_free && x_valid[0] && (!x_valid[1] ? last[0] : !x_valid[2] ? last[1] : last[2]);
@@ -138,7 +139,9 @@ module x86_frontend
             f2_bytes <= f1_bytes;
             f2_mark <= f1_mark;
             if (push) begin
-                fq[fq_tail] <= {f2_pc, f2_bytes, pd_len, pd_npfx, pd_fault, f2_mark};   // block_t order
+                logic [15:0][4:0] nx;
+                for (int i = 0; i < 16; i++) nx[i] = 5'(i) + 5'(pd_len[i]);
+                fq[fq_tail] <= {f2_pc, f2_bytes, pd_len, pd_npfx, nx, pd_fault, f2_mark};   // block_t order
                 fq_tail <= fq_tail + 2'd1;
             end
             if (pop) fq_head <= fq_head + 2'd1;
@@ -147,9 +150,11 @@ module x86_frontend
                 valid <= x_valid;
                 for (int k = 0; k < 3; k++) begin
                     bytes[k] <= fq[fq_head].bytes[8*s[k][3:0] +: 8*15];
-                    eip[k] <= fq[fq_head].pc + 32'(s[k][3:0]);
+                    // blocks are 16-byte aligned: EIP = {pc[31:4], offset}
+                    eip[k] <= {fq[fq_head].pc[31:4], s[k][3:0]};
                     next[k] <= fq[fq_head].mark.taken && last[k] ? fq[fq_head].mark.target
-                               : fq[fq_head].pc + 32'(s[k][3:0]) + 32'(fq[fq_head].len[s[k][3:0]]);
+                               : {fq[fq_head].pc[31:4] + 28'(fq[fq_head].nx[s[k][3:0]][4]),
+                                  fq[fq_head].nx[s[k][3:0]][3:0]};
                     len[k] <= fq[fq_head].len[s[k][3:0]];
                     npfx[k] <= fq[fq_head].npfx[s[k][3:0]];
                     fault[k] <= fq[fq_head].fault[s[k][3:0]];
