@@ -159,8 +159,8 @@ Idea (operator): a multiplexer <-> FPGA converting x86 <-> real ARM64 on a
 Terasic DE25-Nano, for good x86 performance: the x86 side runs single
 threaded, natively on one ARM core. Not a decision, to explore.
 
-Board facts (Terasic / distributors, not yet in the repo): Agilex 5 SoC
-A5EB013BB23BE4SR1, 138K LE; HPS 2x Cortex-A76 + 2x Cortex-A55; 1 GB
+Board facts (Terasic / distributors): Agilex 5 SoC A5EB013BB23BE4SCS
+(DE25-Nano revB `Demonstration/FPGA/Golden_top/golden_top.qsf`), 138K LE; HPS 2x Cortex-A76 + 2x Cortex-A55; 1 GB
 LPDDR4 for the FPGA + 1 GB LPDDR4 for the HPS (shared with the FPGA),
 128 MB SDRAM; BSP on Quartus 25.1.1 Pro; the kit includes a free Quartus
 Pro licence tied to the kit [terasic.com.tw DE25-Nano page; DE25-Nano
@@ -176,10 +176,17 @@ predecode). Box64 / FEX translate Linux user space only; a full-system
 translator is QEMU-TCG class.
 
 Questions before any work:
-1. Toolchain rule: Agilex 5 needs Quartus Prime Pro; is the kit licence
-   obtainable from Bolivia, offline-usable, and not time-limited?
-   (Agilex 3 was rejected for an online-fetched Pro licence,
-   `FPGAlist/README.md`.)
+1. Toolchain rule: Agilex 5 needs Quartus Prime Pro.
+   **Answered 2026-11-01:** Quartus Prime Pro 26.1.1 Build 130 installed at
+   `~/altera_pro/26.1.1` (installers, Agilex 3/5/7 device .qdz, DE25-Nano
+   revA/revB resource packages, user manual and SD card image in
+   `/mnt/data/perso/FPGA/DE25-Nano/`). With no licence file and no
+   LM_LICENSE_FILE, a counter on A5EB013BB23BE4SCS with the golden_top
+   pins (clk BF23, LEDs) ran synthesis, fit, timing and assembler and wrote
+   the .sof: free and offline for this device. Without pin assignments the
+   assembler skips the .sof (Critical Warning 25196/25207); the kit licence
+   is not needed. (The Agilex 3 rejection in `FPGAlist/README.md` predates
+   this check.)
 2. Speed: x86 full-system DBT on one A76 (clock to check) vs the 50-60 MHz
    soft cores measured above; measure QEMU-TCG i386 on an A76 first.
 3. Memory: guest RAM in the HPS LPDDR4 (fast) with the board RAM only for
