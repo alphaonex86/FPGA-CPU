@@ -143,6 +143,19 @@ socket3/docs/notes/design-decisions.md):
   board input VCORE_OK is high, and parks again when it falls
   (plan/interposers.md FPGAmotherboard compatibility).
 
+## Selection criterion (operator, 2026-11-01, permanent)
+
+Maximum performance inside the selected Cyclone V E A9 (113,560 ALMs); code
+volume, rewrites and licences do not count (`AGENTS.md` Rules). Decisions
+taken partly on the dropped criteria, to re-check on performance alone:
+- C0: z486 was rejected also for its licence; its performance gaps (scalar,
+  IPC 0.5, 51 MHz on C8, 32-bit, no SSE) still stand.
+- C1 amendment (hybrid uop): chosen to reuse Vexii plugins, i.e. less code.
+- Vexii itself: in-order dual issue, ~60 MHz on C8 is its pipeline depth
+  (step 1 sweep); a core designed for Cyclone V timing may go higher.
+- C5: the DE25-Nano's Agilex 5 has 46,800 ALMs, under the A9's 113,560:
+  it hosts development of what fits, the full core is sized for the A9.
+
 ## Decisions (core)
 
 - **C0** (decided 2026-11-01 by the operator, after the measured z486

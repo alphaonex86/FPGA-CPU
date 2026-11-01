@@ -77,3 +77,7 @@ chipset, same sockets; source of `sockets/kicad/`).
 ## Rules
 
 - Everything on disk is English.
+- CPU goal is maximum performance inside the selected Cyclone V: large rewrites,
+  a from-scratch x86 core and a separate RISC-V core are all fine; licence is no
+  selection criterion (GitHub code counts as usable; copyrighted parts, avoided
+  when possible, go in a separate marked folder) (operator, 2026-11-01).
