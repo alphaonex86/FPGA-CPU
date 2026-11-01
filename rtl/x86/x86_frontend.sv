@@ -164,6 +164,5 @@ module x86_frontend
     always_ff @(posedge clk)
         if (rst) for (int i = 0; i < BTB_N; i++) btb[i].valid <= 1'b0;
         else if (btb_we && (btb_set || btb[btb_pc[4 +: BI_W]].tag == btb_pc[31:4+BI_W]))
-            btb[btb_pc[4 +: BI_W]] <= '{valid: btb_set, tag: btb_pc[31:4+BI_W],
-                                        off: btb_pc[3:0], target: btb_target};
+            btb[btb_pc[4 +: BI_W]] <= {btb_set, btb_pc[31:4+BI_W], btb_pc[3:0], btb_target};   // btb_t order
 endmodule
