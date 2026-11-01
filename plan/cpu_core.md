@@ -255,6 +255,21 @@ control = ~72: tight, a 4:1 ratio (133 MHz) frees pins. Parts: 5 V
 tolerant 74LVC 16-bit registers / buffers, no FPGA, 3.3 V from the
 header; the 3.3 V output level matches the S3 interposer's (CB3T) level.
 
+DE25-Standard (operator question, 2026-11-01; user manual 2025-10-07,
+mm.digikey.com/Volume0/opasdata/d220001/medias/docus/7704/P0781.pdf):
+same class FPGA (A5ED013BB32AE4SR1, 130K LE [p.7]), $586, 12 V input.
+I/O: HSMC with 80 user I/O (HSMC_D[0..74], 2 x B5B_D, 3 CLKIN) at
+1.8/2.5/3.3 V by jumper JP3, default 3.3 V [p.19 Table 3-5, Table 3-18],
+on a connector built for high-speed signals, plus one 2x20 GPIO header,
+36 I/O at 3.3 V behind two diodes + a resistor each [p.30]: 116 in all.
+- S3 (114): nearly direct, no mux; DE25-Nano + mux (D11) is enough.
+- S7 (166): only the 64+8 data/parity lines 2:1 on 36 HSMC lines
+  (133 MHz per line, on HSMC), the rest direct or slow-muxed: plausible,
+  tight; the one socket the Standard makes possible.
+- S370 (167, AGTL+ 133 MHz): even 2:1 is 266 MHz per single-ended line;
+  only the 17 LVDS pairs per direction could carry it, which needs a
+  SERDES (an FPGA) on the adapter: no DE25 for S370, the interposer only.
+
 ## Next steps (each answers a concrete question)
 
 1. Generate VexiiRiscv dual-issue RV64 (no FPU, then with D) and run
