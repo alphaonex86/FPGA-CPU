@@ -69,7 +69,10 @@ replicated per read port plus a live-value table.
    `rtl/tools/synth_path.sh` for the worst path): single-cycle issue 5.88
    MHz (serial oldest-first select + execute + capture); pipelined issue
    45.9; registered flush 47.9; RS budget off the dispatch count 56.5
-   MHz at 38,946 ALMs (34 %), 17,056 registers.
+   MHz at 38,946 ALMs (34 %), 17,056 registers. DE25-Nano
+   A5EB013BB23BE4SCS (Quartus Pro 26.1.1, R/D split, before the BTB):
+   133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
+   board runs the core 2.4x faster but has little room left.
 3. M3 loads/stores, LSQ, L1I/L1D, then L2; Dhrystone/CoreMark for x86 IPC.
 4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,
