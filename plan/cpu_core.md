@@ -327,3 +327,20 @@ on a connector built for high-speed signals, plus one 2x20 GPIO header,
    prohibited (`plan/interposers.md` D10).
 3. Only then: an x86 decode plugin for the integer reg-reg / load-op
    subset, lock-stepped against an emulator, on the RISC-V back end.
+   Increment X1 (2026-11-01; C0, C1 hybrid, C2, C3, C5): does the hybrid
+   uop run x86 code on the Vexii lanes, and at what IPC? 32-bit flat
+   mode only (segment bases 0, no paging, no faults), in Verilator:
+   - `X86AlignerPlugin` (replaces AlignerPlugin): byte-granular length
+     decode over the fetch window, 1 x86 instruction per cycle first.
+   - `X86DecoderPlugin`: cracks into hybrid uops; EAX..EDI on x1..x8,
+     temporaries above; side payloads X86_IMM, X86_SIZE, X86_FLAGS.
+   - `X86FlagsPlugin` (C2): CF/PF/AF/ZF/SF/OF beside each ALU result,
+     read by Jcc.
+   - Subset: MOV (r/r, r/imm, r/[base+index*scale+disp] both ways), ADD,
+     SUB, AND, OR, XOR, CMP, TEST (r/r, r/imm8/imm32), INC, DEC, LEA,
+     Jcc / JMP rel8/rel32, NOP, HLT (ends the test).
+   - Testbench: Unicorn 2.1.4 (`rtl/tools/setup.sh`) steps the same
+     image; GPRs, EFLAGS and EIP compared at every retired x86
+     instruction; first mismatch stops the run.
+   Answers: correctness on the subset, IPC on a Dhrystone-like loop, and
+   the ALM / fmax cost on A5EB013BB23BE4SCS vs rv64imac_dual.

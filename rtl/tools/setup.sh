@@ -1,10 +1,12 @@
 #!/bin/bash
-# Fetch the VexiiRiscv back end (pinned) + SpinalHDL + sbt into rtl/ext/.
+# Fetch the VexiiRiscv back end (pinned) + SpinalHDL + sbt, and the Unicorn
+# x86 lock-step reference (C3, testbench only, GPLv2), into rtl/ext/.
 # Re-runnable: existing pieces are kept. plan/cpu_core.md next step 1.
 set -eu
 cd "$(dirname "$0")/.."
 VEXII_COMMIT=9f70315deb3390b283995c5b8f1bd38215ecf52b
 SBT_VERSION=1.10.0                         # VexiiRiscv project/build.properties
+UNICORN_TAG=2.1.4
 mkdir -p ext
 if [[ ! -d ext/VexiiRiscv ]]; then
     git clone https://github.com/SpinalHDL/VexiiRiscv.git ext/VexiiRiscv
@@ -18,3 +20,10 @@ if [[ ! -x ext/sbt/bin/sbt ]]; then
     rm ext/sbt.tgz
 fi
 ext/sbt/bin/sbt --version
+if [[ ! -f ext/unicorn/build/libunicorn.a ]]; then
+    [[ -d ext/unicorn ]] || git clone -q --depth 1 -b "$UNICORN_TAG" \
+        https://github.com/unicorn-engine/unicorn.git ext/unicorn
+    cmake -S ext/unicorn -B ext/unicorn/build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+        -DUNICORN_ARCH=x86 -DUNICORN_BUILD_TESTS=OFF -DBUILD_SHARED_LIBS=OFF
+    nice -n 19 ninja -C ext/unicorn/build
+fi
