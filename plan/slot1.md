@@ -318,14 +318,15 @@ connector footprint (card-edge, from the connector drawing).
   the power tree): ERC 0 errors, DRC 0 errors, BOM 281 == PCB 281, S8c
   **160/184** DDR3 die jobs routed (163 before the D23 parts: the die
   capacitors right of and below the dies and the U1 B.Cu capacitors cost
-  3 jobs), 499 unconnected = 286 slot/translator signal nets (never
-  routed yet, as before) + 120 rail/GND pads (QFN leads < 0.5 mm get no
-  via, plus pads the In2 raster leaves on a foreign strip) + 53 regulator
-  internal nets (SW/FB/COMP/SS/BOOT/PG, unrouted by design: D23 = place
-  before routing) + 40 DDR3. The S9 gate now compares the CLI stdout with
-  the JSON unconnected_items list (KiCad 10 lists them, NM27 is outdated);
-  pcbnew counts 14 more, all on the regulator stages (equal once PS/L/R/
-  F/FB are removed), cause inside KiCad not found. Fixed on the way: S6
+  3 jobs), 513 unconnected (pcbnew): slot/translator signal nets (never
+  routed yet), rail/GND pads (QFN leads < 0.5 mm get no via, plus pads
+  the In2 raster leaves on a foreign strip), regulator internal nets
+  (SW/FB/COMP/SS/BOOT/PG, unrouted by design: D23 = place before routing)
+  and DDR3. Correction 2026-11-01: the "499" kicad-cli reported is its
+  report cap (a copy with every track removed also reports 499), not a
+  count; the per-category split given here before was a capped sample,
+  and the "14 more in pcbnew" were the cap too. S9 now gates on pcbnew's
+  count. Fixed on the way: S6
   rewrites a minimal .kicad_pro, so S7 now always writes the Default net
   class (0.15 clearance) - without it KiCad applied 0.2 mm and S8c's
   0.15 mm tracks gave 501 DRC errors; S9 printed "PASS audit" even with a
@@ -334,10 +335,12 @@ connector footprint (card-edge, from the connector drawing).
   times): ERC 0, DRC 0 errors (323 warnings: 199 via_dangling = rail
   pad vias over a foreign In2 strip, 87 lib_footprint_mismatch, 37
   isolated_copper; the 199 B.Fab text warnings fixed by mirroring B-side
-  texts in S7), BOM 278 == PCB 278, S8c **133/184** die jobs (pass 1
-  routes 141; the rip-up pass leaves 133 - the router keeps its last
-  pass, not its best), 499 unconnected = 259 slot/translator signals +
-  113 rail/GND pads + 81 DDR3 + 46 regulator internal. The drop from
+  texts in S7), BOM 278 == PCB 278, S8c 133/184 die jobs (pass 1
+  routes 141; the rip-up pass left 133: the router kept its last pass),
+  543 unconnected (pcbnew). Third pass (2026-11-01, S8c keeps the best
+  board and re-runs rip-up waves only while the routed count grows; the
+  first wave lost, 133 <= 141, best board restored): **141/184**, DRC 0,
+  ERC 0, **536 unconnected** (pcbnew). The drop from
   160 is the real die land: the 160 was routed on the wrong 1.0 mm,
   mirrored ball map; S8c's 0.35/0.20 die vias (D24) were already sized
   for 0.8 mm (one 0.15 track per 0.45 gap). Chain guards: S8a refuses an
@@ -358,13 +361,13 @@ routing (AGTL+ rules, memory byte lanes matched), verification audit + BOM.
 
 | Task | S0 | S1 | S2 | S3 | S4 | S5 | S6 | S7 | S8 | S9 | S10 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| slot1 (slot1-cyclonev per D9) | done | done | done | done | done | done | done | done | in prog (133/184 on the real 0.8 mm die land, DRC 0, 499 unconn) | done | done |
+| slot1 (slot1-cyclonev per D9) | done | done | done | done | done | done | done | done | in prog (141/184 on the real 0.8 mm die land, DRC 0, 536 unconn) | done | done |
 
-Not on the board yet (2026-10-31, after D23): S8c routes only the DDR3 die
-nets (133/184); the SC242 -> translator -> FPGA nets are unrouted (259
-unconnected items); the power tree and decoupling are placed (278 refs)
-but their internal nets and 113 rail/GND pads are not routed; U7 is
-still the generic VTT tracker placeholder.
+Not on the board yet (2026-11-01): S8c routes only the DDR3 die nets
+(141/184); the SC242 -> translator -> FPGA nets are unrouted; the power
+tree and decoupling are placed (278 refs) but their internal nets and
+part of the rail/GND pads are not routed (536 unconnected in all,
+pcbnew); U7 is still the generic VTT tracker placeholder.
 
 ## S10 Report (2026-10-22, to the operator)
 

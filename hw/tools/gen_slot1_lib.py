@@ -150,10 +150,28 @@ def reg_sym(name, left, right, bottom, datasheet):
                                                      -h / 2 - 2.54), nm)
              for k, (n, nm) in enumerate(bottom)]
     return rect_sym(name, "PS", pins, (-10.16, h / 2, 10.16, -h / 2),
-                    datasheet).replace('(pin_numbers (hide yes))\n', '')
+                    datasheet=datasheet).replace('(pin_numbers (hide yes))\n', '')
 
 
-def rect_sym(name, ref, pins, box, unit_name=""):
+def tps_syms():
+    """the pdn.py regulators; pin numbers/names: tps54620 p.4, tps62130
+    p.3 Table 6-1"""
+    return [reg_sym("TPS54620", [
+        ("4", "PVIN"), ("5", "PVIN"), ("6", "VIN"), ("10", "EN"),
+        ("1", "RT/CLK"), ("9", "SS/TR")], [
+        ("13", "BOOT"), ("11", "PH"), ("12", "PH"), ("7", "VSENSE"),
+        ("8", "COMP"), ("14", "PWRGD")], [("2", "GND"), ("3", "GND"),
+        ("15", "PAD")], "sockets/parts/ti_tps54620_6a_buck.pdf"),
+        reg_sym("TPS62130", [
+        ("11", "PVIN"), ("12", "PVIN"), ("10", "AVIN"), ("13", "EN"),
+        ("9", "SS/TR"), ("7", "FSW"), ("8", "DEF")], [
+        ("1", "SW"), ("2", "SW"), ("3", "SW"), ("14", "VOS"), ("5", "FB"),
+        ("4", "PG")], [("6", "AGND"), ("15", "PGND"), ("16", "PGND"),
+        ("17", "PAD")], "sockets/parts/ti_tps62130_3a_buck.pdf")]
+
+
+def rect_sym(name, ref, pins, box, unit_name="",
+             datasheet="hw/tools/gen_slot1_lib.py"):
     x0, y0, x1, y1 = box
     unit_line = ('\t\t\t(unit_name "%s")' % unit_name) if unit_name else None
     body = [
@@ -167,8 +185,8 @@ def rect_sym(name, ref, pins, box, unit_name=""):
         '(font (size 1.27 1.27))))' % (name, y1 + 1.27),
         '\t\t(property "Footprint" "" (at 0 0 0) (hide yes) (effects '
         '(font (size 1.27 1.27))))',
-        '\t\t(property "Datasheet" "hw/tools/gen_slot1_lib.py" (at 0 0 0) '
-        '(hide yes) (effects (font (size 1.27 1.27))))',
+        '\t\t(property "Datasheet" "%s" (at 0 0 0) '
+        '(hide yes) (effects (font (size 1.27 1.27))))' % datasheet,
         '\t\t(embedded_fonts no)',
         '\t\t(symbol "%s_1_1"' % name,
         unit_line,
@@ -213,20 +231,8 @@ def gen_symbols():
                          'A[15:0], VREFCA/VREFDQ 0.675 V [alliance/micron '
                          '8Gb x16 datasheet]'))
 
-    # ---- power tree regulators (plan D23; slot1_pdn.py) ------------------
-    # pin numbers/names: tps54620 p.4, tps62130 p.3 Table 6-1
-    syms.append(reg_sym("TPS54620", [
-        ("4", "PVIN"), ("5", "PVIN"), ("6", "VIN"), ("10", "EN"),
-        ("1", "RT/CLK"), ("9", "SS/TR")], [
-        ("13", "BOOT"), ("11", "PH"), ("12", "PH"), ("7", "VSENSE"),
-        ("8", "COMP"), ("14", "PWRGD")], [("2", "GND"), ("3", "GND"),
-        ("15", "PAD")], "sockets/parts/ti_tps54620_6a_buck.pdf"))
-    syms.append(reg_sym("TPS62130", [
-        ("11", "PVIN"), ("12", "PVIN"), ("10", "AVIN"), ("13", "EN"),
-        ("9", "SS/TR"), ("7", "FSW"), ("8", "DEF")], [
-        ("1", "SW"), ("2", "SW"), ("3", "SW"), ("14", "VOS"), ("5", "FB"),
-        ("4", "PG")], [("6", "AGND"), ("15", "PGND"), ("16", "PGND"),
-        ("17", "PAD")], "sockets/parts/ti_tps62130_3a_buck.pdf"))
+    # ---- power tree regulators (plan D23; pdn.py) ------------------------
+    syms += tps_syms()
 
     # ---- DDR VTT source/sink tracker -------------------------------------
     vt = [

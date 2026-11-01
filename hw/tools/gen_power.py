@@ -29,6 +29,10 @@ converter outputs are strictly monotonic ramps (see sequencing).
 HEAD = """# {name} power (plan/interposers.md task T3)
 
 {intro}
+FPGA tags: cvds = `FPGAlist/CycloneV_A9/docs/cv_51002_device_datasheet.pdf`,
+cvhb = `FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf`,
+tids = `FPGAlist/Ti180_G400/docs/ti180_datasheet.pdf`.
+
 ## Rails
 
 {rails}
@@ -127,13 +131,18 @@ rail supervisor and config logic of T6. Ramp rates inside
 0.1xVsupply/s to 10 V/ms [tids p.85 Table 63].
 """
 
-CV_SEQ = """All supplies strictly monotonic (200 us-100 ms ramp) [cvds p.9 Table 4];
-CV does not define inter-rail groups in the datasheet, so the prototype
-ramps everything from the intermediate rail with per-rail PGOOD cascade
-(5 V first, then 3.3 -> 1.8 -> 2.5 -> core 1.1), and rely on the 4-12 ms
-(fast) / 100-300 ms (standard) POR [cvds p.69 Table 55] before
-configuration; CONF_DONE gating is T6's job (`{notes}`
-R6).
+def cv_seq(core_pg, group2):
+    """Cyclone V order; core_pg: the core PGOOD threshold, group2: the
+    converters it enables"""
+    return f"""All supplies strictly monotonic (200 us-100 ms ramp) [cvds p.9 Table 4].
+Recommended order [cvhb p.10-4 Fig 10-3]: group 1 (VCC 1.1 V) to >= 80 %
+before group 2 (VCCPGM, VCCIO, VCCPD, VCCA_FPLL, VCC_AUX) starts, VCCIO
+together with VCCPD (else up to 1 A VCCPD / 250 mA VCCIO transients,
+cvhb Table 10-1); VCCBAT any time. PGOOD cascade: 5 V first, its PGOOD
+enables the core 1.1 V, whose PGOOD ({core_pg}) enables the {group2}
+converters together; then the 4-12 ms (fast) / 100-300 ms (standard) POR
+[cvds p.69 Table 55] before configuration; CONF_DONE gating is T6's job
+(`{{notes}}` R6).
 """
 
 TI_BUDGET = """D1 moved to external supply, so the socket 32 W budget no longer bounds
@@ -142,16 +151,19 @@ TI_BUDGET = """D1 moved to external supply, so the socket 32 W budget no longer 
   1.5 A"""
 
 S3_INTRO = """Source per D1 (decided 2026-10-31, `plan/interposers.md`): external 12 V
-supply on the interposer. The socket's 23 VCC pins stay unconnected: the
-board's PQ30RV21 LDO (2 A abs max, `hw/common/socket3_notes.md` R2) sees
-no load. The 28 VSS pins join the interposer GND (common reference for the
+supply on the interposer. The socket's 23 VCC pins feed only the
+VCORE-present detector divider (78.1 k, 44 uA at 3.45 V): the board's
+PQ30RV21 LDO (2 A abs max, `hw/common/socket3_notes.md` R2) sees no other
+load. The 28 VSS pins join the interposer GND (common reference for the
 5 V TTL bus). No module RAM (D4). Page numbers are the printed pages of the
 cited PDFs; regulator parts are the ones already on the FPGAmotherboard
 boards (datasheets in `sockets/parts/`).
 
-Socket-side nets: VOLDET gets its 4k7 pull-down, C11 (UP#/RESERVED#) its
-10 k pull-up (`hw/common/socket3_notes.md` R4/R6); the 16 translators run
-from the 3.3 V rail (T5, D2). These are socket nets, not FPGA loads.
+Socket-side nets: VOLDET (S4) is tied to VSS; the pull-ups (C11, DP3-DP0)
+sit on the FPGA side of the switches (`hw/common/socket3_notes.md` R4/R6);
+the 16 translators run from the 3.3 V rail (T5, D2) and stay open while the
+socket rail is down: TLV6700 detector on V5 (`hw/tools/socket3_pdn.py`,
+plan/interposers.md FPGAmotherboard compatibility).
 
 Input: 12 V barrel jack CUI PJ-063AH (2.0 mm centre pin), centre-positive,
 2 A fuse. All converter outputs are strictly monotonic ramps (see sequencing).
@@ -188,15 +200,15 @@ FILES = {
     "intro": S3_INTRO, "notes": "hw/common/socket3_notes.md",
     "est_ref": "Quartus power estimate once T6 compiles",
     "rails": S3_CV_RAILS, "core": "1.1", "topo": S3_CV_TOPO,
-    "seq": CV_SEQ.replace("5 V first, then 3.3 -> 1.8 -> 2.5 -> core 1.1",
-                          "5 V first, then 3.3 -> 2.5 -> core 1.1"),
+    "seq": cv_seq("92-98 % Vout rising [tps62130 p.5]", "2.5 and 3.3 V"),
     "budget": S3_BUDGET,
     "est": "Cyclone V E A9 in this role (no transceivers) core ~1-2 W class\n  + banks + 16 translators; all converted power < 10 W => true"},
  "socket370-cyclonev": {
     "name": "Socket 370 + Cyclone V E A9 (5CEBA9/5CEFA9F23C8N) interposer",
     "intro": INTRO_370, "notes": "hw/common/socket370_notes.md",
     "est_ref": "NM9, `hw/common/socket370_notes.md`",
-    "rails": CV_RAILS, "core": "1.1", "topo": CV_TOPO, "seq": CV_SEQ,
+    "rails": CV_RAILS, "core": "1.1", "topo": CV_TOPO,
+    "seq": cv_seq("threshold per the T9 part", "2.5, 3.3 and 1.8 V"),
     "budget": CV_BUDGET_T,
     "est": "Cyclone V E A9 in this role (no transceivers, low-density logic)\n  core ~1-2 W class + banks; all converted power < 10 W => true"},
  "socket370-ti180": {

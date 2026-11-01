@@ -19,3 +19,5 @@ sockets/kicad/3dmodels/*_Base_*.step
 sockets/slot1/**/*.pdf
 sockets/slot1/**/*.html
 *.kicad_prl
+# rtl/tools/setup.sh downloads (VexiiRiscv, SpinalHDL, sbt)
+rtl/ext/

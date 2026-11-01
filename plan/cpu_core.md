@@ -88,6 +88,23 @@ ao486 (Bochs-modelled) is the reference for items 3, 4, 9 and for the
 test approach (lock-step against an emulator, the way Vexii already
 lock-steps against Spike).
 
+## FPGAmotherboard compatibility (operator, 2026-11-01)
+
+The core must run on the original boards and on the FPGAmotherboard boards
+(FPGA chipset, other session; its rule 9: any fast mode is negotiated, off
+by default). Contract received for Socket 3 (FPGAmotherboard
+socket3/docs/notes/design-decisions.md):
+- the board targets the Am5x86-P75 only [am5x86 19751C]: B13 = WB/WT#,
+  CLKMUL (R17) tied low; the CPUID/reset-signature profile must offer it;
+- bus CLK 8-33 MHz, changed only during Stop Grant (STPCLK#) for DVFS:
+  the bus PLL must relock inside Stop Grant and the core must not assume
+  a fixed bus clock;
+- direct LVCMOS33, VIH 2.0 V / VOH 2.4 V min;
+- VCORE starts at 0 V and comes up after the interposer FPGA: the bus
+  interface ignores every socket pin and keeps the CPU parked until the
+  board input VCORE_OK is high, and parks again when it falls
+  (plan/interposers.md FPGAmotherboard compatibility).
+
 ## Next steps (each answers a concrete question)
 
 1. Generate VexiiRiscv dual-issue RV64 (no FPU, then with D) and run

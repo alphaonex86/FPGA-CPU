@@ -112,3 +112,4 @@ A10,AB18,4A,3.3 V,3.3-V LVTTL,T16c1,12.3,S13,sockets/socket3/intel_dx4_write_bac
 A6,AB20,4A,3.3 V,3.3-V LVTTL,T16c2,13.5,S15,sockets/socket3/intel_dx4_write_back_enhanced.pdf Table 8 p.16; sockets/socket3/intel_dx4_write_back_enhanced.pdf Table 18 p.31; hw/common/socket3_notes.md R1
 A4,AB21,4A,3.3 V,3.3-V LVTTL,T16c3,14.2,S16,sockets/socket3/intel_dx4_write_back_enhanced.pdf Table 8 p.16; sockets/socket3/intel_dx4_write_back_enhanced.pdf Table 18 p.31; hw/common/socket3_notes.md R1
 ADS#,J17,7A,3.3 V,3.3-V LVTTL,T10c3,6.0,S17,sockets/socket3/intel_dx4_write_back_enhanced.pdf Table 8 p.17; sockets/socket3/intel_dx4_write_back_enhanced.pdf Table 18 p.31; hw/common/socket3_notes.md R1
+VCORE_OK,AA8,3B,3.3 V,3.3-V LVTTL,,10.1,,board-local

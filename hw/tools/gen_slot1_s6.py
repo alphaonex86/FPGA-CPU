@@ -28,6 +28,7 @@ import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import gen_t6_schematic as t6
+import pdn
 import slot1_pdn
 
 ROOT = t6.ROOT
@@ -328,31 +329,13 @@ def main():
                                flagged))
 
     # ---- power tree + decoupling (D23) ---------------------------------
-    pdn = slot1_pdn.build(fpganet_of, [(c["ref"], c["a"], c["b"])
-                                       for c in chips])
-    symdef = {d[0]: d for d in t6.parse_lib(PARTS)}
-    stock = {d[0]: d for d in t6.parse_lib(
-        pathlib.Path(t6.STOCK + "Device.kicad_sym"))}
-    for k, row in enumerate(pdn):
-        lib, name = row["sym"].split(":")
-        d = symdef[name] if lib == "Slot1Parts" else stock[name]
-        nick = ("hw_n:" if lib == "Slot1Parts" else "Device:") + name
-        pins = sorted((p for ps in d[2].values() for p in ps),
-                      key=lambda p: int(p["num"]))
-        nets = row["nets"].split("|")
-        assert len(nets) == len(pins), row
-        lab = {p["num"]: n for p, n in zip(pins, nets)}
-        flagged |= t6.power_nets(pins, lab)
-        big = lib == "Slot1Parts"
-        X = 30.0 + (k % 18) * 20.0
-        Y = 455.0 + (k // 18) * 22.0 + (8.0 if big else 0.0)
-        parts.append(t6.syminst(nick, row["ref"], X, Y, 1, pins, lab,
-                                value=row["value"],
-                                footprint=row["footprint"]))
+    pdn_rows = slot1_pdn.build(fpganet_of, [(c["ref"], c["a"], c["b"])
+                                            for c in chips])
+    parts += pdn.draw(pdn_rows, PARTS, "Slot1Parts", 30.0, 455.0, flagged)
     with open(OUTDIR / "pdn.csv", "w", newline="") as f:
-        w = csvmod.DictWriter(f, slot1_pdn.CSV_FIELDS)
+        w = csvmod.DictWriter(f, pdn.CSV_FIELDS)
         w.writeheader()
-        w.writerows(pdn)
+        w.writerows(pdn_rows)
     parts += t6.flags(flagged, 950.0, 678.0, -12.0)
 
     schpath = OUTDIR / "slot1-cyclonev.kicad_sch"

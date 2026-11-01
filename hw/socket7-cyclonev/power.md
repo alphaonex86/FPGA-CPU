@@ -4,8 +4,7 @@ Source per D1 (decided 2026-10-21 for socket 7, `plan/interposers.md`):
 the interposer takes its power from the socket's own rails through the
 Mill-Max header - VCC2 (core, 2.8 V on this board [spec p.5]) and VCC3
 (I/O, 3.4 V on this board [spec p.5]). No external supply, no barrel jack.
-No module RAM (D4). Page numbers are the printed pages of the cited PDFs
-(`tids` excepted: verify per page).
+No module RAM (D4). Page numbers are the printed pages of the cited PDFs.
 
 Socket-side envelope ([notes] R2): VCC2 2.7/2.8/2.9 V +/-3.57 % on 25 pins,
 VCC3 3.135-3.6 V on 28 pins, ICC2 max 6.5 A, ICC3 max 750 mA, active max
@@ -20,7 +19,7 @@ Sources:
 | tag | file |
 |---|---|
 | cvds | FPGAlist/CycloneV_A9/docs/cv_51002_device_datasheet.pdf |
-| tids | FPGAlist/Ti180_G400/docs/ti180_datasheet.pdf |
+| cvhb | FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf |
 | mmx | sockets/socket7/pentium_mmx_datasheet_243185-004.pdf |
 | fmb | sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf |
 | spec | sockets/socket7/board/biostar_mb-8500ttd_spec.pdf |
@@ -66,11 +65,20 @@ datasheets in repo):
 
 ## Sequencing
 
-- No inter-rail group order is imposed: all supplies just ramp strictly
-  monotonic 200 us-100 ms [cvds p.9 Table 4]. Both feed rails (VCC2,
-  VCC3) come up together from the board VRM [mmx p.28], so both bucks
-  ramp side by side; a PGOOD cascade (aux first, core second) is wired
-  anyway so configuration can gate on "all rails good".
+- All supplies strictly monotonic 200 us-100 ms [cvds p.9 Table 4].
+  Recommended order [cvhb p.10-4 Fig 10-3]: group 1 (VCC 1.1 V) to
+  >= 80 % before group 2 (VCCPGM, VCCIO, VCCPD, VCCA_FPLL, VCC_AUX),
+  VCCIO together with VCCPD. The core buck's PGOOD enables the 2.5 V
+  aux buck (VCC_AUX, VCCA_FPLL).
+- Not met as drawn: VCCIO/VCCPD/VCCPGM sit directly on the board's VCC3,
+  which rises together with VCC2 [mmx p.28], i.e. before the core buck
+  fed from VCC2 is up. Cost: a VCCPD current transient up to 1000 mA,
+  ~50 us typical, that appears only when the order is not followed
+  [cvhb p.10-4/10-5 Table 10-1 note 33]; VCCIO and VCCPD share the net,
+  so no VCCIO transient [cvhb Table 10-1 note 35]. The CPU's VCC3 rating is ICC3 750 mA
+  [mmx p.31 Table 12]; the board regulator's own limit is unknown.
+  Open (operator): a load switch VCC3 -> VCCIO/VCCPD/VCCPGM enabled by
+  the core PGOOD, or accept the 50 us transient.
 - POR after all supplies are valid: 100-300 ms (standard POR) before
   configuration is accepted [cvds p.69 Table 55]; nSTATUS/CONF_DONE and
   the board-reset stretch handle the handshake with CPURST ([notes] R6).

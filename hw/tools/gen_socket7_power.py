@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Task T3 (plan/interposers.md): generate hw/<variant>/power.md for both
-socket 7 variants. Source is D1 (socket 7: power from the socket's own
-rails, decided 2026-10-21). Rail requirements are cited from the FPGA
-datasheets (Cyclone V CV-51002, Ti180); regulator part numbers are T9 BOM
-items (no regulator datasheets in repo). Regenerate with this script."""
+"""Task T3 (plan/interposers.md): generate hw/socket7-cyclonev/power.md
+(socket7-ti180 dropped: D9). Source is D1 (socket 7: power from the
+socket's own rails, decided 2026-10-21). Rail requirements are cited from
+the FPGA datasheet (Cyclone V CV-51002); regulator part numbers are T9
+BOM items (no regulator datasheets in repo). Regenerate with this
+script."""
 import pathlib
 import re
 import sys
@@ -15,7 +16,7 @@ SOURCES = """Sources:
 | tag | file |
 |---|---|
 | cvds | FPGAlist/CycloneV_A9/docs/cv_51002_device_datasheet.pdf |
-| tids | FPGAlist/Ti180_G400/docs/ti180_datasheet.pdf |
+| cvhb | FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf |
 | mmx | sockets/socket7/pentium_mmx_datasheet_243185-004.pdf |
 | fmb | sockets/socket7/intel_430hx_pcsiset_design_guide_297467-002.pdf |
 | spec | sockets/socket7/board/biostar_mb-8500ttd_spec.pdf |
@@ -32,8 +33,7 @@ Source per D1 (decided 2026-10-21 for socket 7, `plan/interposers.md`):
 the interposer takes its power from the socket's own rails through the
 Mill-Max header - VCC2 (core, 2.8 V on this board [spec p.5]) and VCC3
 (I/O, 3.4 V on this board [spec p.5]). No external supply, no barrel jack.
-No module RAM (D4). Page numbers are the printed pages of the cited PDFs
-(`tids` excepted: verify per page).
+No module RAM (D4). Page numbers are the printed pages of the cited PDFs.
 
 Socket-side envelope ([notes] R2): VCC2 2.7/2.8/2.9 V +/-3.57 % on 25 pins,
 VCC3 3.135-3.6 V on 28 pins, ICC2 max 6.5 A, ICC3 max 750 mA, active max
@@ -72,11 +72,6 @@ transceivers and no HSIO/MIPI, so the class is "fabric + light I/O".
   closed in [notes] R6.
 """
 
-TIextra = """- Ti180 power-up transient: VCC needs >= 1500 mA transient capability
-  [tids p.79 Table 57]; the core buck is sized for it.
-"""
-
-
 def rails_cv():
     return """## Rails (Cyclone V E A9, 5CEBA9/5CEFA9F23C8N)
 
@@ -90,22 +85,6 @@ def rails_cv():
 | VCCA_FPLL | PLL analog regulator supply | 2.375-2.625 V | cvds p.9 Table 4 |
 | VCCBAT | battery back-up (volatile security key) | 1.2-3.0 V | cvds p.9 Table 4 |
 | tRAMP | all supplies strictly monotonic, no plateaus | 200 us-100 ms (standard POR) | cvds p.9 Table 4 / p.69 Table 55 |
-"""
-
-
-def rails_ti():
-    return """## Rails (Efinix Ti180G400C3)
-
-| rail | where | required band | source |
-|---|---|---|---|
-| VCC | core (C3 speed grade) | 0.92-0.98 V (typ 0.95 V) | tids p.84 Table 62 |
-| VCCA | PLL analog supply | 0.92-0.98 V, same rail as VCC | tids p.84 Table 62, p.79 Table 58 |
-| VCCAUX | auxiliary supply | 1.75-1.85 V (typ 1.8 V) | tids p.84 Table 62 |
-| VQPS | security fuse supply | tied low (stays low unless fuse blowing) | tids p.75 fuse note, p.76 note 1 |
-| VCCIO | HSIO banks | unused on this design: tie per the unused-resources table | tids p.79 Table 58, p.84 Table 62 |
-| VCCIO33 | HVIO banks | 3.3 V band (3.135-3.465 V) on every used bank: host bus and straps are 3.3 V TTL [notes R1] | tids p.84 Table 62 |
-| VCC min transient | power-up momentum reserve | >= 1500 mA on VCC | tids p.79 Table 57 |
-| tRAMP | all supplies | 0.1 x Vsupply/s to 10 V/ms | tids p.85 Table 63 |
 """
 
 
@@ -133,58 +112,28 @@ datasheets in repo):
 """
 
 
-def topo_ti():
-    return """## Topology
-
-```
-VCC2 2.8 V (25 header pins) --[bulk+bulk]--> SYNC BUCK --> VCC 0.95 V
-                                                       +--> VCCA (PI filter)
-VCC3 3.4 V board (28 header pins) --+--> VCCIO33 (direct)
-                                    +--> 1.8 V aux (VCCAUX)
-```
-
-Rail plan (regulator part numbers are T9 BOM items; no regulator
-datasheets in repo):
-- VCC2 -> 0.95 V core buck, >= 3 A class honouring the 1.5 A power-up
-  transient [tids p.79 Table 57]; input must tolerate the 2.70-2.90 V
-  window at ~34 % duty (a 3-6 V input part does NOT qualify).
-- core-rail output -> VCCA through a PI filter ("PLL VCCA: connect to
-  VCC" is allowed [tids p.79 Table 58]).
-- VCC3 -> 1.8 V aux (VCCAUX), 1 A class.
-- VCC3 direct for VCCIO33: the board's 3.4 V is inside the 3.465 V band
-  max [tids p.84 Table 62]; decouple per bank.
-- Unused HSIO banks: VCCIO tied per the unused-resources table
-  [tids p.79 Table 58]; VQPS tied low [tids p.76 note 1].
-"""
-
-
 def seq_cv():
     return """## Sequencing
 
-- No inter-rail group order is imposed: all supplies just ramp strictly
-  monotonic 200 us-100 ms [cvds p.9 Table 4]. Both feed rails (VCC2,
-  VCC3) come up together from the board VRM [mmx p.28], so both bucks
-  ramp side by side; a PGOOD cascade (aux first, core second) is wired
-  anyway so configuration can gate on "all rails good".
+- All supplies strictly monotonic 200 us-100 ms [cvds p.9 Table 4].
+  Recommended order [cvhb p.10-4 Fig 10-3]: group 1 (VCC 1.1 V) to
+  >= 80 % before group 2 (VCCPGM, VCCIO, VCCPD, VCCA_FPLL, VCC_AUX),
+  VCCIO together with VCCPD. The core buck's PGOOD enables the 2.5 V
+  aux buck (VCC_AUX, VCCA_FPLL).
+- Not met as drawn: VCCIO/VCCPD/VCCPGM sit directly on the board's VCC3,
+  which rises together with VCC2 [mmx p.28], i.e. before the core buck
+  fed from VCC2 is up. Cost: a VCCPD current transient up to 1000 mA,
+  ~50 us typical, that appears only when the order is not followed
+  [cvhb p.10-4/10-5 Table 10-1 note 33]; VCCIO and VCCPD share the net,
+  so no VCCIO transient [cvhb Table 10-1 note 35]. The CPU's VCC3 rating is ICC3 750 mA
+  [mmx p.31 Table 12]; the board regulator's own limit is unknown.
+  Open (operator): a load switch VCC3 -> VCCIO/VCCPD/VCCPGM enabled by
+  the core PGOOD, or accept the 50 us transient.
 - POR after all supplies are valid: 100-300 ms (standard POR) before
   configuration is accepted [cvds p.69 Table 55]; nSTATUS/CONF_DONE and
   the board-reset stretch handle the handshake with CPURST ([notes] R6).
 """
 
-
-def seq_ti():
-    return """## Sequencing
-
-- Group 1 (VCC, VCCA) ramps first, any order inside the group; group 2
-  (VCCAUX, VCCIO33) starts >= 10 us after group 1 reaches 90 %;
-  CRESET_N releases >= 10 us after all supplies reach 90 %, configuration
-  starts after a 4.5 ms minimum delay [tids p.76-77 Figure 47 + steps
-  2-6]. With VCC2/VCC3 rising together [mmx p.28], the group order is
-  implemented as a PGOOD ripple: aux buck enable from VCC3 PGOOD feeds
-  the group chain; the core buck leads via its own ramp.
-- Ramp rates stay inside 0.1 x Vsupply/s to 10 V/ms [tids p.85 Table 63];
-  the CRESET_N/CDONE handshake with CPURST is [notes] R6.
-"""
 
 VARIANTS = {
     "socket7-cyclonev": dict(
@@ -192,13 +141,7 @@ VARIANTS = {
         rails=rails_cv(), topo=topo_cv(), seq=seq_cv(),
         core_w=2.5, io_w=2.0, total_w=6, core_buck="1.1",
         vcc2_a=1.0, per_pin=0.04, vcc3_a=0.6, pgm_extra="/VCCPGM",
-        vio_band_src="cvds p.8-9 Table 4", ti_extra=False),
-    "socket7-ti180": dict(
-        fpga="Efinix Ti180G400C3",
-        rails=rails_ti(), topo=topo_ti(), seq=seq_ti(),
-        core_w=4.0, io_w=2.0, total_w=7, core_buck="0.95",
-        vcc2_a=1.6, per_pin=0.06, vcc3_a=0.5, pgm_extra="",
-        vio_band_src="tids p.84 Table 62", ti_extra=True),
+        vio_band_src="cvds p.8-9 Table 4"),
 }
 
 fails = []
@@ -214,8 +157,7 @@ for variant, v in VARIANTS.items():
                               total_w=v["total_w"], core_buck=v["core_buck"],
                               vcc2_a=v["vcc2_a"], per_pin=v["per_pin"],
                               vcc3_a=v["vcc3_a"], pgm_extra=v["pgm_extra"],
-                              vio_band_src=v["vio_band_src"])
-              + (TIextra if v["ti_extra"] else ""))
+                              vio_band_src=v["vio_band_src"]))
     tag_rows = re.findall(r"^\| (\w+) \| ([^|\n]+) \|$", report, re.M)
     tag_rows = [(t, p) for t, p in tag_rows if t != "tag"]
     for tag, path in tag_rows:

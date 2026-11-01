@@ -27,7 +27,10 @@ def ball_key(b):
     return (len(m.group(1)), m.group(1), int(m.group(2)))
 
 
-def assign(root, t1_path, out, plan, vccio, clock, translated):
+def assign(root, t1_path, out, plan, vccio, clock, translated, local=(),
+           pullup=()):
+    """local: (signal, bank) board-only FPGA inputs, no socket pin or
+    translator; pullup: signals given the FPGA weak pull-up in the .qsf"""
     rows = list(csv.reader(open(root / ROOT_FPGACSV)))[1:]
     ncols, nrows = SIZE
     cols = sorted({re.match(r"^([A-Za-z]+)([0-9]+)$", r[0]).group(1)
@@ -121,6 +124,12 @@ def assign(root, t1_path, out, plan, vccio, clock, translated):
             for i, r in enumerate(grp):
                 r[5] = f"T{chips + i // CHANNELS + 1:02d}c{i % CHANNELS + 1}"
             chips += -(-len(grp) // CHANNELS)
+    for name, bank in local:
+        ball = next(b for b in sorted(banked[bank], key=ball_key)
+                    if b not in used and b not in reserved)
+        used[ball] = name
+        out_rows.append([name, ball, bank, vccio[bank], "3.3-V LVTTL", "",
+                         f"{dist(ball):.1f}", "", "board-local"])
 
     out.mkdir(parents=True, exist_ok=True)
     with (out / "pins.csv").open("w", newline="") as f:
@@ -133,6 +142,11 @@ def assign(root, t1_path, out, plan, vccio, clock, translated):
         q.append(f'set_location_assignment PIN_{r[1]} -to "{r[0]}"')
         q.append(f'set_instance_assignment -name IO_STANDARD "{r[4]}"'
                  f' -to "{r[0]}"')
+    for name in pullup:
+        if name not in used.values():
+            sys.exit(f"pull-up on unassigned signal {name}")
+        q.append(f'set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON'
+                 f' -to "{name}"')
     (out / "assignment_quartus.qsf").write_text("\n".join(q) + "\n")
 
     freeio = sum(len([b for b in pool if b not in used and b not in reserved])

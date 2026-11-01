@@ -31,3 +31,7 @@ slot1/die/mt41k512m16_twindie_8gb_x16_ddr3l_auto.pdf https://www.farnell.com/dat
 # (local snapshot only: the docs site serves HTML, fetch.sh can't take it)
 # slot1/die/opalkelly_fomd_acv_ddr3_pinmap.html https://docs.opalkelly.com/fomd-acv/ddr3-memory
 parts/ti_sn74cb3t3245.pdf https://www.ti.com/lit/ds/symlink/sn74cb3t3245.pdf
+parts/ti_sn74avc8t245.pdf https://www.ti.com/lit/ds/symlink/sn74avc8t245.pdf
+parts/ti_sn74lvc8t245.pdf https://www.ti.com/lit/ds/symlink/sn74lvc8t245.pdf
+parts/ti_sn74lvc16t245.pdf https://www.ti.com/lit/ds/symlink/sn74lvc16t245.pdf
+parts/ti_tlv6700.pdf https://www.ti.com/lit/ds/symlink/tlv6700.pdf

@@ -7,12 +7,11 @@ NM29/NM33 floors):
 - ERC: kicad-cli sch erc, 0 error-severity rows (warnings are inventoried
   and counted by type; they are the accepted NC/CFG stubs + off-grid
   cosmetic rows, see S6),
-- DRC: kicad-cli pcb drc, 0 error-severity rows and the CLI stdout
-  "unconnected items" count equal to the JSON unconnected_items list
-  (KiCad 10 lists them; NM27 predates that); pcbnew's GetUnconnectedCount
-  is printed for information only - it counts 14 more on the D23
-  regulator stages (2026-10-31, equal once PS/L/R/F/FB are removed; cause
-  inside KiCad not found),
+- DRC: kicad-cli pcb drc, 0 error-severity rows; the unconnected count
+  is pcbnew's GetUnconnectedCount. kicad-cli 10.0.3 stops its stdout
+  count and JSON list at 499 (2026-11-01: a copy stripped of every track
+  also reports 499), so below the cap CLI, JSON and pcbnew must agree and
+  at the cap pcbnew must not count fewer,
 - BOM: kicad-cli sch export bom -> hw/slot1-cyclonev/
   slot1-cyclonev.bom.csv, and every PCB footprint reference must appear
   in it (schematic == board part list),
@@ -32,6 +31,8 @@ from collections import Counter
 from pathlib import Path
 
 import pcbnew
+
+CLI_CAP = 499           # kicad-cli unconnected report limit (see docstring)
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 DIR = ROOT / "hw/slot1-cyclonev"
@@ -87,12 +88,15 @@ def drc_gate():
     bd = pcbnew.LoadBoard(str(PCB))
     nw = bd.GetConnectivity().GetUnconnectedCount(True)
     listed = len(rep.get("unconnected_items", []))
-    cli_ok = cli is not None and int(cli) == listed
+    capped = listed >= CLI_CAP
+    cli_ok = (cli is not None and int(cli) == listed
+              and (nw >= listed if capped else nw == listed))
     print("DRC errors:", len(errs), "| warnings:", sum(warns.values()),
           dict(warns))
-    print("  unconnected: CLI", cli if cli is not None else "(no line)",
-          " JSON list:", listed, "consistent" if cli_ok else "INCONSISTENT",
-          "| pcbnew (info):", nw)
+    print("  unconnected:", nw, "(pcbnew) | CLI",
+          cli if cli is not None else "(no line)", "JSON", listed,
+          "(capped)" if capped else "",
+          "consistent" if cli_ok else "INCONSISTENT")
     for v in errs[:12]:
         print("   ", v["type"], v["description"][:100])
     return not errs and cli_ok

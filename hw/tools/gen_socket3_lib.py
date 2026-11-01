@@ -2,8 +2,8 @@
 """Task T4 (plan/interposers.md) for the socket 3 variants: generate the
 base CPU symbol sockets/kicad/CPU_Socket3_Am5x86.kicad_sym from
 hw/common/socket3_signals.csv (shape of gen_slot1_cpu_sym.py), the
-SN74CB3T3245 bus switch (D2 translator) in hw/lib/Socket3_Parts.kicad_sym,
-and verify
+SN74CB3T3245 bus switch (D2 translator), the regulators and the TLV6700
+VCORE-present detector in hw/lib/Socket3_Parts.kicad_sym, and verify
 the library pieces T6 will use: symbol = T1, base footprint pads = symbol
 pins, FPGA symbols = their ball CSVs. Checks pass or exit 1.
 """
@@ -13,6 +13,7 @@ import re
 import sys
 
 from gen_slot1_cpu_sym import rect_sym, unit_pins
+from gen_slot1_lib import reg_sym, tps_syms
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 T1 = ROOT / "hw/common/socket3_signals.csv"
@@ -63,8 +64,12 @@ cb3t = "\n".join(
        f'(size 1.27 1.27)))) (number "{num}" (effects (font (size 1.27 1.27)))))'
        for n, num, el, at in CB3T]
     + ['\t\t)', '\t)'])
+# TLV6700 SOT-23-6 (DDC) pins [sockets/parts/ti_tlv6700.pdf p.3]
+tlv = reg_sym("TLV6700", [("3", "INA+"), ("4", "INB-"), ("5", "VDD")],
+              [("1", "OUTA"), ("6", "OUTB")], [("2", "GND")],
+              "sockets/parts/ti_tlv6700.pdf")
 parts_text = ('(kicad_symbol_lib (version 20241209) (generator "gen_socket3_lib.py")\n'
-              f'{cb3t}\n)\n')
+              + "\n".join([cb3t] + tps_syms() + [tlv]) + '\n)\n')
 PARTS.write_text(parts_text)
 
 

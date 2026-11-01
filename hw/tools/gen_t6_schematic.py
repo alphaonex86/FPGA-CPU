@@ -17,6 +17,7 @@ hw/<v>/<v>.net: kicad-cli netlist export; audit must pass:
 """
 import collections
 import csv as csvmod
+import collections
 import json
 import pathlib
 import re
@@ -218,9 +219,13 @@ def label(net, x, y):
             f'(uuid "{uuid.uuid4()}"))')
 
 
+NOCONNECT = object()      # labels value: no-connect flag instead of a label
+
+
 def syminst(nick, ref, X, Y, unit, pins, labels, project="fpga-cpu",
             value=None, footprint=""):
-    """instance + one label per labelled pin at world (X+px, Y-py)"""
+    """instance + one label (or no-connect flag) per labelled pin at
+    world (X+px, Y-py)"""
     r = [f"{TAB}(symbol",
          f'{TAB}{TAB}(lib_id "{nick}")',
          f"{TAB}{TAB}(at {X:.2f} {Y:.2f} 0)",
@@ -249,7 +254,10 @@ def syminst(nick, ref, X, Y, unit, pins, labels, project="fpga-cpu",
     out = "\n".join(r)
     for p in pins:
         net = labels.get(p["num"])
-        if net:
+        if net is NOCONNECT:
+            out += (f'\n{TAB}(no_connect (at {X + p["x"]:.6f} '
+                    f'{Y - p["y"]:.6f}) (uuid "{uuid.uuid4()}"))')
+        elif net:
             out += "\n" + label(net, X + p["x"], Y - p["y"])
     return out
 
@@ -318,6 +326,11 @@ def write_sheet(path, parts):
         elif ch in "()" and not quoted:
             depth += 1 if ch == "(" else -1
     assert depth == 0, f"unbalanced by {depth}"
+    seen = collections.Counter(re.findall(
+        r'\(reference "([^"]+)"\) \(unit (\d+)\)', out))
+    dups = sorted(k for k, n in seen.items() if n > 1)
+    if dups:
+        sys.exit(f"duplicate (reference, unit): {dups[:10]}")
     path.write_text(out)
     print(f"wrote {path.relative_to(ROOT)} ({len(out) // 1000} kB)")
 
@@ -371,10 +384,14 @@ def run_erc(schpath, ercf):
 
 
 def write_project(outdir, name, libs):
-    """.kicad_pro + sym-lib-table; libs = [(name, uri, descr)]"""
-    (outdir / f"{name}.kicad_pro").write_text(json.dumps(dict(
-        meta={"filename": f"{name}.kicad_pro", "version": 3},
-        sheets=[[SUID, "Root"]]), indent=2, sort_keys=True))
+    """.kicad_pro + sym-lib-table; libs = [(name, uri, descr)]. An
+    existing .kicad_pro keeps its other sections (the board settings and
+    net classes a placement step wrote)"""
+    path = outdir / f"{name}.kicad_pro"
+    pro = json.loads(path.read_text()) if path.exists() else {}
+    pro["meta"] = {"filename": f"{name}.kicad_pro", "version": 3}
+    pro["sheets"] = [[SUID, "Root"]]
+    path.write_text(json.dumps(pro, indent=2, sort_keys=True))
     (outdir / "sym-lib-table").write_text(
         "(sym_lib_table\n  (version 7)\n" + "".join(
             f'  (lib (name "{n}")(type "KiCad")(uri "${{KIPRJMOD}}/{u}")'

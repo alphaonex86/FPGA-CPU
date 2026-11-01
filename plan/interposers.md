@@ -1,6 +1,6 @@
-# Plan: interposer boards, 3 sockets x 2 FPGAs
+# Plan: interposer boards, 3 sockets x 2 FPGAs (4 kept, D9)
 
-Six KiCad 10 projects, one interposer PCB each: a Mill-Max PGA header underneath
+Four KiCad 10 projects, one interposer PCB each: a Mill-Max PGA header underneath
 plugs into the target board's ZIF socket, and the FPGA, its power, configuration
 (and optional RAM) sit on top.
 
@@ -9,11 +9,12 @@ plugs into the target board's ZIF socket, and the FPGA, its power, configuration
 | `socket3-cyclonev` (pilot) | Socket 3, Biostar MB-8433UUD-A, UMC 8881F/8886BF | 5CEBA9F23C8N / 5CEFA9F23C8N |
 | `socket7-cyclonev` | Socket 7, Biostar MB-8500TTD, Intel 430TX | same |
 | `socket370-cyclonev` | Socket 370, VIA VT82C694X + VT82C686B board | same |
-| `socket3-ti180`, `socket7-ti180`, `socket370-ti180` | as above | TI180G400C3 |
+| `socket370-ti180` | as above | TI180G400C3 |
+| ~~`socket3-ti180`, `socket7-ti180`~~ | dropped (D9) | - |
 | slot1 (see `plan/slot1.md`) | Slot 1 (SC242), board per slot1 D8 | per slot1 D9 |
 
 Order: the pilot first (simplest bus, 2.54 mm pins, 3.3 V I/O, ao486 is a 486
-core), then the other Cyclone V variants, then the Ti180 ones (they need level
+core), then the other Cyclone V variants, then socket370-ti180 (it needs level
 translators). A variant starts only when the previous one passes all its checks.
 Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
 `hw/tools/` scripts, `hw/common/` per-socket tables and notes.
@@ -92,6 +93,16 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   2-3 PCBs stacked on the base PCB (growing in height, not sideways), above
   all for the sockets and RAM >= 1 GB. Both PCB sides carry components
   wherever nothing collides mechanically.
+- **D9** (decided 2026-11-01 by the operator) socket3-ti180 and
+  socket7-ti180 are dropped. Only 74 of the Ti180's 274 I/O are 3.3 V
+  HVIO; HSIO stops at 1.8 V [tids p.84 Table 62]. Socket 7 (166 signals,
+  3.3 V TTL) and Socket 3 (113, 5 V) are push-pull buses without
+  pull-ups, so a pass-gate or CB3T would hand the chipset 1.8 V (< VIH
+  2.0 V); they would need DIR-controlled transceivers: SN74AVC8T245
+  1.8 -> 3.3 V <= 3.9 ns, 3.6 V max [avc8t245 p.8 Table 5.8];
+  SN74LVC8T245 1.8 -> 5 V <= 7.1 ns but 5 -> 1.8 V <= 23.4 ns
+  [lvc8t245 p.10 Table 5.7] (datasheets in `sockets/parts/`).
+  socket370-ti180 stays: AGTL+ is open-drain with VTT pull-ups (D3).
 - **D7** (decided 2026-10-20 by the operator) JTAG header only (no USB
   bridge); TAP and PRDY#/PREQ# land on it; configuration via passive
   serial from the host.
@@ -105,6 +116,26 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
 - **D5** ~~Layer count, fab, HDI or not~~ (decided above: 4 layers).
 - **D6** Maximum interposer outline and height per board (needs M1, M2) - advanced with an estimated outline, to be re-checked.
 - **D7** ~~Debug/config: JTAG connector type, UART, on-board USB-JTAG or not~~ (decided above).
+
+## FPGAmotherboard compatibility (decided 2026-11-01 by the operator)
+
+socket3-cyclonev on the FPGAmotherboard Socket 3 board (contract from the
+other session): its Artix-7 enables VCORE (TPS546B24A, 3.45 V nominal,
+0.5-3 ms ramp) only when VOLDET (S4) reads low against its internal pull-up
+(VIL 0.8 V); 10k pull-ups to VCORE on BS16#, BS8#, DP3-DP0, UP#, 8.2k on
+RESET; CLKMUL (R17) tied to GND; no back-feed allowed into a VCORE at 0 V.
+Done in T5/T6 (`gen_socket3_assign.py`, `gen_socket3_t6.py`,
+`socket3_pdn.py`), also right on the original board (VCORE always on):
+1. S4 tied to VSS (Am5x86 behaviour).
+2. CB3T OE# = BUS_OE# from a TLV6700 on S_VCC: switches close at 3.04-3.21 V
+   rising, open below >= 2.97 V; its OUTA is VCORE_OK on FPGA ball AA8:
+   the RTL treats socket pins as invalid and keeps the CPU parked until it
+   is high.
+3. UP#/DP3-DP0 pull-ups moved to the FPGA side of the switches.
+4. CLKMUL pull-up removed; FPGA weak pull-up in the .qsf instead.
+Open: our 4k7 RESET (C16) pull-down against the board's 8.2k pull-up to
+VCORE gives 1.26 V while their RESET pin is not driven (asked the other
+session).
 
 ## Operator measurements (record the numbers in `sockets/kicad/README.md`)
 
@@ -184,19 +215,32 @@ VCC2DET# -> 3B); banks 4A/5B/7A/8A are now full, ~19 I/O free.
 Every Cyclone V generator first checks each supply ball against its band
 (cvds p.8-9 Table 4, VCCPD per note 4: `cv_supply_errors` in
 `gen_t6_schematic.py`) and refuses to write the sheet on a violation.
-Status socket3-cyclonev (`hw/tools/gen_socket3_t6.py`, 2026-10-31): 113
+Status socket3-cyclonev (`hw/tools/gen_socket3_t6.py`, 2026-11-01): 113
 signals via 16 SN74CB3T3245 (`hw/lib/Socket3_Parts.kicad_sym`, single VCC
-3.3 V, OE# to GND so the socket side is defined while the FPGA configures,
-socket3_notes R6); 18 resistors: socket-side 4k7 pull-downs HLDA, BREQ,
-VOLDET, RESET, HOLD (FPGA side), 10k pull-ups UP#, CLKMUL, DP0-3 (notes
-R4/R6); FPGA nSTATUS/CONF_DONE 10k up, DCLK 10k down, TCK 1k down, TMS/TDI
-10k up, RREF_TL 2k0 1% (PLL used) (cvpcg p.4-7, p.16); MSEL[4..0] = 10001
-passive serial, standard POR (cvhb p.7-3 Table 7-2; fast POR would need
-ramps <= 4 ms, cvds p.9), nCE to GND, unused VREFB to GND (cvpcg p.4, p.19).
-S_VCC joins the 23 socket VCC pins and nothing else (D1). FLUSH# gets no
-pull-down: it is active low, a pull-down would flush permanently (notes R4
-proposal rejected, NM3). Not drawn yet: power tree and decoupling (power.md
-regulators, same parts as Slot 1 D23). Audit 113/113, ERC 0.
+3.3 V, OE# = BUS_OE# from the VCORE-present TLV6700, see FPGAmotherboard
+compatibility); S4 tied to VSS; 16 resistors: socket-side 4k7 pull-downs
+HLDA, BREQ, RESET; FPGA-side 4k7 HOLD down, 10k UP#, DP0-3 up (notes
+R4/R6); CLKMUL FPGA weak pull-up only; FPGA nSTATUS/CONF_DONE 10k up, DCLK
+10k down, TCK 1k down, TMS/TDI 10k up, RREF_TL 2k0 1% (PLL used) (cvpcg
+p.4-7, p.16); MSEL[4..0] = 10001 passive serial, standard POR (cvhb p.7-3
+Table 7-2; fast POR would need ramps <= 4 ms, cvds p.9), nCE to GND,
+unused VREFB to GND (cvpcg p.4, p.19). S_VCC joins the 23 socket VCC pins
+and the detector divider only (D1). FLUSH# gets no pull-down: it is active
+low, a pull-down would flush permanently (notes R4 proposal rejected,
+NM3). Power tree + decoupling drawn from `socket3_pdn.py` (147 parts,
+`pdn.csv` for T7). Audit 113/113 + VCORE_OK, ERC 0.
+Status socket7-cyclonev (`hw/tools/gen_socket7_t6.py`, 2026-11-01): 166
+signals direct, FPGA ball net = socket pin net (3.3 V TTL bus, no
+translators, notes R1); every bank, VCCPD and VCCPGM on S_VCC3 (board
+3.4 V [spec p.5], inside 3.465 V); 14 resistors: 4k7 socket-side
+pull-downs BREQ, SCYC, PM0/BP0, PM1/BP1, BP2, BP3 (outputs whose
+configuration pull-up is unsafe, notes R6) and A27 (refresh-rate strap
+the chipset samples at RESET, notes R4); FPGA configuration pulls as
+socket 3. The 10 socket pins the interposer leaves open (PICCLK, PICD0/1,
+FRCMC#, PHIT#/PHITM#, PBREQ#/PBGNT#, R/S#, D/P#: NC on UP boards, notes
+R4) and the NC pins carry a no-connect flag (`t6.NOCONNECT`). No FLUSH#
+pull-up: the board has its 8.2 k [fmb p.2-2]. Not drawn yet: power tree
+and decoupling. Audit 166/166, VCC2 25 / VCC3 28 / VSS 53 pins, ERC 0.
 Status socket370 (both, `hw/tools/gen_t6_schematic.py`, 2026-10-20): label-wired
 sheet, no wires; every required signal's net holds its FPGA ball and its
 translator A-pin, its `S_<signal>` net holds the CPU socket pin and the paired
@@ -252,9 +296,7 @@ with `kicad-cli` (gerbers, drill, positions, BOM).
 
 | Variant | T0 | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| socket3-cyclonev | | done | done | done | done | done | done | | | | |
-| socket7-cyclonev | | done | done | done | done | done | | | | | |
-| socket370-cyclonev | | done | done | done | done | done | done | | | | |
-| socket3-ti180 | | done | done | | done | | | | | | |
-| socket7-ti180 | | done | done | done | done | | | | | | |
-| socket370-ti180 | | done | done | done | done | done | done | | | | |
+| socket3-cyclonev | done | done | done | done | done | done | done | | | | |
+| socket7-cyclonev | done | done | done | done | done | done | done | | | | |
+| socket370-cyclonev | done | done | done | done | done | done | done | | | | |
+| socket370-ti180 | done | done | done | done | done | done | done | | | | |

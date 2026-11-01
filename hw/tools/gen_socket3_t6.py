@@ -5,10 +5,11 @@ gen_t6_schematic.py.
 
 One sheet: FPGA symbol (one instance per bank unit), the PGA168 CPU symbol,
 16 SN74CB3T3245 bus switches (A = FPGA net, B = S_<sig> socket net, single
-3.3 V VCC, OE# tied low so the socket side is pulled even while the FPGA
-configures: socket3_notes R6), pull resistors, FPGA JTAG / passive-serial
-headers and the 12 V barrel jack. Power tree and decoupling are not drawn
-yet: rail nets get a PWR_FLAG (power.md lists the regulators).
+3.3 V VCC, OE# = BUS_OE# from the VCORE-present detector of socket3_pdn.py:
+open while the socket rail is down), pull resistors, FPGA JTAG /
+passive-serial headers, the 12 V barrel jack, and the power tree +
+decoupling of socket3_pdn.py (power.md; also written to pdn.csv for
+placement). S4 (VOLDET) is tied to VSS like on the Am5x86.
 
 Every FPGA supply ball is checked against its Cyclone V band before the
 sheet is written (gen_t6_schematic.cv_supply_errors).
@@ -16,7 +17,8 @@ sheet is written (gen_t6_schematic.cv_supply_errors).
 Audit: every T5 signal's net holds its FPGA ball and its switch A pin; the
 S_<signal> net holds the socket pin and the switch B pin of the channel
 pins.csv names; every resistor joins two nets that reach other pins; 23
-socket VCC pins share S_VCC (board supply, no load: D1), 28 VSS on GND.
+socket VCC pins share S_VCC (board supply, only the detector divider: D1),
+28 VSS + S4 on GND; every power-tree net reaches at least two pins.
 """
 import csv
 import pathlib
@@ -24,6 +26,8 @@ import re
 import sys
 
 import gen_t6_schematic as t6
+import pdn
+import socket3_pdn
 
 ROOT = t6.ROOT
 OUT = ROOT / "hw/socket3-cyclonev"
@@ -40,16 +44,15 @@ VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5, "V3V3": 3.3}
 MSEL = {"MSEL4": "V3V3", "MSEL3": "GND", "MSEL2": "GND", "MSEL1": "GND",
         "MSEL0": "V3V3"}
 
-# (value, net 1, net 2, source)
+# (value, net 1, net 2, source); pull-ups sit on the FPGA side so an open
+# switch never feeds the socket rail (plan/interposers.md)
 PULLS = [
     ("4k7", "S_HLDA", "GND", "socket3_notes R6"),
     ("4k7", "S_BREQ", "GND", "socket3_notes R6"),
-    ("4k7", "S_VOLDET", "GND", "socket3_notes R6"),
     ("4k7", "S_RESET", "GND", "socket3_notes R4 (C16, NM2)"),
     ("4k7", "HOLD", "GND", "socket3_notes R6 (FPGA side)"),
-    ("10k", "S_UP#", "V3V3", "socket3_notes R4"),
-    ("10k", "S_CLKMUL", "V3V3", "socket3_notes R4"),
-    *[("10k", f"S_DP{k}", "V3V3", "socket3_notes R4, dx4 p.16")
+    ("10k", "UP#", "V3V3", "socket3_notes R4"),
+    *[("10k", f"DP{k}", "V3V3", "socket3_notes R4, dx4 p.16")
       for k in range(4)],
     ("10k", "CFG_nSTATUS", "V3V3", "cvpcg p.5"),
     ("10k", "CFG_CONF_DONE", "V3V3", "cvpcg p.4"),
@@ -104,14 +107,16 @@ def main():
 
     fsym = t6.parse_lib(FSYM)[0]
     csym = t6.parse_lib(CPUSYM)[0]
-    ssym = t6.parse_lib(PARTS)[0]
+    psyms = t6.parse_lib(PARTS)
+    ssym = next(d for d in psyms if d[0] == "SN74CB3T3245")
     parts = t6.sheet_head(
         "gen_socket3_t6", "Socket 3 interposer: 5CEBA9 + 16x SN74CB3T3245",
         [("hw_n:" + fsym[0], fsym[1]), ("cpu_n:" + csym[0], csym[1]),
-         ("hw_n:" + ssym[0], ssym[1])] + t6.stock_defs(
+        ] + [("hw_n:" + d[0], d[1]) for d in psyms] + t6.stock_defs(
             [("Connector_Generic", ["Conn_02x03_Odd_Even",
                                     "Conn_02x05_Odd_Even"]),
-             ("Connector", ["Barrel_Jack"]), ("Device", ["R"])]))
+             ("Connector", ["Barrel_Jack"]),
+             ("Device", ["C", "R", "L", "Fuse", "FerriteBead"])]))
     flagged = set()
 
     # ---- FPGA units ----
@@ -125,6 +130,8 @@ def main():
     # ---- bus switches: chip/channel from pins.csv T<dd>c<n> ----
     chips = {}
     for r in pinsrows:
+        if r["source"] == "board-local":
+            continue
         m = re.fullmatch(r"T(\d+)c([1-8])", r["translator"])
         if not m:
             sys.exit(f"{r['signal']}: bad translator {r['translator']!r}")
@@ -138,7 +145,7 @@ def main():
     pinnum = {p["name"]: p["num"] for p in spins}
     for cid, ch in sorted(chips.items()):
         ref = "TR%02d" % cid
-        byname = {"VCC": "V3V3", "GND": "GND", "OE#": "GND"}
+        byname = {"VCC": "V3V3", "GND": "GND", "OE#": "BUS_OE#"}
         for n in range(1, 9):
             s = ch.get(str(n))
             byname[f"A{n}"] = s or f"NC_{ref}_A{n}"
@@ -157,7 +164,7 @@ def main():
         lab = {}
         for p in pins:
             r = row_of[p["num"]]
-            lab[p["num"]] = ("GND" if r["signal"] == "VSS" else
+            lab[p["num"]] = ("GND" if r["signal"] in ("VSS", "VOLDET") else
                              "S_VCC" if r["signal"] == "VCC" else
                              "NC_U2_" + p["num"] if r["class"] == "nc" else
                              "S_" + r["signal"])
@@ -182,10 +189,20 @@ def main():
           ("J2", "Connector_Generic:Conn_02x05_Odd_Even",
            ["CFG_nCONFIG", "GND", "CFG_nSTATUS", "GND", "CFG_CONF_DONE",
             "GND", "CFG_DCLK", "GND", "CFG_DATA0", "GND"]),
-          ("J3", "Connector:Barrel_Jack", ["V12", "GND"])]
+          ("J3", "Connector:Barrel_Jack", ["V12_IN", "GND"])]
     for k, (ref, nick, nets) in enumerate(HD):
         parts.append(t6.header(ref, nick, nets, 780.0, 150.0 + k * 40.0,
                                flagged))
+
+    # ---- power tree + decoupling ----
+    pdn_rows = socket3_pdn.build(net_of, ["TR%02d" % c for c in sorted(chips)],
+                                 {f"R{k}" for k in range(1, len(PULLS) + 1)}
+                                 | {"U1", "U2"})
+    parts += pdn.draw(pdn_rows, PARTS, "Socket3Parts", 30.0, 440.0, flagged)
+    with open(OUT / "pdn.csv", "w", newline="") as f:
+        w = csv.DictWriter(f, pdn.CSV_FIELDS)
+        w.writeheader()
+        w.writerows(pdn_rows)
     parts += t6.flags(flagged, 980.0, 150.0, 12.0)
 
     schpath = OUT / f"{NAME}.kicad_sch"
@@ -199,24 +216,36 @@ def main():
     fails = []
     for r in pinsrows:
         sig, ball, cpin = r["signal"], r["ball"], r["socket_pin"]
+        if r["source"] == "board-local":
+            if ("U1", ball) not in on(sig) or len(on(sig)) < 2:
+                fails.append(f"{sig}: net lacks U1 {ball} or a driver")
+            continue
         cid, n = re.fullmatch(r"T(\d+)c(\d)", r["translator"]).groups()
         ref = "TR%02d" % int(cid)
         if not {("U1", ball), (ref, pinnum["A" + n])} <= on(sig):
             fails.append(f"{sig}: net lacks U1 {ball} or {ref} A{n}")
         if not {("U2", cpin), (ref, pinnum["B" + n])} <= on("S_" + sig):
             fails.append(f"S_{sig}: net lacks U2 {cpin} or {ref} B{n}")
+    if len({ref for ref, _ in on("BUS_OE#")} & {f"TR{c:02d}" for c in chips}) \
+            != len(chips):
+        fails.append("BUS_OE# does not reach every bus switch")
     for k, (val, a, b, _src) in enumerate(PULLS, 1):
         for net, pin in ((a, "1"), (b, "2")):
             if (f"R{k}", pin) not in on(net) or len(on(net)) < 2:
                 fails.append(f"R{k} {val}: pin {pin} net {net} reaches nothing")
-    for sig, net, count in (("VCC", "S_VCC", 23), ("VSS", "GND", 28)):
+    for sigs, net, count in ((("VCC",), "S_VCC", 23),
+                             (("VSS", "VOLDET"), "GND", 29)):
         got = {p for ref, p in on(net) if ref == "U2"}
-        want = {r["pin"] for r in t1 if r["signal"] == sig}
+        want = {r["pin"] for r in t1 if r["signal"] in sigs}
         if got != want or len(want) != count:
-            fails.append(f"{sig}: {len(want)} pins, {net} has {len(got)}")
+            fails.append(f"{sigs}: {len(want)} pins, {net} has {len(got)}")
+    for row in pdn_rows:
+        for net in row["nets"].split("|"):
+            if not net.startswith("NC_") and len(on(net)) < 2:
+                fails.append(f"{row['ref']}: net {net} reaches one pin")
     t6.audit_exit(fails)
     print(f"AUDIT OK: {len(pinsrows)} signals via {len(chips)} SN74CB3T3245,"
-          f" {len(PULLS)} resistors, VCC/VSS")
+          f" {len(PULLS)} resistors, VCC/VSS, {len(pdn_rows)} power parts")
 
     t6.run_erc(schpath, OUT / f"{NAME}.erc.json")
     print("PASS  T6 checks (supply bands + netlist audit + ERC)")

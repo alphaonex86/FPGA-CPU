@@ -4,9 +4,8 @@ balls -> hw/socket7-cyclonev/pins.csv + assignment_quartus.qsf.
 
 Socket 7 needs no translators (hw/common/socket7_notes.md R1: the 430TX
 drives 3.3 V TTL and both FPGAs take 3.3 V on any bank), so every bank
-runs VCCIO 3.3 V and all signals land directly. The socket7-ti180
-variant needs a translator-aware plan (only 74 of 274 Ti180 I/O are
-3.3 V capable) and is a separate task.
+runs VCCIO 3.3 V and all signals land directly (socket7-ti180 is
+dropped: plan/interposers.md D9).
 
 Bank plan: D bytes (8 D + their DP bit) never split across banks; the
 address bus, then control, fill the remaining banks; TAP + sideband +

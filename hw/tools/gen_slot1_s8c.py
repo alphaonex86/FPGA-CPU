@@ -20,9 +20,11 @@ Topology on the D22 stack (F/In1/In2/B signal+planes), decisions NM28/NM29:
 Gate: kicad-cli DRC 0 error-level rows and the pcbnew unconnected count
 drops below the pre-routing baseline (499 before S8c).
 """
+import itertools
 import json
 import math
 import subprocess
+import tempfile
 from collections import defaultdict
 from heapq import heappush, heappop
 from pathlib import Path
@@ -779,8 +781,10 @@ def main():
     realcopper = defaultdict(list)
     tot_ok = 0
     n_victims = 0
-    for pass_no in (1, 2, 3, 4):
-        if pass_no == 4:
+    snapdir = tempfile.TemporaryDirectory()
+    snap = str(Path(snapdir.name) / "best.kicad_pcb")
+    for pass_no in itertools.count(1):
+        if pass_no >= 4:
             # ---- NM41 deterministic rip-up (single wave) ----------------
             # The current todo's jobs are solved against the static
             # raster below the emitted copper (emitted items
@@ -789,12 +793,15 @@ def main():
             # RIPPED whole (objects deleted; _PLACED_VIA flip cells -
             # never the static in-pad cells - and selfpaths entries
             # reverted), the jobs route first on the rebuilt raster,
-            # the ripped family re-routes after them. Cap 1 wave: the
-            # NM42 wave-5 fixpoint re-rip landed work and collapsed to
-            # 156/390 (run41) - iterated family rips never converge
-            # under this congestion profile.
+            # the ripped family re-routes after them. Waves repeat while
+            # the routed count grows; a losing wave (NM42: 156/390) is
+            # reverted to the best board.
             if not todo or not EMITTED_UUIDS:
                 break
+            # every wave may lose work (NM42): keep the best board and
+            # wave again only while the routed count grows
+            pcbnew.SaveBoard(snap, bd)
+            best_ok, best_todo = tot_ok, list(todo)
             # NM41: emit-time proxies go STALE after bd.Add (the board's
             # track container reallocates; run36 bound: deleted proxies
             # destroyed neighbour nets' copper). Resolve all reads and
@@ -1062,6 +1069,11 @@ def main():
         tot_ok += ok
         todo = remaining
         print(f"pass {pass_no}: routed {ok} failed {fail} left {len(todo)}")
+        if pass_no >= 4 and tot_ok <= best_ok:
+            print(f"  wave lost ({tot_ok} <= {best_ok}): best board restored")
+            bd = pcbnew.LoadBoard(snap)
+            tot_ok, todo = best_ok, best_todo
+            break
         if not todo:
             break
     print("routed:", tot_ok, "failed:", len(todo))

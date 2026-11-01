@@ -4,12 +4,14 @@ balls -> hw/socket3-cyclonev/pins.csv + assignment_quartus.qsf.
 
 Every CPU net crosses an 8-channel translator (D2: the UMC chipset drives
 5 V TTL, hw/common/socket3_notes.md R1), so all banks run VCCIO 3.3 V.
-The socket3-ti180 variant needs its own plan (74 HVIO 3.3 V balls for
-113 signals) and is a separate task.
+(socket3-ti180 is dropped: plan/interposers.md D9.)
 
 Bank plan: data + parity in 7A with the cycle-control inputs; address
 and cycle definition in 4A; clock (N9 = CLK1p, notes R5), reset,
 interrupts, straps and TAP in 3B. Translator chips never straddle a bank.
+VCORE_OK (3B) is the VCORE-present detector output, straight from the
+board (plan/interposers.md FPGAmotherboard compatibility); CLKMUL has
+only the FPGA weak pull-up (the FPGAmotherboard ties R17 to GND).
 
 Checks and outputs: hw/tools/assign_common.py.
 """
@@ -42,10 +44,12 @@ VCCIO = {"3B": "3.3 V", "7A": "3.3 V", "4A": "3.3 V"}
 
 
 def main():
-    rows, chips = assign(ROOT, T1, OUT, CV_PLAN, VCCIO, "CLK", translated=True)
-    if any(not r[5] for r in rows):
+    rows, chips = assign(ROOT, T1, OUT, CV_PLAN, VCCIO, "CLK", translated=True,
+                         local=[("VCORE_OK", "3B")], pullup=["CLKMUL"])
+    if any(not r[5] for r in rows if r[0] != "VCORE_OK"):
         raise SystemExit("signal without a translator channel")
-    print(f"  translators: {chips} x 8 channels for {len(rows)} nets (D2)")
+    print(f"  translators: {chips} x 8 channels for "
+          f"{sum(1 for r in rows if r[5])} nets (D2)")
     print(f"  wrote {OUT.relative_to(ROOT)}/pins.csv + assignment_quartus.qsf")
 
 

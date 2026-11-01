@@ -118,14 +118,14 @@ real board (see Open items).
 | pin | signal | dir (CPU) | board behavior, cited | proposed interposer handling |
 |---|---|---|---|---|
 | C3 | CLK | I | UM9515 PLL -> 74F244 buffer, FSB 20-83 MHz by jumpers JP15/16/17 [board p.17, 19] | read through translator, see R5 |
-| R17 | CLKMUL | I | multiplier select jumpers JP45 [board p.19]; DX4: internal pull-up, 10 k when high; 2x if low, 3x if high [dx4 p.23]; must be grounded for AM486DX2 [impl p.2 note 8] | 10 k pull-up; FPGA reads it after config and sets its core multiplier (never drives) |
+| R17 | CLKMUL | I | multiplier select jumpers JP45 [board p.19]; DX4: internal pull-up, 10 k when high; 2x if low, 3x if high [dx4 p.23]; must be grounded for AM486DX2 [impl p.2 note 8] | no resistor (the FPGAmotherboard ties R17 to GND, plan/interposers.md); the FPGA weak pull-up (25 k [cvds p.18 Table 14]) stands in for the DX4 internal one; FPGA reads it after config and sets its core multiplier (never drives) |
 | B13 | WB/WT# | I | set by the CPU-type jumpers/resistor packs JP10/JP11/JP31/JP46, RN11-RN15 [board p.20]; chipset L1 write policy register 51.02 [umc p.17] | sampled like at reset: must be valid >= 2 clocks before/after our stretched RESET de-assertion [dx4 p.23]; FPGA reads after config; exact board network = NM3 |
 | B12 | CACHE# | O | routed to the HB CACHE# input through board jumper J12/J13 [umc p.12] | FPGA drives the WB-Enhanced CACHE# output [dx4 p.22]; jumper must be in the DX4/P24D position |
 | C17/D16 | BS16#/BS8# | I | not on the UMC HB (no bus-size pins in the pin list) [umc p.12-16] | leave at internal-pull-up level (32-bit bus); FPGA input |
-| C11 | UP (Am5x86) | I | sampled in the clock before RESET falls; low = outputs tri-state immediately (CPU parked) [am5x86 p.17] | 10 k pull-up; FPGA input; treat low as "stay parked" |
+| C11 | UP (Am5x86) | I | sampled in the clock before RESET falls; low = outputs tri-state immediately (CPU parked) [am5x86 p.17] | 10 k pull-up on the FPGA side of the switch; FPGA input; treat low as "stay parked" |
 | C11 | RESERVED# (DX4) | I | - | on the DX4 this pin MUST have its own 10 k pull-up [dx4 p.23]; the Am5x86-style UP handling satisfies it |
 | J1 | VCC5 (DX4) / NC (Am5x86) | I | DX4: 5 V reference for the tolerant buffers [dx4 p.23]; common-socket boards jumper it NC/VCC/VCC5 by CPU type [impl p.2-3]; on this board NM3 | leave unconnected (Am5x86 mode); our translators supply their own rails |
-| S4 | VOLDET | O | lets the system detect a 3 V vs 5 V CPU [dx4 p.23]; Am5x86 ties it to VSS [am5x86 p.9, p.17]; what MB-8433UUD-A does with it: not documented in repo | pull-down on the interposer = "3 V part", like the Am5x86, defined also while the FPGA configures (R6) |
+| S4 | VOLDET | O | lets the system detect a 3 V vs 5 V CPU [dx4 p.23]; Am5x86 ties it to VSS [am5x86 p.9, p.17]; what MB-8433UUD-A does with it: not documented in repo | tied to VSS on the interposer = "3 V part", exactly the Am5x86; the FPGAmotherboard only powers VCORE once it reads S4 low (plan/interposers.md) |
 | B10 | SMI# | I | driven by UM8886BF pin 32 [umc p.26] | FPGA input; SMM implemented later (optional) |
 | C12 | SMIACT# | O | UM8886BF pin 50 input [umc p.27] | pull-up-safe output |
 | C10 | SRESET | I | the chipset's CPU reset: CPURSTO, UM8886BF pin 29, "CPU reset (486 pin C10 SRST)" [umc p.26]; internal pull-down [am5x86 p.17] | reset input, ORed with the config-done gate (R6) |
@@ -145,7 +145,7 @@ real board (see Open items).
 | F16 / H15 | RDY# / BRDY# | I | HB pins 188 / 189 outputs [umc p.16] | inputs, driven by board |
 | D17 | BOFF# | I | HB pin 184 output [umc p.16] | input, driven by board |
 | L15 / J17 | PWT / PCD | O | HB PPCD input pin 205 [umc p.16]; page cacheability outputs [dx4 p.20] | pulled-up state = write-through / cache-disable: conservative, safe |
-| A5, H3, F1, N3 | DP3-DP0 | IO | parity checked on the bus [umc p.16]; BIOS "Memory Parity Check - Disabled" by default [board p.21] | keep the Intel pull-ups when parity is unused [dx4 p.16]; translators bidirectional |
+| A5, H3, F1, N3 | DP3-DP0 | IO | parity checked on the bus [umc p.16]; BIOS "Memory Parity Check - Disabled" by default [board p.21] | keep the Intel pull-ups when parity is unused [dx4 p.16], on the FPGA side of the switches; translators bidirectional |
 | A3, B14, A14, B16 | TCK/TMS/TDI/TDO | I/O | JTAG pins, internal pull-ups [dx4 p.21] | to the debug connector, per D7 |
 
 ## R5 - Bus clock
@@ -200,8 +200,11 @@ real board (see Open items).
   [tids p.104 Table 110].
 - So while the FPGA configures, every interposer net is weakly pulled up at
   the FPGA rail. External resistors of 4 k7 or less win against 25-42 k
-  internal pulls. Translator output-enables must be hard-wired (or pulled)
-  so the socket side is driven/pulled even while the FPGA sleeps.
+  internal pulls. The translator output-enables do not depend on the
+  FPGA: they close as soon as the socket rail is up and stay open while it
+  is down (VCORE-present detector, plan/interposers.md), so no pull-up
+  back-feeds an unpowered socket rail, and the pulls below act while the
+  FPGA configures.
 
 ### CPU outputs whose pulled-up state is unsafe
 
@@ -209,11 +212,11 @@ real board (see Open items).
 |---|---|---|---|---|
 | P15 | HLDA | HIGH, and it "remains driven during bus hold" [dx4 p.19] | the HB samples it (PHLDA pin 207 [umc p.16]): the board would believe the bus was granted while no CPU is there | 4 k7 pull-down to VSS |
 | Q15 | BREQ | HIGH, "never floated" [dx4 p.19] | false coprocessor/bus request toward the board FERR/IGNNE logic network [umc p.12] | 4 k7 pull-down to VSS |
-| S4 | VOLDET | LOW = "3.3 V part" [dx4 p.23] | pull-up would claim a 5 V part, the opposite of the Am5x86 behaviour [am5x86 p.9] | 4 k7 pull-down to VSS |
+| S4 | VOLDET | LOW = "3.3 V part" [dx4 p.23] | pull-up would claim a 5 V part, the opposite of the Am5x86 behaviour [am5x86 p.9] | tied to VSS |
 | N15, Q16, R16, S17 | LOCK#, PLOCK#, BLAST#, ADS# | LOW | pulled high = inactive: safe, no cycle can start without ADS# | none |
 | B12, A12, Q17, C12, C14 | CACHE#, HITM#, PCHK#, SMIACT#, FERR# | LOW | pulled high = cacheable-off / no snoop hit / no parity error / not in SMM / no FPU error: safe | none |
 | L15, J17 | PWT, PCD | HIGH [dx4 p.20] | high = write-through, page-cache-disable: conservative | none |
-| DP[3:0] (A5, H3, F1, N3) | parity | HIGH | Intel requires exactly this pull-up when parity is unused [dx4 p.16] | keep pull-ups |
+| DP[3:0] (A5, H3, F1, N3) | parity | HIGH | Intel requires exactly this pull-up when parity is unused [dx4 p.16] | keep pull-ups (FPGA side) |
 | A[31:2], D[31:0], BE[3:0] | bus | any | no bus cycle exists while ADS# is high and RESET is stretched | none |
 | B16 | TDO | hi-Z unless clocked | safe | none |
 

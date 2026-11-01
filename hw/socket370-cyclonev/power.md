@@ -16,6 +16,10 @@ are socket nets, not FPGA loads.
 Input: 12 V barrel jack 5.5x2.1 mm, centre-positive, 2 A fuse. All
 converter outputs are strictly monotonic ramps (see sequencing).
 
+FPGA tags: cvds = `FPGAlist/CycloneV_A9/docs/cv_51002_device_datasheet.pdf`,
+cvhb = `FPGAlist/CycloneV_A9/docs/cv_5v2_device_handbook_vol1.pdf`,
+tids = `FPGAlist/Ti180_G400/docs/ti180_datasheet.pdf`.
+
 ## Rails
 
 | rail | where | required band | source |
@@ -56,13 +60,15 @@ Rail plan (regulator part numbers are T9 BOM items, no datasheets in repo):
 
 ## Sequencing
 
-All supplies strictly monotonic (200 us-100 ms ramp) [cvds p.9 Table 4];
-CV does not define inter-rail groups in the datasheet, so the prototype
-ramps everything from the intermediate rail with per-rail PGOOD cascade
-(5 V first, then 3.3 -> 1.8 -> 2.5 -> core 1.1), and rely on the 4-12 ms
-(fast) / 100-300 ms (standard) POR [cvds p.69 Table 55] before
-configuration; CONF_DONE gating is T6's job (`hw/common/socket370_notes.md`
-R6).
+All supplies strictly monotonic (200 us-100 ms ramp) [cvds p.9 Table 4].
+Recommended order [cvhb p.10-4 Fig 10-3]: group 1 (VCC 1.1 V) to >= 80 %
+before group 2 (VCCPGM, VCCIO, VCCPD, VCCA_FPLL, VCC_AUX) starts, VCCIO
+together with VCCPD (else up to 1 A VCCPD / 250 mA VCCIO transients,
+cvhb Table 10-1); VCCBAT any time. PGOOD cascade: 5 V first, its PGOOD
+enables the core 1.1 V, whose PGOOD (threshold per the T9 part) enables the 2.5, 3.3 and 1.8 V
+converters together; then the 4-12 ms (fast) / 100-300 ms (standard) POR
+[cvds p.69 Table 55] before configuration; CONF_DONE gating is T6's job
+(`hw/common/socket370_notes.md` R6).
 
 
 ## Budget check (D1)
