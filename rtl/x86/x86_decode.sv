@@ -2,7 +2,7 @@
 // code; prefixes 66 and CS/DS/ES/SS, no-ops in the flat model): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
 // /0 /1, TEST 84/85/A8/A9/F6/F7 /0, NOT/NEG F6/F7 /2 /3, shifts and
 // rotates C0/C1/D0-D3 (not RCL/RCR), MOV 88-8B/B0-BF/C6/C7 /0,
-// MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
+// SHLD/SHRD, MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
 // MUL/IMUL/DIV/IDIV F6/F7 /4-/7 (x86_muldiv), LEA, PUSH
 // r32/imm/r/m, POP r32, CALL rel32/r32, RET, LEAVE, JMP rel/r/m, Jcc
 // rel8/rel32, NOP, HLT. Anything else is one K_ILL uop.
@@ -77,7 +77,7 @@ module x86_decode
     // shift / rotate count 0 and partial flag writes pass the old flags
     function automatic logic reads_flags(input aop_t a);
         return (a == A_ADC || a == A_SBB || a == A_INC || a == A_DEC || a == A_SHL || a == A_SHR
-                || a == A_SAR || a == A_ROL || a == A_ROR || a == A_SETCC || a == A_CMOV);
+                || a == A_SAR || a == A_ROL || a == A_ROR || a == A_SHLD || a == A_SHRD || a == A_SETCC || a == A_CMOV);
     endfunction
 
     // d = f(src): d is read only to merge
@@ -444,6 +444,14 @@ module x86_decode
                         n = 2'd2;
                     end
                     uop[0].cond = op2[3:0];
+                end
+                8'b1010?10?: begin   // A4/A5/AC/AD SHLD / SHRD r/m, reg (s3), imm8 / CL
+                    shift_rm(op2[3] ? A_SHRD : A_SHLD, wsz, op2[0], op2[0] ? 32'd0 : sx8(ipos), uop, n);
+                    for (int k = 0; k < 2; k++)
+                        if (k == int'(mem)) begin
+                            uop[k].s3 = gpr(reg_f, wsz);
+                            uop[k].us3 = 1'b1;
+                        end
                 end
                 8'hAF: imul2(1'b1, 32'd0, uop, n);
                 8'hB6: movx(1'b0, SZ8, uop, n);

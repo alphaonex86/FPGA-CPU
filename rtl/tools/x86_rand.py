@@ -37,7 +37,7 @@ def main():
         return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(24)
+        k = rnd.randrange(25)
         x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
         a = rnd.choice(ALU) + x
         if k == 0:
@@ -110,6 +110,11 @@ def main():
             fix = ["and%s %s, %s" % (x, mask, d), "or%s $2, %s" % (x, d)] if sgn \
                 else ["or%s $1, %s" % (x, d)]
             return [*fix, *setup, "%s%s %s" % ("idiv" if sgn else "div", x, d)]
+        if k == 23:   # SHLD / SHRD (16-bit counts above 16 included)
+            y = rnd.choice("lw")
+            cnt = rnd.choice(["$%d" % rnd.randrange(32), "%cl"])
+            return ["%s%s %s, %s, %s" % (rnd.choice(["shld", "shrd"]), y, cnt, sreg(y),
+                                         rnd.choice([sreg(y), mem()]))]
         return ["nop"]
 
     def run(n):

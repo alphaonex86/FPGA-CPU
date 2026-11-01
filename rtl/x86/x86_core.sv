@@ -42,7 +42,8 @@ module x86_core
     output logic                  illegal       // halted on an unsupported instruction
 );
     localparam int UQ_N = 16;
-    localparam int NP = 4;   // issue ports = result buses: 0, 1 ALU; 2 memory; 3 mul/div
+    localparam int NP = 4;   // issue ports: 0, 1 ALU; 2 memory; 3 mul/div
+    localparam int NW = 3;   // result buses: 0, 1 ALU; 2 memory or mul/div (mul/div first)
 
     // ---------------- frontend + decode ----------------
     logic                 fe_redirect;
@@ -183,17 +184,17 @@ module x86_core
     // ---------------- result registers ----------------
     // one per port. wb1 writes the ROB and the RS (capture); wb2 is wb1 one
     // cycle later, for the X/A bypass only.
-    logic [NP-1:0]             wb_valid;
-    logic [NP-1:0][TAG_W-1:0]  wb_tag;
-    logic [NP-1:0][31:0]       wb_value;
-    flags_t [NP-1:0]           wb_flags;
-    logic [NP-1:0]             wb_mispred, wb_fault;
-    logic [NP-1:0][31:0]       wb_redirect_pc;   // branches: the actual next EIP
-    logic [NP-1:0]             wb_br;
-    logic [NP-1:0]             wb2_valid;
-    logic [NP-1:0][TAG_W-1:0]  wb2_tag;
-    logic [NP-1:0][31:0]       wb2_value;
-    flags_t [NP-1:0]           wb2_flags;
+    logic [NW-1:0]             wb_valid;
+    logic [NW-1:0][TAG_W-1:0]  wb_tag;
+    logic [NW-1:0][31:0]       wb_value;
+    flags_t [NW-1:0]           wb_flags;
+    logic [NW-1:0]             wb_mispred, wb_fault;
+    logic [NW-1:0][31:0]       wb_redirect_pc;   // branches: the actual next EIP
+    logic [NW-1:0]             wb_br;
+    logic [NW-1:0]             wb2_valid;
+    logic [NW-1:0][TAG_W-1:0]  wb2_tag;
+    logic [NW-1:0][31:0]       wb2_value;
+    flags_t [NW-1:0]           wb2_flags;
 
     // ---------------- decode -> P -> uop queue ----------------
     assign p_push = p_valid != 3'd0 && !flush && 5'(UQ_N) - uq_count >= 5'(p_total);
@@ -368,7 +369,7 @@ module x86_core
         x.ready = !in_rob || rob[t].done;
         x.captured = 1'b0;
         x.value = !in_rob ? arch[r] : rob[t].value;
-        for (int p = 0; p < NP; p++)
+        for (int p = 0; p < NW; p++)
             if (in_rob && wb_valid[p] && wb_tag[p] == t) begin
                 x.ready = 1'b1;
                 x.value = wb_value[p];
@@ -419,7 +420,7 @@ module x86_core
             ds_rs[k].fsrc.tag = t;
             ds_rs[k].fsrc.ready = !dq[k].in_rob[3] || rob[t].done || !u.rflags;
             ds_rs[k].fsrc.value = !dq[k].in_rob[3] ? arch_flags : rob[t].flags;
-            for (int p = 0; p < NP; p++)
+            for (int p = 0; p < NW; p++)
                 if (dq[k].in_rob[3] && wb_valid[p] && wb_tag[p] == t) begin
                     ds_rs[k].fsrc.ready = 1'b1;
                     ds_rs[k].fsrc.value = wb_flags[p];
@@ -493,7 +494,7 @@ module x86_core
     function automatic logic [31:0] opnd(input src_t x);
         logic [31:0] v = x.value;
         if (!x.captured)
-            for (int q = 0; q < NP; q++) begin
+            for (int q = 0; q < NW; q++) begin
                 if (wb2_valid[q] && wb2_tag[q] == x.tag) v = wb2_value[q];
                 if (wb_valid[q] && wb_tag[q] == x.tag) v = wb_value[q];
             end
@@ -503,7 +504,7 @@ module x86_core
     function automatic flags_t fopnd(input fsrc_t x);
         flags_t v = x.value;
         if (!x.captured)
-            for (int q = 0; q < NP; q++) begin
+            for (int q = 0; q < NW; q++) begin
                 if (wb2_valid[q] && wb2_tag[q] == x.tag) v = wb2_flags[q];
                 if (wb_valid[q] && wb_tag[q] == x.tag) v = wb_flags[q];
             end
@@ -536,6 +537,7 @@ module x86_core
         x86_alu u_alu (.op(xr[gi].u.aop), .sz(xr[gi].u.osz), .cond(xr[gi].u.cond),
                        .a(byte_hi(xr[gi].src[0].value, xr[gi].u.hi1)),
                        .b(xr[gi].u.us2 ? byte_hi(xr[gi].src[1].value, xr[gi].u.hi2) : xr[gi].u.imm),
+                       .c(xr[gi].src[2].value),
                        .fin(xr[gi].fsrc.value), .y(alu_y[gi]), .f(alu_f[gi]));
     end endgenerate
 
@@ -551,7 +553,7 @@ module x86_core
                         cap = i < 3 ? ix[p].src[i].captured : ix[p].fsrc.captured;
                         t = i < 3 ? ix[p].src[i].tag : ix[p].fsrc.tag;
                         hit = 1'b0;
-                        for (int q = 0; q < NP; q++)
+                        for (int q = 0; q < NW; q++)
                             hit = hit || wb_valid[q] && wb_tag[q] == t || wb2_valid[q] && wb2_tag[q] == t;
                         if (!cap && !hit) $error("port %0d source %0d: tag %0d on no bypass", p, i, t);
                     end
@@ -594,7 +596,7 @@ module x86_core
     always_comb begin
         logic ld_ok;
         ld_ok = load_ok(am_sq_snap, am_addr, am_osz, m_fwd, m_fdata);
-        m_ok = am_store || ld_ok;
+        m_ok = (am_store || ld_ok) && !md_done;   // bus 2 taken by mul/div: replay
     end
 
     // ---------------- port 3: multiply / divide ----------------
@@ -610,10 +612,10 @@ module x86_core
                      .done_flags(md_flags), .done_fault(md_fault));
 
     // ---------------- results of X, M and port 3 ----------------
-    logic [NP-1:0]          ex_valid;
-    logic [NP-1:0][31:0]    ex_value, ex_redirect_pc;
-    flags_t [NP-1:0]        ex_flags;
-    logic [NP-1:0]          ex_mispred, ex_br, ex_fault;
+    logic [NW-1:0]          ex_valid;
+    logic [NW-1:0][31:0]    ex_value, ex_redirect_pc;
+    flags_t [NW-1:0]        ex_flags;
+    logic [NW-1:0]          ex_mispred, ex_br, ex_fault;
     always_comb begin
         for (int p = 0; p < 2; p++) begin
             rs_t r;
@@ -630,25 +632,20 @@ module x86_core
             ex_redirect_pc[p] = pc;
             ex_br[p] = r.u.kind == K_BR;
         end
-        ex_valid[2] = am_valid && m_ok;
+        ex_valid[2] = md_done || am_valid && m_ok;
         begin
             logic [31:0] raw;
             raw = m_fwd ? m_fdata : load_data;
-            ex_value[2] = am_lext == LX_MERGE ? merge(am_data, raw, am_osz, am_dhi)
+            ex_value[2] = md_done ? md_value
+                        : am_lext == LX_MERGE ? merge(am_data, raw, am_osz, am_dhi)
                                               : extend(raw, am_osz, am_lext == LX_SIGN);
         end
-        ex_flags[2] = '0;
+        ex_flags[2] = md_done ? md_flags : '0;
         ex_mispred[2] = 1'b0;
         ex_redirect_pc[2] = 32'd0;
         ex_br[2] = 1'b0;
-        ex_valid[3] = md_done;
-        ex_value[3] = md_value;
-        ex_flags[3] = md_flags;
-        ex_mispred[3] = 1'b0;
-        ex_redirect_pc[3] = 32'd0;
-        ex_br[3] = 1'b0;
         ex_fault = '0;
-        ex_fault[3] = md_fault;
+        ex_fault[2] = md_done && md_fault;
     end
 
     // ---------------- state update ----------------
@@ -705,7 +702,7 @@ module x86_core
                 rob_head <= rob_head + TAG_W'(r_n);
                 if (r_store) sq_head <= sq_head + 1'b1;
                 // wb1 -> ROB
-                for (int p = 0; p < NP; p++)
+                for (int p = 0; p < NW; p++)
                     if (wb_valid[p]) begin
                         rob[wb_tag[p]].done <= 1'b1;
                         rob[wb_tag[p]].value <= wb_value[p];
@@ -724,8 +721,7 @@ module x86_core
                 wb_br <= ex_br;
                 wb_fault <= ex_fault;
                 for (int p = 0; p < 2; p++) wb_tag[p] <= ix[p].tag;
-                wb_tag[2] <= am_tag;
-                wb_tag[3] <= md_tag;
+                wb_tag[2] <= md_done ? md_tag : am_tag;
                 wb2_valid <= wb_valid;
                 wb2_tag <= wb_tag;
                 wb2_value <= wb_value;
@@ -764,7 +760,7 @@ module x86_core
                     for (int i = 0; i < 3; i++) begin
                         for (int p = 0; p < 2; p++)
                             if (grant[p] != '0 && rs[e].src[i].tag == gtag[p]) rs[e].src[i].ready <= 1'b1;
-                        for (int p = 0; p < NP; p++)
+                        for (int p = 0; p < NW; p++)
                             if (wb_valid[p] && !rs[e].src[i].captured && rs[e].src[i].tag == wb_tag[p]) begin
                                 rs[e].src[i].ready <= 1'b1;
                                 rs[e].src[i].captured <= 1'b1;
@@ -773,7 +769,7 @@ module x86_core
                     end
                     for (int p = 0; p < 2; p++)
                         if (grant[p] != '0 && rs[e].fsrc.tag == gtag[p]) rs[e].fsrc.ready <= 1'b1;
-                    for (int p = 0; p < NP; p++)
+                    for (int p = 0; p < NW; p++)
                         if (wb_valid[p] && !rs[e].fsrc.captured && rs[e].fsrc.tag == wb_tag[p]) begin
                             rs[e].fsrc.ready <= 1'b1;
                             rs[e].fsrc.captured <= 1'b1;

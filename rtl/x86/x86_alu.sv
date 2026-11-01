@@ -5,7 +5,9 @@
 // Undefined flags follow QEMU/Unicorn, the lock-step reference: AF = 0
 // after logic ops and shifts; shift CF/OF from the value shifted by
 // count - 1 (cc_helper_template.h compute_all_shl/sar); rotates set only
-// CF/OF (translate.c gen_rot_rm_T1); count 0 changes nothing.
+// CF/OF (translate.c gen_rot_rm_T1); count 0 changes nothing. SHLD/SHRD
+// shift a with bits of c (gen_shiftd_rm_T1: 64-bit concatenation; 16-bit
+// a:c:a, so counts above 16 match), flags as SHL/SHR.
 module x86_alu
     import x86_pkg::*;
 (
@@ -13,6 +15,7 @@ module x86_alu
     input  logic [1:0]  sz,
     input  logic [3:0]  cond,     // A_SETCC / A_CMOV
     input  logic [31:0] a, b,
+    input  logic [31:0] c,        // A_SHLD / A_SHRD: bits shifted in
     input  flags_t      fin,      // flags before the uop
     output logic [31:0] y,
     output flags_t      f
@@ -26,6 +29,7 @@ module x86_alu
     logic [4:0]  cnt, msb;
     logic [31:0] v, pre, res, rot;
     logic        is_shift, is_rot;
+    logic [63:0] dx, dpre;          // SHLD / SHRD
 
     function automatic logic parity(input logic [7:0] x);
         return ~^x;
@@ -65,7 +69,7 @@ module x86_alu
         y = ys >> sh;
 
         // shifts and rotates, on the operand zero (SAR: sign) extended
-        is_shift = op == A_SHL || op == A_SHR || op == A_SAR;
+        is_shift = op == A_SHL || op == A_SHR || op == A_SAR || op == A_SHLD || op == A_SHRD;
         is_rot = op == A_ROL || op == A_ROR;
         cnt = b[4:0];
         msb = 5'd31 - sh;
@@ -80,6 +84,16 @@ module x86_alu
             A_SHR:   res = pre >> 1;
             default: res = $signed(pre) >>> 1;
         endcase
+        dx = sz == SZ16 ? {16'd0, a[15:0], c[15:0], a[15:0]} : op == A_SHLD ? {a, c} : {c, a};
+        if (op == A_SHLD) begin
+            dpre = dx << (cnt - 5'd1);
+            pre = extend(dpre[63:32], sz, 1'b0);
+            res = 32'((dpre << 1) >> 32);
+        end else if (op == A_SHRD) begin
+            dpre = dx >> (cnt - 5'd1);
+            pre = extend(dpre[31:0], sz, 1'b0);
+            res = dpre[32:1];
+        end else dpre = '0;
         res = extend(res, sz, 1'b0);
         rot = sz == SZ8 ? {4{a[7:0]}} : sz == SZ16 ? {2{a[15:0]}} : a;   // replicated
         rot = op == A_ROL ? rot << cnt | rot >> (6'd32 - {1'b0, cnt})
@@ -91,7 +105,7 @@ module x86_alu
             if (cnt != 5'd0) begin
                 if (is_shift) begin
                     y = res;
-                    f.cf = op == A_SHL ? pre[msb] : pre[0];
+                    f.cf = op == A_SHL || op == A_SHLD ? pre[msb] : pre[0];
                     f.of = pre[msb] ^ res[msb];
                     f.sf = res[msb];
                     f.zf = res == 32'd0;

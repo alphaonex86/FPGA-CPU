@@ -62,16 +62,18 @@ replicated per read port plus a live-value table.
    SQ, forward on an exact match, replay on a partial overlap, stores
    write at retire); mul/div port (`x86_muldiv`: 3-stage multiply,
    1 bit/cycle divider, issued in order since MULH/DIVR read the unit's
-   last high half / remainder). ALU grants wake dependents at once (back to back);
+   last high half / remainder), its results on the memory result bus (a
+   memory op in M that cycle replays: 3 capture buses, not 4). ALU grants wake dependents at once (back to back);
    an uncaptured operand must be on wb1/wb2 (simulation check). Branches:
    static BTFN at decode, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
-   they retire. Subset: ALU/shift/rotate/SETcc/CMOVcc/MUL/IMUL/DIV/IDIV
+   they retire. Subset: ALU/shift/rotate/SHLD/SHRD/SETcc/CMOVcc/MUL/IMUL/DIV/IDIV
    on 8/16/32-bit operands (QEMU flag semantics), loads/stores, stack,
    branches; prefixes 66 and CS/DS/ES/SS. Matches Unicorn on x1/x2, 2000
    random programs (`x86_rand.py`) and compiled C (`tests/x86/c1_mix.c`,
    gcc -O2 i686: records, strings, sort, CRC-32, recursion; 23,879
-   instructions, IPC 0.716). IPC: 1.88 straight ALU code (2 ALU ports), 1.94 in a
+   instructions, IPC 0.716; `c2_core.c`: list, matrix, switch jump table,
+   64-bit arithmetic; 9,369 instructions, IPC 0.754). IPC: 1.88 straight ALU code (2 ALU ports), 1.94 in a
    14-instruction loop, 0.45 on random programs (random forward Jcc).
    5CEFA9F23C8 (`rtl/tests/x86/synth/x86_core_synth.sv`,
    `rtl/tools/synth_path.sh` for the worst path): single-cycle issue 5.88
