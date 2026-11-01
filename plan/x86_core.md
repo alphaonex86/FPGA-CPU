@@ -65,7 +65,7 @@ replicated per read port plus a live-value table.
    last high half / remainder), its results on the memory result bus (a
    memory op in M that cycle replays: 3 capture buses, not 4). ALU grants wake dependents at once (back to back);
    an uncaptured operand must be on wb1/wb2 (simulation check). Branches:
-   static BTFN at decode, a 32-entry fetch BTB that learns decode's taken
+   gshare + static BTFN at decode / P, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
    they retire. Subset: ALU/shift/rotate/SHLD/SHRD/BSF/BSR/BSWAP/SETcc/CMOVcc/
    MUL/IMUL/DIV/IDIV on 8/16/32-bit operands (QEMU flag semantics), loads/stores,
@@ -103,7 +103,15 @@ replicated per read port plus a live-value table.
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div
    wake dependents in their result cycle (bus 2, also at D): IPC c1 0.805
-   -> 0.859, c2 0.891 -> 0.959, c3 0.677 -> 0.771, c4 0.831 -> 0.900. DE25-Nano
+   -> 0.859, c2 0.891 -> 0.959, c3 0.677 -> 0.771, c4 0.831 -> 0.900.
+   Conditional branches: static BTFN mispredicted 817 of 3,350 Jcc in c1
+   (= its 824 flushes); offline replay of the Unicorn traces: bimodal 548,
+   gshare 4K 334, gshare whose weak counters keep BTFN 272 (best on every
+   test, cold code stays at BTFN). Built (4K x 2-bit, 10-bit history,
+   read as the group enters P, updated at retire): flushes c1 824 -> 287,
+   c2 129 -> 57, c4 72 -> 18; IPC c1 1.174, c2 1.134, c4 1.049. Decode
+   redirects rose (c1 216 -> 889): forward taken branches until the
+   32-entry BTB learns them. DE25-Nano
    A5EB013BB23BE4SCS (Quartus Pro 26.1.1, R/D split, before the BTB):
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.
