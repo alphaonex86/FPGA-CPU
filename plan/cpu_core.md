@@ -125,7 +125,31 @@ socket3/docs/notes/design-decisions.md):
    above every Socket 3 bus clock (<= 40 MHz) but below Socket 7/370.
    Critical paths: the max-ipc lane1 -> lane0 early-ALU bypass (rv64imac)
    and the execute -> fetch TLB write (rv64imafdc), both inside the back
-   end; the next question is how much fmax a lighter bypass buys per IPC.
+   end.
+
+   fmax vs IPC sweep (2026-11-01, `rtl/tools/vexii_configs.sh`,
+   `bench_vexii.sh`: prebuilt NaxSoftware Dhrystone / CoreMark in the
+   VexiiRiscv Verilator testbench, default testbench memory; both fit the
+   16 KB L1, so this is core IPC, not system IPC). CoreMark = CoreMark/MHz
+   x fmax:
+
+   | config | ALMs | fmax | DMIPS/MHz | CoreMark/MHz | IPC (CoreMark) | CoreMark |
+   |---|---|---|---|---|---|---|
+   | rv64imac_dual (max-ipc) | 12,932 | 60.7 | 2.61 | 4.84 | 1.24 | 294 |
+   | rv64imac_dual_rbra (+ relaxed branch) | 12,839 | 60.6 | 2.59 | 4.72 | 1.21 | 286 |
+   | rv64imac_dual_nolate (- late ALU) | 11,249 | 59.4 | 2.35 | 4.41 | 1.13 | 262 |
+   | rv64imafdc_dual (+ F/D) | 16,879 | 52.0 | 2.60 | 4.84 | 1.24 | 252 |
+   | rv64imac_single (max-ipc, 1 lane) | 9,524 | 65.0 | 1.78 | 3.33 | 0.85 | 216 |
+   | rv64imac_dual_nolate_bp1 (- late ALU, bypass from 1) | 11,035 | 59.1 | 1.49 | 2.81 | 0.72 | 166 |
+
+   Answer: the full max-ipc dual-issue core is the best; the lighter
+   bypass, no late ALU and the relaxed branch cost IPC and buy no fmax.
+   Each removal only moves the worst path (execute branch -> fetch L1 /
+   TLB RAM address, then late-ALU 64-bit bypass, register file, dispatch):
+   about 60 MHz is the depth of this pipeline at 64 bits on C8, not one
+   path. More clock needs more stages (decoder/dispatcher/fetch fork
+   placement), a later question. The F/D unit costs 14 % clock: keep the
+   FPU off the integer critical loop when x87/SSE are added.
 2. Same netlist in Efinity for the Ti180 (176k LE): does it fit at all?
 3. Only then: an x86 decode plugin for the integer reg-reg / load-op
    subset, lock-stepped against an emulator, on the RISC-V back end.
