@@ -10,6 +10,7 @@ plugs into the target board's ZIF socket, and the FPGA, its power, configuration
 | `socket7-cyclonev` | Socket 7, Biostar MB-8500TTD, Intel 430TX | same |
 | `socket370-cyclonev` | Socket 370, VIA VT82C694X + VT82C686B board | same |
 | `socket3-de25mux` | Socket 3, MB-8433UUD-A, adapter to a DE25-Nano (D11) | none on the adapter (74LVC mux); DE25-Nano Agilex 5 |
+| `socket7-de25std` | Socket 7, MB-8500TTD, adapter to a DE25-Standard HSMC + GPIO (D12) | none on the adapter (74LVC, data 2:1); DE25-Standard Agilex 5 |
 | ~~`socket370-ti180`~~ | dropped (D10), files deleted 2026-11-01 | - |
 | ~~`socket3-ti180`, `socket7-ti180`~~ | dropped (D9) | - |
 | slot1 (see `plan/slot1.md`) | Slot 1 (SC242), board per slot1 D8 | per slot1 D9 |
@@ -94,6 +95,12 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   2-3 PCBs stacked on the base PCB (growing in height, not sideways), above
   all for the sockets and RAM >= 1 GB. Both PCB sides carry components
   wherever nothing collides mechanically.
+- **D12** (decided 2026-11-01 by the operator) `socket7-de25std`: the
+  operator buys a DE25-Standard (116 I/O: 80 HSMC + 36 GPIO); a Socket 7
+  adapter without FPGA muxes only D/DP 2:1 (133 MHz per line on the HSMC),
+  the rest direct or slow-muxed (`plan/cpu_core.md` E1). Signal
+  integrity at 133 MHz per line is the risk to check first. Socket 370
+  stays interposer-only (no DE25 can carry AGTL+ 133 MHz without a SERDES).
 - **D11** (decided 2026-11-01 by the operator) `socket3-de25mux`: a
   Socket 3 adapter without FPGA that links the DE25-Nano's 72 header I/O
   to the socket through 74LVC registers multiplexed 3:1 or 4:1, the
