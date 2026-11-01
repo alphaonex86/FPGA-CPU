@@ -1,16 +1,20 @@
 #!/bin/bash
-# Usage: rtl/tools/synth_cv.sh <verilog> <out dir> [period ns] [recipe]
-# Compiles one SpinalHDL core netlist alone on $DEVICE (default 5CEFA9F23C8;
-# A5EB013BB23BE4SCS = DE25-Nano), every port but clk a virtual pin; recipe
-# default | perf, quartus_run.sh)
-# and prints its area and slow-model fmax: plan/cpu_core.md.
+# Usage: rtl/tools/synth_cv.sh <top file> <out dir> [period ns] [recipe] [more files...]
+# Compiles one core (SpinalHDL netlist, or a .sv harness whose first module
+# is the top, its submodules in [more files]) alone on $DEVICE (default
+# 5CEFA9F23C8; A5EB013BB23BE4SCS = DE25-Nano), every port but clk a virtual
+# pin; recipe default | perf (quartus_run.sh), and prints its area and
+# slow-model fmax: plan/cpu_core.md.
 set -eu
 . "$(dirname "$0")/quartus_run.sh"
 src=$(realpath "$1")
 out=$2
 period=${3:-10.0}
 recipe=${4:-default}
-top=$(sed -n 's/^module \([A-Za-z_0-9]*\).*/\1/p' "$src" | head -1)   # SpinalHDL: top first
+shift $(($# < 4 ? $# : 4))
+srcs=("$src")
+for f; do srcs+=("$(realpath "$f")"); done
+top=$(sed -n 's/^module \([A-Za-z_0-9]*\).*/\1/p' "$src" | head -1)   # top first
 [[ -n $top ]] || { echo "no module in $src"; exit 1; }
 grep -q "input  *wire *clk\b\|input wire clk\b" "$src" || { echo "$top: no clk port"; exit 1; }
 mkdir -p "$out"
@@ -19,7 +23,9 @@ cat > core.qsf <<EOF
 set_global_assignment -name FAMILY "$FAMILY"
 set_global_assignment -name DEVICE $DEVICE
 set_global_assignment -name TOP_LEVEL_ENTITY $top
-set_global_assignment -name VERILOG_FILE $src
+$(for f in "${srcs[@]}"; do
+    [[ $f == *.sv ]] && echo "set_global_assignment -name SYSTEMVERILOG_FILE $f" \
+                     || echo "set_global_assignment -name VERILOG_FILE $f"; done)
 set_global_assignment -name VERILOG_MACRO "SYNTHESIS=1"
 set_global_assignment -name SDC_FILE core.sdc
 set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL

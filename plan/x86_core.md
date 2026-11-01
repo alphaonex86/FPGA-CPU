@@ -39,6 +39,13 @@ replicated per read port plus a live-value table.
 
 1. M1 length decoder + predecode: every byte stream decoded to the same
    instruction lengths as GNU objdump (i386, all prefixes, 0F maps).
+   **Done 2026-11-01** (`rtl/tools/x86_len_test.sh`): `x86_len_decode`
+   (prefix scan + `x86_opdecode`) matches objdump 2.47 at 784,137 32-bit
+   and 944,575 16-bit starts (2 MB random, seed 7); `x86_predecode` (16
+   starts/cycle, 2 stages: per-byte opcode decode, then one-hot prefix-run
+   select) equals it on 200,000 biased random blocks (3 injected bugs
+   caught). 5CEFA9F23C8, harness `rtl/tests/x86/synth/`: 3,793 ALMs,
+   1,093 registers, 101.09 MHz slow 1100 mV 85 C (one stage: 46 MHz).
 2. M2 integer core, flat 32-bit, no caches (ideal memory): fetch, decode,
    rename, ALU/branch, ROB; `x86_trace_check` per retired instruction.
 3. M3 loads/stores, LSQ, L1I/L1D, then L2; Dhrystone/CoreMark for x86 IPC.
