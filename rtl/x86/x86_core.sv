@@ -115,7 +115,9 @@ module x86_core
         p_btb_k = 2'd0;
         stop = 1'b0;
         for (int k = 0; k < 3; k++) begin
-            p_want[k] = p_ret[k] ? p_ras[p_sp - 1'b1] : p_redirect[k] ? p_target[k] : p_seq[k];
+            // RET: the top before the group (a call / ret ends the group unless
+            // mispredicted; later slots are then wrong path): parallel compares
+            p_want[k] = p_ret[k] ? ras[ras_sp - 1'b1] : p_redirect[k] ? p_target[k] : p_seq[k];
             p_uop_ret[k][2].imm = p_ret[k] ? p_want[k] : p_uop[k][2].imm;
             p_mis[k] = p_want[k] != p_next[k];
             p_take[k] = p_valid[k] && !stop && !(k != 0 && p_lk[k]);
@@ -217,6 +219,8 @@ module x86_core
     logic [NW-1:0]             wb_mispred, wb_fault;
     logic [NW-1:0][31:0]       wb_redirect_pc;   // branches: the actual next EIP
     logic [NW-1:0]             wb_br;
+    logic [2:0]                ew_valid;   // early wakeup (ready, value on a bypass later):
+    logic [2:0][TAG_W-1:0]     ew_tag;     // ALU grants, result bus 2 in its X / M cycle
     logic [NW-1:0]             wb2_valid;
     logic [NW-1:0][TAG_W-1:0]  wb2_tag;
     logic [NW-1:0][31:0]       wb2_value;
@@ -451,6 +455,9 @@ module x86_core
                 ds_rs[k].src[i] = read_src(sr[i], dq[k].in_rob[i], dq[k].stag[i]);
                 if (!su[i]) ds_rs[k].src[i].ready = 1'b1;
                 ds_rs[k].src[i].captured = ds_rs[k].src[i].ready;
+                for (int p = 0; p < 3; p++)
+                    if (dq[k].in_rob[i] && ew_valid[p] && ew_tag[p] == dq[k].stag[i])
+                        ds_rs[k].src[i].ready = 1'b1;
             end
             t = dq[k].stag[3];
             ds_rs[k].fsrc.tag = t;
@@ -462,6 +469,8 @@ module x86_core
                     ds_rs[k].fsrc.value = wb_flags[p];
                 end
             ds_rs[k].fsrc.captured = ds_rs[k].fsrc.ready;
+            for (int p = 0; p < 3; p++)
+                if (dq[k].in_rob[3] && ew_valid[p] && ew_tag[p] == t) ds_rs[k].fsrc.ready = 1'b1;
             ds_to_rs[k] = d_ok && dq_valid[k] && needs_rs(u.kind);
             ds_slot[k] = fs[nrs];
             nrs = nrs + 2'(ds_to_rs[k]);
@@ -685,6 +694,14 @@ module x86_core
         ex_fault = '0;
         ex_fault[2] = md_done && md_fault;
     end
+    always_comb begin
+        for (int p = 0; p < 2; p++) begin
+            ew_valid[p] = grant[p] != '0;
+            ew_tag[p] = gtag[p];
+        end
+        ew_valid[2] = ex_valid[2];
+        ew_tag[2] = md_done ? md_tag : am_tag;
+    end
 
     // ---------------- state update ----------------
     always_ff @(posedge clk) begin
@@ -793,11 +810,11 @@ module x86_core
                     else rs[am_slot].issued <= 1'b0;
                     if (am_store) sq[am_sq_idx] <= '{addr_valid: 1'b1, size: am_osz, addr: am_addr, data: am_data};
                 end
-                // wakeup: ALU grants (ready), wb1 (ready + capture)
+                // wakeup: early (ready), wb1 (ready + capture)
                 for (int e = 0; e < RS_N; e++) begin
                     for (int i = 0; i < 3; i++) begin
-                        for (int p = 0; p < 2; p++)
-                            if (grant[p] != '0 && rs[e].src[i].tag == gtag[p]) rs[e].src[i].ready <= 1'b1;
+                        for (int p = 0; p < 3; p++)
+                            if (ew_valid[p] && rs[e].src[i].tag == ew_tag[p]) rs[e].src[i].ready <= 1'b1;
                         for (int p = 0; p < NW; p++)
                             if (wb_valid[p] && !rs[e].src[i].captured && rs[e].src[i].tag == wb_tag[p]) begin
                                 rs[e].src[i].ready <= 1'b1;
@@ -805,8 +822,8 @@ module x86_core
                                 rs[e].src[i].value <= wb_value[p];
                             end
                     end
-                    for (int p = 0; p < 2; p++)
-                        if (grant[p] != '0 && rs[e].fsrc.tag == gtag[p]) rs[e].fsrc.ready <= 1'b1;
+                    for (int p = 0; p < 3; p++)
+                        if (ew_valid[p] && rs[e].fsrc.tag == ew_tag[p]) rs[e].fsrc.ready <= 1'b1;
                     for (int p = 0; p < NW; p++)
                         if (wb_valid[p] && !rs[e].fsrc.captured && rs[e].fsrc.tag == wb_tag[p]) begin
                             rs[e].fsrc.ready <= 1'b1;

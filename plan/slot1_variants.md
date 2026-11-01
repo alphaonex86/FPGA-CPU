@@ -201,8 +201,14 @@ the DMA mirror.
     Bolivia; alternative openXC7 (yosys + nextpnr-xilinx) has Artix
     PCIE_2_1 + GTP support in release 0.9.0, PCIe hardware-verified only on
     Kintex-7 [github.com/openXC7/nextpnr-xilinx releases 0.9.0].
-    Update 2026-11-01 (operator): the Vivado download from Bolivia works
-    (in progress); board choice after it finishes.
+    Update 2026-11-01 (operator): the Vivado download from Bolivia works.
+    Verified 2026-11-01 (Vivado 2025.2 ML Standard, `rtl/tools/vivado.sh`,
+    7-series devices only, 52 GB): xc7a200tfbg484-2 synthesis,
+    implementation and bitstream with no licence file; PCIe 7 Series IP
+    3.3 (x2, 5 GT/s) licence "Included", out-of-context synthesis done.
+    Vivado needs the ncurses 5 ABI (Gentoo sys-libs/ncurses-compat, else
+    the script's .so.6 shim). Decision 2026-11-01 (operator): C2 bench
+    board Puzhi PZ-A7200T-KFB (Vivado part xc7a200tfbg484-2).
   - Dropped: LiteFury/NiteFury (M.2, too few I/O); Tagus, AC701, Cyclone V
     GX/GT Intel kits (945-2,800 USD; GX kit stock 0, GT kit -B 1,380-1,558
     USD, stock 0) on price.

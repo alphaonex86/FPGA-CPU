@@ -2,7 +2,7 @@
 // +image=<hex> at 0x1000, writing the retire trace (one line per x86
 // instruction, x86_trace_check format) to +trace=<file>; +debug prints the
 // frontend redirects, the extracted instructions, mul/div starts and results
-// and the retired uops.
+// and the retired uops; +stats a cycle breakdown at the end.
 module core_top (
     input  logic clk,
     input  logic rst,
@@ -26,7 +26,11 @@ module core_top (
     logic [31:0] regs [8];
     flags_t      flags;
     int          trace;
-    logic        debug;
+    logic        debug, stats;
+    // +stats: cycles that retire nothing (ROB empty / head not done), uop
+    // queue empty, decode redirects, retire flushes
+    logic [31:0] st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush;
+    logic [31:0] st_wait_kind [8];   // head waits by the head uop kind (kind_t)
 
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000),
                    .fetch_addr(fetch_addr), .fetch_data(fetch_data),
@@ -52,6 +56,7 @@ module core_top (
         end
         $readmemh(image, mem, 32'h1000);
         debug = $test$plusargs("debug");
+        stats = $test$plusargs("stats");
         trace = $fopen(tname, "w");
         if (trace == 0) begin
             $display("cannot write %s", tname);
@@ -66,6 +71,8 @@ module core_top (
             flags <= '0;
             cycles <= 32'd0;
             insns <= 32'd0;
+            {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush} <= '0;
+            for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
         end else begin
             logic [31:0] r [8];
             flags_t      f;
@@ -74,6 +81,16 @@ module core_top (
             done = insns;
             f = flags;
             cycles <= cycles + 32'd1;
+            if (ret_valid == 3'd0 && !halted) begin
+                if (core.rob_count == '0) st_empty <= st_empty + 32'd1;
+                else begin
+                    st_wait <= st_wait + 32'd1;
+                    st_wait_kind[core.rob[core.rob_head].kind] <= st_wait_kind[core.rob[core.rob_head].kind] + 32'd1;
+                end
+            end
+            if (core.uq_count == '0) st_uq_empty <= st_uq_empty + 32'd1;
+            if (core.fe_redirect && !core.flush) st_dec_redir <= st_dec_redir + 32'd1;
+            if (core.flush) st_flush <= st_flush + 32'd1;
             if (debug) begin
                 if (core.fe_redirect) $display("%0d redirect %08x", cycles, core.fe_redirect_pc);
                 for (int k = 0; k < 3; k++)
@@ -110,5 +127,13 @@ module core_top (
         end
     end
 
-    final $fclose(trace);
+    final begin
+        $fclose(trace);
+        if (stats)
+            $display("stats: retire 0: ROB empty %0d, head waits %0d; uop queue empty %0d; decode redirects %0d; flushes %0d",
+                     st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush);
+        if (stats)
+            $display("stats: head waits by kind: ALU %0d LD %0d ST %0d BR %0d MD %0d",
+                     st_wait_kind[K_ALU], st_wait_kind[K_LD], st_wait_kind[K_ST], st_wait_kind[K_BR], st_wait_kind[K_MD]);
+    end
 endmodule

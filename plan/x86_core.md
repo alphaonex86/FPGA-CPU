@@ -96,7 +96,14 @@ replicated per read port plus a live-value table.
    54.91 MHz, 49,173 ALMs (43 %), 22,976 registers, default recipe; worst
    path return stack -> P redirect compare -> P load enable (then the load
    enable no longer waits for the compare; frontend next-start chain
-   precomputed per byte at queue push). DE25-Nano
+   precomputed per byte at queue push): 52.36 MHz, 49,725 ALMs; worst path
+   in-group return stack index -> serial redirect compares (then: RET
+   reads the top before its group, parallel compares).
+   Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
+   mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
+   3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div
+   wake dependents in their result cycle (bus 2, also at D): IPC c1 0.805
+   -> 0.859, c2 0.891 -> 0.959, c3 0.677 -> 0.771, c4 0.831 -> 0.900. DE25-Nano
    A5EB013BB23BE4SCS (Quartus Pro 26.1.1, R/D split, before the BTB):
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.
