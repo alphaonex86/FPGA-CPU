@@ -1,15 +1,16 @@
 #!/bin/bash
-# Usage: rtl/c2/cyclonev/build.sh <out_dir>
-# Compiles the C2 cartridge bitstream (c2_cart_top.sv) with Quartus Lite;
+# Usage: rtl/c2/cyclonev/build.sh <a|c2cart> <out_dir>
+# Compiles the C2 cartridge bitstream for the variant A PCB (c2_cart_top.sv)
+# or the dedicated one (c2_cart_gtl_top.sv, gen_qsf.py) with Quartus Lite;
 # fails on a critical warning, an unplaced, ignored or incomplete pin
 # assignment, an inferred latch or a timing violation.
 set -eu
-[[ $# -eq 1 ]] || { echo "usage: $0 <out_dir>"; exit 1; }
+[[ $# -eq 2 ]] || { echo "usage: $0 <a|c2cart> <out_dir>"; exit 1; }
 here=$(realpath "$(dirname "$0")")
 QUARTUS=${QUARTUS:-$HOME/altera_lite/25.1std/quartus/bin}
-mkdir -p "$1"
-cd "$1"
-python3 -I "$here/gen_qsf.py" c2_cart.qsf
+mkdir -p "$2"
+cd "$2"
+python3 -I "$here/gen_qsf.py" "$1" c2_cart.qsf
 echo 'PROJECT_REVISION = "c2_cart"' > c2_cart.qpf
 nice -n 19 "$QUARTUS/quartus_sh" --flow compile c2_cart > flow.log 2>&1 || {
     grep -m10 "^Error" flow.log || true; echo "FAIL see $PWD/flow.log"; exit 1; }

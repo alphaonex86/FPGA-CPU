@@ -203,6 +203,9 @@ window is never refilled under a running REP.
 
 ## Cartridge bitstream (`rtl/c2/cyclonev`, variant A PCB)
 
+- `build.sh <a|c2cart> <out_dir>`: `c2_cart_core.sv` (everything but the
+  pins) under `c2_cart_top.sv` (variant A) or `c2_cart_gtl_top.sv`
+  (dedicated PCB, below).
 - `c2_cart_top.sv`: c2_cart on the received link clock (M8), c2_bus_sync,
   c2_p6_agent on BCLK through `c2_bclk_pll` (normal mode: the raw pin ->
   I/O register clock path is ~5 ns, which would capture the chipset's data
@@ -225,41 +228,87 @@ window is never refilled under a running REP.
 - The board must run 66 MHz: 100/66# low on the cartridge (a tie on the
   next PCB revision) or the board's FSB jumper.
 
-## Dedicated cartridge PCB (D33) with GTL+ transceivers (D35)
+## Dedicated cartridge PCB (D33) with GTL+ transceivers (D35, D37)
 
-`hw/slot1-c2cart/`, independent of the variant A routing.
+`hw/slot1-c2cart/` (`pins.csv` from `hw/tools/gen_c2cart_assign.py`),
+independent of the variant A routing; bitstream `build.sh c2cart`
+(`c2_cart_gtl_top.sv` + `.sdc`).
 
 - FPGA 5CEBA4F23C8 (or A2; an A9 drops in): pins only on the 208 F484 IO
   balls that are IO on both A4 and A9 (16 bank-7A balls are A9-only, 16
   A4-only); the board powers the A4's VCCIO2A/VCCPD1A2A balls (NC on the
-  A9). All banks 3.3 V: no DDR3, no 1.35 V bank.
-- AGTL+ through 8 x SN74GTL16612DGG (18-bit LVTTL <-> GTL+ transceiver,
-  B port 40 mA at VOL 0.4 V = ~0.4 V into the double-terminated 28 ohm
-  line vs VIL 0.82 V; VREF comparator on receive), transparent mode
-  (LEAB/LEBA high, CEAB/CEBA high, CLKAB/CLKBA low), timing A->B
-  4.5 ns, B->A 6.9 ns, OE 7.4 ns max [ti_sn74gtl16612]:
-  | group | chips | lines | direction |
+  A9). Banks 3.3 V except 3A: RX at SSTL-18 (VCCIO3A 1.8 V, VCCPD3A
+  2.5 V). No DDR3.
+- AGTL+ drive and the wide groups through 7 x SN74GTL16612DGG (18-bit
+  LVTTL <-> GTL+ transceiver, B port 40 mA at VOL 0.4 V = ~0.4 V into the
+  double-terminated 28 ohm line vs VIL 0.82 V) [ti_sn74gtl16612]; every
+  chip's CLKAB = CLKBA from its own output of a CY2309 zero-delay buffer
+  (REF = BCLK), CEAB#/CEBA# low, LEAB from the FPGA pin AB_LE (high: A -> B
+  transparent, low: clocked; the bitstream picks):
+  | group | chips | lines | B -> A |
   |---|---|---|---|
-  | ADDR | 2 | A[31:3]#, REQ[4:0]# | FPGA OEAB#/OEBA# pair |
-  | DATA | 4 | D[63:0]# | FPGA OEAB#/OEBA# pair |
-  | RX | 1 | ADS#, BNR#, BPRI#, TRDY#, DBSY#, DRDY#, RS[2:0]#, RESET#, DEFER#, LOCK#, HIT#, HITM#, BR0# | B -> A only (OEBA# tied low) |
-  | TX | 1 | ADS#, DRDY#, DBSY#, BR0#, BNR#, HIT#, HITM# | A -> B only (OEAB# tied low) |
-  TX lines also land on an RX channel (two FPGA balls each: drive and
-  observe): the agent counts its own ADS# and every DRDY#/DBSY#, also
-  while it drives. Direction change, contention-free on the LVTTL side:
-  OEBA# off and the FPGA drives high (released) one BCLK before OEAB# on;
-  back the same way. ADDR goes out one BCLK before ADS# (the agent
-  rechecks BPRI#/BNR# then); DATA goes out when our write heads the
-  in-order queue and the data bus is quiet, and DRDY# waits for OEAB#
-  (a late DRDY# is a legal wait state after TRDY#).
+  | ADDR | 2 | A[31:3]#, REQ[4:0]# | transparent (LEBA high; only the straps are read), FPGA OEAB#/OEBA# pair |
+  | DATA | 4 | D[63:0]# | clocked (LEBA low), FPGA OEAB#/OEBA# pair |
+  | TX | 1 | ADS#, DRDY#, DBSY#, BR0#, BNR#, HIT#, HITM# | off (OEBA# high); OEAB# from the FPGA; the lines C2 does not drive are driven high (released) |
+  Spare channels: both sides open. Direction change, contention-free on
+  the LVTTL side: OEBA# off and the FPGA drives high (released) one BCLK
+  before OEAB# on; OEAB# stays one BCLK after the last drive (a clocked
+  A -> B shows the data one BCLK after its OEAB#; the open-drain B side
+  is off meanwhile); dir falls one BCLK after OEAB#. ADDR goes out one
+  BCLK before ADS# (the agent rechecks BPRI#/BNR# then); DATA goes out
+  when our write heads the in-order queue and the data bus is quiet.
+- **D37 receive path and transceiver clocks** (timing study 2026-11-02,
+  Quartus 5CEBA4 C8 at 66 MHz, slow 85 C / fast 0 C):
+  - Through the transparent 16612 (B -> A 1.1-6.3 ns) the inputs miss by
+    ~0.7 ns in either PLL mode (normal, source synchronous). So the
+    control lines the agent observes (ADS#, BNR#, BPRI#, TRDY#, DBSY#,
+    DRDY#, RS[2:0]#, RESET#, DEFER#, LOCK#, HIT#, HITM#, BR0#) go
+    straight from their contacts to bank 3A (SSTL-18 Class I, VREFB3AN0
+    0.96 V = 1.00k/1.78k from VTT, inside the 0.833-0.969 V spec [cvds
+    Table 16]; thresholds 0.835/1.085 V DC vs the bus's 0.82/1.22 V [p2
+    Table 12]): setup/hold slack >= 1.1 ns. D# is registered in the DATA
+    chips at BCLK and reaches the FPGA one BCLK later (`c2_p6_agent`
+    D_CLOCKED: read data follows DRDY# by one clock; RTL test p6gtl
+    models the register, a non-clocked agent hangs it): slack >= 1.8 ns.
+  - CLKBA cannot come from the FPGA: its forwarded clock moved -2.0 to
+    +5.7 ns across PVT against a 5.4 ns window. The CY2309 (REF at its
+    VDD/2 threshold, +-0.35 ns, 0.25 ns skew, 0.2 ns jitter, +0.4 ns for
+    the threshold: -0.8..+1.2 ns) meets B setup 2.3 / hold 0.3 (-4.4..
+    +1.4 ns) and, through CLKAB -> B 1.9-5.5 ns, the P6 output window
+    (0.71 ns hold, valid by t_spec - 4.66 ns before the next edge); the
+    SDC computes these windows and fails the build if they break.
+  - Outputs, transparent A -> B (1.3-4.1 ns): the FPGA's own tco spread
+    (2.96-8.6 ns from its clock) leaves ~0 ns (-0.07..+0.06 ns over three
+    fits, agent 3.4-3.6 ns before BCLK; 16 mA drive does not help).
+  - Outputs, clocked A -> B (agent 1.75 ns after BCLK, inputs sampled
+    5 ns before it): bus side setup +1.7 / hold +2.1 ns, OEAB# +0.66 ns,
+    but the agent's
+    input -> output paths get 6.75 ns and miss by up to 4.4 ns (TRDY#/
+    DBSY# -> the 64 D# drives; BPRI#/ADS# -> the address and ADS#
+    drives, RESET# -> the directions, D# -> the read data register).
+    Next: a write wait state ([PPRO1] p.3-21: DBSY# held in the clock
+    before a late DRDY#, so the 64 drives load from a register), the
+    address loaded in PREP whatever `go` says (OEAB# keeps it off the
+    bus), the read data one register later; then the default top
+    (`c2_cart_gtl_top.sv`, AB_LE low) closes or the transparent mode
+    gets the faster speed grade. `build.sh c2cart` fails timing until
+    then; variant A builds.
 - A[35:32]#, AP[1:0]#, DEP[7:0]#, RP#, AERR#, BERR#, BINIT#, IERR#,
   BP/BPM#: terminated, not connected (C2 uses no parity, 32-bit addresses).
 - Every AGTL+ net keeps its 56 ohm processor-end termination to the slot
-  VTT; VREF 1.0 V = 2/3 VTT divider from the slot VTT, one per board,
-  0.1 uF at each 16612. CMOS pins (2.5 V) through CB3T3245 pass-gates.
-- Power: 12 V barrel (D13); 5 V for the 16612 (ICC5 120 mA max each,
-  0.96 A) and the FPGA rails from TPS62130 bucks; 100/66# tied low
-  (66 MHz).
+  VTT; 16612 VREF 1.0 V = 2/3 VTT divider, 0.1 uF at each 16612; the
+  FPGA's 3A VREF its own divider. CMOS pins (2.5 V) through CB3T3245
+  pass-gates.
+- Power (variant A's tree minus DDR3): 12 V barrel (D13) -> PS1
+  TPS54620 5 V (the 16612 VCC5: ICC5 120 mA max each, 0.84 A) -> PS2
+  TPS54620 VCC 1.1 V; TPS62130 PS3 VCC_AUX 2.5 V (+ FPLL bead, VCCPD3A),
+  PS4 VCCIO 3.3 V (3.3 V banks, their VCCPD, the 16612 VCC3.3, the
+  CY2309, VCCPGM: AS x1 configuration from an EPCQ128A, MSEL 10011
+  [cvhb Table 7-2], the AS pins on VCCPGM [cvhb 7-13]),
+  PS5 VCCIO3A 1.8 V (input-only bank). 100/66# tied low (66 MHz).
+  Pull-ups on the five FPGA OE# lines keep the ADDR/DATA/TX transceivers
+  off while the FPGA configures (the 16612 bus-hold would keep an
+  undriven A input low: a weak FPGA pull-up does not overdrive it).
 - Variant A also gets D35 later: its 1.35 V banks cannot take the 16612's
   3.3 V A-port outputs (receive-only nets there, NM45 option 1).
 
@@ -356,8 +405,9 @@ filtering), AGP cards.
 
 0. Cartridge PCBs: variant A (D32): done S6 netlist (TA_ nets, RL01-RL17,
    J5, LINK_DCLK on M8) and S7 placement; the link nets get tracks with
-   the other slot nets (S8c phase 2). New (D33-D35): a dedicated C2
-   cartridge, a C2 cartridge with its own PCIe, GTL+ output buffers.
+   the other slot nets (S8c phase 2). New (D33-D37): a dedicated C2
+   cartridge (ball map, symbols, bitstream draft; timing open: "Dedicated
+   cartridge PCB"), a C2 cartridge with its own PCIe, GTL+ output buffers.
 1. Bridge protocol: burst write (framebuffer pages, coalesced runs) in
    bus.h; VMM LFB mirror (dirty logging). Done: string I/O as one REP
    command through a 4 KB BAR window; coalesced ATA data / VGA writes.

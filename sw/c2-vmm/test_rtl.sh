@@ -6,7 +6,8 @@
 # (C++), by c2_loop_target (the bring-up bitstream's RTL devices), and as P6
 # bus transactions (c2_p6_agent) answered by FPGAcommon's p6_bif chipset
 # front end, whose host port the bus_sim devices serve; p6gtl adds the GTL+
-# transceiver direction model (C2_GTL, plan/slot1_c2.md D35).
+# transceiver model (C2_GTL, plan/slot1_c2.md D35/D37: direction, clocked
+# D# receive).
 # rtl/tests/c2/p6_bif.v: copy of FPGAcommon/rtl/cpu_p6/p6_bif.v at cdd16c2
 # (the FPGAmotherboard chipset front end, same operator); refresh by copying.
 set -eu

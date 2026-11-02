@@ -16,9 +16,17 @@
 // drives the transceiver's LVTTL side (its B -> A path off), *_oeab = 1:
 // the transceiver drives the bus. OEAB comes one clock after dir and goes
 // one clock before it (no LVTTL contention), so ADS# waits one clock (PREP)
-// and a write's data group turns at its clock B. Pass-gate boards ignore them.
-module c2_p6_agent (
+// and a write's data group turns at its clock B. OEAB stays one clock after
+// the last drive: a registered A -> B path (D37) puts the data on the bus
+// one BCLK after its OEAB; the open-drain B outputs are off meanwhile.
+// Pass-gate boards ignore them.
+// D_CLOCKED: D# comes through a transceiver register clocked by BCLK, so
+// d_n lags the bus one clock; read data then follows DRDY# by one clock.
+module c2_p6_agent #(
+    parameter bit D_CLOCKED = 0
+) (
     input  logic        clk,          // BCLK
+    input  logic        clk_in,       // BCLK as the input registers want it (= clk, or a PLL phase)
     input  logic        rst,          // FPGA reset
     // board bus port (c2_cart): bus_req holds until bus_done
     input  logic        bus_req,
@@ -65,7 +73,7 @@ module c2_p6_agent (
     logic [2:0]  rs_q;
     logic [63:0] d_q;
     logic [12:5] a_q;
-    always_ff @(posedge clk) begin
+    always_ff @(posedge clk_in) begin
         reset_q <= !reset_n;
         ads_q   <= !ads_n;
         bnr_q   <= !bnr_n;
@@ -79,6 +87,9 @@ module c2_p6_agent (
     end
     assign cpu_reset = reset_q;
     wire rs_seen = rs_q != 3'b000;
+    logic drdy_late;
+    always_ff @(posedge clk) drdy_late <= drdy_q;
+    wire  drdy_d = D_CLOCKED ? drdy_late : drdy_q;   // DRDY# of the data now in d_q
 
     // ---- the request
     wire [2:0] lane   = bus_inta ? 3'd0 : bus_addr[2:0];   // INTA: vector on D[7:0]#
@@ -155,7 +166,7 @@ module c2_p6_agent (
     // read data: every DRDY# while waiting; the last one before DONE is ours
     // (data phases follow the response order), so RS# stays off this enable
     always_ff @(posedge clk)
-        if ((state == WAIT || state == DATA) && drdy_q) bus_rdata <= 32'(d_q >> (8 * lane));
+        if ((state == WAIT || state == DATA) && drdy_d) bus_rdata <= 32'(d_q >> (8 * lane));
 
     always_ff @(posedge clk) begin
         a_drv    <= '0;
@@ -209,15 +220,16 @@ module c2_p6_agent (
                 if (rs_seen && head) begin
                     if (rs_q == RS_RETRY) state <= IDLE;
                     else if (rs_q == RS_NORMAL && reads)
-                        // read data starts with the response [PPRO1] 4.6.2.2
-                        state <= drdy_q ? DONE : DATA;
+                        // read data starts with the response [PPRO1] 4.6.2.2;
+                        // a late drdy_d now is an older transaction's
+                        state <= drdy_q && !D_CLOCKED ? DONE : DATA;
                     else begin
                         bus_err <= !(rs_q == RS_NODATA && (bus_special || writes && wrote));
                         state   <= DONE;
                     end
                 end
             end
-            DATA: if (drdy_q) state <= DONE;
+            DATA: if (drdy_d) state <= DONE;
             DONE: state <= IDLE;
             default: state <= IDLE;
         endcase
@@ -239,10 +251,14 @@ module c2_p6_agent (
     // clock B until the clock its data is on the bus
     wire addr_want = next == PREP || next == REQ_A || next == REQ_B;
     wire data_want = writes && !wrote && (next == REQ_B || next == WAIT);
+    logic addr_want_q, data_want_q;
+    wire  addr_on = addr_want || addr_want_q, data_on = data_want || data_want_q;
     always_ff @(posedge clk) begin
-        addr_dir  <= !rst && (addr_want || addr_oeab);
-        addr_oeab <= !rst && addr_want && addr_dir;
-        data_dir  <= !rst && (data_want || data_oeab);
-        data_oeab <= !rst && data_want && data_dir;
+        addr_want_q <= !rst && addr_want;
+        data_want_q <= !rst && data_want;
+        addr_dir    <= !rst && (addr_on || addr_oeab);
+        addr_oeab   <= !rst && addr_on && addr_dir;
+        data_dir    <= !rst && (data_on || data_oeab);
+        data_oeab   <= !rst && data_on && data_dir;
     end
 endmodule

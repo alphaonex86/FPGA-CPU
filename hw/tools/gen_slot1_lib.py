@@ -32,6 +32,7 @@ Geometry sources (page numbers are printed pages):
 
 Regenerate with this script. Checks pass or exit 1.
 """
+import math
 import pathlib
 import re
 import sys
@@ -134,22 +135,25 @@ def npin(num, t, at, name):
             '(effects (font (size 1.27 1.27)))))' % (t, at, name, num))
 
 
-def reg_sym(name, left, right, bottom, datasheet):
-    """regulator: inputs left, outputs right, grounds bottom; supply-in
-    pins (VIN/PVIN/AVIN/grounds) power_in, the rest passive"""
+def reg_sym(name, left, right, bottom, datasheet, ref="PS"):
+    """regulator (or any IC): inputs left, outputs right, supplies bottom;
+    supply pins (VIN/PVIN/AVIN/VCC*/grounds) power_in, the rest passive"""
     def typ(nm):
-        return "power_in" if nm in ("PVIN", "VIN", "AVIN", "GND", "AGND",
-                                    "PGND", "PAD") else "passive"
-    h = 2.54 * (max(len(left), len(right)) + 1)
-    pins = [npin(n, typ(nm), "(at -12.7 %.2f 0)" % (h / 2 - 2.54 * (k + 1)), nm)
-            for k, (n, nm) in enumerate(left)]
-    pins += [npin(n, typ(nm), "(at 12.7 %.2f 180)" % (h / 2 - 2.54 * (k + 1)), nm)
-             for k, (n, nm) in enumerate(right)]
+        return "power_in" if nm in ("PVIN", "VIN", "AVIN", "GND", "AGND", "PGND", "PAD",
+                                    "VDD") or nm.startswith("VCC") else "passive"
     w = 2.54 * (len(bottom) - 1)
+    hw = max(10.16, 2.54 * math.ceil(w / 5.08 + 1))   # bottom pins inside the box
+    # more than 8 bottom pins: rows for their vertical names under the side pins
+    rows = math.ceil(max(len(nm) for _, nm in bottom) / 2 + 1) if len(bottom) > 8 else 0
+    h = 2.54 * (max(len(left), len(right)) + 1 + rows)
+    pins = [npin(n, typ(nm), "(at %g %.2f 0)" % (-hw - 2.54, h / 2 - 2.54 * (k + 1)), nm)
+            for k, (n, nm) in enumerate(left)]
+    pins += [npin(n, typ(nm), "(at %g %.2f 180)" % (hw + 2.54, h / 2 - 2.54 * (k + 1)), nm)
+             for k, (n, nm) in enumerate(right)]
     pins += [npin(n, typ(nm), "(at %.2f %.2f 90)" % (-w / 2 + 2.54 * k,
                                                      -h / 2 - 2.54), nm)
              for k, (n, nm) in enumerate(bottom)]
-    return rect_sym(name, "PS", pins, (-10.16, h / 2, 10.16, -h / 2),
+    return rect_sym(name, ref, pins, (-hw, h / 2, hw, -h / 2),
                     datasheet=datasheet).replace('(pin_numbers (hide yes))\n', '')
 
 
@@ -168,6 +172,32 @@ def tps_syms():
         ("1", "SW"), ("2", "SW"), ("3", "SW"), ("14", "VOS"), ("5", "FB"),
         ("4", "PG")], [("6", "AGND"), ("15", "PGND"), ("16", "PGND"),
         ("17", "PAD")], "sockets/parts/ti_tps62130_3a_buck.pdf")]
+
+
+def c2cart_syms():
+    """dedicated C2 cartridge (plan/slot1_c2.md D33/D35/D37); pin numbers:
+    ti_sn74gtl16612 p.1 (DGG), ti_sn74cb3t3245 p.3 (PW), infineon_cy2305
+    Table 2 (CY2309, SOIC-16)"""
+    a = [("3", "A1"), ("5", "A2"), ("6", "A3"), ("8", "A4"), ("9", "A5"), ("10", "A6"),
+         ("12", "A7"), ("13", "A8"), ("14", "A9"), ("15", "A10"), ("16", "A11"), ("17", "A12"),
+         ("19", "A13"), ("20", "A14"), ("21", "A15"), ("23", "A16"), ("24", "A17"), ("26", "A18")]
+    b = [("54", "B1"), ("52", "B2"), ("51", "B3"), ("49", "B4"), ("48", "B5"), ("47", "B6"),
+         ("45", "B7"), ("44", "B8"), ("43", "B9"), ("42", "B10"), ("41", "B11"), ("40", "B12"),
+         ("38", "B13"), ("37", "B14"), ("36", "B15"), ("34", "B16"), ("33", "B17"), ("31", "B18")]
+    ctl = [("1", "OEAB#"), ("2", "LEAB"), ("56", "CEAB#"), ("55", "CLKAB"),
+           ("27", "OEBA#"), ("28", "LEBA"), ("29", "CEBA#"), ("30", "CLKBA")]
+    sup = [("7", "VCC33"), ("22", "VCC33"), ("50", "VCC5"), ("35", "VREF")] + \
+        [(n, "GND") for n in ("4", "11", "18", "25", "32", "39", "46", "53")]
+    gtl = reg_sym("SN74GTL16612", a + ctl, b, sup, "sockets/parts/ti_sn74gtl16612.pdf", ref="U")
+    cb3t = reg_sym("SN74CB3T3245", [("%d" % (k + 2), "A%d" % (k + 1)) for k in range(8)] + [("19", "OE#")],
+                   [("%d" % (18 - k), "B%d" % (k + 1)) for k in range(8)],
+                   [("20", "VCC"), ("10", "GND"), ("1", "NC")], "sockets/parts/ti_sn74cb3t3245.pdf", ref="U")
+    zdb = reg_sym("CY2309", [("1", "REF"), ("9", "S1"), ("8", "S2")],
+                  [("2", "CLKA1"), ("3", "CLKA2"), ("14", "CLKA3"), ("15", "CLKA4"), ("6", "CLKB1"),
+                   ("7", "CLKB2"), ("10", "CLKB3"), ("11", "CLKB4"), ("16", "CLKOUT")],
+                  [("4", "VDD"), ("13", "VDD"), ("5", "GND"), ("12", "GND")],
+                  "sockets/parts/infineon_cy2305.pdf", ref="U")
+    return [gtl, cb3t, zdb]
 
 
 def rect_sym(name, ref, pins, box, unit_name="",
@@ -233,6 +263,8 @@ def gen_symbols():
 
     # ---- power tree regulators (plan D23; pdn.py) ------------------------
     syms += tps_syms()
+
+    syms += c2cart_syms()
 
     # ---- DDR VTT source/sink tracker -------------------------------------
     vt = [

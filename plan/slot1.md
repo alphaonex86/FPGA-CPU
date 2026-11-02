@@ -546,6 +546,11 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
 - **D36** (decided 2026-11-02 by the operator) Variant B gets its PCB: a
   Slot 1 <-> DE25-Standard adapter (bus at 66 MHz, 2:1 multiplexed,
   `slot1_variants.md` common facts).
+- **D37** (design, 2026-11-02, from the D33 timing study; plan/slot1_c2.md
+  "Dedicated cartridge PCB") The dedicated C2 cartridge receives the
+  AGTL+ control lines directly on an SSTL-18 bank against VREF, clocks
+  the 16612 D# receive path (and optionally A -> B, pin AB_LE) with BCLK
+  through a CY2309 zero-delay buffer; read data lags DRDY# one BCLK.
 - **3D models** (operator 2026-11-02): every footprint of the slot 1 PCBs
   carries a 3D model, kept in the tree. Done 2026-11-02:
   `hw/tools/models3d.py` maps each footprint to a KiCad stock model

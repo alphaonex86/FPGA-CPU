@@ -4,13 +4,18 @@
 Usage: python3 hw/tools/gen_c2cart_assign.py
 Output: hw/slot1-c2cart/pins.csv (signal, kind, ball, bank, chip, channel,
 contact). FPGA 5CEBA4F23C8 with A9 drop-in: only the F484 balls that are IO
-on both (FPGAlist/CycloneV_A9/pins/5ceba4.txt, 5ceba9.txt). All banks 3.3 V.
+on both (FPGAlist/CycloneV_A9/pins/5ceba4.txt, 5ceba9.txt). Banks 3.3 V
+except 3A (RX, SSTL-18 with VREF).
 
-The bus nets pass 8 SN74GTL16612 (18 channels): ADDR0-1, DATA0-3 (FPGA
-direction pair per group), RX (B -> A), TX (A -> B); the TX nets also have
-an RX channel. Each group is cut into chips along the card edge (contact
-x), and the bus nets take the edge-facing banks (7A 5B 5A 4A: high ball
+The bus nets pass 7 SN74GTL16612 (18 channels): ADDR0-1, DATA0-3 (FPGA
+direction pair per group, DATA B -> A clocked by BCLK through a CY2309
+zero-delay buffer; A -> B clocked too), TX
+(A -> B). Each group is cut into chips along the card edge (contact x),
+and the bus nets take the edge-facing banks (7A 5B 5A 4A: high ball
 numbers face the edge, as on the variant A board) in the same x order.
+RX: every observed control line straight from its contact into bank 3A
+(the transparent transceiver's 1.1-6.3 ns leaves no input window at
+66 MHz, plan/slot1_c2.md D37); the TX nets are also RX nets.
 CMOS nets pass 2 CB3T3245 pass-gates; BCLK and the J5 link are direct.
 Checks (exit 1): every ball IO on both devices and used once, every chip
 within 18 channels, BCLK / LINK_DCLK on their clock balls.
@@ -30,12 +35,14 @@ DATA = ["D[%d]#" % i for i in range(64)]
 RX = ["ADS#", "BNR#", "BPRI#", "TRDY#", "DBSY#", "DRDY#", "RS[0]#", "RS[1]#", "RS[2]#", "RESET#",
       "DEFER#", "LOCK#", "HIT#", "HITM#", "BR0#"]
 TX = ["ADS#", "DRDY#", "DBSY#", "BR0#", "BNR#", "HIT#", "HITM#"]
-CTRL = ["ADDR_OEAB#", "ADDR_OEBA#", "DATA_OEAB#", "DATA_OEBA#"]
+# AB_LE: every chip's LEAB (high: A -> B transparent, low: clocked)
+CTRL = ["ADDR_OEAB#", "ADDR_OEBA#", "DATA_OEAB#", "DATA_OEBA#", "TX_OEAB#", "AB_LE"]
+RX_BANK = "3A"
 CMOS = ["A20M#", "FLUSH#", "IGNNE#", "INIT#", "LINT[0]/INTR", "LINT[1]/NMI", "PWRGOOD", "SLP#",
         "SMI#", "STPCLK#", "THERMTRIP#"]
 LINK = ["LINK_DOWN%d" % i for i in range(8)] + ["LINK_UP%d" % i for i in range(8)] + ["LINK_UCLK"]
 CLOCKS = {"BCLK": "M9", "LINK_DCLK": "M8"}       # CLK0p / CLK0n, bank 3B
-EDGE_BANKS = ["7A", "5B", "5A", "4A"]
+EDGE_BANKS = ["7A", "5B", "5A", "4A"]       # RX_BANK too
 CHIP_CH = 18
 CB3T_CH = 8
 
@@ -83,7 +90,7 @@ def main():
     fails = []
 
     groups = chips(ADDR, "ADDR", contact) + chips(DATA, "DATA", contact) + \
-        [("RX", sorted(RX, key=lambda n: int(contact[n][1:]))), ("TX", sorted(TX, key=lambda n: int(contact[n][1:])))]
+        [("TX", sorted(TX, key=lambda n: int(contact[n][1:])))]
     rows = []                                   # signal, kind, chip, channel, contact
     for chip, nets in groups:
         if len(nets) > CHIP_CH:
@@ -107,9 +114,14 @@ def main():
         r[2].startswith("ADDR") for r in bus) else len(bus)
     ordered = bus[:split] + ctrl + bus[split:]
     assigned = [r + (b,) for r, b in zip(ordered, edge)]
+    rx_balls = sorted((b for b in common if a9[b][0] == RX_BANK), key=lambda b: ball_xy(b))
+    if len(rx_balls) < len(RX):
+        fails.append("bank %s: %d balls for %d RX nets" % (RX_BANK, len(rx_balls), len(RX)))
+    rx = sorted(RX, key=lambda n: int(contact[n][1:]))
+    assigned += [(n, "rx", "", "", contact[n], b) for n, b in zip(rx, rx_balls)]
 
     # CMOS (2 pass-gates), link, clocks on the far banks
-    far = sorted((b for b in common if a9[b][0] not in EDGE_BANKS and b not in CLOCKS.values()),
+    far = sorted((b for b in common if a9[b][0] not in EDGE_BANKS + [RX_BANK] and b not in CLOCKS.values()),
                  key=lambda b: ball_xy(b))
     cmos = [(n, "cmos", "CMOS%d" % (i // CB3T_CH), i % CB3T_CH + 1, contact[n]) for i, n in enumerate(CMOS)]
     link = [(n, "link", "", "", "") for n in LINK]

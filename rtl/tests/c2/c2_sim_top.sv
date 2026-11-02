@@ -6,8 +6,10 @@
 // c2_loop_target (RTL devices, the bring-up bitstream's); with C2_P6 the
 // bus port crosses to BCLK (c2_bus_sync) and runs c2_p6_agent on a P6 bus
 // whose chipset is FPGAcommon's p6_bif, the testbench serves its host port;
-// C2_GTL adds the D35 GTL+ transceivers' direction (p6_err[9]: a drive
-// without OEAB or an OEAB/dir order that makes LVTTL contention).
+// C2_GTL adds the D35/D37 GTL+ transceivers: D# B -> A one BCLK late, and
+// their direction (p6_err[9]: a drive without OEAB, also in the clock
+// after it, where the registered A -> B output still holds it, or an
+// OEAB/dir order that makes LVTTL contention).
 // board_rst: the board's reset (into the cartridge, or p6_bif's reset);
 // cpu_pins: the chipset's CMOS outputs {SMI#, INIT#, NMI, STPCLK#, A20M#},
 // asserted (into the cartridge, with C2_P6 through c2_bus_sync).
@@ -175,12 +177,18 @@ module c2_sim_top #(
     wire [4:0]  req_n = ~((addr_oeab ? req_cpu : '0) | req_cs);
     wire [63:0] d_n   = ~((data_oeab ? d_cpu : '0) | d_cs);
     wire [12:5] a_agent = addr_dir ? ~a_cpu[12:5] : a_n[12:5];
-    wire [63:0] d_agent = data_dir ? ~d_cpu : d_n;
-    logic       addr_dir_q, addr_oeab_q, data_dir_q, data_oeab_q, gtl_err;
+    // D#: B -> A through the transceiver register (CLKBA = BCLK)
+    logic [63:0] d_bus_q;
+    always_ff @(posedge bclk) d_bus_q <= d_n;
+    wire [63:0] d_agent = data_dir ? ~d_cpu : d_bus_q;
+    localparam bit D_CLOCKED = 1;
+    logic       addr_dir_q, addr_oeab_q, data_dir_q, data_oeab_q, addr_drove, data_drove, gtl_err;
     always_ff @(posedge bclk) begin
         {addr_dir_q, addr_oeab_q, data_dir_q, data_oeab_q} <= {addr_dir, addr_oeab, data_dir, data_oeab};
+        addr_drove <= |a_cpu || |req_cpu;
+        data_drove <= |d_cpu;
         if (rst) gtl_err <= 0;
-        else if ((|a_cpu || |req_cpu) && !addr_oeab || |d_cpu && !data_oeab ||
+        else if ((|a_cpu || |req_cpu || addr_drove) && !addr_oeab || (|d_cpu || data_drove) && !data_oeab ||
                  addr_oeab && !(addr_dir && addr_dir_q) || addr_dir_q && !addr_dir && addr_oeab_q ||
                  data_oeab && !(data_dir && data_dir_q) || data_dir_q && !data_dir && data_oeab_q)
             gtl_err <= 1;
@@ -192,11 +200,12 @@ module c2_sim_top #(
     wire [12:5] a_agent = a_n[12:5];
     wire [63:0] d_agent = d_n;
     wire        gtl_err = 0;
+    localparam bit D_CLOCKED = 0;
 `endif
     assign p6_err[9] = gtl_err;
     wire        ads_n = ~(ads_cpu | ads_cs), drdy_n = ~(drdy_cpu | drdy_cs);
-    c2_p6_agent agent (
-        .clk(bclk), .rst, .bus_req(s_req), .bus_space, .bus_write, .bus_inta, .bus_special, .bus_addr, .bus_size,
+    c2_p6_agent #(.D_CLOCKED(D_CLOCKED)) agent (
+        .clk(bclk), .clk_in(bclk), .rst, .bus_req(s_req), .bus_space, .bus_write, .bus_inta, .bus_special, .bus_addr, .bus_size,
         .bus_wdata,
         .bus_done(s_done), .bus_rdata(s_rdata), .bus_err(s_err),
         .reset_n(!reset_cs), .a_n(a_agent), .ads_n, .bnr_n(!bnr_cs), .bpri_n(!bpri_cs), .trdy_n(!trdy_cs),
