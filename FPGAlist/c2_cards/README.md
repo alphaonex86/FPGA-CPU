@@ -5,6 +5,15 @@ drives the cable link to the Slot 1 cartridge (J5). An XC7A35T is enough
 (free Vivado). All documents are kept here, versioned (seller links die
 fast); `sources.txt` only records where each came from.
 
+- `alinx/` AX7A035B user manual. On delivery, also save here the ALINX
+  package sent with the board (schematic, XDC, demos).
+- `xilinx/` XC7A35T FGG484 pin file; DS180/DS181 (Artix-7), UG470
+  (configuration), UG471 (SelectIO), UG472 (clocking), UG475 (packages),
+  UG482 (GTP), UG477 + PG054 v3.3 (PCIe integrated block / IP).
+- `puzhi/` Puzhi product guides (the rejected candidate).
+- Vivado 2025.2 (with Artix-7) is installed at
+  `/mnt/data/perso/FPGA/AMD/` (`rtl/tools/vivado.sh`).
+
 Purchase plan (operator 2026-11-02): one order around 2026-11-16, arrival
 expected around 2026-12-16; AliExpress first, then Alibaba.
 

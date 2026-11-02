@@ -1,0 +1,3 @@
+# Linux 6.18.57 kernel documentation (GPL-2.0), offline copies for the VMM
+kvm_api.rst file:///usr/src/linux-6.18.57-gentoo/Documentation/virt/kvm/api.rst
+vfio.rst file:///usr/src/linux-6.18.57-gentoo/Documentation/driver-api/vfio.rst

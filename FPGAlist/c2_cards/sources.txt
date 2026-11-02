@@ -3,3 +3,12 @@ puzhi/puzhi_product_guide_2026.pdf https://macrogroup.ru/upload/iblock/a34/nyq0t
 puzhi/puzhi_product_guide_2025.pdf https://macrogroup.ru/upload/iblock/5e3/o5hthn50zok4i0zuydafulso6pvlde0u/2025-PuZhi_web.pdf
 alinx/AX7A035B_user_manual.pdf https://botland.com.pl/img/cms/products_29039/AX7A035B%20user%20manual.pdf
 xilinx/xc7a35tfgg484pkg.txt https://www.xilinx.com/content/dam/xilinx/support/packagefiles/a7packages/xc7a35tfgg484pkg.txt
+xilinx/ds181_Artix_7_Data_Sheet.pdf https://docs.amd.com/api/khub/documents/iAkxxTOk96ANLJqYf2hgrQ/content
+xilinx/ds180_7Series_Overview.pdf https://docs.amd.com/api/khub/documents/2LByHkO~nSZXcei2D55fTg/content
+xilinx/ug470_7Series_Config.pdf https://docs.amd.com/api/khub/documents/FOs3lXmlcWxBhTIFxVKyGA/content
+xilinx/ug471_7Series_SelectIO.pdf https://docs.amd.com/api/khub/documents/IbGcnPFe6eF19RHma_Y~IA/content
+xilinx/ug472_7Series_Clocking.pdf https://docs.amd.com/api/khub/documents/1kFbRqzm2fhwGy~cLQG2yA/content
+xilinx/ug475_7Series_Pkg_Pinout.pdf https://docs.amd.com/api/khub/documents/kHyYQ6XzXnQwR2O~gaV~MQ/content
+xilinx/ug482_7Series_GTP_Transceivers.pdf https://docs.amd.com/api/khub/documents/Xk_zMbXsJj92suJ4_0Akkg/content
+xilinx/ug477_7Series_IntBlock_PCIe.pdf https://docs.amd.com/api/khub/documents/yDSUL8gmoxb2PqQ1Eo5Y~Q/content
+xilinx/pg054-7series-pcie.pdf https://www.xilinx.com/content/dam/xilinx/support/documents/ip_documentation/pcie_7x/v3_3/pg054-7series-pcie.pdf
