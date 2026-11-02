@@ -279,12 +279,15 @@ replicated per read port plus a live-value table.
      cycle, across lines too. The store queue drains into it with byte
      enables (a line-crossing store in two steps); a miss holds the drain.
      CoreMark 4.756 at mem_lat 10 (117 misses, all in the setup).
+   - L1I (`x86_l1i.sv`) 16 KB, 4-way, 32-byte lines, one miss in flight;
+     tags and data read with pc_f's next value like the BTB, two
+     half-line banks (the 30-byte window: the block's half and the next
+     one); a miss holds F0. The core shares the line port between L1I
+     (first) and L1D, one read in flight. CoreMark 4.756 (265 L1I misses,
+     setup only).
    Next:
    - A missing load leaves the RS waiting on its line (no replay loop),
      woken when the fill writes it; more misses in flight.
-   - L1I 16 KB, 4-way, 32-byte lines, read with pc_f's next value like the
-     BTB; the 30-byte window reads two 16-byte half-line banks; a miss
-     stalls fetch.
    - Stores to code (loaders, self-modifying code): a drained store
      invalidates its L1I line, L1I fills see dirty L1D lines; in-flight
      instructions in M5.

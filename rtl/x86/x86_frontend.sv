@@ -1,5 +1,6 @@
 // Fetch + predecode + instruction extraction (plan/x86_core.md M2).
-// F0 fetches the 16-byte block at pc_f plus the 14 bytes after it, F1/F2 run
+// F0 fetches the 16-byte block at pc_f plus the 14 bytes after it from the
+// L1I (x86_l1i; a miss holds F0), F1/F2 run
 // x86_predecode, F2 pushes the block into a 4-entry queue; extraction takes
 // up to 3 instructions per cycle from the head block starting at offset
 // off, into the output register read by the decoders. An instruction may
@@ -18,8 +19,11 @@ module x86_frontend
     input  logic                  redirect,      // flush, continue at redirect_pc
     input  logic [31:0]           redirect_pc,
     input  logic                  take,          // decoders consume the output
-    output logic [31:0]           fetch_addr,    // ideal memory: fetch_data is
-    input  logic [8*30-1:0]       fetch_data,    // bytes fetch_addr.. this cycle
+    output logic                  mem_req,       // L1I line reads
+    output logic [31:5]           mem_addr,
+    input  logic                  mem_ready,
+    input  logic                  mem_rvalid,
+    input  logic [255:0]          mem_rdata,
     output logic [2:0]            valid,
     output logic [2:0][8*15-1:0]  bytes,
     output logic [2:0][31:0]      eip,
@@ -81,18 +85,24 @@ module x86_frontend
     logic [4:0]       x_next;
     logic [2:0][4:0]  s;
     logic [2:0]       last;         // instruction k ends the head block
+    logic             ic_hit;
+    logic [8*30-1:0]  ic_bytes;     // the 30 bytes at pc_f
+
+    x86_l1i u_l1i (.clk(clk), .rst(rst), .pc_n(pc_n[31:4]), .pc_f(pc_f[31:4]),
+                   .hit(ic_hit), .bytes(ic_bytes),
+                   .mem_req(mem_req), .mem_addr(mem_addr), .mem_ready(mem_ready),
+                   .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata));
 
     x86_predecode #(.N(16)) pd (.clk(clk), .bytes(f1_bytes), .d32(1'b1), .len(pd_len),
                                 .npfx(pd_npfx), .map(pd_map), .fault(pd_fault));
 
-    assign fetch_addr = pc_f;
     always_comb begin
         f0_mark.taken = bh.valid && bh.tag == pc_f[31:4+BI_W] && bh.off >= f0_off;
         f0_mark.moff = bh.off;
         f0_mark.target = bh.target;
     end
     // blocks in F1, F2 and the queue never exceed its size
-    assign issue = 3'(f1_valid) + 3'(f2_valid) + fq_count < 3'(FQ_N);
+    assign issue = ic_hit && 3'(f1_valid) + 3'(f2_valid) + fq_count < 3'(FQ_N);
     assign push = f2_valid;
     assign out_free = valid == 3'd0 || take;
 
@@ -156,7 +166,7 @@ module x86_frontend
     // the redirect only drives the control registers (timing)
     always_ff @(posedge clk) begin
         f1_pc <= pc_f;
-        f1_bytes <= fetch_data;
+        f1_bytes <= ic_bytes;
         f1_mark <= f0_mark;
         f2_pc <= f1_pc;
         f2_bytes <= f1_bytes;
