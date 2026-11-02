@@ -7,7 +7,8 @@
 // - One unified reservation station capturing operands. Pipeline S (select,
 //   age matrix, oldest ready first per port) -> X (execute) -> wb1 (result
 //   register: ROB, capture) -> wb2 (bypass only). Ports: 2 ALU/branch, each
-//   ALU uop bound to one at dispatch; 1 memory port S -> A (AGU) -> M.
+//   ALU uop bound to one at dispatch; 1 load port S -> A (AGU) -> M; 1
+//   store port, S -> X (AGU: store queue entry, done; no result bus).
 // - An ALU grant wakes its dependents at once (back to back issue); their
 //   value then comes from the wb1/wb2 bypass until captured. Loads wake
 //   their dependents from wb1.
@@ -42,7 +43,7 @@ module x86_core
     output logic                  illegal       // halted on an unsupported instruction
 );
     localparam int UQ_N = 16;
-    localparam int NP = 4;   // issue ports: 0, 1 ALU; 2 memory; 3 mul/div
+    localparam int NP = 5;   // issue ports: 0, 1 ALU; 2 load; 3 mul/div; 4 store
     localparam int NW = 3;   // result buses: 0, 1 ALU; 2 memory or mul/div (mul/div first)
 
     // ---------------- frontend + decode ----------------
@@ -597,8 +598,8 @@ module x86_core
                    && rs[e].src[2].ready && rs[e].fsrc.ready;
             req[0][e] = srcs && is_alu(rs[e].u.kind) && !rs[e].port;
             req[1][e] = srcs && is_alu(rs[e].u.kind) && rs[e].port;
-            req[2][e] = srcs && (rs[e].u.kind == K_ST
-                                 || rs[e].u.kind == K_LD && rs[e].sq_snap - sq_head <= known);
+            req[2][e] = srcs && rs[e].u.kind == K_LD && rs[e].sq_snap - sq_head <= known;
+            req[4][e] = srcs && rs[e].u.kind == K_ST;
             // in order (MULH/DIVR read the unit's last result); nothing while
             // a division runs or is in X (it starts there)
             req[3][e] = srcs && md_wait[e] && (md_wait & older[e]) == '0 && !md_busy
@@ -612,7 +613,7 @@ module x86_core
     end
 
     // ---------------- X / A: execute, address ----------------
-    logic [RS_W-1:0] ix_slot;   // memory port: RS entry
+    logic [RS_W-1:0] ix_slot;   // load port: RS entry
 
     // operand: captured, else the producer result on wb1 / wb2
     function automatic logic [31:0] opnd(input logic [31:0] v, input logic [NW-1:0] on1, on2);
@@ -683,13 +684,12 @@ module x86_core
                     end
 `endif
 
-    // memory port A -> M register
-    logic             am_valid, am_store, am_dhi;
+    // load port A -> M register
+    logic             am_valid, am_dhi;
     logic [TAG_W-1:0] am_tag;
-    logic [31:0]      am_addr, am_data;   // store data, or a load's merge source
+    logic [31:0]      am_addr, am_data;   // am_data: a load's merge source
     logic [1:0]       am_osz, am_lext;
     logic [SQ_W:0]    am_sq_snap;
-    logic [SQ_W-1:0]  am_sq_idx;
     logic [RS_W-1:0]  am_slot;
 
     // ---------------- M: memory ----------------
@@ -720,7 +720,7 @@ module x86_core
     always_comb begin
         logic ld_ok;
         ld_ok = load_ok(am_sq_snap, am_addr, am_osz, m_fwd, m_fdata);
-        m_ok = (am_store || ld_ok) && !md_done;   // bus 2 taken by mul/div: replay
+        m_ok = ld_ok && !md_done;   // bus 2 taken by mul/div: replay
     end
 
     // ---------------- port 3: multiply / divide ----------------
@@ -902,7 +902,6 @@ module x86_core
                     if (grant[2][e]) rs[e].issued <= 1'b1;
                 // A -> M
                 am_valid <= ix_valid[2];
-                am_store <= ix[2].u.kind == K_ST;
                 am_tag <= ix[2].tag;
                 am_addr <= agu(xr[2]);
                 am_data <= ix[2].u.us3 ? byte_hi(xr[2].src[2].value, ix[2].u.hi3) : ix[2].u.imm2;
@@ -910,13 +909,17 @@ module x86_core
                 am_lext <= ix[2].u.lext;
                 am_dhi <= ix[2].u.dhi;
                 am_sq_snap <= ix[2].sq_snap;
-                am_sq_idx <= ix[2].sq_idx;
                 am_slot <= ix_slot;
+                // X store: its queue entry, done (no result)
+                if (ix_valid[4]) begin
+                    sq[ix[4].sq_idx] <= '{addr_valid: 1'b1, size: ix[4].u.osz, addr: agu(xr[4]),
+                        data: ix[4].u.us3 ? byte_hi(xr[4].src[2].value, ix[4].u.hi3) : ix[4].u.imm2};
+                    rob[ix[4].tag].done <= 1'b1;
+                end
                 // M: done or replay
                 if (am_valid) begin
                     if (m_ok) rs[am_slot].valid <= 1'b0;
                     else rs[am_slot].issued <= 1'b0;
-                    if (am_store) sq[am_sq_idx] <= '{addr_valid: 1'b1, size: am_osz, addr: am_addr, data: am_data};
                 end
                 // wakeup: early (ready), wb1 (ready + capture)
                 for (int e = 0; e < RS_N; e++) begin

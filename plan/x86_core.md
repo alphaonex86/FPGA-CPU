@@ -163,6 +163,13 @@ replicated per read port plus a live-value table.
    1.110. On top of it the issue choice gives: youngest 3.709, second
    oldest 3.747 (+0.3 %, more logic in S, the critical stage): ports keep
    alternating at rename.
+   Store port: stores issue on their own port 4 (S -> X: AGU, store queue
+   entry and ROB done, no result bus, never replayed), port 2 keeps loads:
+   3.735 -> 3.894 CoreMark/MHz (256,784 cycles, IPC 1.322; head waits on
+   stores 16,418 -> 2,510). BTB 512 entries on top: 3.970 (+2.0 %; taken
+   not followed 8,021 -> 5,072, the rest is set / clear thrash). Tried:
+   P never clears a Jcc's entry (one redirect per loop exit, not two):
+   3.629, falsely taken 3,360 -> 10,809; rejected.
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div
