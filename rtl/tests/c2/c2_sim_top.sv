@@ -4,8 +4,8 @@
 // c2_afifo back into the link clock. The C++ testbench (bus_rtl.cpp) plays
 // the PCIe IP and the board; with C2_LOOP_TARGET defined the board is
 // c2_loop_target (RTL devices, the bring-up bitstream's); with C2_P6 the
-// bus port runs c2_p6_agent on a P6 bus whose chipset is FPGAcommon's
-// p6_bif (one clock, cclk, for now), the testbench serves its host port.
+// bus port crosses to BCLK (c2_bus_sync) and runs c2_p6_agent on a P6 bus
+// whose chipset is FPGAcommon's p6_bif, the testbench serves its host port.
 module c2_sim_top #(
     parameter int    LINK_DELAY = 3,     // cartridge-side registers each way (I/O, cable)
     /* verilator lint_off UNUSEDPARAM */   // used with C2_LOOP_TARGET only
@@ -44,6 +44,7 @@ module c2_sim_top #(
     input  logic        serial_ready
 `ifdef C2_P6
     ,
+    input  logic        bclk,        // the board's BCLK
     output logic        host_req,
     output logic        host_we,
     output logic        host_io,
@@ -113,11 +114,15 @@ module c2_sim_top #(
         .serial_valid, .serial_byte, .serial_ready, .post
     );
 `elsif C2_P6
-    logic        p_done, p_err;
-    logic [31:0] p_rdata;
+    logic        p_done, p_err, s_req, s_done, s_err;
+    logic [31:0] p_rdata, s_rdata;
     c2_cart cart (
         .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta,
         .bus_addr, .bus_size, .bus_wdata, .bus_done(p_done), .bus_rdata(p_rdata), .bus_err(p_err), .intr
+    );
+    c2_bus_sync bus_sync (
+        .mclk(cclk), .mrst(rst), .m_req(bus_req), .m_done(p_done), .m_rdata(p_rdata), .m_err(p_err),
+        .sclk(bclk), .srst(rst), .s_req, .s_done, .s_rdata, .s_err
     );
     assign serial_valid = 0;
     assign serial_byte  = '0;
@@ -134,8 +139,8 @@ module c2_sim_top #(
     wire [63:0] d_n   = ~(d_cpu | d_cs);
     wire        ads_n = ~(ads_cpu | ads_cs), drdy_n = ~(drdy_cpu | drdy_cs);
     c2_p6_agent agent (
-        .clk(cclk), .rst, .bus_req, .bus_space, .bus_write, .bus_inta, .bus_addr, .bus_size, .bus_wdata,
-        .bus_done(p_done), .bus_rdata(p_rdata), .bus_err(p_err),
+        .clk(bclk), .rst, .bus_req(s_req), .bus_space, .bus_write, .bus_inta, .bus_addr, .bus_size, .bus_wdata,
+        .bus_done(s_done), .bus_rdata(s_rdata), .bus_err(s_err),
         .reset_n(!reset_cs), .a_n(a_n[12:5]), .ads_n, .bnr_n(!bnr_cs), .bpri_n(!bpri_cs), .trdy_n(!trdy_cs),
         .dbsy_n(!dbsy_cs), .drdy_n, .rs_n(~rs_cs), .d_n,
         .a_drv(a_cpu), .req_drv(req_cpu), .ads_drv(ads_cpu), .br0_drv(br0_cpu), .drdy_drv(drdy_cpu),
@@ -144,7 +149,7 @@ module c2_sim_top #(
     // board bus decode: every memory address is PCI (no DRAM model), every
     // I/O port goes to the host port
     p6_bif #(.RESET_CLKS(24)) chipset (
-        .clk(cclk), .rst_n(!rst), .a_n, .req_n(~(req_cpu | req_cs)), .ads_n, .d_n, .drdy_n,
+        .clk(bclk), .rst_n(!rst), .a_n, .req_n(~(req_cpu | req_cs)), .ads_n, .d_n, .drdy_n,
         .dbsy_n(!dbsy_cs), .hit_n(!hit_cs), .hitm_n(!hitm_cs), .bnr_n(!bnr_cs), .lock_n(1'b1),
         .binit_n(!binit_cs),
         .a_drv(a_cs), .req_drv(req_cs), .ads_drv(ads_cs), .d_drv(d_cs), .rs_drv(rs_cs), .trdy_drv(trdy_cs),

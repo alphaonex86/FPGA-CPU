@@ -20,11 +20,11 @@ too. Nothing is bought before the viability verdict below.
 | VMM (KVM, one vCPU, bus backends) | `sw/c2-vmm/` | v0 + 440BX shadow RAM + coalesced writes + 100 us tick: test ROM passes on the sim and rtl backends |
 | BAR0 bus protocol | `sw/c2-vmm/bus.h` | v0 defined |
 | PCIe card: BAR0 block -> cable link | `rtl/c2/c2_card.sv` | v0, simulated end to end (`test_rtl.sh`) |
-| PCIe card: 7 Series PCIe IP wrapper (TLP <-> BAR0 request port) | `rtl/c2/` | to do |
-| Cable link protocol (card <-> cartridge) | `rtl/c2/`; 22 cartridge balls (D32: 17 at 3.3 V, 2 at 1.35 V, 3 free) | v0 messages simulated (one clock domain, no I/O cells yet) |
+| PCIe card: 7 Series PCIe IP wrapper (TLP <-> BAR0 request port) | `rtl/c2/xilinx/` | bitstream builds, timing met; LOOPBACK variant for bring-up |
+| Cable link protocol (card <-> cartridge) | `rtl/c2/`; 22 cartridge balls (D32: 17 at 3.3 V, 2 at 1.35 V, 3 free) | v0 simulated through 3 clock domains; card I/O cells in the AX7A035B bitstream; cartridge I/O cells to do |
 | Cartridge: link -> command executor on a generic bus port | `rtl/c2/c2_cart.sv` | v0, simulated |
-| Cartridge PCB: link header + 19 selection 0-ohms (D32) | `hw/slot1-cyclonev` generators | to do |
-| Cartridge: link + P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | `rtl/c2/` on the A cartridge | to do |
+| Cartridge PCB: link header J5 + 17 selection 0-ohms (D32) | `hw/slot1-cyclonev` generators | S6 netlist + S7 placement done; link nets unrouted like every slot net |
+| Cartridge: link + P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | `rtl/c2/c2_p6_agent.sv` | v0 (uncached cycles, agent 0) simulated against FPGAcommon's p6_bif; snoop / DMA mirror, CMOS pins, link CDC to do |
 | Bench: host <-> PCIe card round trip | hardware | after the verdict |
 
 ## VMM v0 (`sw/c2-vmm`, `test.sh`)
@@ -92,7 +92,7 @@ window is never refilled under a running REP.
   MRd 1-2 DW on BAR0, UR otherwise); `c2_req_sync.sv` (PCIe user clock to
   link clock, toggle handshake), `c2_afifo.sv` (up link on the returned
   clock). `test_rtl.sh` drives real TLPs through all three clocks.
-- Not yet: a link check (CRC), the P6 agent behind the bus port.
+- Not yet: a link check (CRC).
 
 ## Card bitstream (`rtl/c2/xilinx`, AX7A035B)
 
@@ -120,6 +120,31 @@ window is never refilled under a running REP.
   4. `c2-vmm -e 0xf4 fpga /sys/bus/pci/devices/<bdf>/resource0`: the
      test ROM on the loopback devices, exit 0; its serial on the UART.
   5. Then the plain bitstream (no ROM) with the cartridge on J11.
+
+## P6 bus agent v0 (`rtl/c2/c2_p6_agent.sv`)
+
+- One c2_cart bus cycle = one P6 transaction, one at a time, as symmetric
+  agent 0: Memory Data Read (00110), Memory Write may be retried (00111),
+  I/O Read / Write (1000x), Interrupt Acknowledge (01000, LEN 00); UC
+  ATTR, partial (LEN 00, BE from address and size); Retry re-issues,
+  Hard Failure or any other answer is a bus error [HWDM Table A-7].
+- Arbitration [PPRO1 4.1]: BREQ0# from 5 clocks after RESET#, then parked;
+  BPRI# observed stops new requests; the BNR# stall / throttle / free
+  sampling; at most one ADS# per 3 clocks; the in-order queue is tracked so
+  RS#/TRDY# of earlier (chipset) transactions are not taken as ours.
+- Inputs registered once: driven in T, observed in T+1, answered in T+2,
+  the timing the [PPRO1] figures use (also the IOB flops of the real pins).
+- `test_rtl.sh` runs the whole test ROM through it with FPGAcommon's
+  `p6_bif` (copied to `rtl/tests/c2/`, the FPGAmotherboard chipset
+  front end, whose protocol checks stop the run) as the chipset; two
+  mutations (write data lane, write request code) fail the run.
+- Straps A[12:5]# and RESET# are outputs for the bridge; not yet sent to
+  the VMM (a link status bit for the board reset is next).
+- `c2_bus_sync` crosses the bus port from the link clock to BCLK (toggle
+  handshake each way, the request fields held by the cartridge); the sim
+  runs BCLK at 14 ns against the 20 ns link clock.
+- Not yet: HIT# / HITM# snoop stall and the DMA mirror, the CMOS pins (INTR via LINT0,
+  NMI, INIT#, SMI#, A20M#, STPCLK# with its Stop Grant special cycle).
 
 ## Shadow RAM (`shadow.c`)
 
@@ -170,7 +195,8 @@ filtering), AGP cards.
   A[35:32]#, DEP[7:0]#, AP[1:0]#, AERR#, BERR#, BINIT# + free M8 = CLK0n,
   a clock input); RP#/RSP# and the free K19/K20 are 1.35 V (bank 7A),
   below a 3.3 V receiver's VIH, so they stay off the link.
-- Cartridge header J5: 2 x 20, 2.54 mm, pin order of the ALINX 40-pin
+- Cartridge header J5: 2 x 20, 1.27 mm SMD (a 2.54 mm one fits nowhere on
+  the cartridge; D32 amendment in plan/slot1.md), pin order of the ALINX 40-pin
   expansion header (AX7A035B manual REV 1.1 sec. 3.11, J11: 1 GND, 2 +5 V,
   3-36 I/O behind 33 ohm in bank 16, 37-38 GND, 39-40 +3.3 V; table in
   `FPGAlist/c2_cards/README.md`): the 18 signals on odd pins 3-35 + pin 36,
@@ -179,6 +205,8 @@ filtering), AGP cards.
   every signal wire), 1/37/38 GND, 2/39/40 not connected (no supply
   crosses the cable). A card with another header order needs its manual
   checked first: a mismatch would short a signal to a card supply.
+  Cable: a 1.27 mm 40-wire IDC ribbon (pin n to pin n) from J5 to a
+  1.27 -> 2.54 mm 2 x 20 adapter plugged on J11.
 - Card (decided by the operator 2026-11-02: AX7A035B, one order ~2026-11-16,
   arrival ~2026-12-16): ALINX AX7A035B (XC7A35T-2FGG484I, PCIe 2.0 x2,
   one usable 40-pin header J11, public manual; ~211-299 USD), chosen
@@ -209,8 +237,9 @@ filtering), AGP cards.
 
 ## Next
 
-0. Cartridge PCB (D32): S6 netlist (TA_ nets, 17 0-ohm RL01-RL17, J5),
-   S7 placement, S8 re-route; J5 in the ALINX J11 order.
+0. Cartridge PCB (D32): done S6 netlist (TA_ nets, RL01-RL17, J5,
+   LINK_DCLK on M8) and S7 placement; the link nets get tracks with the
+   other slot nets (S8c phase 2).
 1. Bridge protocol: burst write (framebuffer pages, coalesced runs) in
    bus.h; VMM LFB mirror (dirty logging). Done: string I/O as one REP
    command through a 4 KB BAR window; coalesced ATA data / VGA writes.

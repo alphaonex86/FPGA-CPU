@@ -35,7 +35,7 @@ build() {
         "${flags[@]}" -GROM_HEX="\"$out/test_rom.hex\"" \
         -CFLAGS "-O2 -I$here ${*/#/-D}" -LDFLAGS "${objs[*]}" -o c2-vmm-rtl \
         "$rtl"/c2/c2_afifo.sv "$rtl"/c2/c2_req_sync.sv "$rtl"/c2/xilinx/c2_tlp.sv "$rtl"/c2/c2_card.sv \
-        "$rtl"/c2/c2_cart.sv "$rtl"/c2/c2_loop_target.sv "$rtl"/c2/c2_p6_agent.sv "$rtl"/tests/c2/p6_bif.v \
+        "$rtl"/c2/c2_cart.sv "$rtl"/c2/c2_loop_target.sv "$rtl"/c2/c2_p6_agent.sv "$rtl"/c2/c2_bus_sync.sv "$rtl"/tests/c2/p6_bif.v \
         "$rtl"/tests/c2/c2_sim_top.sv "$rtl"/tests/c2/bus_rtl.cpp \
         > "$out/$name.log" 2>&1 || { grep -m20 -A3 "%Error\|%Warning\|error:" "$out/$name.log"; exit 1; }
 }

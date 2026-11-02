@@ -3,7 +3,8 @@
 // link + cartridge), completions are checked field by field; the
 // cartridge's bus cycles are served by the bus_sim devices.
 // Time step 2 ns: PCIe user clock 125 MHz, link and cartridge clocks
-// 50 MHz, the cartridge's 6 ns after the card's.
+// 50 MHz, the cartridge's 6 ns after the card's; with C2_P6 the board's
+// BCLK at 14 ns (71 MHz, asynchronous to the link).
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -71,11 +72,6 @@ static void host_edge()
 static void cclk_edge()
 {
 #ifdef C2_P6
-    if (top->p6_err) {
-        fprintf(stderr, "c2-vmm rtl: P6 chipset protocol error 0x%x\n", top->p6_err);
-        exit(1);
-    }
-    host_edge();
     // the vector must stand before the chipset's INTA strobe: take it
     // when the cartridge starts the interrupt-acknowledge cycle
     if (top->bus_req && top->bus_inta && !bus_busy) {
@@ -120,6 +116,10 @@ static bool step()
     t++;
     bool u = t % 4 < 2, l = t % 10 < 5, c = (t + 7) % 10 < 5;
     bool u_rise = u && !top->uclk, c_rise = c && !top->cclk;
+#ifdef C2_P6
+    bool b = t % 7 < 4, b_rise = b && !top->bclk;
+    top->bclk = b;
+#endif
     if (u_rise) {
         if (top->tx_tvalid && top->tx_tready) tx_beats.push_back({top->tx_tdata, top->tx_tkeep, (bool)top->tx_tlast});
         rx_accepted = top->rx_tvalid && top->rx_tready;
@@ -132,6 +132,16 @@ static bool step()
         cclk_edge();
         top->eval();
     }
+#ifdef C2_P6
+    if (b_rise) {
+        if (top->p6_err) {
+            fprintf(stderr, "c2-vmm rtl: P6 chipset protocol error 0x%x\n", top->p6_err);
+            exit(1);
+        }
+        host_edge();
+        top->eval();
+    }
+#endif
     return u_rise;
 }
 

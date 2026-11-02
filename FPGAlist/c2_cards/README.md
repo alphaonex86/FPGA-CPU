@@ -75,6 +75,8 @@ D7/C7 (manual sec. 3.4).
    AX7A035B also runs from the PC's PCIe slot power.
 2. Puzhi only: the user manual / schematic with the 40-pin header order
    (Puzhi sends docs by Google Drive after purchase).
-3. In the same order: a 40-wire 2.54 mm IDC ribbon cable (2 x 20, 15-20 cm).
+3. In the same order: a 1.27 mm 40-wire IDC ribbon cable (2 x 20 female
+   both ends, 15-20 cm) and a 2 x 20 2.54 mm -> 1.27 mm adapter board (the
+   cartridge J5 is a 1.27 mm header; plan/slot1.md D32 amendment).
 
 The host PC needs a free PCIe x4 or x16 slot (x2 card).
