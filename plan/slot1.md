@@ -340,7 +340,10 @@ connector footprint (card-edge, from the connector drawing).
   543 unconnected (pcbnew). Third pass (2026-11-01, S8c keeps the best
   board and re-runs rip-up waves only while the routed count grows; the
   first wave lost, 133 <= 141, best board restored): **141/184**, DRC 0,
-  ERC 0, **536 unconnected** (pcbnew). The drop from
+  ERC 0, **536 unconnected** (pcbnew). Fourth pass (2026-11-02, chain
+  S7 -> S9 with the D32 link parts J5 + RL01-RL17 and the 3D models):
+  141/184 again (152 min), DRC 0, ERC 0, BOM 296 == PCB 296, 294 models,
+  590 unconnected (pcbnew; the link nets are not routed yet). The drop from
   160 is the real die land: the 160 was routed on the wrong 1.0 mm,
   mirrored ball map; S8c's 0.35/0.20 die vias (D24) were already sized
   for 0.8 mm (one 0.15 track per 0.45 gap). Chain guards: S8a refuses an
