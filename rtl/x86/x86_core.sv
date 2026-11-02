@@ -79,19 +79,10 @@ module x86_core
     logic                 p_redir, p_btb;   // the push redirects the frontend; the BTB
     logic [31:0]          p_redir_pc;       // learns slot p_btb_k
     logic [1:0]           p_btb_k;
-    // conditional branch direction: gshare, 4K x 2-bit counters indexed by
-    // EIP[11:0] ^ history << 2, read as the group enters P; a strong counter
-    // decides, a weak one keeps decode's static BTFN (offline on c1: 817 ->
-    // 272 mispredicts); index + counter ride in the uop (imm2) to retire
-    localparam int BP_W = 12;
-    logic [1:0]           bht0 [1 << BP_W], bht1 [1 << BP_W], bht2 [1 << BP_W];   // a read port each
-    logic [9:0]           bp_hist, bp_rhist, bp_rhist_n;   // speculative (P) / retired outcomes
-    logic [2:0][BP_W-1:0] bp_idx, p_bidx;
-    logic [2:0][1:0]      p_bctr;
-    logic [2:0]           p_jcc, p_dir;
-    logic                 bp_we;
-    logic [BP_W-1:0]      bp_widx;
-    logic [1:0]           bp_wctr;
+    // conditional branch direction: x86_tage, read as the group enters P,
+    // trained at retire (Jcc uops marked by imm2 bit 14)
+    logic [2:0]           p_jcc, p_dir, tg_dir, tg_ret, tg_taken;
+    logic                 tg_room;
     logic [31:0]          p_ras [RAS_N];    // return stack after the pushed group
     logic [$clog2(RAS_N)-1:0] p_sp;
 
@@ -130,13 +121,13 @@ module x86_core
         for (int k = 0; k < 3; k++) begin
             // RET: the top before the group (a call / ret ends the group unless
             // mispredicted; later slots are then wrong path): parallel compares
-            p_dir[k] = p_jcc[k] ? p_bctr[k] == 2'd3 || p_bctr[k] != 2'd0 && p_redirect[k] : p_redirect[k];
+            p_dir[k] = p_jcc[k] ? tg_dir[k] : p_redirect[k];
             p_want[k] = p_ret[k] ? ras[ras_sp - 1'b1]
                       : !p_dir[k] ? p_seq[k] : p_jcc[k] ? p_uop[k][0].imm : p_target[k];
             p_uop_ret[k][2].imm = p_ret[k] ? p_want[k] : p_uop[k][2].imm;
             if (p_jcc[k]) begin
                 p_uop_ret[k][0].pred_taken = p_dir[k];
-                p_uop_ret[k][0].imm2 = 32'({1'b1, p_bctr[k], p_bidx[k]});   // bit 14: P-predicted
+                p_uop_ret[k][0].imm2 = 32'h4000;   // bit 14: P-predicted
             end
             p_mis[k] = p_want[k] != p_next[k];
             p_take[k] = p_valid[k] && !stop && !(k != 0 && p_lk[k]);
@@ -180,8 +171,7 @@ module x86_core
         logic        mispred;
         logic        fault;          // divide error: halts at retire (no exceptions yet)
         logic [31:0] redirect_pc;
-        logic        bp_jcc, bp_taken;   // branch predicted by P (gshare), predicted taken
-        logic [13:0] bp_info;            // its counter and table index
+        logic        bp_jcc, bp_taken;   // branch predicted by P (x86_tage), predicted taken
     } rob_t;
 
     // ready: may issue; captured: value holds it (else it is on wb1/wb2)
@@ -248,7 +238,7 @@ module x86_core
     flags_t [NW-1:0]           wb2_flags;
 
     // ---------------- decode -> P -> uop queue ----------------
-    assign p_push = p_valid != 3'd0 && !flush && 5'(UQ_N) - uq_count >= 5'(p_all);
+    assign p_push = p_valid != 3'd0 && !flush && 5'(UQ_N) - uq_count >= 5'(p_all) && tg_room;
     assign dec_take = x_valid != 3'd0 && (p_valid == 3'd0 || p_push && !p_long);
     assign p_load = dec_take && !fe_redirect;   // a redirect drops the decoded group
     // the data registers load on dec_take: only p_valid waits for the redirect
@@ -269,7 +259,6 @@ module x86_core
                 p_seq[k] <= x_eip[k] + 32'(x_len[k]);
                 p_lk[k] <= d_n_b[k] != 2'd0;
                 p_jcc[k] <= d_uop[k][0].kind == K_BR && !d_uop[k][0].uncond && !d_uop[k][0].ecxz;
-                p_bidx[k] <= bp_idx[k];
             end
             p_long <= d_n_b[0] != 2'd0;
             p_uop_b <= d_uop_b[0];
@@ -284,45 +273,12 @@ module x86_core
             ras <= p_ras;
             ras_sp <= p_sp;
         end
-        if (rst) bp_hist <= '0;
-        else if (flush) bp_hist <= bp_rhist;   // the flushing branch included
-        else if (p_push) begin
-            logic [9:0] h;
-            h = bp_hist;
-            for (int k = 0; k < 3; k++) if (p_take[k] && p_jcc[k]) h = {h[8:0], p_dir[k]};
-            bp_hist <= h;
-        end
-        bp_rhist <= rst ? '0 : bp_rhist_n;
     end
 
-    // branch table: read with the P load, written the cycle after retire
-    // (registered: off the retire -> M10K address path)
-    logic            bq_we;
-    logic [BP_W-1:0] bq_idx;
-    logic [1:0]      bq_ctr;
-    always_ff @(posedge clk) begin
-        bq_we <= bp_we && !rst;
-        bq_idx <= bp_widx;
-        bq_ctr <= bp_wctr;
-    end
-    initial for (int i = 0; i < 1 << BP_W; i++) begin
-        bht0[i] = 2'd1;
-        bht1[i] = 2'd1;
-        bht2[i] = 2'd1;
-    end
-    always_comb for (int k = 0; k < 3; k++) bp_idx[k] = x_eip[k][BP_W-1:0] ^ {bp_hist, 2'b00};
-    always_ff @(posedge clk) begin
-        if (dec_take) p_bctr[0] <= bht0[bp_idx[0]];
-        if (bq_we) bht0[bq_idx] <= bq_ctr;
-    end
-    always_ff @(posedge clk) begin
-        if (dec_take) p_bctr[1] <= bht1[bp_idx[1]];
-        if (bq_we) bht1[bq_idx] <= bq_ctr;
-    end
-    always_ff @(posedge clk) begin
-        if (dec_take) p_bctr[2] <= bht2[bp_idx[2]];
-        if (bq_we) bht2[bq_idx] <= bq_ctr;
-    end
+    x86_tage tage (.clk(clk), .rst(rst), .look(dec_take), .look_pc(x_eip), .p_busy(p_valid != 3'd0),
+                   .btfn(p_redirect), .dir(tg_dir), .p_push(p_push), .push(p_take & p_jcc),
+                   .room(tg_room), .flush(flush), .ret(tg_ret), .ret_taken(tg_taken));
+
 
     // ---------------- retire ----------------
     logic [1:0]  r_n;            // uops retired this cycle
@@ -372,31 +328,14 @@ module x86_core
     assign store_data = sq[sq_head[SQ_W-1:0]].data;
     assign store_size = sq[sq_head[SQ_W-1:0]].size;
 
-    // branch table update: the first retired conditional branch of the cycle;
-    // retired history: all of them
-    always_comb begin
-        logic [9:0] h;
-        h = bp_rhist;
-        bp_we = 1'b0;
-        bp_widx = '0;
-        bp_wctr = '0;
+    // branch training: retired P-predicted Jcc, in order
+    always_comb
         for (int k = 0; k < 3; k++) begin
             rob_t e;
-            logic t;
             e = rob[TAG_W'(rob_head + TAG_W'(k))];
-            t = e.bp_taken ^ e.mispred;
-            if (ret_valid[k] && e.bp_jcc) begin
-                h = {h[8:0], t};
-                if (!bp_we) begin
-                    bp_we = 1'b1;
-                    bp_widx = e.bp_info[BP_W-1:0];
-                    bp_wctr = t ? (e.bp_info[13:12] == 2'd3 ? 2'd3 : e.bp_info[13:12] + 2'd1)
-                                : (e.bp_info[13:12] == 2'd0 ? 2'd0 : e.bp_info[13:12] - 2'd1);
-                end
-            end
+            tg_ret[k] = ret_valid[k] && e.bp_jcc;
+            tg_taken[k] = e.bp_taken ^ e.mispred;
         end
-        bp_rhist_n = h;
-    end
 
     // frontend redirect: retire flush first, else the first instruction of
     // the decoded group the frontend did not follow as decode predicts (the
@@ -978,8 +917,7 @@ module x86_core
                         rob[rn[k].tag] <= '{done: !needs_rs(u.kind), kind: u.kind,
                             dst: u.dst, wdst: u.wdst, wflags: u.wflags, eop: u.eop, value: 32'd0,
                             flags: '0, next_eip: u.next_eip, mispred: 1'b0, fault: 1'b0, redirect_pc: 32'd0,
-                            bp_jcc: u.kind == K_BR && u.imm2[14], bp_taken: u.pred_taken,
-                            bp_info: u.imm2[13:0]};
+                            bp_jcc: u.kind == K_BR && u.imm2[14], bp_taken: u.pred_taken};
                         if (u.kind == K_ST) sq[rn[k].sq_snap[SQ_W-1:0]].addr_valid <= 1'b0;
                         if (u.wdst) begin
                             rat_rob[u.dst] <= 1'b1;

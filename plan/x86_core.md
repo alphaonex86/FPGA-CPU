@@ -65,7 +65,7 @@ replicated per read port plus a live-value table.
    last high half / remainder), its results on the memory result bus (a
    memory op in M that cycle replays: 3 capture buses, not 4). ALU grants wake dependents at once (back to back);
    an uncaptured operand must be on wb1/wb2 (simulation check). Branches:
-   gshare + static BTFN at decode / P, a 32-entry fetch BTB that learns decode's taken
+   TAGE + static BTFN at decode / P, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
    they retire. Subset: ALU/shift/rotate/SHLD/SHRD/BSF/BSR/BSWAP/BT/BTS/BTR/BTC
    (a register bit offset on a register only)/MOV moffs/XADD/CMPXCHG/CLC/STC/CMC/
@@ -123,6 +123,16 @@ replicated per read port plus a live-value table.
    1-iteration run (`core_tb +stats`): 4,561 flushes, 12,646 decode
    redirects; head waits LD 35,910, ALU 32,717, ST 19,570, MD 17,204.
    Indirect CALL/JMP are not predicted (fall-through: a flush each).
+   Flushes split (`+stats`): Jcc 3,908, indirect / RET 653. Offline on the
+   CoreMark trace (56,251 Jcc): gshare 4K 3,729 mispredicts, 64K 3,071,
+   tournament 16K 3,199, TAGE (4 x 1K tagged, histories 5 / 12 / 24 / 48,
+   4K bimodal base) 1,449, 1,632 with the update 6 branches late. Built
+   (`x86_tage.sv`: one table copy per decode slot, read at the P load with
+   the history up to two groups back, entries read kept in a 32-entry queue
+   from P to retire, the first retired Jcc of a cycle trains): Jcc flushes
+   CoreMark 3,908 -> 2,243, c1 273 -> 158; 3.444 CoreMark/MHz (290,354
+   cycles per iteration), IPC c1 1.292, c2 1.125, c4 1.079.
+   `rtl/tools/x86_synth.sh` compiles the core (sources in `x86_files.sh`).
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div
