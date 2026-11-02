@@ -177,7 +177,7 @@ def tps_syms():
 def c2cart_syms():
     """dedicated C2 cartridge (plan/slot1_c2.md D33/D35/D37); pin numbers:
     ti_sn74gtl16612 p.1 (DGG), ti_sn74cb3t3245 p.3 (PW), infineon_cy2305
-    Table 2 (CY2309, SOIC-16)"""
+    Table 2 (CY2309, SOIC-16), cf52014 (EPCQ128A, SOIC-16)"""
     a = [("3", "A1"), ("5", "A2"), ("6", "A3"), ("8", "A4"), ("9", "A5"), ("10", "A6"),
          ("12", "A7"), ("13", "A8"), ("14", "A9"), ("15", "A10"), ("16", "A11"), ("17", "A12"),
          ("19", "A13"), ("20", "A14"), ("21", "A15"), ("23", "A16"), ("24", "A17"), ("26", "A18")]
@@ -197,7 +197,12 @@ def c2cart_syms():
                    ("7", "CLKB2"), ("10", "CLKB3"), ("11", "CLKB4"), ("16", "CLKOUT")],
                   [("4", "VDD"), ("13", "VDD"), ("5", "GND"), ("12", "GND")],
                   "sockets/parts/infineon_cy2305.pdf", ref="U")
-    return [gtl, cb3t, zdb]
+    # AS x1 pin-out (cf52014_epcq-a_datasheet Figure 3, Table 8)
+    epcq = reg_sym("EPCQ128A", [("7", "nCS"), ("16", "DCLK"), ("15", "DATA0"), ("3", "nRESET")],
+                   [("8", "DATA1")] + [(n, "NC") for n in ("4", "5", "6", "11", "12", "13", "14")],
+                   [("1", "VCC"), ("2", "VCC"), ("9", "VCC"), ("10", "GND")],
+                   "FPGAlist/CycloneV_A9/docs/cf52014_epcq-a_datasheet.pdf", ref="U")
+    return [gtl, cb3t, zdb, epcq]
 
 
 def rect_sym(name, ref, pins, box, unit_name="",

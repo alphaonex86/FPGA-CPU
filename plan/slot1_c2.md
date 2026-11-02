@@ -309,6 +309,17 @@ independent of the variant A routing; bitstream `build.sh c2cart`
   Pull-ups on the five FPGA OE# lines keep the ADDR/DATA/TX transceivers
   off while the FPGA configures (the 16612 bus-hold would keep an
   undriven A input low: a weak FPGA pull-up does not overdrive it).
+- Schematic + netlist: `python3 hw/tools/gen_c2cart_s6.py` ->
+  `hw/slot1-c2cart/slot1-c2cart.kicad_sch` / `.net` / `pdn.csv` (238
+  passives + regulators): U1 FPGA, U2 contacts, U3-U9 16612, U10-U11
+  CB3T3245 (VCC 2.5 V), U12 CY2309 (22 R per chip clock, CLKOUT 22 R +
+  10 pF ~ one chip's CLKAB + CLKBA load), U13 EPCQ128A (SOIC-16W
+  assumed: the datasheet gives no outline), J1 USB-Blaster 10-pin at
+  VCCPD3A 2.5 V (JTAG pins in 3A [pcg-01014]), J3 12 V, J5 link; RN1-35
+  56 R packs on the 137 AGTL+ contacts (RESET# excluded: board-terminated);
+  RREF_TL 2.00k 1 % (PLLs used [pcg-01014]); VID 00001 by 0 R straps.
+  Audit (every pins.csv net, chip clocks, AS, VREFs, terminations, supply
+  bands) and ERC: 0 errors. Next: placement (S7-like), then routing.
 - Variant A also gets D35 later: its 1.35 V banks cannot take the 16612's
   3.3 V A-port outputs (receive-only nets there, NM45 option 1).
 
@@ -406,8 +417,8 @@ filtering), AGP cards.
 0. Cartridge PCBs: variant A (D32): done S6 netlist (TA_ nets, RL01-RL17,
    J5, LINK_DCLK on M8) and S7 placement; the link nets get tracks with
    the other slot nets (S8c phase 2). New (D33-D37): a dedicated C2
-   cartridge (ball map, symbols, bitstream draft; timing open: "Dedicated
-   cartridge PCB"), a C2 cartridge with its own PCIe, GTL+ output buffers.
+   cartridge (ball map, symbols, schematic + netlist, bitstream draft;
+   timing open: "Dedicated cartridge PCB"), a C2 cartridge with its own PCIe, GTL+ output buffers.
 1. Bridge protocol: burst write (framebuffer pages, coalesced runs) in
    bus.h; VMM LFB mirror (dirty logging). Done: string I/O as one REP
    command through a 4 KB BAR window; coalesced ATA data / VGA writes.

@@ -1050,3 +1050,7 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   (neither a top nor a bottom view). U7 (VTT_tracker) is a 5-pad stand-in
   for the TPS51200. Both must become the chosen parts' land patterns
   (D17/D35) before S8 routes the slot nets for fabrication.
+- **NM48** (found writing the C2 cartridge schematic, 2026-11-02): ball
+  A1 RREF_TL is NC_A1 on variant A, but the bitstream uses PLLs: it needs
+  its own 2.00k 1 % to GND [pcg-01014 RREF_TL]. Fix with the next S6-S9
+  rerun (gen_c2cart_s6.py already wires it).
