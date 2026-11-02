@@ -1,11 +1,11 @@
 // Fetch + predecode + instruction extraction (plan/x86_core.md M2).
 // F0 fetches the 16-byte block at pc_f plus the 14 bytes after it from the
-// L1I (x86_l1i; a miss holds F0), F1/F2 run x86_predecode, F2 pushes the
-// block into a 4-entry queue; extraction takes up to 3 instructions per cycle
-// from the head block starting at offset off, continuing into the next block,
-// into the output register read by the decoders; an instruction of more than
-// 3 uops only goes first. An instruction may run past its block: the window
-// holds it whole.
+// L1I (x86_l1i, read with pc_n; a miss holds F0), F1/F2 run x86_predecode, F2
+// pushes the block into a 4-entry queue; extraction takes up to 3
+// instructions per cycle from the head block starting at offset off,
+// continuing into the next block, into the output register read by the
+// decoders; an instruction of more than 3 uops only goes first. An
+// instruction may run past its block: the window holds it whole.
 // BTB: per 16-byte block, the start offset and target of the taken branch
 // decode predicted there; F0 follows it, so the block ends at that
 // instruction and the next block is the target's. Each instruction carries
@@ -20,11 +20,10 @@ module x86_frontend
     input  logic                  redirect,      // flush, continue at redirect_pc
     input  logic [31:0]           redirect_pc,
     input  logic                  take,          // decoders consume the output
-    output logic                  mem_req,       // L1I line reads
-    output logic [31:5]           mem_addr,
-    input  logic                  mem_ready,
-    input  logic                  mem_rvalid,
-    input  logic [255:0]          mem_rdata,
+    output logic [31:4]           fetch_next,    // L1I: pc_n, pc_f
+    output logic [31:4]           fetch_pc,
+    input  logic                  ic_hit,        // ic_bytes: the 30 bytes at pc_f
+    input  logic [8*30-1:0]       ic_bytes,
     output logic [2:0]            valid,
     output logic [2:0][8*15-1:0]  bytes,
     output logic [2:0][31:0]      eip,
@@ -89,13 +88,8 @@ module x86_frontend
     logic [2:0][3:0]  s;            // its offset there
     logic [2:0][4:0]  nx;           // the next start: s + len (bit 4: next block)
     logic [2:0]       last;         // instruction k ends its block
-    logic             ic_hit;
-    logic [8*30-1:0]  ic_bytes;     // the 30 bytes at pc_f
-
-    x86_l1i u_l1i (.clk(clk), .rst(rst), .pc_n(pc_n[31:4]), .pc_f(pc_f[31:4]),
-                   .hit(ic_hit), .bytes(ic_bytes),
-                   .mem_req(mem_req), .mem_addr(mem_addr), .mem_ready(mem_ready),
-                   .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata));
+    assign fetch_next = pc_n[31:4];
+    assign fetch_pc = pc_f[31:4];
 
     x86_predecode #(.N(16)) pd (.clk(clk), .bytes(f1_bytes), .d32(1'b1), .len(pd_len),
                                 .npfx(pd_npfx), .map(pd_map), .fault(pd_fault), .multi(pd_multi));

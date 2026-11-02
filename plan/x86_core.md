@@ -299,12 +299,19 @@ replicated per read port plus a live-value table.
      c3 3 -> 142); x86_predecode flags them (`multi`) and extraction stops
      before them: 4.925 CoreMark/MHz (203,029 cycles, IPC 1.672), c3
      1.124 -> 1.128.
+   - Stores to code (BIOS shadowing, loaders, patching; `x3_smc.S`,
+     `x86_rand.py ... code`): a store snoops the L1I tags at its address
+     (two MLAB copies: its first and last byte lines) and is flagged when
+     a line is cached or being filled. Its instruction retires, the
+     pipeline flushes, fetch holds until the store drained (invalidating
+     every way of the L1I set) and restarts at the next instruction. An
+     L1I miss waits while an older store to its line is queued, then the
+     L1D writes the line back if dirty (probe) before L2 is read. Not
+     covered: a line evicted from the L1I while its instructions are in
+     flight, then stored to.
    Next:
    - A missing load leaves the RS waiting on its line (no replay loop),
      woken when the fill writes it; more misses in flight.
-   - Stores to code (loaders, self-modifying code): a drained store
-     invalidates its L1I line, L1I fills see dirty L1D lines; in-flight
-     instructions in M5.
    - The bus unit behind L2 (M8).
 4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,

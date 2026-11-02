@@ -16,6 +16,9 @@
 // - Loads wait for every older store address, forward from an equal-address
 //   older store, replay on a partially overlapping one.
 // - Retired stores drain into the L1D in order; a load that misses replays.
+// - Stores to code (x86_l1i snoop at the store address): the instruction
+//   retires, the pipeline flushes, fetch waits for the store's drain (which
+//   invalidates the L1I set) and restarts after it.
 //   A mispredicted branch retires, the pipeline flushes the next cycle.
 module x86_core
     import x86_pkg::*;
@@ -129,10 +132,25 @@ module x86_core
                  .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                  .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata));
 
+    // L1I; stores to code (snoop, invalidation, fetch hold), its misses
+    // after the older stores to the line (sq_busy) and the L1D probe
+    logic [31:4]       fetch_next, fetch_pc;
+    logic              ic_hit, ic_sn_hit, ic_sq_busy, pr_req, pr_done, d_step;
+    logic              code_pend, code_pend_q;   // a store to code waits for its drain
+    logic [8*30-1:0]   ic_bytes;
+    logic [1:0][31:5]  sn_line;
+    logic [31:5]       ic_miss_line, d_line;
+    x86_l1i u_l1i (.clk(clk), .rst(rst), .pc_n(fetch_next), .pc_f(fetch_pc),
+                   .hold(code_pend || code_pend_q), .hit(ic_hit), .bytes(ic_bytes),
+                   .sn_line(sn_line), .sn_hit(ic_sn_hit),
+                   .inv(d_step && sq[sq_head[SQ_W-1:0]].code), .inv_line(d_line),
+                   .miss_line(ic_miss_line), .sq_busy(ic_sq_busy), .pr_req(pr_req), .pr_done(pr_done),
+                   .mem_req(im_req), .mem_addr(im_addr), .mem_ready(im_ready),
+                   .mem_rvalid(im_rvalid), .mem_rdata(l2_rdata));
+
     x86_frontend fe (.clk(clk), .rst(rst), .redirect(fe_redirect), .redirect_pc(fe_redirect_pc),
-                     .take(dec_take),
-                     .mem_req(im_req), .mem_addr(im_addr), .mem_ready(im_ready),
-                     .mem_rvalid(im_rvalid), .mem_rdata(l2_rdata),
+                     .take(dec_take), .fetch_next(fetch_next), .fetch_pc(fetch_pc),
+                     .ic_hit(ic_hit), .ic_bytes(ic_bytes),
                      .valid(x_valid), .bytes(x_bytes), .eip(x_eip), .len(x_len), .npfx(x_npfx), .fault(x_fault),
                      .next(x_next), .btb_we(btb_we), .btb_set(fe_btb_set),
                      .btb_pc(fe_btb_pc), .btb_target(fe_btb_target));
@@ -221,6 +239,7 @@ module x86_core
         flags_t      flags;
         logic [31:0] next_eip;
         logic        mispred;
+        logic        smc;            // a store to code: the pipeline flushes after its instruction
         logic        fault;          // divide error: halts at retire (no exceptions yet)
         logic [31:0] redirect_pc;
         logic        btbi;               // CALL/JMP r/m: value = its EIP
@@ -256,6 +275,8 @@ module x86_core
 
     typedef struct packed {
         logic        addr_valid, data_valid;
+        logic        code;           // to a line in the L1I or being filled
+        logic        two_lines;      // its last byte is in the next line
         logic [1:0]  size;
         logic [31:0] addr, data;
     } sq_t;
@@ -353,8 +374,10 @@ module x86_core
     logic [31:0] flush_pc;
     logic        r_btb, flush_btb;   // the flushing CALL/JMP r/m teaches the BTB its target
     logic [31:0] flush_bpc;
+    logic        smc_q, r_smc;    // a store to code retired, its instruction not yet
     always_comb begin
-        logic stop;
+        logic stop, smc;
+        smc = smc_q;
         r_n = 2'd0;
         r_flush = 1'b0;
         r_halt = 1'b0;
@@ -374,9 +397,10 @@ module x86_core
                 if (e.kind == K_ST) r_store = 1'b1;
                 if (e.kind == K_HLT) begin r_halt = 1'b1; stop = 1'b1; end
                 if (e.kind == K_ILL || e.fault) begin r_halt = 1'b1; r_ill = 1'b1; stop = 1'b1; end
-                if (e.kind == K_BR && e.mispred || e.kind == K_DF) begin
+                if (e.kind == K_ST && e.smc) smc = 1'b1;
+                if (e.kind == K_BR && e.mispred || e.kind == K_DF || smc && e.eop) begin
                     r_flush = 1'b1;
-                    r_flush_pc = e.kind == K_DF ? e.next_eip : e.redirect_pc;
+                    r_flush_pc = e.kind == K_BR && e.mispred ? e.redirect_pc : e.next_eip;
                     r_btb = e.btbi;
                     r_dfw = e.kind == K_DF;
                     stop = 1'b1;
@@ -390,6 +414,7 @@ module x86_core
             ret_wflags[k] = e.wflags;
             ret_flags[k] = e.flags;
         end
+        r_smc = smc && !r_flush;
     end
     // retired stores drain into the L1D one per cycle at most, in order;
     // until then loads still see them in the queue (forwarding / overlap replay)
@@ -788,10 +813,39 @@ module x86_core
                    .m_addr(am_addr), .m_data(load_data),
                    .d_valid(sq_head != sq_cmt), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
                    .d_size(sq[sq_head[SQ_W-1:0]].size), .d_data(sq[sq_head[SQ_W-1:0]].data),
-                   .d_done(drain),
+                   .d_done(drain), .d_step(d_step), .d_line(d_line),
+                   .pr_req(pr_req), .pr_line(ic_miss_line), .pr_done(pr_done),
                    .mem_req(dm_req), .mem_we(dm_we), .mem_addr(dm_addr), .mem_wdata(l2_wdata),
                    .mem_ready(dm_ready), .mem_rvalid(dm_rvalid), .mem_rdata(l2_rdata));
     assign m_ok = am_ok && !md_done;   // bus 2 taken by mul/div: replay
+
+    // ---------------- stores to code ----------------
+    // the store at X: its first and last byte lines, snooped in the L1I
+    logic st_cross;
+    always_comb begin
+        logic [31:0] a;
+        a = agu(xr[4]);
+        st_cross = 6'(a[4:0]) + 6'((1 << ix[4].u.osz) - 1) > 6'd31;
+        sn_line[0] = a[31:5];
+        sn_line[1] = a[31:5] + 27'(st_cross);
+    end
+    // fetch waits while a retired store to code is queued (and a cycle
+    // after its drain: the L1I RAMs read during the invalidation); an L1I
+    // miss waits while an older store to its line is queued
+    always_comb begin
+        logic [31:5] prev;
+        prev = ic_miss_line - 27'd1;
+        code_pend = 1'b0;
+        ic_sq_busy = 1'b0;
+        for (int q = 0; q < SQ_N; q++) begin
+            logic [SQ_W:0] age;
+            age = (SQ_W + 1)'(SQ_W'(SQ_W'(q) - sq_head[SQ_W-1:0]));
+            if (age < sq_cmt - sq_head && sq[q].code) code_pend = 1'b1;
+            if (age < sq_tail - sq_head && sq[q].addr_valid
+                && (sq[q].addr[31:5] == ic_miss_line || sq[q].two_lines && sq[q].addr[31:5] == prev))
+                ic_sq_busy = 1'b1;
+        end
+    end
 
     // ---------------- port 3: multiply / divide ----------------
     logic             md_done, md_fault, md_next;
@@ -913,6 +967,8 @@ module x86_core
     // ---------------- state update ----------------
     always_ff @(posedge clk) begin
         flush <= r_flush && !rst;
+        smc_q <= r_smc && !rst;
+        code_pend_q <= code_pend;
         flush_pc <= r_flush_pc;
         flush_btb <= r_btb;
         flush_bpc <= rob[TAG_W'(rob_head + TAG_W'(r_n - 2'd1))].value;
@@ -1001,6 +1057,9 @@ module x86_core
                     sq[ix[4].sq_idx].addr_valid <= 1'b1;
                     sq[ix[4].sq_idx].size <= ix[4].u.osz;
                     sq[ix[4].sq_idx].addr <= agu(xr[4]);
+                    sq[ix[4].sq_idx].code <= ic_sn_hit;
+                    sq[ix[4].sq_idx].two_lines <= st_cross;
+                    rob[ix[4].tag].smc <= ic_sn_hit;
                 end
                 if (ix_valid[4] && ix[4].src[2].ready) begin
                     sq[ix[4].sq_idx].data_valid <= 1'b1;
@@ -1075,6 +1134,7 @@ module x86_core
                         rob[rn[k].tag].eop <= u.eop;
                         rob[rn[k].tag].next_eip <= u.next_eip;
                         rob[rn[k].tag].mispred <= 1'b0;
+                        rob[rn[k].tag].smc <= 1'b0;
                         rob[rn[k].tag].fault <= 1'b0;
                         rob[rn[k].tag].bp_jcc <= u.kind == K_BR && !u.btbi && u.imm2[14];
                         rob[rn[k].tag].bp_taken <= u.pred_taken;

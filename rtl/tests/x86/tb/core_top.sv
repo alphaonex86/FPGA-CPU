@@ -34,7 +34,7 @@ module core_top (
     logic [31:0] st_wait_kind [8];   // head waits by the head uop kind (kind_t)
     logic [31:0] st_dr [4];          // decode redirects: not followed, falsely taken, target, cut
     logic [31:0] st_mp_wait, st_refill;   // flushing branch: result -> retire; flush -> next retire
-    logic [31:0] st_fl [5];               // flushes: P-predicted Jcc, indirect, RET, other branch, K_DF
+    logic [31:0] st_fl [6];               // flushes: P-predicted Jcc, indirect, RET, other branch, K_DF, store to code
     logic [31:0] st_skew, st_alu3, st_mem2, st_replay, st_replay_md;   // issue contention
     logic [31:0] st_miss, st_wb;              // L2 misses, writebacks
     logic [31:0] st_imiss, st_dmiss, st_dwb;  // L1I, L1D misses, L1D writebacks
@@ -91,7 +91,7 @@ module core_top (
             {st_imiss, st_dmiss, st_dwb} <= '0;
             rd_pend <= 1'b0;
             refill <= 1'b0;
-            for (int i = 0; i < 5; i++) st_fl[i] <= 32'd0;
+            for (int i = 0; i < 6; i++) st_fl[i] <= 32'd0;
             for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
             for (int i = 0; i < 4; i++) st_dr[i] <= 32'd0;
             for (int i = 0; i < 4; i++) {st_x[i], st_rn[i]} <= '0;
@@ -146,7 +146,8 @@ module core_top (
                 logic [TAG_W-1:0] t;
                 t = core.rob_head + TAG_W'(core.r_n - 2'd1);
                 st_mp_wait <= st_mp_wait + cycles - mp_cycle[t];
-                c = core.rob[t].kind == K_DF ? 4 : core.rob[t].bp_jcc ? 0 : ind[t] ? (core.rob[t].bp_taken ? 2 : 1) : 3;
+                c = core.rob[t].kind == K_DF ? 4 : !(core.rob[t].kind == K_BR && core.rob[t].mispred) ? 5
+                  : core.rob[t].bp_jcc ? 0 : ind[t] ? (core.rob[t].bp_taken ? 2 : 1) : 3;
                 st_fl[c] <= st_fl[c] + 32'd1;
             end
             if (core.flush) refill <= 1'b1;
@@ -225,7 +226,7 @@ module core_top (
             $display("stats: misses: L1I %0d, L1D %0d (writebacks %0d), L2 %0d (writebacks %0d; memory read latency %0d)",
                      st_imiss, st_dmiss, st_dwb, st_miss, st_wb, mem_lat);
         if (stats)
-            $display("stats: flushes: Jcc %0d, indirect %0d, RET %0d, other branch %0d, DF %0d",
-                     st_fl[0], st_fl[1], st_fl[2], st_fl[3], st_fl[4]);
+            $display("stats: flushes: Jcc %0d, indirect %0d, RET %0d, other branch %0d, DF %0d, store to code %0d",
+                     st_fl[0], st_fl[1], st_fl[2], st_fl[3], st_fl[4], st_fl[5]);
     end
 endmodule

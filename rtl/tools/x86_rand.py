@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-# Usage: rtl/tools/x86_rand.py <seed> <out.S> [stride]
+# Usage: rtl/tools/x86_rand.py <seed> <out.S> [stride | code]
 # Random terminating flat 32-bit program in the M2 decoder subset
 # (rtl/x86/x86_decode.sv): EDI = 64-byte buffer base, EBP = loop counter,
 # ESP = stack; EAX..ESI are free (8/16-bit forms included). Unaligned
 # buffer offsets and mixed sizes exercise store-to-load forwarding and
 # partial overlaps. "stride": the buffer is 10 copies, 64 KB * (i / 2) +
 # 4 KB * (i % 2): one L1D set, two L2 sets, more lines than ways in each
-# (evictions, write-backs at both levels).
+# (evictions, write-backs at both levels). "code": the buffer is in the
+# code, before the called subroutines (stores to code lines).
 import random
 import sys
 
@@ -19,9 +20,11 @@ JCC = ["jo", "jno", "jb", "jae", "je", "jne", "jbe", "ja",
 
 
 def main():
-    if len(sys.argv) not in (3, 4) or sys.argv[3:] not in ([], ["stride"]):
-        sys.exit("usage: x86_rand.py <seed> <out.S> [stride]")
-    copies = 10 if sys.argv[3:] else 1
+    mode = sys.argv[3] if len(sys.argv) == 4 else ""
+    if len(sys.argv) not in (3, 4) or mode not in ("", "stride", "code"):
+        sys.exit("usage: x86_rand.py <seed> <out.S> [stride | code]")
+    copies = 10 if mode == "stride" else 1
+    base = "buf" if mode == "code" else "0x9000"
     rnd = random.Random(int(sys.argv[1]))
     labels = iter(range(1 << 30))
     subs = []
@@ -153,10 +156,10 @@ def main():
                 return ["%s%s%s %s, %s" % (rnd.choice(["", "lock "]), rnd.choice(["xadd", "cmpxchg"]), y,
                                           sreg(y), mem())]
             return ["%s%s %s, %s" % (rnd.choice(["xadd", "cmpxchg"]), y, sreg(y), sreg(y))]
-        if k == 29:   # MOV AL / AX / EAX <-> moffs32 (inside the buffer at 0x9000)
+        if k == 29:   # MOV AL / AX / EAX <-> moffs32 (inside the buffer)
             y = rnd.choice("lwb")
             a = {"l": "%eax", "w": "%ax", "b": "%al"}[y]
-            m = "0x%x" % (0x9000 + rnd.randrange(61))
+            m = "%s+%d" % (base, rnd.randrange(61))
             return ["mov%s %s, %s" % (y, *((a, m) if rnd.randrange(2) else (m, a)))]
         return ["nop"]
 
@@ -208,12 +211,15 @@ def main():
                     "%s L%d" % (rnd.choice(["loop", "loope", "loopne"]), l)]
         return run(rnd.randrange(1, 10))
 
-    out = [".code32", ".globl _start", "_start:", "mov $0x9000, %edi"]
+    out = [".code32", ".globl _start", "_start:", "mov $%s, %%edi" % base]
     out += ["mov %s, %s" % (imm(), r) for r in FREE]
     out += ["movl %s, %d(%%edi)" % (imm(), 4 * i) for i in range(17)]
     for _ in range(40):
         out += block()
     out.append("hlt")
+    if mode == "code":
+        # 17 dwords set first; its last 20 bytes share the first subroutine's line
+        out += [".balign 32", ".fill 12, 1, 0", "buf:", ".fill 68, 1, 0"]
     for s in subs:
         out += s
     with open(sys.argv[2], "w") as f:

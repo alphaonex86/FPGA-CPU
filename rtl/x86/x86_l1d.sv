@@ -14,6 +14,8 @@
 //   steps; a miss starts the fill and holds the drain.
 // - Miss: a dirty victim is read (the load port stolen for that cycle) and
 //   written back, then the line is read and written with its tag.
+// - Probe (an L1I miss): the line, if dirty, is written back the same way
+//   and stays, clean.
 module x86_l1d
     import x86_pkg::*;
 (
@@ -32,6 +34,12 @@ module x86_l1d
     input  logic [1:0]    d_size,
     input  logic [31:0]   d_data,
     output logic          d_done,      // written: the head leaves
+    output logic          d_step,      // a drain step writes d_line this cycle
+    output logic [31:5]   d_line,
+    // probe: write pr_line back if dirty
+    input  logic          pr_req,
+    input  logic [31:5]   pr_line,
+    output logic          pr_done,
     // memory, 32-byte lines
     output logic          mem_req,
     output logic          mem_we,
@@ -102,6 +110,8 @@ module x86_l1d
     logic [255:0]   f_buf;         // victim data, then the fill data
     logic [1:0]     rr;            // replacement when no way is free
     logic           miss;          // a miss starts the MSHR this cycle
+    logic           probing;       // a probe looks up its line this cycle
+    logic           probe;         // the eviction is a probe's
     logic [31:5]    miss_line;
     tg_t  [WAYS-1:0] miss_ways;    // the set of the missing line
 
@@ -115,7 +125,6 @@ module x86_l1d
     logic [1:0][29:0] a_bdw;       // dword of each bank
     logic [1:0]       a_need, a_bhit;
     logic [1:0][1:0]  a_bway;
-    logic [31:5]      d_line;      // the line the drain step writes
     // addresses in their own block: the lookup below reads the tags they address
     always_comb begin
         logic [7:0] m8;
@@ -126,7 +135,8 @@ module x86_l1d
         a_need[0] = (a_dw[0] ? m8[7:4] : m8[3:0]) != 4'd0;
         a_need[1] = (a_dw[0] ? m8[3:0] : m8[7:4]) != 4'd0;
     end
-    assign t_ra = {d_line[5 +: SW], set_of(a_bdw[1]), set_of(a_bdw[0])};
+    assign probing = st == S_IDLE && pr_req;
+    assign t_ra = {probing ? pr_line[5 +: SW] : d_line[5 +: SW], set_of(a_bdw[1]), set_of(a_bdw[0])};
     always_comb begin
         for (int b = 0; b < 2; b++) begin
             a_bhit[b] = 1'b0;
@@ -179,10 +189,26 @@ module x86_l1d
                 d_hit = 1'b1;
                 d_way = 2'(w);
             end
-        // not into the line being evicted / filled (its data is captured)
-        d_write = d_valid && d_hit && st != S_FILL
+        // not into the line being evicted / filled (its data is captured),
+        // nor while a probe uses the tag port
+        d_write = d_valid && d_hit && st != S_FILL && !probing && !(st == S_WB && probe)
                   && !(st != S_IDLE && d_line[5 +: SW] == f_line[5 +: SW] && d_way == f_way);
         d_done = d_write && (d_second || !d_cross);
+    end
+    assign d_step = d_write;
+
+    // probe lookup (the drain's tag copy)
+    logic       p_hit;
+    logic [1:0] p_way;
+    always_comb begin
+        p_hit = 1'b0;
+        p_way = 2'd0;
+        for (int w = 0; w < WAYS; w++)
+            if (t_rd[2][w].v && t_rd[2][w].tag == pr_line[31 -: TW]) begin
+                p_hit = 1'b1;
+                p_way = 2'(w);
+            end
+        pr_done = probing && !(p_hit && t_rd[2][p_way].d) || st == S_WB && probe && mem_ready;
     end
 
     // ---------------- bank and tag ports
@@ -215,6 +241,11 @@ module x86_l1d
             t_set = f_line[5 +: SW];
             t_way = f_way;
             t_wd = '{v: 1'b1, d: 1'b0, tag: f_line[31 -: TW]};
+        end else if (st == S_WB && probe) begin   // the probed line, clean
+            t_we = mem_ready;
+            t_set = f_line[5 +: SW];
+            t_way = f_way;
+            t_wd = '{v: 1'b1, d: 1'b0, tag: v_tag};
         end else if (d_write) begin
             for (int b = 0; b < 2; b++) begin
                 bdw = d_dw[0] == 1'(b) ? d_dw : d_dw + 30'd1;   // the bank's dword
@@ -235,8 +266,8 @@ module x86_l1d
             end
         end
         // a miss (a load in A first, else the drain) when the MSHR is free
-        miss_a = a_valid && st == S_IDLE && (a_need[0] && !a_bhit[0] || a_need[1] && !a_bhit[1]);
-        miss = st == S_IDLE && (miss_a || d_valid && !d_hit);
+        miss_a = a_valid && st == S_IDLE && !pr_req && (a_need[0] && !a_bhit[0] || a_need[1] && !a_bhit[1]);
+        miss = st == S_IDLE && !pr_req && (miss_a || d_valid && !d_hit);
         miss_b = !(a_need[0] && !a_bhit[0]);   // the load's missing line
         miss_line = miss_a ? a_bdw[miss_b][29:3] : d_line;
         miss_ways = miss_a ? t_rd[miss_b] : t_rd[2];
@@ -251,7 +282,15 @@ module x86_l1d
             if (d_write) d_second <= !d_done;
             case (st)
                 S_IDLE:
-                    if (miss) begin
+                    if (probing) begin
+                        if (p_hit && t_rd[2][p_way].d) begin
+                            f_line <= pr_line;
+                            f_way <= p_way;
+                            v_tag <= t_rd[2][p_way].tag;
+                            probe <= 1'b1;
+                            st <= S_EVRD;
+                        end
+                    end else if (miss) begin
                         logic [1:0] w;
                         logic dirty;
                         w = victim(miss_ways, rr);
@@ -261,6 +300,7 @@ module x86_l1d
                         f_line <= miss_line;
                         f_way <= w;
                         v_tag <= miss_ways[w].tag;
+                        probe <= 1'b0;
                         st <= dirty ? S_EVRD : S_REQ;
                         rr <= rr + 2'd1;
                     end
@@ -272,7 +312,7 @@ module x86_l1d
                     end
                     st <= S_WB;
                 end
-                S_WB: if (mem_ready) st <= S_REQ;
+                S_WB: if (mem_ready) st <= probe ? S_IDLE : S_REQ;
                 S_REQ: if (mem_ready) st <= S_WAIT;
                 S_WAIT:
                     if (mem_rvalid) begin
