@@ -4,7 +4,7 @@
 // /0 /1, TEST 84/85/A8/A9/F6/F7 /0, NOT/NEG F6/F7 /2 /3, shifts and
 // rotates C0/C1/D0-D3 (not RCL/RCR), MOV 88-8B/B0-BF/C6/C7 /0,
 // SHLD/SHRD, BSF/BSR, BSWAP, BT/BTS/BTR/BTC (r/m with a register offset:
-// register only), MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, XADD,
+// register only), MOV A0-A3 (moffs32), MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, XADD,
 // CMPXCHG, CLC/STC/CMC, SAHF/LAHF, IMUL 0F AF/69/6B,
 // MUL/IMUL/DIV/IDIV F6/F7 /4-/7 (x86_muldiv), LEA, PUSH
 // r32/imm/r/m, POP r32, CALL rel32/r32, RET [imm16], LEAVE, JMP rel/r/m, Jcc
@@ -585,6 +585,18 @@ module x86_decode
                 uop[0] = mop; uop[0].kind = K_ALU; uop[0].aop = A_LEA;
                 uop[0].dst = {1'b0, reg_f}; uop[0].wdst = 1'b1;
             end
+            8'b101000??: begin   // MOV AL / eAX <-> [moffs32]
+                logic [1:0] sz;
+                sz = op[0] ? wsz : SZ8;
+                uop[0] = u; uop[0].osz = sz; uop[0].imm = imm32_at(1);
+                uop[0].s3 = 4'd0;
+                if (op[1]) begin
+                    uop[0].kind = K_ST; uop[0].us3 = 1'b1;
+                end else begin
+                    uop[0].kind = K_LD; uop[0].dst = 4'd0; uop[0].wdst = 1'b1;
+                    uop[0].lext = LX_MERGE; uop[0].us3 = sz != SZ32;
+                end
+            end
             8'h90: uop[0].kind = K_ALU;   // NOP: A_ADD writing nothing
             8'hF5: uop[0] = alu(A_CMC, SZ32, 4'd0, 1'b0, 1'b0, 4'd0, 1'b0, 32'd0);
             8'hF8, 8'hF9: uop[0] = alu(op[0] ? A_STC : A_CLC, SZ32, 4'd0, 1'b0, 1'b0, 4'd0, 1'b0, 32'd0);
@@ -655,6 +667,14 @@ module x86_decode
                     uop[1] = esp_add(-32'd4); uop[1].eop = 1'b0;
                     uop[2] = jmp_ind({1'b0, rm});
                     n = 2'd3;
+                end else if (!p66) begin   // CALL m32: LD TMP first (ESP-relative)
+                    uop_t [5:0] s;
+                    s = '0;
+                    s[0] = load_tmp(SZ32);
+                    s[1] = push_st(1'b0, 4'd0, next_eip);
+                    s[2] = esp_add(-32'd4);
+                    s[3] = jmp_ind(R_TMP);
+                    emit(s, 4, uop, n, uop_b, n_b);
                 end
                 3'd4: if (p66) ;
                     else if (!mem) uop[0] = jmp_ind({1'b0, rm});
@@ -748,7 +768,7 @@ module x86_decode
             redirect = prep || prepne;
             target = eip;
         end else if (prepne || prep && op != 8'hC3) pbad = 1'b1;   // REP RET is RET
-        call = !p66 && (op == 8'hE8 || op == 8'hFF && reg_f == 3'd2 && !mem);
+        call = !p66 && (op == 8'hE8 || op == 8'hFF && reg_f == 3'd2);
         ret = !p66 && (op == 8'hC3 || op == 8'hC2);
         if (fault || pbad) begin
             uop = '0;

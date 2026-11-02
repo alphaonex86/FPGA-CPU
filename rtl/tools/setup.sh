@@ -1,12 +1,14 @@
 #!/bin/bash
 # Fetch the VexiiRiscv back end (pinned) + SpinalHDL + sbt, and the Unicorn
-# x86 lock-step reference (C3, testbench only, GPLv2), into rtl/ext/.
+# x86 lock-step reference (C3, testbench only, GPLv2) and CoreMark (x86
+# benchmark test), into rtl/ext/.
 # Re-runnable: existing pieces are kept. plan/cpu_core.md next step 1.
 set -eu
 cd "$(dirname "$0")/.."
 VEXII_COMMIT=9f70315deb3390b283995c5b8f1bd38215ecf52b
 SBT_VERSION=1.10.0                         # VexiiRiscv project/build.properties
 UNICORN_TAG=2.1.4
+COREMARK_COMMIT=1f483d5b8316753a742cbf5590caf5bd0a4e4777
 mkdir -p ext
 if [[ ! -d ext/VexiiRiscv ]]; then
     git clone https://github.com/SpinalHDL/VexiiRiscv.git ext/VexiiRiscv
@@ -37,3 +39,5 @@ if [[ ! -f ext/unicorn/build/libunicorn.a ]]; then
 fi
 cc -O2 -Wall -Werror -Iext/unicorn/include -o ext/x86_trace_check tools/x86_trace_check.c \
     ext/unicorn/build/libunicorn.a -lpthread -lm
+[[ -d ext/coremark ]] || git clone -q https://github.com/eembc/coremark.git ext/coremark
+git -C ext/coremark checkout -q "$COREMARK_COMMIT"

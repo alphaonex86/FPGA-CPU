@@ -37,7 +37,7 @@ def main():
         return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(30)
+        k = rnd.randrange(31)
         x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
         a = rnd.choice(ALU) + x
         if k == 0:
@@ -149,6 +149,11 @@ def main():
                 return ["%s%s%s %s, %s" % (rnd.choice(["", "lock "]), rnd.choice(["xadd", "cmpxchg"]), y,
                                           sreg(y), mem())]
             return ["%s%s %s, %s" % (rnd.choice(["xadd", "cmpxchg"]), y, sreg(y), sreg(y))]
+        if k == 29:   # MOV AL / AX / EAX <-> moffs32 (inside the buffer at 0x9000)
+            y = rnd.choice("lwb")
+            a = {"l": "%eax", "w": "%ax", "b": "%al"}[y]
+            m = "0x%x" % (0x9000 + rnd.randrange(61))
+            return ["mov%s %s, %s" % (y, *((a, m) if rnd.randrange(2) else (m, a)))]
         return ["nop"]
 
     def run(n):
@@ -179,8 +184,11 @@ def main():
             ret = "ret $%d" % pop if pop else "rep ret" if rnd.randrange(4) == 0 else "ret"
             subs.append(["S%d:" % l, *body, ret])
             args = ["pushl $%d" % i for i in range(pop // 4)]
-            if rnd.randrange(2):
+            c = rnd.randrange(3)
+            if c == 0:
                 return [*args, "call S%d" % l]
+            if c == 1:
+                return [*args, "movl $S%d, 60(%%edi)" % l, "call *60(%edi)"]
             r = reg()
             return [*args, "lea S%d, %s" % (l, r), "call *%s" % r]
         if k == 3:

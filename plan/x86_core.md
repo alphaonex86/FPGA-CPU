@@ -68,10 +68,10 @@ replicated per read port plus a live-value table.
    gshare + static BTFN at decode / P, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
    they retire. Subset: ALU/shift/rotate/SHLD/SHRD/BSF/BSR/BSWAP/BT/BTS/BTR/BTC
-   (a register bit offset on a register only)/XADD/CMPXCHG/CLC/STC/CMC/
+   (a register bit offset on a register only)/MOV moffs/XADD/CMPXCHG/CLC/STC/CMC/
    SAHF/LAHF/SETcc/CMOVcc/
    MUL/IMUL/DIV/IDIV on 8/16/32-bit operands (QEMU flag semantics), loads/stores,
-   stack, branches (LOOP/LOOPE/LOOPNE: ECX - 1 written, taken when ECX != 1;
+   stack, branches (CALL r/m32; LOOP/LOOPE/LOOPNE: ECX - 1 written, taken when ECX != 1;
    JECXZ), [REP] MOVS/STOS/LODS, CMPS, [REPE/REPNE] SCAS (REP CMPS would
    need 7 uops: K_ILL), DF 0 / 1 (decode reads the architectural DF; a
    CLD/STD that changes it retires as K_DF and flushes), RET imm16;
@@ -112,7 +112,17 @@ replicated per read port plus a live-value table.
    wb2 tag compare -> operand bypass mux -> ALU shifter -> ZF; then the
    bypass tags are compared in S against the buses that are wb1 / wb2 in
    the X cycle, X keeps only the mux on registered selects (a simulation
-   check compares them with the old X-stage match).
+   check compares them with the old X-stage match): 57.05 MHz, 51,771
+   ALMs, worst path store queue `known` count -> memory request -> grant
+   -> pick -> bypass tag compare (S).
+   CoreMark 1.0 (`rtl/tools/x86_coremark.sh`: 2K performance run, port in
+   `rtl/tests/x86/coremark/`, gcc -O2 -march=i686, CRCs checked natively;
+   1 and 2 iterations, both lock-step against Unicorn, the difference is
+   one iteration): 339,549 instructions, 315,531 cycles per iteration, IPC
+   1.076, 3.17 CoreMark/MHz on ideal memory (about 181 at 57 MHz). Whole
+   1-iteration run (`core_tb +stats`): 4,561 flushes, 12,646 decode
+   redirects; head waits LD 35,910, ALU 32,717, ST 19,570, MD 17,204.
+   Indirect CALL/JMP are not predicted (fall-through: a flush each).
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div
