@@ -506,6 +506,13 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
 - **D30** (decided 2026-11-01 by the operator) The operator buys a
   DE25-Nano; B's first step is measuring FEX/Box64 vs native on its A76
   (script prepared before it arrives).
+- **D31** (decided 2026-11-02 by the operator) C2 depends on no single
+  part: host = any x86 PC with VT-x/AMD-V and Linux (no fixed module); the
+  board bus is driven by the variant A cartridge (Cyclone V A9, shared
+  PCB); a generic FPGA PCIe card links the PC to the cartridge by a cable
+  (vendor PCIe IP in a thin wrapper). Reason: several parts from different
+  sellers, any one out of stock stops the plan. Design first, buy after
+  the viability verdict (`slot1_c2.md`).
 - **D22** (decided 2026-10-21, amended 2026-10-22 twice by operator: first
   6, then 8 copper layers, same answer as the D5 pattern) Slot 1
   cartridge = 8 layers: signals F&B (B.Cu gets the die escapes, F.Cu the

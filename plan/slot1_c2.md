@@ -1,11 +1,17 @@
 # Slot 1 C2: N100 + FPGA PCIe <-> P6 bridge, implementation
 
-Variant C2 of `slot1_variants.md` (decided best, D26/D29): an Intel N100
-runs Linux + KVM; one vCPU executes the board's stock BIOS and OS; every
-guest access outside its RAM is a bus cycle on the Slot 1 board, run by an
-FPGA that is a PCIe endpoint and a P6 bus agent. Test boards per slot1 D8
-(440BX first). Bench hardware (D29): LattePanda Mu (N100) + Puzhi
-PZ-A7200T-KFB (XC7A200T, PCIe 2.0 x2, Vivado verified).
+Variant C2 of `slot1_variants.md` (decided best, D26): a host PC runs
+Linux + KVM; one vCPU executes the board's stock BIOS and OS; every guest
+access outside its RAM is a bus cycle on the Slot 1 board. Test boards per
+slot1 D8 (440BX first).
+
+Shape (D31, no single-source part): any x86 PC with VT-x/AMD-V (the VMM
+runs on this Ryzen host already; an N100 mini-PC for the compact build)
+-> PCIe -> any FPGA PCIe card (Puzhi PZ-A7200T-KFB, ALINX AX7A200B,
+Cyclone V GX kits...: vendor PCIe IP in a thin wrapper) -> a cable link ->
+the variant A Slot 1 cartridge (Cyclone V A9, P6 bus agent on its
+AGTL+ translators). The cartridge is the only custom board and serves A
+too. Nothing is bought before the viability verdict below.
 
 ## Parts
 
@@ -13,9 +19,10 @@ PZ-A7200T-KFB (XC7A200T, PCIe 2.0 x2, Vivado verified).
 |---|---|---|
 | VMM (KVM, one vCPU, bus backends) | `sw/c2-vmm/` | v0 + 440BX shadow RAM: test ROM passes on the sim backend |
 | BAR0 bus protocol | `sw/c2-vmm/bus.h` | v0 defined |
-| FPGA bridge: PCIe endpoint + BAR0 block | `rtl/c2/` (Puzhi, Vivado) | to do |
-| P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | cartridge FPGA or the bridge over a link | to do |
-| Bench: N100 <-> Puzhi PCIe round trip | hardware | waits for the boards |
+| PCIe card: endpoint + BAR0 block -> cable link | `rtl/c2/` (vendor-neutral, PCIe IP wrapper) | to do |
+| Cable link protocol (card <-> cartridge) | `rtl/c2/` | to do |
+| Cartridge: link + P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | `rtl/c2/` on the A cartridge | to do |
+| Bench: host <-> PCIe card round trip | hardware | after the verdict |
 
 ## VMM v0 (`sw/c2-vmm`, `test.sh`)
 
