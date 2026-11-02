@@ -43,3 +43,20 @@ parts/infineon_cy2305.pdf https://store.comet.bg/download-file.php?id=9870
 parts/snia_sff9402_rev1.1.pdf https://members.snia.org/document/dl/27380
 # SNIA SFF-8612 Rev 1.0 OCuLink fixed receptacle (D34 connector footprint)
 parts/snia_sff8612_rev1.0.pdf https://members.snia.org/document/dl/51522
+# LattePanda Mu (D40), LattePandaTeam/LattePanda-Mu at deefecd863043d760f85b760c17769a66820ccc9
+slot1/lattepanda_mu/edge_connector_pinout.xlsx https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Pinouts/LattePanda_Mu_Edge_Connector_Pinout.xlsx
+slot1/lattepanda_mu/pinout_README.md https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Pinouts/README.md
+slot1/lattepanda_mu/pinout.jpg https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Pinouts/pinout.jpg
+slot1/lattepanda_mu/MCU_Module_LattePanda.kicad_sym https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Libraries/MCU_Module_LattePanda.kicad_sym
+slot1/lattepanda_mu/LattePanda_Module_H4.0mm_Horizontal.kicad_mod https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Libraries/Module_LattePanda.pretty/LattePanda_Module_H4.0mm_Horizontal.kicad_mod
+slot1/lattepanda_mu/LattePanda_Module_H8.0mm_Horizontal.kicad_mod https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Libraries/Module_LattePanda.pretty/LattePanda_Module_H8.0mm_Horizontal.kicad_mod
+slot1/lattepanda_mu/libraries_README.md https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Libraries/README.md
+slot1/lattepanda_mu/dimension_drawing.pdf https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Mechanicals/LattePanda_Mu_Dimension_Drawing.pdf
+slot1/lattepanda_mu/LattePanda_Mu_H8.0_Horizontal.step.7z https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Mechanicals/LattePanda_Mu_H8.0_Horizontal.step.7z
+slot1/lattepanda_mu/LattePanda_Mu_H4.0_Horizontal.step.7z https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Mechanicals/LattePanda_Mu_H4.0_Horizontal.step.7z
+slot1/lattepanda_mu/mechanicals_README.md https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Mechanicals/README.md
+slot1/lattepanda_mu/README_upstream.md https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/README.md
+slot1/lattepanda_mu/lite_carrier_v2_schematic.pdf https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Examples/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu%28V2%29/%5BDFR1142%5DLite%20Carrier%20for%20LattePanda%20Mu%28V2%29.pdf
+slot1/lattepanda_mu/mini_carrier_schematic.pdf https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Examples/%5BDFR1293%5DMini%20Carrier%20for%20LattePanda%20Mu%20and%20Mu%20Ultra/DFR1293%20Mini%20Carrier%20Board%20Schematic.pdf
+slot1/lattepanda_mu/bios_README.md https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Softwares/BIOS/README.md
+slot1/lattepanda_mu/bios_dflt_README.md https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Softwares/BIOS/DFLT/README.md

@@ -563,6 +563,11 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   card is bought: the cartridge on the desk is the PCIe bench. Reason:
   no PayPal seller for the AX7A035B and no published SoM connector
   positions (plan/slot1_c2.md "Artix cartridge").
+- **D40** (decided 2026-11-02 by the operator, amends D31/D39) No
+  external PC, ever: the x86 is a LattePanda Mu (preferred N305, 16 GB,
+  64 GB eMMC) stacked on the C2 Artix cartridge, its PCIe x4 wired on the
+  board to the XC7A100T (no OCuLink); 12 V input for the Mu + FPGA
+  (plan/slot1_c2.md "Mu cartridge").
 - **3D models** (operator 2026-11-02): every footprint of the slot 1 PCBs
   carries a 3D model, kept in the tree. Done 2026-11-02:
   `hw/tools/models3d.py` maps each footprint to a KiCad stock model

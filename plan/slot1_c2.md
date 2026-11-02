@@ -12,6 +12,8 @@ Cyclone V GX kits...: vendor PCIe IP in a thin wrapper) -> a cable link ->
 the variant A Slot 1 cartridge (Cyclone V A9, P6 bus agent on its
 AGTL+ translators). The cartridge is the only custom board and serves A
 too. Nothing is bought before the viability verdict below.
+Since D40 (operator 2026-11-02): no external PC, ever; the x86 is a
+LattePanda Mu on the cartridge ("Mu cartridge").
 
 ## Parts
 
@@ -364,6 +366,35 @@ N100 host plugs an OCuLink cable (or a slot / M.2 -> OCuLink adapter).
   nPERSTL1 binding, to verify with a Quartus build of the PCIe HIP
   (gen_qsf/top for c2pcie); routing (layer count, 85 ohm diff pairs).
 
+## Mu cartridge (D40)
+
+`hw/slot1-c2mu/` (to do): the D39 Artix cartridge with a LattePanda Mu on
+a DDR4 SO-DIMM 260 socket on the board instead of the OCuLink; no
+external PC (operator: never). Docs offline in
+`sockets/slot1/lattepanda_mu/` (LattePandaTeam/LattePanda-Mu): edge
+pinout xlsx, KiCad symbol + module footprints (H4.0 / H8.0 stacking),
+dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
+- Module: N100 or N305 (preferred N305, 16 GB, 64 GB eMMC: BIOS
+  S70NC1R200-16G-B), 60 x 69.6 mm, VIN 9-20 V on pins 251-259
+  [edge_connector_pinout.xlsx].
+- PCIe x4 to the FPGA: HSIO8-11 = PCIe 3.0 x4 lanes 0-3 by the default
+  BIOS [bios_dflt_README.md HSIO]; on the Lite carrier the x4 slot takes
+  REFCLK2 (pins 97/99) and ~PLT_RST (pin 105), the module's TX through
+  series caps (netlist of the Lite carrier V2 KiCad project, nets
+  /LattePanda Module/REFCLK2+-, /~PLT_RST, /PCIe x4/PCIE30_TX0_P). Here
+  both directions sit on our board: 0.22 uF in each TX lane (Mu TX ->
+  GTP RX, GTP TX -> Mu RX); REFCLK2 AC-coupled into MGTREFCLK1 (F10/E10);
+  PLT_RST# into a 3.3 V FPGA IO as PERST#. The link trains at Gen2
+  (GTP limit).
+- Power: 12 V input (Mu VIN + the FPGA / 16612 rails); budget ~20 W
+  (N305 up to ~15 W), allowed by the CLAUDE.md external-supply rule for
+  the C2 gain.
+- Open: Mu placement over the cartridge parts with the H8.0 connector
+  (8 mm under the module: TSSOPs, BGA, small passives only) and the
+  cartridge thickness in the Slot 1 (module + heatsink); power-on of
+  the Mu with the board (PWR_SW#, PSON); a USB 2.0 port / UART header
+  for installing the VMM on the eMMC.
+
 ## Artix cartridge (D39)
 
 `hw/slot1-c2art/` (to do). The D34 board with an XC7A100T-2FGG484I in
@@ -374,9 +405,8 @@ reference clock pairs [xilinx/xc7a100tfgg484pkg.txt]; the card RTL
 - PCIe x4 Gen2 over the OCuLink 4i (D34 pinout), refclk from the cable
   on an MGTREFCLK pair, PERST# on an IO.
 - Bought as one JLCPCB order (PCB + BGA assembly + parts from LCSC,
-  PayPal); the PC side is a PCIe x4 -> OCuLink adapter and an OCuLink
-  cable (eBay, PayPal). Bench: the cartridge on the desk on its own
-  supply, PC on OCuLink, LOOPBACK bitstream (no Slot 1 board needed).
+  PayPal). D40 replaces the OCuLink / external PC by a LattePanda Mu on
+  the cartridge.
 - PCIe lanes (Vivado 2025.2, pcie_7x x4 on xc7a100tfgg484-2: lane k on
   GTPE2_CHANNEL_X0Y(7-k), site -> pins by get_package_pins): lane 0 TX
   D7/C7 RX D9/C9, lane 1 B6/A6 B10/A10, lane 2 D5/C5 D11/C11, lane 3
