@@ -12,3 +12,4 @@ xilinx/ug475_7Series_Pkg_Pinout.pdf https://docs.amd.com/api/khub/documents/kHyY
 xilinx/ug482_7Series_GTP_Transceivers.pdf https://docs.amd.com/api/khub/documents/Xk_zMbXsJj92suJ4_0Akkg/content
 xilinx/ug477_7Series_IntBlock_PCIe.pdf https://docs.amd.com/api/khub/documents/yDSUL8gmoxb2PqQ1Eo5Y~Q/content
 xilinx/pg054-7series-pcie.pdf https://www.xilinx.com/content/dam/xilinx/support/documents/ip_documentation/pcie_7x/v3_3/pg054-7series-pcie.pdf
+alinx/panasonic_p5k_catalog.pdf https://www.tti.com/content/dam/tti-commons/supplier/panasonic/ecom/panasonic-p5k-series-datasheet.pdf

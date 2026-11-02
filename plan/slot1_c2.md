@@ -364,6 +364,35 @@ N100 host plugs an OCuLink cable (or a slot / M.2 -> OCuLink adapter).
   nPERSTL1 binding, to verify with a Quartus build of the PCIe HIP
   (gen_qsf/top for c2pcie); routing (layer count, 85 ohm diff pairs).
 
+## SoM cartridge (D38)
+
+`hw/slot1-c2som/` (to do). The AX7A035B core board AC7A035 (60 x 60 mm,
+mounting holes on a 55 mm square, 5 V only on CON1 pins 1-8; XC7A35T-2,
+1 GB DDR3, 128 Mb QSPI on the SoM) on a Slot 1 carrier with the D33 bus
+side (16612s, CY2309, terminations) and the D34 OCuLink 4i; the PC gets
+a PCIe x4 -> OCuLink adapter card. [AX7A035B manual sec. 2.9-2.11]
+- SoM connectors: 4 x 80 pins, 0.5 mm, Panasonic P5K 3.0 mm mated
+  height; SoM side AXK580137YG socket, carrier side AXK680337YG header
+  (with positioning bosses, on-demand part); AXK680347YG is the stock
+  header without bosses, same mating [panasonic_p5k_catalog.pdf p.4-6].
+  Insertion life 50 cycles: move the SoM between the ALINX carrier and
+  ours only a few times. Header land pattern [same, p.11]: 2 rows of 40,
+  0.25 x 2.30 pads at 0.5 mm, rows 1.00 apart (5.60 overall), outermost
+  pads 0.75 wide (0.125 inside to 0.625 outside the end pin centre).
+- IO on the connectors: 145 at 3.3 V (bank 14: 45, banks 15/16: 50 + 50,
+  VCCO from LDOs on the SoM), 15 at 1.5 V (bank 34, DDR3 bank), bank 13
+  not bonded on the 35T; the 4 GTP channels + MGT_CLK1 (F10/E10) and
+  JTAG (CON3 77-80). The C2 bus side needs 139 IO (64 data, 34 address,
+  15 rx, 11 CMOS, 7 tx, 6 control, 1 clock) + PERST#: every AGTL+ line
+  goes through a 16612 (no SSTL-18 bank on the SoM: the D37 direct
+  receive becomes a 16612 path, timing to recheck on the Artix -2).
+- PCIe x4 Gen2 on GTP 0-3 (the AX7A035B carrier wires only 2 + 2 to
+  SFP); PERST# from OCuLink A12 onto a SoM IO.
+- Open: the exact CON1-CON4 positions and pin-1 orientation on the SoM
+  (the manual dimensions only the 55 mm hole square): ALINX core board
+  footprint on request, or a 1200 dpi scan of the delivered board;
+  board height (60 mm SoM + the 16612 band > the 57.8 mm D33 outline).
+
 ## Shadow RAM (`shadow.c`)
 
 440BX PAM0-PAM6 (config 0:0:0 0x59-0x5f, datasheet 290633-001 sec.

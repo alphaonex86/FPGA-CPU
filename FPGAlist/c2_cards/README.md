@@ -5,7 +5,8 @@ drives the cable link to the Slot 1 cartridge (J5). An XC7A35T is enough
 (free Vivado). All documents are kept here, versioned (seller links die
 fast); `sources.txt` only records where each came from.
 
-- `alinx/` AX7A035B user manual. On delivery, also save here the ALINX
+- `alinx/` AX7A035B user manual; Panasonic P5K catalog (SoM connectors,
+  D38). On delivery, also save here the ALINX
   package sent with the board (schematic, XDC, demos).
 - `xilinx/` XC7A35T FGG484 pin file; DS180/DS181 (Artix-7), UG470
   (configuration), UG471 (SelectIO), UG472 (clocking), UG475 (packages),
