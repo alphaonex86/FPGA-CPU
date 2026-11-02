@@ -175,7 +175,7 @@ def power(P, net_of_ball, gtl, cb3t, agtl):
     P.r("2.00k", "VREF_GTL", "GND", "vref")
     P.r("1.00k", "VTT15", "VREF_3A", "vref", "U1")
     P.r("1.78k", "VREF_3A", "GND", "vref", "U1")
-    P.c("100nF", C0402, "VREF_3A", "pin", "U1", "Y7")
+    P.c("100nF", C0402, "VREF_3A", "vref", "U1")
     # processor-end termination, 56 R +-5 % [p2 Table 8], packs in contact order
     for k in range(0, len(agtl), 4):
         sigs = [f"S_{s}" for s in agtl[k:k + 4]]

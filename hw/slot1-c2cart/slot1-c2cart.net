@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/user/Desktop/CatchChallenger/FPGA-CPU/hw/slot1-c2cart/slot1-c2cart.kicad_sch")
-		(date "2026-11-02T11:46:03")
+		(date "2026-11-02T11:51:30")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -79,7 +79,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -93,7 +93,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5045f239-2ad6-4a7c-9156-6d54b9c9691f")
+			(tstamps "452fce86-9483-4ff3-af0c-fd817fa15ccc")
 			(units
 				(unit
 					(name "A")
@@ -133,7 +133,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -147,7 +147,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "82da4ac5-cab9-4105-816a-6a800b3fc427")
+			(tstamps "87c211d9-8d77-4532-97b4-b4d67c49a1b2")
 			(units
 				(unit
 					(name "A")
@@ -187,7 +187,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -201,7 +201,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "73cc272f-9895-47e9-8375-208466cfbec1")
+			(tstamps "dabdffb7-9b78-4ffb-99e8-15d7267567ec")
 			(units
 				(unit
 					(name "A")
@@ -241,7 +241,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -255,7 +255,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d4ceb75a-3466-48ad-946d-2ea28a8ca103")
+			(tstamps "aa6d972c-11ae-4ad7-b19a-084a67e0c1db")
 			(units
 				(unit
 					(name "A")
@@ -295,7 +295,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -309,7 +309,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "563b6ee0-1f1f-46d4-9e26-aab2a29d0488")
+			(tstamps "a981cf0e-9bcd-4bba-9996-53edc171eef9")
 			(units
 				(unit
 					(name "A")
@@ -349,7 +349,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -363,7 +363,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "958127c0-3739-4f90-90c2-e9dadf0b0957")
+			(tstamps "f96b08ce-5889-47cd-9b56-ff389e921f2e")
 			(units
 				(unit
 					(name "A")
@@ -403,7 +403,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -417,7 +417,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "332e4a54-707a-41e1-a93f-cd084691c1a8")
+			(tstamps "464fb36f-e8f4-4c5d-8718-5d4f7a6de357")
 			(units
 				(unit
 					(name "A")
@@ -457,7 +457,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -471,7 +471,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "45140e76-9eca-49e9-84e3-ae46a88129f2")
+			(tstamps "473e5662-154b-40ac-be3a-0c5e62a35e3d")
 			(units
 				(unit
 					(name "A")
@@ -511,7 +511,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -525,7 +525,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "cfccc9cc-7aa9-417d-95fb-cad4cd8bbc48")
+			(tstamps "5c7e242d-24a7-4638-b719-239ffee6dfb9")
 			(units
 				(unit
 					(name "A")
@@ -565,7 +565,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -579,7 +579,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a3981e9d-7201-445e-b487-1ceed43faffc")
+			(tstamps "dd2a2286-0d9e-4be1-afa3-206a679496e0")
 			(units
 				(unit
 					(name "A")
@@ -619,7 +619,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -633,7 +633,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "cdf880c2-f1f4-468c-a20d-68cefb093a99")
+			(tstamps "3e1a0573-6f32-4ea7-87fe-f0647d408e80")
 			(units
 				(unit
 					(name "A")
@@ -673,7 +673,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -687,7 +687,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "29714777-8eac-4ea6-81f1-3c1ba53e1bf6")
+			(tstamps "c7a30dab-ae2d-4d0c-abc3-ca4a341dfa21")
 			(units
 				(unit
 					(name "A")
@@ -727,7 +727,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -741,7 +741,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "474859f0-a123-4b84-946b-2ec6b049936c")
+			(tstamps "5ee0f69a-13d7-4771-94ab-15a9ab895794")
 			(units
 				(unit
 					(name "A")
@@ -781,7 +781,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -795,7 +795,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6511dbd9-4c8c-4263-8e3f-71a6e39786dc")
+			(tstamps "df9a9cc4-b5e1-4e92-8b85-83a386cee293")
 			(units
 				(unit
 					(name "A")
@@ -835,7 +835,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -849,7 +849,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "996ba7de-4c6b-4c4b-8b26-6c948b75284e")
+			(tstamps "321c3853-6461-4fb0-993f-07886e868452")
 			(units
 				(unit
 					(name "A")
@@ -889,7 +889,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -903,7 +903,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "328d11d8-0ea6-456f-9b07-c69b37e9af95")
+			(tstamps "431eebbf-04fd-45a0-a606-c1a90ccc076b")
 			(units
 				(unit
 					(name "A")
@@ -943,7 +943,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -957,7 +957,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a9b86665-eeff-446a-a678-bd09fe94ffb3")
+			(tstamps "67261417-deb4-4a6b-ba48-178dae030681")
 			(units
 				(unit
 					(name "A")
@@ -997,7 +997,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1011,7 +1011,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6490a5dc-8955-4b46-bcd8-d973453be4ec")
+			(tstamps "3b01edd7-e3b7-4e21-8552-36c76f8c91ed")
 			(units
 				(unit
 					(name "A")
@@ -1051,7 +1051,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1065,7 +1065,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f252c11f-2a00-437f-b3f9-552de3e079bb")
+			(tstamps "c8eb1d5c-9b65-4e48-92df-f7e449688ca9")
 			(units
 				(unit
 					(name "A")
@@ -1105,7 +1105,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1119,7 +1119,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "750d09bb-08ab-40ed-b6be-66c150421de3")
+			(tstamps "68c94455-cff7-45c5-8501-262097dd5c46")
 			(units
 				(unit
 					(name "A")
@@ -1159,7 +1159,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1173,7 +1173,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "62357e1a-f70f-4ca6-a3ec-254c049b5bc6")
+			(tstamps "0d582055-d077-409c-801c-c82df696eb30")
 			(units
 				(unit
 					(name "A")
@@ -1213,7 +1213,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1227,7 +1227,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "96f65d6e-89eb-4526-90ce-1132c1f2f201")
+			(tstamps "21a98c9c-61b4-4ffb-a870-f055810b3922")
 			(units
 				(unit
 					(name "A")
@@ -1267,7 +1267,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1281,7 +1281,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5294cdaf-9c6b-4e23-bb4c-fbbcae7b375f")
+			(tstamps "40b21741-e108-45a0-ad1b-14050f98f27c")
 			(units
 				(unit
 					(name "A")
@@ -1321,7 +1321,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1335,7 +1335,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9d78745b-a0f8-47ed-9989-ec1db2614736")
+			(tstamps "ac29135d-8aa2-47d5-bc28-57ea033b1c05")
 			(units
 				(unit
 					(name "A")
@@ -1375,7 +1375,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1389,7 +1389,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c3906961-2307-47ac-a343-d58aa59f2228")
+			(tstamps "81d5a0b5-309a-4aca-b14f-d11d024d080e")
 			(units
 				(unit
 					(name "A")
@@ -1429,7 +1429,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1443,7 +1443,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8f6988d7-72af-4507-8f9d-b70ed9a2dd6e")
+			(tstamps "636c6bf7-8e6a-4784-a07d-fd2b08ce2537")
 			(units
 				(unit
 					(name "A")
@@ -1483,7 +1483,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1497,7 +1497,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "722472ef-74d3-4849-a3d0-5f3e5871623d")
+			(tstamps "e1a2ef93-cc5b-4a14-a603-f849c94e8541")
 			(units
 				(unit
 					(name "A")
@@ -1537,7 +1537,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1551,7 +1551,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "89f69fb2-ef06-4ad5-bf4f-e345fc351635")
+			(tstamps "7afc967d-9406-45e5-b072-d14803852359")
 			(units
 				(unit
 					(name "A")
@@ -1591,7 +1591,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1605,7 +1605,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "348513da-fa46-4f6f-98ad-c88fbc3ff5f8")
+			(tstamps "3e971a8a-5c2c-489a-93cb-3898d02bdf10")
 			(units
 				(unit
 					(name "A")
@@ -1645,7 +1645,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1659,7 +1659,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "803c471b-6710-4c95-976a-97d1276b7466")
+			(tstamps "adbc2c72-c3b0-485d-8fc4-d9f13961204b")
 			(units
 				(unit
 					(name "A")
@@ -1699,7 +1699,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1713,7 +1713,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "65d58e97-f876-4072-9a82-541cbafd654c")
+			(tstamps "2f49d98f-f5f7-48ab-bdf4-87d878481dcc")
 			(units
 				(unit
 					(name "A")
@@ -1753,7 +1753,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1767,7 +1767,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "332f88a3-f0f2-4a16-b53c-f17a09ec3021")
+			(tstamps "2903509b-e805-441e-aac9-fffa4f8e4dea")
 			(units
 				(unit
 					(name "A")
@@ -1807,7 +1807,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1821,7 +1821,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "77435705-4f22-4e35-9486-d573921ffc0d")
+			(tstamps "243176a2-1a29-4d00-adca-8463c7e98aaa")
 			(units
 				(unit
 					(name "A")
@@ -1861,7 +1861,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1875,7 +1875,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b1103664-e4ad-471e-8be0-77e4c6f4c904")
+			(tstamps "2616e828-ef86-44b4-afc6-cd065610e3d5")
 			(units
 				(unit
 					(name "A")
@@ -1915,7 +1915,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1929,7 +1929,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5507d597-ae49-46c8-9ef5-7b807b2644f3")
+			(tstamps "b24367c7-95aa-4514-8915-7ef6df025e2b")
 			(units
 				(unit
 					(name "A")
@@ -1969,7 +1969,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -1983,7 +1983,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "895d157f-c1bf-4fad-9179-338950bdf912")
+			(tstamps "4586572c-6029-4c92-9501-61d0387e55ce")
 			(units
 				(unit
 					(name "A")
@@ -2023,7 +2023,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2037,7 +2037,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a0d77f6f-89b7-4812-95bc-6e632965a83d")
+			(tstamps "b05439fc-3539-4416-828c-ae11860a381b")
 			(units
 				(unit
 					(name "A")
@@ -2077,7 +2077,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2091,7 +2091,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7bede7a6-520e-4f9d-974b-cdc41ef56e7b")
+			(tstamps "39dd917c-3fbf-4326-8179-09751874e8f1")
 			(units
 				(unit
 					(name "A")
@@ -2131,7 +2131,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2145,7 +2145,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e893c54e-5470-496b-8e65-3c13a8b10a6d")
+			(tstamps "4a9733a9-cc1a-4994-a9e1-887aa1a28dba")
 			(units
 				(unit
 					(name "A")
@@ -2185,7 +2185,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2199,7 +2199,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b21af9c9-9f78-48e2-ac33-4547accac7dc")
+			(tstamps "a03a932f-7680-47ad-a9bc-4cce944ee14f")
 			(units
 				(unit
 					(name "A")
@@ -2239,7 +2239,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2253,7 +2253,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "11a6f62a-431b-47b7-abf1-d8e07cf1b77c")
+			(tstamps "bb826421-22d6-413d-b7a4-0c3526ceba72")
 			(units
 				(unit
 					(name "A")
@@ -2293,7 +2293,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2307,7 +2307,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d8d48b2d-f818-444d-825b-eeef1f12885a")
+			(tstamps "a1e3014b-38c7-48c2-bce9-35167f266ca3")
 			(units
 				(unit
 					(name "A")
@@ -2347,7 +2347,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2361,7 +2361,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9f70c3b0-ce82-457f-a9e9-dc07921fce08")
+			(tstamps "80d57779-91d1-4be8-bd7b-d1136410a24b")
 			(units
 				(unit
 					(name "A")
@@ -2401,7 +2401,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2415,7 +2415,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7ff6b605-7bc5-4347-9939-b335519d57e6")
+			(tstamps "4625279d-ed0d-422a-a5d7-0045101c10fa")
 			(units
 				(unit
 					(name "A")
@@ -2455,7 +2455,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2469,7 +2469,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fa3a7590-77d5-498d-83c5-24cc8caee4fc")
+			(tstamps "1a23dcc1-9b64-4613-a887-fb02235a3e65")
 			(units
 				(unit
 					(name "A")
@@ -2509,7 +2509,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2523,7 +2523,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e432613b-802e-4e99-83a3-a248940b583f")
+			(tstamps "f04c0eb6-413b-46dc-86af-369ba05ea20b")
 			(units
 				(unit
 					(name "A")
@@ -2563,7 +2563,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2577,7 +2577,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ad9ca09e-2160-4988-929d-c22b4ecf1458")
+			(tstamps "0695055a-1aac-4fe9-85ad-9d4b8d25cee9")
 			(units
 				(unit
 					(name "A")
@@ -2617,7 +2617,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2631,7 +2631,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6f949dc0-32dd-4f7e-9580-35573cf17e6e")
+			(tstamps "06cb5e97-5dc4-4d51-9b20-0a624ef19c58")
 			(units
 				(unit
 					(name "A")
@@ -2671,7 +2671,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2685,7 +2685,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3db7af11-693f-4ec0-9601-3637a22324b5")
+			(tstamps "e1c61ddf-daa7-4119-bbf8-8b8aa3a1e80c")
 			(units
 				(unit
 					(name "A")
@@ -2725,7 +2725,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2739,7 +2739,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "240e7704-5e54-48f5-8ce6-b3a413ee3d5e")
+			(tstamps "d40a45ce-73b0-45c6-ad58-04d555843a9e")
 			(units
 				(unit
 					(name "A")
@@ -2779,7 +2779,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2793,7 +2793,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0958bbf7-ccd1-4515-8591-273af871704c")
+			(tstamps "f4060ec5-2dc5-49c5-95c1-e25214c95c7f")
 			(units
 				(unit
 					(name "A")
@@ -2833,7 +2833,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2847,7 +2847,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d29dc7a8-b079-4592-a222-f8c5af2cf158")
+			(tstamps "2a3626ac-8f57-4557-a8d7-fe4885bb6b3c")
 			(units
 				(unit
 					(name "A")
@@ -2887,7 +2887,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2901,7 +2901,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "61907ddd-a37c-4922-823f-94e4879cf856")
+			(tstamps "f30dc27d-9e1a-4d5d-bb04-e822256b1be0")
 			(units
 				(unit
 					(name "A")
@@ -2941,7 +2941,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -2955,7 +2955,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "cf7caafa-0d63-4556-af2c-c56916f5dd35")
+			(tstamps "3ca77ede-6e1f-4de9-a13d-7e5b2e3a2470")
 			(units
 				(unit
 					(name "A")
@@ -2995,7 +2995,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3009,7 +3009,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f7953c46-2021-4f07-a09a-1db9b627d3fb")
+			(tstamps "33f6944f-979d-4a5a-a970-f788d0fd3c45")
 			(units
 				(unit
 					(name "A")
@@ -3049,7 +3049,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3063,7 +3063,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d882f6a5-46e6-433d-8f0c-eb3d0a660cd5")
+			(tstamps "bfc77d89-1d51-401d-87b0-89db4e4ff639")
 			(units
 				(unit
 					(name "A")
@@ -3103,7 +3103,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3117,7 +3117,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7b19d68f-2c3a-4602-af71-a6fa1c56b902")
+			(tstamps "647a2f41-e2a6-4065-9651-bcb5db6f8f3d")
 			(units
 				(unit
 					(name "A")
@@ -3157,7 +3157,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3171,7 +3171,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "65beb109-b831-4d22-9725-558c722d5cea")
+			(tstamps "b77c4584-1d17-4eff-9696-0a897533b755")
 			(units
 				(unit
 					(name "A")
@@ -3211,7 +3211,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3225,7 +3225,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4a26891d-a7df-4d01-89e0-7984ee8a706e")
+			(tstamps "3a5a2d54-7937-4fa5-9dd9-c4c12250e41a")
 			(units
 				(unit
 					(name "A")
@@ -3265,7 +3265,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3279,7 +3279,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a355f5f5-bd76-4419-919d-43466aff2e21")
+			(tstamps "cf0c2301-8023-4fc2-8d5a-782b4a63cd15")
 			(units
 				(unit
 					(name "A")
@@ -3319,7 +3319,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3333,7 +3333,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5462dcf9-087b-4be5-9e1d-760ca63150f1")
+			(tstamps "8f6c5983-3306-4c5f-9c63-3144ea6fc707")
 			(units
 				(unit
 					(name "A")
@@ -3373,7 +3373,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3387,7 +3387,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1b25dd90-22d3-4023-8892-ede170075efe")
+			(tstamps "6ff3613e-33f5-43cb-b417-2fe5ec338f77")
 			(units
 				(unit
 					(name "A")
@@ -3427,7 +3427,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3441,7 +3441,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "791702a8-9d9f-4f75-87ed-23bddaee86d4")
+			(tstamps "d7e02e45-b642-40a7-98bf-12ec7d005982")
 			(units
 				(unit
 					(name "A")
@@ -3481,7 +3481,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3495,7 +3495,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c74dd675-c8d0-48e9-8b5d-8ac30abf34e0")
+			(tstamps "c533c0bf-6b20-4dec-a07e-d0609755274f")
 			(units
 				(unit
 					(name "A")
@@ -3535,7 +3535,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3549,7 +3549,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9b6d9b28-a8ad-4d19-99cd-ba9595a5a4cf")
+			(tstamps "47e46779-4f78-42d6-83ca-245907a44dc4")
 			(units
 				(unit
 					(name "A")
@@ -3589,7 +3589,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3603,7 +3603,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "76a68192-7ba7-4376-bea4-425738634670")
+			(tstamps "2ddfc165-9dcd-46f5-bd85-8a407f358c72")
 			(units
 				(unit
 					(name "A")
@@ -3643,7 +3643,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3657,7 +3657,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "45e27df8-281f-479d-b04f-701cf0014660")
+			(tstamps "79578374-d4b2-4455-b444-21c245875e06")
 			(units
 				(unit
 					(name "A")
@@ -3697,7 +3697,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3711,7 +3711,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5bfcefa3-ef19-45ec-8bf0-798451a4ade2")
+			(tstamps "4119f119-3bae-45bf-9ae3-4e16e577df66")
 			(units
 				(unit
 					(name "A")
@@ -3751,7 +3751,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3765,7 +3765,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "51d00d76-9a59-48ef-91a0-5d8878c0a95c")
+			(tstamps "0bc3a7b1-80e4-48f8-b773-7c4693d34da1")
 			(units
 				(unit
 					(name "A")
@@ -3805,7 +3805,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3819,7 +3819,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "aa057912-aa48-4746-9081-de062b5ee2ce")
+			(tstamps "01343c3f-08d7-4227-8f2c-80200d57e707")
 			(units
 				(unit
 					(name "A")
@@ -3859,7 +3859,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3873,7 +3873,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "33478d19-928f-404b-9cd8-2f94a0ea5254")
+			(tstamps "88bef383-6bdc-4489-99d1-0399a088a197")
 			(units
 				(unit
 					(name "A")
@@ -3913,7 +3913,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3927,7 +3927,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "607ffbdc-76b9-4114-b5aa-c7bffbec83cd")
+			(tstamps "45184382-b451-4395-996e-1cf7ee5c45ca")
 			(units
 				(unit
 					(name "A")
@@ -3967,7 +3967,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -3981,7 +3981,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9558231a-0631-42c7-bcfc-02278f169142")
+			(tstamps "d5fca92a-5fca-445d-a390-aa60bd793c97")
 			(units
 				(unit
 					(name "A")
@@ -4021,7 +4021,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4035,7 +4035,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1aae4d13-1210-4e0e-848b-ecaa49058366")
+			(tstamps "435efb05-1eb6-4b46-83cb-e4f1c08209e5")
 			(units
 				(unit
 					(name "A")
@@ -4075,7 +4075,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4089,7 +4089,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c392ac3c-92e6-4a82-85db-ce0c1862546f")
+			(tstamps "4f419c9c-79e8-49fe-a499-a8ad6e869a63")
 			(units
 				(unit
 					(name "A")
@@ -4129,7 +4129,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4143,7 +4143,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "923eaf15-d1f8-41ed-99c0-fbf14e590e6a")
+			(tstamps "cf5990ff-7890-4fd5-a637-a9dc38893365")
 			(units
 				(unit
 					(name "A")
@@ -4183,7 +4183,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4197,7 +4197,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f82be57d-54af-419c-85f4-20bdd77b1b4b")
+			(tstamps "83d59b1f-4141-48ea-93ac-e0be0588a4f1")
 			(units
 				(unit
 					(name "A")
@@ -4237,7 +4237,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4251,7 +4251,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "20dc8fe5-c6a9-467e-9a03-e370aa7593d1")
+			(tstamps "f97437a5-c0b0-402b-b46b-cca3e95e9924")
 			(units
 				(unit
 					(name "A")
@@ -4291,7 +4291,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4305,7 +4305,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d2506f09-4db0-45ea-839e-d6497a64919d")
+			(tstamps "37b7cd92-da34-486d-8268-7b4a3dc98cde")
 			(units
 				(unit
 					(name "A")
@@ -4345,7 +4345,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4359,7 +4359,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "78d74e44-a834-485e-a401-3c272ebbcbf8")
+			(tstamps "2a071df0-f679-47ef-b61f-e0ce25059630")
 			(units
 				(unit
 					(name "A")
@@ -4399,7 +4399,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4413,7 +4413,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "52538dc9-26fd-410e-83e4-d0e876cba56c")
+			(tstamps "31a1321b-2529-41b7-a1ec-d94714d945c4")
 			(units
 				(unit
 					(name "A")
@@ -4453,7 +4453,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4467,7 +4467,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e87e18bd-72d8-4ea8-9737-e075bac15a23")
+			(tstamps "28171e9c-a1c4-420e-b2b3-16dc17af5d82")
 			(units
 				(unit
 					(name "A")
@@ -4507,7 +4507,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4521,7 +4521,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2b545f4d-5841-4ad7-b37a-f984de813f06")
+			(tstamps "c457e6ec-1106-49b8-8486-88e99ddd462a")
 			(units
 				(unit
 					(name "A")
@@ -4561,7 +4561,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4575,7 +4575,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "84b59ace-d163-4c3e-8e7b-13790697fbbd")
+			(tstamps "ee69b820-3b5d-4df4-b6e7-72ed7e50df53")
 			(units
 				(unit
 					(name "A")
@@ -4615,7 +4615,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4629,7 +4629,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "299f13ca-e7c3-4997-944c-7ce1b989f649")
+			(tstamps "6a4c995a-4e27-4ce7-a33e-ac0e2900c66a")
 			(units
 				(unit
 					(name "A")
@@ -4669,7 +4669,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4683,7 +4683,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c09d31ec-3304-4dfe-b48d-531966607229")
+			(tstamps "47091396-defe-4428-a2f3-894a46b92723")
 			(units
 				(unit
 					(name "A")
@@ -4723,7 +4723,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4737,7 +4737,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ff8b51c3-10ac-4345-8f97-9ade24115dae")
+			(tstamps "679e98b0-a113-471b-9445-b9f628f835b3")
 			(units
 				(unit
 					(name "A")
@@ -4777,7 +4777,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4791,7 +4791,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2833557f-d5db-42ca-9be3-e03b72e8c42f")
+			(tstamps "cc94a568-e6a8-4739-865b-5305b6f63ae7")
 			(units
 				(unit
 					(name "A")
@@ -4831,7 +4831,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4845,7 +4845,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b19df586-b3e3-431a-a31a-ada1ee69599d")
+			(tstamps "33b0218c-3f88-4b9e-b5f2-61c400cd1953")
 			(units
 				(unit
 					(name "A")
@@ -4885,7 +4885,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4899,7 +4899,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0d202f7f-7335-4e71-b720-2b3ba28944ff")
+			(tstamps "06251284-c9b1-4069-b0d6-50307b7c7395")
 			(units
 				(unit
 					(name "A")
@@ -4939,7 +4939,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -4953,7 +4953,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "96715a1e-43b7-45af-87d5-3a877ecaf795")
+			(tstamps "0b803a00-06d9-4478-89e8-d985ec79fef3")
 			(units
 				(unit
 					(name "A")
@@ -4993,7 +4993,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5007,7 +5007,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a557b1a2-91d4-4ecd-82d4-6035ad55a3d2")
+			(tstamps "07dfba0f-84c0-4eef-855d-c0d89ea2eff2")
 			(units
 				(unit
 					(name "A")
@@ -5047,7 +5047,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5061,7 +5061,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6a7a3f8f-1797-4291-bd6a-bdb5fbd888cc")
+			(tstamps "7320c7f3-8b26-4fa2-973a-7d7d4595ebf1")
 			(units
 				(unit
 					(name "A")
@@ -5101,7 +5101,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5115,7 +5115,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "af270494-5272-4bdc-b732-e723e02ae331")
+			(tstamps "ee387982-ce21-4dee-894a-670697c79a69")
 			(units
 				(unit
 					(name "A")
@@ -5155,7 +5155,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5169,7 +5169,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "89624701-de14-4e73-8e90-6d2b74598b8a")
+			(tstamps "376e4963-5658-4039-966c-32bb46151ddb")
 			(units
 				(unit
 					(name "A")
@@ -5209,7 +5209,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5223,7 +5223,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2106946a-018d-4d7d-9903-aeb9724c35c5")
+			(tstamps "e7f8165f-5063-4c56-959f-a036eab86005")
 			(units
 				(unit
 					(name "A")
@@ -5263,7 +5263,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5277,7 +5277,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9cd16afc-9f00-4364-bc42-96ac5c9bf994")
+			(tstamps "341bf0ec-c705-4e26-a82a-6ae9e21dc3b3")
 			(units
 				(unit
 					(name "A")
@@ -5317,7 +5317,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5331,7 +5331,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8177dd70-bdad-4b63-af6c-00a91f392c1e")
+			(tstamps "4864afdc-b003-4828-b0e2-d5662feb76d8")
 			(units
 				(unit
 					(name "A")
@@ -5371,7 +5371,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5385,7 +5385,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "53f7e631-849c-4072-8cbc-f00d48d749ed")
+			(tstamps "142c1f22-b747-4741-bc76-2df14eb34716")
 			(units
 				(unit
 					(name "A")
@@ -5425,7 +5425,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5439,7 +5439,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8ae5d98a-bccb-44b7-be0e-64d890a5d49d")
+			(tstamps "8094bb77-1455-4ef8-9964-3df8cae3dcec")
 			(units
 				(unit
 					(name "A")
@@ -5479,7 +5479,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5493,7 +5493,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "31ba5c61-c04b-4d23-bbd0-aa74ca44c2d8")
+			(tstamps "d14d7490-bb89-49b7-919c-9d4c63342b41")
 			(units
 				(unit
 					(name "A")
@@ -5533,7 +5533,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5547,7 +5547,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "729f4a8e-6e6c-4a90-8977-db2281523259")
+			(tstamps "72d62692-f39d-492d-ad59-688bef135e01")
 			(units
 				(unit
 					(name "A")
@@ -5587,7 +5587,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5601,7 +5601,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "18bd8943-3a03-4456-b952-fb18e055bfb0")
+			(tstamps "df968166-cf91-41a2-9ae8-02a5649eeb62")
 			(units
 				(unit
 					(name "A")
@@ -5641,7 +5641,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5655,7 +5655,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a07c8fa2-aaf9-4bd9-8a87-c669c4fbf3b6")
+			(tstamps "c190e2a3-b604-4511-ac60-2059f04c3adb")
 			(units
 				(unit
 					(name "A")
@@ -5695,7 +5695,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5709,7 +5709,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "84c32356-e102-4acc-bcd9-6da3c75c5d13")
+			(tstamps "26f57428-01fe-402c-bb37-ffd6bc55f3af")
 			(units
 				(unit
 					(name "A")
@@ -5749,7 +5749,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5763,7 +5763,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3e955019-0b82-41cc-8140-d0201910c2d1")
+			(tstamps "a4d3c7c1-7bbd-489d-bf6e-d3cdeacef99d")
 			(units
 				(unit
 					(name "A")
@@ -5803,7 +5803,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5817,7 +5817,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fcebd9f1-5c6d-4bf6-93eb-aea6bc3405a4")
+			(tstamps "abef1b6d-4128-417e-8e98-175a7322e256")
 			(units
 				(unit
 					(name "A")
@@ -5857,7 +5857,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5871,7 +5871,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "98ee2659-f550-4754-8724-948fb7dfbbb0")
+			(tstamps "8a9120b7-223a-453e-b5c0-d7c75d6f57fc")
 			(units
 				(unit
 					(name "A")
@@ -5911,7 +5911,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5925,7 +5925,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "24c3e696-2756-48d9-abbd-78794736ef91")
+			(tstamps "8a515945-ccfc-4da7-aa73-f908c58b09d4")
 			(units
 				(unit
 					(name "A")
@@ -5965,7 +5965,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -5979,7 +5979,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "15c930a6-76ab-43fc-abbb-59ce657f4ddb")
+			(tstamps "75213dc4-8e84-4dd3-b39c-6d1452a36fe3")
 			(units
 				(unit
 					(name "A")
@@ -6019,7 +6019,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6033,7 +6033,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "00a6bbe3-84f5-4b0d-882c-75e8add07ee5")
+			(tstamps "e1b9ed4f-abca-4b79-a969-0e23fb039af8")
 			(units
 				(unit
 					(name "A")
@@ -6073,7 +6073,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6087,7 +6087,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "db8a56b0-06c1-49f0-bf6e-50ea7a6d2ac4")
+			(tstamps "724595c3-3e25-4f92-bfd2-a1d7ea9d986d")
 			(units
 				(unit
 					(name "A")
@@ -6127,7 +6127,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6141,7 +6141,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4c6cc334-439b-465f-8629-022151c82ec7")
+			(tstamps "4319e291-4266-4e0a-be6e-876aad855911")
 			(units
 				(unit
 					(name "A")
@@ -6181,7 +6181,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6195,7 +6195,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ca5f770b-669c-40ae-bea3-55781527cdce")
+			(tstamps "1be94c2e-9687-4ebb-943e-55cba5f6f2c1")
 			(units
 				(unit
 					(name "A")
@@ -6235,7 +6235,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6249,7 +6249,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4d7d107e-3652-4af7-aca8-224deae59306")
+			(tstamps "6103456c-2570-49a2-b58d-d80be94c1c6f")
 			(units
 				(unit
 					(name "A")
@@ -6289,7 +6289,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6303,7 +6303,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1d4430ba-cf0c-41f4-86c7-54c619499671")
+			(tstamps "09defd7d-ca70-4968-a573-eb347a1ea52b")
 			(units
 				(unit
 					(name "A")
@@ -6343,7 +6343,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6357,7 +6357,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b9a5cd30-6ae6-4c77-981d-8f88239c4b1b")
+			(tstamps "821a2491-cc6e-4af0-b133-142644934b23")
 			(units
 				(unit
 					(name "A")
@@ -6397,7 +6397,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6411,7 +6411,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "27528146-9a87-4d5c-a4ea-125a4eb1d20b")
+			(tstamps "722e54df-6329-420e-b04c-1f7840907f54")
 			(units
 				(unit
 					(name "A")
@@ -6451,7 +6451,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6465,7 +6465,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2578c34f-72fa-4dd7-a6d2-add10bde8b34")
+			(tstamps "ef2b83b1-539c-4d5d-b851-5d3078f7c347")
 			(units
 				(unit
 					(name "A")
@@ -6505,7 +6505,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6519,7 +6519,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6c79b3c0-50c7-446a-b56c-f4050ee213ae")
+			(tstamps "15874685-4fa3-48cf-abb9-8b771188cb0e")
 			(units
 				(unit
 					(name "A")
@@ -6559,7 +6559,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6573,7 +6573,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "723102cf-36d8-4682-a96a-dec3cab873b2")
+			(tstamps "fe158121-d3bd-4e4b-90b9-639a17acfddf")
 			(units
 				(unit
 					(name "A")
@@ -6613,7 +6613,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6627,7 +6627,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "483263e2-6f23-40b3-b779-3069cca7b782")
+			(tstamps "1a36e0d2-2c98-40f4-bd34-6f0005877271")
 			(units
 				(unit
 					(name "A")
@@ -6667,7 +6667,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6681,7 +6681,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fcd653bd-76e9-49e2-9eca-824790bdaba3")
+			(tstamps "166676fb-9b31-4ab6-8c1b-44df6ce19691")
 			(units
 				(unit
 					(name "A")
@@ -6721,7 +6721,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6735,7 +6735,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1c797905-9b8c-41f6-b39b-4d00fa3c38ba")
+			(tstamps "3709ba36-3b20-4c05-845f-fccb12a163e1")
 			(units
 				(unit
 					(name "A")
@@ -6775,7 +6775,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6789,7 +6789,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6aa2b3ea-ed3e-4eb7-b766-af26c72b98b1")
+			(tstamps "e08d8cdb-e0b0-4f36-92d5-c00443ba25ac")
 			(units
 				(unit
 					(name "A")
@@ -6829,7 +6829,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6843,7 +6843,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "63bf1b9a-62bb-4815-89e7-6305af31090e")
+			(tstamps "48eeafaa-2119-4e06-90c5-4b3168ca849a")
 			(units
 				(unit
 					(name "A")
@@ -6883,7 +6883,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6897,7 +6897,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "42e25a4a-a224-4d75-a684-2b48e1ac2129")
+			(tstamps "5cbf268c-f970-462a-a5b3-ffc6205fa00f")
 			(units
 				(unit
 					(name "A")
@@ -6937,7 +6937,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -6951,7 +6951,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1ac0943a-beee-46d3-8dc1-12eb51a254f1")
+			(tstamps "14199d8b-3093-46d2-b649-16f753249221")
 			(units
 				(unit
 					(name "A")
@@ -6991,7 +6991,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7005,7 +7005,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "59c3eb69-4a80-4021-987d-ad826231385d")
+			(tstamps "15859562-2f38-4419-9219-146ddbe211d7")
 			(units
 				(unit
 					(name "A")
@@ -7045,7 +7045,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7059,7 +7059,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9edb6969-c0cb-4267-aec8-8d1424232c11")
+			(tstamps "a3d3dbe5-e1f8-40a5-a056-cea7fdfa928f")
 			(units
 				(unit
 					(name "A")
@@ -7099,7 +7099,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7113,7 +7113,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2fd42431-6fee-4810-8873-5b0d07c71edf")
+			(tstamps "4ec60836-b24e-489d-8634-9af8044144d3")
 			(units
 				(unit
 					(name "A")
@@ -7153,7 +7153,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7167,7 +7167,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7cf00454-30be-4a41-b2f9-8693a16fc472")
+			(tstamps "b4d491fe-ab01-42d2-8b30-95edc6b9c44d")
 			(units
 				(unit
 					(name "A")
@@ -7207,7 +7207,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7221,7 +7221,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "29348ed4-2759-4cb8-99c8-d2cb38fcb86e")
+			(tstamps "3b4f8cd8-85db-45ef-b85e-ad274c19b421")
 			(units
 				(unit
 					(name "A")
@@ -7261,7 +7261,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7275,7 +7275,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "44d9b067-c756-40c6-a88c-72e598c55f52")
+			(tstamps "2ec8a048-69e5-45ed-8cab-2efc6beeac90")
 			(units
 				(unit
 					(name "A")
@@ -7315,7 +7315,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7329,7 +7329,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "36f1f2db-6315-413e-9fb5-c876da3e283f")
+			(tstamps "fcccfe17-1f09-41c6-9e27-96fc57b2ce51")
 			(units
 				(unit
 					(name "A")
@@ -7369,7 +7369,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7383,7 +7383,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2b21059d-904d-46a7-9ea4-73c758b03221")
+			(tstamps "23a42fa3-8938-4e6f-b48c-15d03f67609c")
 			(units
 				(unit
 					(name "A")
@@ -7423,7 +7423,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7437,7 +7437,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c2ed60c2-9a77-43c8-867d-a48baa0ab715")
+			(tstamps "1aa9307b-e023-4150-afe4-b0cc602749ae")
 			(units
 				(unit
 					(name "A")
@@ -7477,7 +7477,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7491,7 +7491,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fe050aff-795f-4472-bfff-58525605d535")
+			(tstamps "7d1ac48c-e140-4407-b88a-f48ad080d0c2")
 			(units
 				(unit
 					(name "A")
@@ -7531,7 +7531,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7545,7 +7545,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a7d0ae5b-13e1-4e33-856a-309c2bd00716")
+			(tstamps "f5a34715-7631-4304-8b06-10660de9cdd4")
 			(units
 				(unit
 					(name "A")
@@ -7585,7 +7585,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7599,7 +7599,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0b0ee210-9198-4838-b3b7-003f19367bb0")
+			(tstamps "9d251513-46bc-4277-80c8-84f910917d7f")
 			(units
 				(unit
 					(name "A")
@@ -7639,7 +7639,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7653,7 +7653,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4c643334-3750-4587-a482-9074be25f5c1")
+			(tstamps "5c253d1d-9679-43ca-b2a3-196c1e550575")
 			(units
 				(unit
 					(name "A")
@@ -7693,7 +7693,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7707,7 +7707,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ed8b0f53-efd0-47cb-954d-56ef77b50e1d")
+			(tstamps "3b80adcd-eea9-4169-b715-6cb5b612ae60")
 			(units
 				(unit
 					(name "A")
@@ -7747,7 +7747,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7761,7 +7761,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "210567df-4d2b-4de9-92ba-e28cac40ae6b")
+			(tstamps "843f904f-84f6-4dd3-ba22-3dfcdb469bdd")
 			(units
 				(unit
 					(name "A")
@@ -7801,7 +7801,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7815,7 +7815,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c1045167-aad2-401a-b850-c5a1ce672070")
+			(tstamps "67e25873-5a91-45ac-a2c6-93c28738f2c8")
 			(units
 				(unit
 					(name "A")
@@ -7855,7 +7855,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7869,7 +7869,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9fe14caa-7ba2-43b3-b9c8-bcaf74ca2662")
+			(tstamps "baf3b1d6-f659-4dc4-9936-9b5dcf7adc9d")
 			(units
 				(unit
 					(name "A")
@@ -7909,7 +7909,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7923,7 +7923,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fdc1db36-df4c-45ec-ab4a-a0d4532f5eae")
+			(tstamps "81bfece6-c80b-4bcf-991d-a9e87c6d6ddd")
 			(units
 				(unit
 					(name "A")
@@ -7963,7 +7963,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -7977,7 +7977,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1c475f7e-1dbc-412c-a591-b7e093170c3e")
+			(tstamps "bca47464-fbc2-444a-acfc-1cc0020f8db2")
 			(units
 				(unit
 					(name "A")
@@ -8017,7 +8017,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8031,7 +8031,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9c411600-6071-44f9-8f83-d001a516f827")
+			(tstamps "cdf9feca-c42c-4d65-be48-07c6ea21e353")
 			(units
 				(unit
 					(name "A")
@@ -8071,7 +8071,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8085,7 +8085,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "90b8b73c-da9d-4d5b-8343-beed50a31da9")
+			(tstamps "1bca2da3-7b1f-42b5-9288-a8f6dcb3d36d")
 			(units
 				(unit
 					(name "A")
@@ -8125,7 +8125,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8139,7 +8139,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bfddc004-c4b9-4505-a9eb-9c9538312238")
+			(tstamps "4ce30013-45af-4a10-8869-b2397a9f9044")
 			(units
 				(unit
 					(name "A")
@@ -8203,7 +8203,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8217,7 +8217,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d95b17db-c0c9-4743-96e5-c16aeb5add3a")
+			(tstamps "2888d748-289e-4a0b-95eb-5c89cf08a975")
 			(units
 				(unit
 					(name "A")
@@ -8257,7 +8257,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8271,7 +8271,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0e4bffd1-ed33-46e7-8bad-724c5ee4e2a4")
+			(tstamps "60a34491-59ae-42fb-bc4c-8820ac0bee9a")
 			(units
 				(unit
 					(name "A")
@@ -8425,7 +8425,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8439,7 +8439,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "db3495d7-5b7d-4fca-a2fc-8b2348a0adae")
+			(tstamps "9e4ea74a-ba02-42d6-8fea-cf045873980b")
 			(units
 				(unit
 					(name "A")
@@ -8479,7 +8479,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8493,7 +8493,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "363ca625-6a85-4f6f-8ff8-b660b2a34879")
+			(tstamps "1ad932f0-b91a-4943-9e82-ca1159c86f84")
 			(units
 				(unit
 					(name "A")
@@ -8533,7 +8533,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8547,7 +8547,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d0c62e06-463a-44cc-90d5-b313c063bdcb")
+			(tstamps "f12051de-d14f-4a55-8f3a-b37b0fa7d942")
 			(units
 				(unit
 					(name "A")
@@ -8587,7 +8587,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8601,7 +8601,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bd98a025-bd2e-4dc7-b725-0114247c4417")
+			(tstamps "8c89dea3-1948-42c2-9583-e4ed410bdfcd")
 			(units
 				(unit
 					(name "A")
@@ -8641,7 +8641,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -8655,7 +8655,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7250fe49-0abf-4afd-bc7b-6d90f9656fdc")
+			(tstamps "916a98c9-4b83-426b-afda-b4fb613e7a30")
 			(units
 				(unit
 					(name "A")
@@ -8695,13 +8695,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "455d6263-2007-4aad-b629-0a77c6a9bc22")
+			(tstamps "097d67a5-b1bb-42b3-9b33-2564e9df73fc")
 			(units
 				(unit
 					(name "A")
@@ -8780,13 +8780,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7b813eac-60a2-4947-87c1-3f127fa4ed83")
+			(tstamps "d1ca7edb-9a27-4249-8060-8812f248be24")
 			(units
 				(unit
 					(name "A")
@@ -8865,13 +8865,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "aa53577c-7181-4ca0-b470-b72da91f8636")
+			(tstamps "526bbfba-da72-488a-888a-afe62f466dd6")
 			(units
 				(unit
 					(name "A")
@@ -8956,13 +8956,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a701f2bd-c19b-4e18-b878-902889722cf1")
+			(tstamps "a5893246-11d7-4d35-9cc3-8a0f539ee5d7")
 			(units
 				(unit
 					(name "A")
@@ -9047,13 +9047,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "de9a901c-7ad8-41c3-8069-26d7ae21ba36")
+			(tstamps "5fb5a6cb-b933-48f5-b1b3-e0eca5cded2b")
 			(units
 				(unit
 					(name "A")
@@ -9138,7 +9138,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9152,7 +9152,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f47b8215-a0ae-4c9c-b0b6-b22074041ec3")
+			(tstamps "c21849e7-4a61-4188-9715-adfa8b190b06")
 			(units
 				(unit
 					(name "A")
@@ -9192,7 +9192,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9206,7 +9206,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "40b46484-bdce-4500-90d8-1cfb7322687d")
+			(tstamps "e3542c33-c989-4f55-ab61-df7a6f9ef424")
 			(units
 				(unit
 					(name "A")
@@ -9246,7 +9246,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9260,7 +9260,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "781af67c-bb68-4a4f-88d4-4dc5c9a69a30")
+			(tstamps "8f13f1af-9174-4109-804d-6f5ea98468ad")
 			(units
 				(unit
 					(name "A")
@@ -9300,7 +9300,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9314,7 +9314,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "14aa5d00-33eb-46f3-880d-f33086b35dbb")
+			(tstamps "5b9c4509-02c6-4e0c-8bf1-b64129967671")
 			(units
 				(unit
 					(name "A")
@@ -9354,7 +9354,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9368,7 +9368,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a4aa42cd-138d-480f-9250-54a43d3a43c2")
+			(tstamps "87cadd83-68d3-435b-b685-70bfd2664f57")
 			(units
 				(unit
 					(name "A")
@@ -9408,7 +9408,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9422,7 +9422,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "53ac75db-e292-4367-927f-149934200d82")
+			(tstamps "dd8e487a-3a0a-4ff3-b208-ed66eff796ca")
 			(units
 				(unit
 					(name "A")
@@ -9462,7 +9462,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9476,7 +9476,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a0f02a02-6cac-4114-a627-344e91c8dfbb")
+			(tstamps "c230685c-00d0-4f33-b130-96aaf562b4f7")
 			(units
 				(unit
 					(name "A")
@@ -9516,7 +9516,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9530,7 +9530,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1a25aea5-f533-4d26-bc8e-4e03c695f536")
+			(tstamps "9815341d-143f-44e9-a660-9db2b8840c39")
 			(units
 				(unit
 					(name "A")
@@ -9570,7 +9570,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9584,7 +9584,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e91c8599-08de-48c9-8ef8-43f1aed12e93")
+			(tstamps "d89f1516-746a-4400-82cb-76466c54bb3a")
 			(units
 				(unit
 					(name "A")
@@ -9624,7 +9624,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9638,7 +9638,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "66687b59-d069-41a2-9678-e0de9966a21d")
+			(tstamps "4d0a849b-a62c-42af-98b4-9067215c2611")
 			(units
 				(unit
 					(name "A")
@@ -9678,7 +9678,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9692,7 +9692,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "972d8ed9-8614-4cc0-8e3d-16dc12ae2e6b")
+			(tstamps "76ac791e-6901-4eb1-9b88-ee740c86a956")
 			(units
 				(unit
 					(name "A")
@@ -9732,7 +9732,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9746,7 +9746,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "24c47c9a-739f-4ac5-a026-92a474b94f3e")
+			(tstamps "ba46fe3e-db6f-4f32-b173-25d85d0f6933")
 			(units
 				(unit
 					(name "A")
@@ -9786,7 +9786,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9800,7 +9800,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fc320527-400f-4ee7-8029-8e46b3fbbf3c")
+			(tstamps "81629b5a-5650-4d39-9c1a-292f35c3446c")
 			(units
 				(unit
 					(name "A")
@@ -9840,7 +9840,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9854,7 +9854,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0f359ed5-386e-42c2-b882-cdbd2399eb4a")
+			(tstamps "698d1576-de9b-4479-b62c-1d4ad77e8a40")
 			(units
 				(unit
 					(name "A")
@@ -9894,7 +9894,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9908,7 +9908,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2d22a8b4-98d0-40e3-b45b-af9f550ec0f7")
+			(tstamps "7585ce1a-b873-4716-bb11-8684b88c46d0")
 			(units
 				(unit
 					(name "A")
@@ -9948,7 +9948,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -9962,7 +9962,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4bd87ad0-398d-4ac0-b555-1d29819dc8cd")
+			(tstamps "ab71de04-4115-4cd1-ab3a-fcab9709c154")
 			(units
 				(unit
 					(name "A")
@@ -10002,7 +10002,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10016,7 +10016,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1ea01921-09a2-4b34-af81-e8f197a969a1")
+			(tstamps "9f1e86b3-c938-47ab-bd6f-1f3e034de87d")
 			(units
 				(unit
 					(name "A")
@@ -10056,7 +10056,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10070,7 +10070,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ec778467-0456-478d-bb04-449ba64d603a")
+			(tstamps "ab7a9975-5fe3-441d-8472-cd3814bf5e56")
 			(units
 				(unit
 					(name "A")
@@ -10110,7 +10110,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10124,7 +10124,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a968a7e7-8187-4038-9772-c2289ea1d280")
+			(tstamps "809c6335-611a-4a0e-88d1-d1d9baa59933")
 			(units
 				(unit
 					(name "A")
@@ -10164,7 +10164,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10178,7 +10178,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f2e10f2a-2e8c-42f3-82f9-28839801948b")
+			(tstamps "515db11c-7c37-42b0-8a78-78237ee7ae19")
 			(units
 				(unit
 					(name "A")
@@ -10218,7 +10218,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10232,7 +10232,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3e90effa-3a8c-4e71-914f-5426909430a7")
+			(tstamps "148676cb-07a6-4aa3-9bf1-f4083aada97f")
 			(units
 				(unit
 					(name "A")
@@ -10272,7 +10272,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10286,7 +10286,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c43b5353-3517-4acc-9c7a-9801458427e5")
+			(tstamps "e7bf6d91-440a-4a16-b68b-8a3efc80e302")
 			(units
 				(unit
 					(name "A")
@@ -10326,7 +10326,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10340,7 +10340,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "258b9ca0-b3ea-4808-bb8a-b7bd5243f215")
+			(tstamps "fe95ce2c-5842-4d51-b75a-b5187a4ba9d5")
 			(units
 				(unit
 					(name "A")
@@ -10380,7 +10380,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10394,7 +10394,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bc9872a8-947d-44b7-9533-0f9c4f613d89")
+			(tstamps "e5e8aa8d-7809-4ef3-ba4a-6ea9117bda52")
 			(units
 				(unit
 					(name "A")
@@ -10434,7 +10434,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10448,7 +10448,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4976f457-a32d-48a0-a8d2-7fcf2713b101")
+			(tstamps "500567b6-4bd4-4bcc-b060-50578ab08fb4")
 			(units
 				(unit
 					(name "A")
@@ -10488,7 +10488,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10502,7 +10502,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "10f64f1a-d9a2-4a14-8d6d-01a7f1165501")
+			(tstamps "b7a477bb-c58e-47c9-98d3-878dd982c6ae")
 			(units
 				(unit
 					(name "A")
@@ -10542,7 +10542,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10556,7 +10556,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "220f7dc1-a813-4473-a3c6-1df79985e9e5")
+			(tstamps "27564f4d-e706-45cf-ae96-7040d45661e6")
 			(units
 				(unit
 					(name "A")
@@ -10596,7 +10596,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10610,7 +10610,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f803eb84-9504-4bc3-922d-10db9d2a61b6")
+			(tstamps "494f145e-001e-4b14-9a41-e7f806fc9305")
 			(units
 				(unit
 					(name "A")
@@ -10650,7 +10650,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10664,7 +10664,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1310883d-d1a5-4f72-b804-190e0d4aeb8d")
+			(tstamps "c982cd85-9e51-43c2-b377-fbd9fee2b0d5")
 			(units
 				(unit
 					(name "A")
@@ -10704,7 +10704,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10718,7 +10718,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b3c0f585-ece0-4132-bb72-63240ccf8e5f")
+			(tstamps "10bdfd6b-f6e1-472f-aaee-423cf107e8bb")
 			(units
 				(unit
 					(name "A")
@@ -10758,7 +10758,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10772,7 +10772,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d6ffdf41-937e-4e0e-8b49-7e9390b40a50")
+			(tstamps "0ff0aa10-fd50-4f71-b4f2-a366a09d947f")
 			(units
 				(unit
 					(name "A")
@@ -10812,7 +10812,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10826,7 +10826,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a049bc8f-acaf-494b-97fb-bf5ea01716ea")
+			(tstamps "c037c6a4-2e99-43e5-b29d-c4129d0e1156")
 			(units
 				(unit
 					(name "A")
@@ -10866,7 +10866,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10880,7 +10880,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8109552c-4a02-4cbc-9a21-005870512534")
+			(tstamps "64db7ae3-34d4-43bf-82cf-314c7666e743")
 			(units
 				(unit
 					(name "A")
@@ -10920,7 +10920,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10934,7 +10934,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "dd9684ee-eda4-4d68-b9fa-e94affc33f75")
+			(tstamps "1117a604-eeb5-420d-8b90-a627212212ba")
 			(units
 				(unit
 					(name "A")
@@ -10974,7 +10974,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -10988,7 +10988,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4b91e4bf-433c-48e8-9038-2718967ea0e8")
+			(tstamps "1c445090-ff28-432c-ba43-20c6813487b4")
 			(units
 				(unit
 					(name "A")
@@ -11028,7 +11028,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11042,7 +11042,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "cf4933f3-3be5-44f5-b127-61a76eacb486")
+			(tstamps "29480213-e86e-4f25-bc25-9da93b8c675b")
 			(units
 				(unit
 					(name "A")
@@ -11082,7 +11082,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11096,7 +11096,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3aefca3e-ae2e-4f16-a8e6-d1a732a1d4c3")
+			(tstamps "6d5d6bb3-e0da-4398-8036-7b01b48e909a")
 			(units
 				(unit
 					(name "A")
@@ -11136,7 +11136,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11150,7 +11150,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8878b820-5134-4e6b-9886-7045da9c3b62")
+			(tstamps "f9b1472e-435d-40e5-b63e-3980cb60e3c1")
 			(units
 				(unit
 					(name "A")
@@ -11190,7 +11190,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11204,7 +11204,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "70455355-df2c-4f76-8d58-9ef1fcf5fdd8")
+			(tstamps "32e63939-6d0c-4fac-a213-ff02f999a22f")
 			(units
 				(unit
 					(name "A")
@@ -11244,7 +11244,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11258,7 +11258,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6a49a6c2-b342-4ebb-9b66-6be5dc93f248")
+			(tstamps "f7d97181-5509-4bce-a23d-bf6bcab3e857")
 			(units
 				(unit
 					(name "A")
@@ -11298,7 +11298,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11312,7 +11312,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "49de3c30-23f1-4d47-b3ac-eb16ed05ecc0")
+			(tstamps "a02762fb-1212-4cfe-840b-7f5b50fea631")
 			(units
 				(unit
 					(name "A")
@@ -11352,7 +11352,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11366,7 +11366,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0c5faf4c-bdfb-49b8-bda2-d714b73b6782")
+			(tstamps "2adf5ed9-894d-487d-a92b-f681e02da1a8")
 			(units
 				(unit
 					(name "A")
@@ -11406,7 +11406,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11420,7 +11420,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "79aabe47-66e6-46f6-b315-8d58aa3cd62e")
+			(tstamps "9e9a2a4d-eada-4dbf-a6a0-121058ba43ae")
 			(units
 				(unit
 					(name "A")
@@ -11460,7 +11460,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11474,7 +11474,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2968783e-a716-48a8-b87f-ab027cddfc1e")
+			(tstamps "a0391610-17f7-4748-a56a-756bcc91e39c")
 			(units
 				(unit
 					(name "A")
@@ -11514,7 +11514,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11528,7 +11528,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "49d81a2a-4863-49d2-bd77-0f0a389b95f5")
+			(tstamps "3dc12eb0-4a03-4974-834f-867b14e1277c")
 			(units
 				(unit
 					(name "A")
@@ -11586,7 +11586,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11600,7 +11600,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "db1c18ea-115c-4cc0-aa5b-2346fe5528ac")
+			(tstamps "b29ed27e-2a35-47e9-acc5-2dbbd33f7be3")
 			(units
 				(unit
 					(name "A")
@@ -11658,7 +11658,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11672,7 +11672,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9e71b0cd-43ff-4839-b93f-3ea62e266a5f")
+			(tstamps "407292fd-59e4-4220-b7e7-12bf8360e71f")
 			(units
 				(unit
 					(name "A")
@@ -11730,7 +11730,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11744,7 +11744,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1765cad1-5b15-423a-b37f-cdc940e48727")
+			(tstamps "ad5cac79-61c2-432c-b239-f2ff2442ab92")
 			(units
 				(unit
 					(name "A")
@@ -11802,7 +11802,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11816,7 +11816,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "23b3fdaa-8f34-4499-a092-4dc0deba3acc")
+			(tstamps "b34e050a-4937-402d-a35b-e6efca3b9b9f")
 			(units
 				(unit
 					(name "A")
@@ -11874,7 +11874,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11888,7 +11888,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ecefe8b3-8948-4f79-84ef-4eca343964d8")
+			(tstamps "76d17155-6662-4469-8629-6c39fa429b01")
 			(units
 				(unit
 					(name "A")
@@ -11946,7 +11946,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -11960,7 +11960,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fda15c05-2ca6-470f-9497-ff5e9c07c4c7")
+			(tstamps "e4931d5a-0b8b-44ad-9b63-c78ce23a24d9")
 			(units
 				(unit
 					(name "A")
@@ -12018,7 +12018,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12032,7 +12032,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "19a2c4e8-5ad3-4f4d-8586-e913da38a7b2")
+			(tstamps "624c4303-fc29-4387-a99f-45d2d0dad302")
 			(units
 				(unit
 					(name "A")
@@ -12090,7 +12090,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12104,7 +12104,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9b1e8f99-e138-4c48-a0c8-faa05f77b8d1")
+			(tstamps "231ac1f9-dc5a-45de-97c2-4990b162e0cf")
 			(units
 				(unit
 					(name "A")
@@ -12162,7 +12162,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12176,7 +12176,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6835d8f2-b5d2-4bf5-96f2-c5d3c8830c96")
+			(tstamps "7883d61c-1551-4f0c-a335-5711bbb6dc17")
 			(units
 				(unit
 					(name "A")
@@ -12234,7 +12234,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12248,7 +12248,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "49e27b91-3a1b-44b9-a627-50d76e70df58")
+			(tstamps "36bff364-53d7-4717-8e07-f3abefe9d1bb")
 			(units
 				(unit
 					(name "A")
@@ -12306,7 +12306,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12320,7 +12320,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f976997b-d9d6-4dfa-ad62-043185346b60")
+			(tstamps "78e47c65-c16e-4294-84ba-9bc1bbff294b")
 			(units
 				(unit
 					(name "A")
@@ -12378,7 +12378,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12392,7 +12392,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1d1df20e-b233-4c6a-8f99-84d9b125fe96")
+			(tstamps "2cf27c09-0701-41a1-becf-f7aee2ecb5c6")
 			(units
 				(unit
 					(name "A")
@@ -12450,7 +12450,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12464,7 +12464,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ad6ea69a-768b-4d06-8c7d-5b454b410b26")
+			(tstamps "826c52a9-94e5-4997-8e69-d927ee355c69")
 			(units
 				(unit
 					(name "A")
@@ -12522,7 +12522,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12536,7 +12536,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ada39f99-b30b-4984-acbd-c1bf8475cbb3")
+			(tstamps "19abff9d-b493-41d1-9e52-3fcd2f8b36ce")
 			(units
 				(unit
 					(name "A")
@@ -12594,7 +12594,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12608,7 +12608,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6a506a2f-50b8-4be1-9233-277617076ebf")
+			(tstamps "1a09d9a9-fb48-4bc9-a6e8-7e8c1251ac71")
 			(units
 				(unit
 					(name "A")
@@ -12666,7 +12666,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12680,7 +12680,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0d0cb03a-a3d2-4f47-a2dc-9d8a74bad5ca")
+			(tstamps "f1294278-a81b-481a-b197-901a51496c16")
 			(units
 				(unit
 					(name "A")
@@ -12738,7 +12738,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12752,7 +12752,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6415b3ab-e851-43cb-9650-b34c087215ec")
+			(tstamps "e4d08aa8-f7d5-4cb3-a2fc-2f99555e4b0d")
 			(units
 				(unit
 					(name "A")
@@ -12810,7 +12810,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12824,7 +12824,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "dd3b8fe5-8176-47d1-b0ef-f88706a5e23d")
+			(tstamps "7137326c-a86f-449f-89bd-1e1fd1ce844e")
 			(units
 				(unit
 					(name "A")
@@ -12882,7 +12882,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12896,7 +12896,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d55b113a-4897-4635-a0a4-7644fdfd0857")
+			(tstamps "6b554289-7412-44bb-ab68-eb640bd83cdb")
 			(units
 				(unit
 					(name "A")
@@ -12954,7 +12954,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -12968,7 +12968,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bb1ba6c8-dbc6-498f-88de-ef7eaa2d45ca")
+			(tstamps "a15c882a-803b-42eb-98ca-88281fbea63a")
 			(units
 				(unit
 					(name "A")
@@ -13026,7 +13026,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13040,7 +13040,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e577a872-8eda-4eeb-bd7e-61f743d9097f")
+			(tstamps "2359abd5-efdc-440c-b3b9-daac5fcbd9d3")
 			(units
 				(unit
 					(name "A")
@@ -13098,7 +13098,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13112,7 +13112,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "024d06d1-fc5d-4c0c-bcc6-fdfc813c0b10")
+			(tstamps "d0eaf04f-9f85-4e88-8fdd-43f5217aaef1")
 			(units
 				(unit
 					(name "A")
@@ -13170,7 +13170,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13184,7 +13184,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5dccc0bf-de1c-4d80-afe4-f6d23c18ef2a")
+			(tstamps "0ddfefdc-54eb-4ef5-a8a8-58cd2fe27fdf")
 			(units
 				(unit
 					(name "A")
@@ -13242,7 +13242,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13256,7 +13256,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "067fa22e-176d-4763-8f67-832d80a7a7dc")
+			(tstamps "ba886ca0-26d0-4400-9574-6a7529ee1cb0")
 			(units
 				(unit
 					(name "A")
@@ -13314,7 +13314,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13328,7 +13328,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6f1f3eff-d855-472b-ad85-ebccb5edc87a")
+			(tstamps "43c916f1-dbbc-4f5d-ac7b-ae92e370b12b")
 			(units
 				(unit
 					(name "A")
@@ -13386,7 +13386,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13400,7 +13400,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ead9a0e7-1f83-4b8c-a247-75fb9148555e")
+			(tstamps "be74b1eb-5cf3-4164-b9ef-e0f1e3ca0079")
 			(units
 				(unit
 					(name "A")
@@ -13458,7 +13458,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13472,7 +13472,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "541fa6d1-85f2-4305-b118-8e166b796c69")
+			(tstamps "bd6805d5-bbd0-4448-b67b-d7577d098da2")
 			(units
 				(unit
 					(name "A")
@@ -13530,7 +13530,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13544,7 +13544,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "37379346-a372-4987-b481-c513ca398a28")
+			(tstamps "b04472ee-71c8-4f41-9077-fd4906eecff4")
 			(units
 				(unit
 					(name "A")
@@ -13602,7 +13602,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13616,7 +13616,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d33e9fa4-8961-419b-94dc-21d9e4d9ab99")
+			(tstamps "57c39871-b339-49f1-b80e-54d3104f9c8c")
 			(units
 				(unit
 					(name "A")
@@ -13674,7 +13674,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13688,7 +13688,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "9250c912-40b6-4b12-a2aa-b2a19aff2706")
+			(tstamps "23800172-5f38-48f0-a5d2-f3979c6f8607")
 			(units
 				(unit
 					(name "A")
@@ -13746,7 +13746,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13760,7 +13760,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "76cd4cb6-319c-44a1-b65d-8c17e2862e3c")
+			(tstamps "49c06d3f-381c-4b23-b0d4-02377b2536ee")
 			(units
 				(unit
 					(name "A")
@@ -13818,7 +13818,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13832,7 +13832,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e13d81b1-295f-4676-b165-609eb88dfed3")
+			(tstamps "30ca2382-985b-46e7-be2f-b42994a5b6d9")
 			(units
 				(unit
 					(name "A")
@@ -13890,7 +13890,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13904,7 +13904,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fa36026f-154d-4d3a-9d6c-32221193ef71")
+			(tstamps "1c54e4f1-90bb-49bf-9944-e9359c1b196e")
 			(units
 				(unit
 					(name "A")
@@ -13962,7 +13962,7 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(property
 				(name "ki_keywords")
@@ -13976,7 +13976,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "62c08ba8-7715-4691-818a-3a39eb5e10e4")
+			(tstamps "18fb0ce0-2799-4e5b-a8a3-849704659dbb")
 			(units
 				(unit
 					(name "A")
@@ -14034,17 +14034,17 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "335f56cd-9830-4cad-8521-9070899c1b29" "774afd92-e8d6-480c-a275-4da9664633e1"
-				"1d0fe971-4a7c-42bf-8e28-60d2230bf97b" "6d5cf9e2-de0c-4905-8fd6-176ff18056b6"
-				"e7b2c688-e7d4-4846-bb40-ef6d74e8319c" "fe9b07d6-94e7-46b2-9498-5a3571482c72"
-				"1281ec4b-b98e-435d-83dc-01a5704af7f5" "3def1baa-da5c-47d4-bc6c-ff3a24799b9c"
-				"c10a24ad-33ee-4602-856b-9bacec67b064" "02435ab0-a72f-45b2-8b44-d1c674f551aa"
+			(tstamps "ef984851-245b-41ed-bc78-ce90a7f69019" "bd49fd2c-cf27-4f60-8ff9-4e717fbfd5e6"
+				"83fb8089-bb78-4853-a0d4-06fccf9ba7e9" "8af9af63-6f62-4829-b5f8-be2aca6d6610"
+				"b8b5f663-b629-49e2-b5d1-9a1c6dadea3c" "f63a529d-0510-493e-9541-7d5aec959c7b"
+				"c2dca50b-63d6-4c34-ab4d-102ff7e5af8d" "d345e73a-5291-4f49-86bf-e345bb7c48d2"
+				"58e6c7b6-ccc5-43b6-a1c9-676e5818c60d" "34bf8866-3aeb-4c0d-8d73-26c350b564c2"
 			)
 			(units
 				(unit
@@ -15576,14 +15576,14 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "df5dda3a-30d3-4a23-913c-a34aaeaf02df" "a7006d15-f217-4527-a817-a8b7b6967013"
-				"7a4acc19-5007-49ef-9e89-e90a55e28c61" "379012b2-604b-4483-9bcb-ccaf91660fe8"
+			(tstamps "d707d775-aefc-4fc7-a423-ddf84f6cd532" "7e286f49-93f8-48e2-bdd2-347287c03727"
+				"dae23ba7-b004-4a3e-adff-f70e1102aa46" "33867811-bd97-4028-8cc0-8c998434c3bf"
 			)
 			(units
 				(unit
@@ -16359,13 +16359,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "69bd46fc-55fa-4c7a-a99d-c39c38164c70")
+			(tstamps "78f7f9bb-cc9f-45a1-bb95-ca810929f634")
 			(units
 				(unit
 					(name "A")
@@ -16567,13 +16567,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3bf71480-0ca2-4429-b7f6-e80fa69cf0fc")
+			(tstamps "c8638dff-7023-4b4b-8b8c-44ad21672129")
 			(units
 				(unit
 					(name "A")
@@ -16775,13 +16775,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "13b8d3f0-4f0a-4467-82ae-f8a5c53b0748")
+			(tstamps "12ad3be2-a50c-4c9c-9dc5-d5a5e7de5b8b")
 			(units
 				(unit
 					(name "A")
@@ -16983,13 +16983,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f24674ba-59d3-4178-b916-d490b3ffc478")
+			(tstamps "82c25861-270f-42a9-a0de-6c459262bc30")
 			(units
 				(unit
 					(name "A")
@@ -17191,13 +17191,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5f48f18b-a811-4629-a6b8-c94730fd6705")
+			(tstamps "ad16588b-40fe-42dd-a7ec-ba9a70600019")
 			(units
 				(unit
 					(name "A")
@@ -17399,13 +17399,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c611e0da-6365-4dc2-b79d-56bc40cc989d")
+			(tstamps "52100e27-57f4-488f-98e2-79386df87b54")
 			(units
 				(unit
 					(name "A")
@@ -17607,13 +17607,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d03634ec-26cf-4c5a-ad4a-2600d6893b89")
+			(tstamps "d9cc8980-2050-48ed-8ef4-a98f7dc487a9")
 			(units
 				(unit
 					(name "A")
@@ -17815,13 +17815,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a750cd5d-5ff1-419c-84e8-c94b0539f865")
+			(tstamps "6527c04e-a08c-4bb6-a8da-b08e04b025ad")
 			(units
 				(unit
 					(name "A")
@@ -17915,13 +17915,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3022beb6-dc91-47d3-8ebe-be07f8cecdc0")
+			(tstamps "d21625fd-9619-4d00-a33d-b0f96487ce9f")
 			(units
 				(unit
 					(name "A")
@@ -18015,13 +18015,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "49a27d1e-03cd-4174-b9e3-c8f558ac6582")
+			(tstamps "c4707edf-8847-49fe-a24d-d3cef65878a4")
 			(units
 				(unit
 					(name "A")
@@ -18103,13 +18103,13 @@
 			)
 			(property
 				(name "Sheetfile")
-				(value "hw/slot1-c2cart/slot1-c2cart.kicad_sch")
+				(value "slot1-c2cart.kicad_sch")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fabec7bb-0f77-42fd-a4d4-c0abc995c35c")
+			(tstamps "77bef666-fef5-4784-8f52-7166e5896112")
 			(units
 				(unit
 					(name "A")
@@ -30801,8 +30801,8 @@
 			(class "Default")
 			(node
 				(ref "RN34")
-				(pin "1")
-				(pinfunction "R1.1_1")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -31295,8 +31295,8 @@
 			(class "Default")
 			(node
 				(ref "RN24")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -31341,8 +31341,8 @@
 			(class "Default")
 			(node
 				(ref "RN24")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -31433,8 +31433,8 @@
 			(class "Default")
 			(node
 				(ref "RN23")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -31456,8 +31456,8 @@
 			(class "Default")
 			(node
 				(ref "RN23")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -31548,8 +31548,8 @@
 			(class "Default")
 			(node
 				(ref "RN21")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -31565,8 +31565,8 @@
 			(class "Default")
 			(node
 				(ref "RN21")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -31713,8 +31713,8 @@
 			(class "Default")
 			(node
 				(ref "RN30")
-				(pin "1")
-				(pinfunction "R1.1_1")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -31816,8 +31816,8 @@
 			(class "Default")
 			(node
 				(ref "RN33")
-				(pin "1")
-				(pinfunction "R1.1_1")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -31919,8 +31919,8 @@
 			(class "Default")
 			(node
 				(ref "RN3")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -31987,8 +31987,8 @@
 			(class "Default")
 			(node
 				(ref "RN3")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -32004,8 +32004,8 @@
 			(class "Default")
 			(node
 				(ref "RN31")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -32032,9 +32032,9 @@
 			(name "/S_D[0]#")
 			(class "Default")
 			(node
-				(ref "RN19")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(ref "RN20")
+				(pin "1")
+				(pinfunction "R1.1_1")
 				(pintype "passive")
 			)
 			(node
@@ -32079,8 +32079,8 @@
 			(class "Default")
 			(node
 				(ref "RN19")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -32101,9 +32101,9 @@
 			(name "/S_D[3]#")
 			(class "Default")
 			(node
-				(ref "RN20")
-				(pin "1")
-				(pinfunction "R1.1_1")
+				(ref "RN19")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -32148,8 +32148,8 @@
 			(class "Default")
 			(node
 				(ref "RN19")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -32171,8 +32171,8 @@
 			(class "Default")
 			(node
 				(ref "RN18")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -32240,8 +32240,8 @@
 			(class "Default")
 			(node
 				(ref "RN18")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -32285,9 +32285,9 @@
 			(name "/S_D[11]#")
 			(class "Default")
 			(node
-				(ref "RN17")
-				(pin "1")
-				(pinfunction "R1.1_1")
+				(ref "RN16")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -32377,9 +32377,9 @@
 			(name "/S_D[15]#")
 			(class "Default")
 			(node
-				(ref "RN16")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(ref "RN17")
+				(pin "1")
+				(pinfunction "R1.1_1")
 				(pintype "passive")
 			)
 			(node
@@ -32607,9 +32607,9 @@
 			(name "/S_D[25]#")
 			(class "Default")
 			(node
-				(ref "RN13")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(ref "RN14")
+				(pin "1")
+				(pinfunction "R1.1_1")
 				(pintype "passive")
 			)
 			(node
@@ -32631,8 +32631,8 @@
 			(class "Default")
 			(node
 				(ref "RN13")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -32653,9 +32653,9 @@
 			(name "/S_D[27]#")
 			(class "Default")
 			(node
-				(ref "RN14")
-				(pin "1")
-				(pinfunction "R1.1_1")
+				(ref "RN13")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -32677,8 +32677,8 @@
 			(class "Default")
 			(node
 				(ref "RN12")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -32723,8 +32723,8 @@
 			(class "Default")
 			(node
 				(ref "RN13")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -32838,8 +32838,8 @@
 			(class "Default")
 			(node
 				(ref "RN12")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -33091,8 +33091,8 @@
 			(class "Default")
 			(node
 				(ref "RN7")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node
@@ -33137,8 +33137,8 @@
 			(class "Default")
 			(node
 				(ref "RN7")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -33436,8 +33436,8 @@
 			(class "Default")
 			(node
 				(ref "RN5")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "1")
+				(pinfunction "R1.1_1")
 				(pintype "passive")
 			)
 			(node
@@ -33482,8 +33482,8 @@
 			(class "Default")
 			(node
 				(ref "RN5")
-				(pin "1")
-				(pinfunction "R1.1_1")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -33728,8 +33728,8 @@
 			(class "Default")
 			(node
 				(ref "RN30")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "1")
+				(pinfunction "R1.1_1")
 				(pintype "passive")
 			)
 			(node
@@ -33751,8 +33751,8 @@
 			(class "Default")
 			(node
 				(ref "RN31")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -33774,8 +33774,8 @@
 			(class "Default")
 			(node
 				(ref "RN32")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "1")
+				(pinfunction "R1.1_1")
 				(pintype "passive")
 			)
 			(node
@@ -33797,8 +33797,8 @@
 			(class "Default")
 			(node
 				(ref "RN30")
-				(pin "3")
-				(pinfunction "R3.1_3")
+				(pin "4")
+				(pinfunction "R4.1_4")
 				(pintype "passive")
 			)
 			(node
@@ -33854,8 +33854,8 @@
 			(class "Default")
 			(node
 				(ref "RN34")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "1")
+				(pinfunction "R1.1_1")
 				(pintype "passive")
 			)
 			(node
@@ -33871,8 +33871,8 @@
 			(class "Default")
 			(node
 				(ref "RN32")
-				(pin "1")
-				(pinfunction "R1.1_1")
+				(pin "2")
+				(pinfunction "R2.1_2")
 				(pintype "passive")
 			)
 			(node
@@ -33917,8 +33917,8 @@
 			(class "Default")
 			(node
 				(ref "RN33")
-				(pin "2")
-				(pinfunction "R2.1_2")
+				(pin "1")
+				(pinfunction "R1.1_1")
 				(pintype "passive")
 			)
 			(node
@@ -34008,8 +34008,8 @@
 			(class "Default")
 			(node
 				(ref "RN30")
-				(pin "4")
-				(pinfunction "R4.1_4")
+				(pin "3")
+				(pinfunction "R3.1_3")
 				(pintype "passive")
 			)
 			(node

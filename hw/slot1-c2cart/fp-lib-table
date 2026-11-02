@@ -1,0 +1,8 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "Slot1")(type "KiCad")(uri "${KIPRJMOD}/../lib/Slot1.pretty")(options "")(descr "C2 cartridge footprint set"))
+  (lib (name "Interposer")(type "KiCad")(uri "${KIPRJMOD}/../lib/Interposer.pretty")(options "")(descr "C2 cartridge footprint set"))
+  (lib (name "Conn")(type "KiCad")(uri "${KIPRJMOD}/../lib/Conn.pretty")(options "")(descr "C2 cartridge footprint set"))
+  (lib (name "Pwr")(type "KiCad")(uri "${KIPRJMOD}/../lib/Pwr.pretty")(options "")(descr "C2 cartridge footprint set"))
+  (lib (name "Stock")(type "KiCad")(uri "${KIPRJMOD}/../lib/Stock.pretty")(options "")(descr "C2 cartridge footprint set"))
+)

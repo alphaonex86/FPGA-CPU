@@ -37,6 +37,11 @@ MODELS = {
     "L_Coilcraft_XxL4020": ("Inductor_SMD.3dshapes/L_Coilcraft_XAL4020-XXX.step", 0, (0, 0)),
     # the EP 1.68 body is not in the stock set: same 3 x 3 x 0.9 mm QFN
     "VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm": ("Package_DFN_QFN.3dshapes/QFN-16-1EP_3x3mm_P0.5mm_EP1.7x1.7mm.step", 0, (0, 0)),
+    "TSSOP-56_6.1x14mm_P0.5mm": ("Package_SO.3dshapes/TSSOP-56_6.1x14mm_P0.5mm.step", 0, (0, 0)),
+    "TSSOP-20_4.4x6.5mm_P0.65mm": ("Package_SO.3dshapes/TSSOP-20_4.4x6.5mm_P0.65mm.step", 0, (0, 0)),
+    "SOIC-16_3.9x9.9mm_P1.27mm": ("Package_SO.3dshapes/SOIC-16_3.9x9.9mm_P1.27mm.step", 0, (0, 0)),
+    "SOIC-16W_7.5x10.3mm_P1.27mm": ("Package_SO.3dshapes/SOIC-16W_7.5x10.3mm_P1.27mm.step", 0, (0, 0)),
+    "R_Array_Convex_4x0402": ("Resistor_SMD.3dshapes/R_Array_Convex_4x0402.step", 0, (0, 0)),
     "TI_RHL0014A": ("Package_DFN_QFN.3dshapes/Texas_S-PVQFN-N14.step", 0, (0, 0)),
     "FPGA_CycloneV_5CEFA9_F484_BGA": ("Package_BGA.3dshapes/BGA-484_23.0x23.0mm_Layout22x22_P1.0mm.step", -90, (0, 0)),
     "FBGA96_x16": ("Package_BGA.3dshapes/BGA-96_9.0x13.0mm_Layout2x3x16_P0.8mm.step", 0, (0, 0)),

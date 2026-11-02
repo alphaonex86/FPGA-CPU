@@ -319,7 +319,15 @@ independent of the variant A routing; bitstream `build.sh c2cart`
   56 R packs on the 137 AGTL+ contacts (RESET# excluded: board-terminated);
   RREF_TL 2.00k 1 % (PLLs used [pcg-01014]); VID 00001 by 0 R straps.
   Audit (every pins.csv net, chip clocks, AS, VREFs, terminations, supply
-  bands) and ERC: 0 errors. Next: placement (S7-like), then routing.
+  bands) and ERC: 0 errors.
+- Placement: `python3 hw/tools/gen_c2cart_s7.py` -> `slot1-c2cart.kicad_pcb`
+  (variant A substrate, edge, keep-outs, power strip): F.Cu chip band
+  y 7.1-21.6 in FPGA ball order (DATA0-3, CY2309, ADDR0-1, TX), U1 at
+  (63.5, 34.3), J5 + CB3T3245s left, EPCQ + J1 right; B.Cu the RN row
+  along the edge at its contacts' x, supply caps under each chip's pins,
+  CY2309 series parts under it. 254 footprints, DRC 0. Next: routing
+  (layer count: the 3A RX balls sit on U1's far side, 15 nets around
+  or under it; a 1.0 mm F484 with ~160 signals wants >= 4 layers).
 - Variant A also gets D35 later: its 1.35 V banks cannot take the 16612's
   3.3 V A-port outputs (receive-only nets there, NM45 option 1).
 
