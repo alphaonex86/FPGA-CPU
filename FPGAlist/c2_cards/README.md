@@ -18,6 +18,10 @@ fast); `sources.txt` only records where each came from.
 Purchase plan (operator 2026-11-02): one order around 2026-11-16, arrival
 expected around 2026-12-16; AliExpress first, then Alibaba.
 
+Update (D39, 2026-11-02): no card is bought; the XC7A100T sits on the
+C2 cartridge itself (plan/slot1_c2.md "Artix cartridge"). The AX7A035B
+notes and `rtl/c2/xilinx` stay as the 7 Series PCIe reference.
+
 ## Choice: ALINX AX7A035B (operator 2026-11-02) over Puzhi PZ-A735T-KFB
 
 | | ALINX AX7A035B | Puzhi PZ-A735T-KFB |

@@ -551,11 +551,18 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   AGTL+ control lines directly on an SSTL-18 bank against VREF, clocks
   the 16612 D# receive path (and optionally A -> B, pin AB_LE) with BCLK
   through a CY2309 zero-delay buffer; read data lags DRDY# one BCLK.
-- **D38** (decided 2026-11-02 by the operator) C2 SoM cartridge: the
+- **D38** (decided 2026-11-02 by the operator, replaced by D39) C2 SoM cartridge: the
   operator buys the whole AX7A035B (bench in the PC first, the AX200 card
   out of its slot), then its AC7A035 SoM (XC7A35T) moves onto a Slot 1
   carrier: one FPGA does PCIe x4 (OCuLink to the PC) and the P6 agent,
   no cable link, no BGA on our PCB (plan/slot1_c2.md "SoM cartridge").
+- **D39** (decided 2026-11-02 by the operator, replaces D38) C2 Artix
+  cartridge: an XC7A100T-2FGG484I (LCSC C410276) soldered on the Slot 1
+  cartridge does PCIe x4 (OCuLink to the PC) and the P6 agent; the whole
+  board (PCB, BGA assembly, parts) is one JLCPCB order (PayPal). No PCIe
+  card is bought: the cartridge on the desk is the PCIe bench. Reason:
+  no PayPal seller for the AX7A035B and no published SoM connector
+  positions (plan/slot1_c2.md "Artix cartridge").
 - **3D models** (operator 2026-11-02): every footprint of the slot 1 PCBs
   carries a 3D model, kept in the tree. Done 2026-11-02:
   `hw/tools/models3d.py` maps each footprint to a KiCad stock model

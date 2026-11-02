@@ -364,9 +364,27 @@ N100 host plugs an OCuLink cable (or a slot / M.2 -> OCuLink adapter).
   nPERSTL1 binding, to verify with a Quartus build of the PCIe HIP
   (gen_qsf/top for c2pcie); routing (layer count, 85 ohm diff pairs).
 
-## SoM cartridge (D38)
+## Artix cartridge (D39)
 
-`hw/slot1-c2som/` (to do). The AX7A035B core board AC7A035 (60 x 60 mm,
+`hw/slot1-c2art/` (to do). The D34 board with an XC7A100T-2FGG484I in
+place of the Cyclone V GX: 285 IO in banks 13 (35), 14, 15, 16, 34, 35
+(50 each), VCCO per bank chosen on the PCB, 4 GTP (one quad) + 2 GTP
+reference clock pairs [xilinx/xc7a100tfgg484pkg.txt]; the card RTL
+(`rtl/c2/xilinx`, PCIe 7 Series IP) and the P6 agent in one FPGA.
+- PCIe x4 Gen2 over the OCuLink 4i (D34 pinout), refclk from the cable
+  on an MGTREFCLK pair, PERST# on an IO.
+- Bought as one JLCPCB order (PCB + BGA assembly + parts from LCSC,
+  PayPal); the PC side is a PCIe x4 -> OCuLink adapter and an OCuLink
+  cable (eBay, PayPal). Bench: the cartridge on the desk on its own
+  supply, PC on OCuLink, LOOPBACK bitstream (no Slot 1 board needed).
+- To do: power tree (VCCINT/VCCBRAM 1.0 V, VCCAUX 1.8 V, MGTAVCC 1.0 V,
+  MGTAVTT 1.2 V, VCCO), SPI x4 configuration flash, JTAG header, pin
+  map (16612 LVTTL banks at 3.3 V, the D37 direct receive on a VREF
+  bank), timing of the P6 agent on the Artix -2.
+
+## SoM cartridge (D38, replaced by D39)
+
+`hw/slot1-c2som/` (not done). The AX7A035B core board AC7A035 (60 x 60 mm,
 mounting holes on a 55 mm square, 5 V only on CON1 pins 1-8; XC7A35T-2,
 1 GB DDR3, 128 Mb QSPI on the SoM) on a Slot 1 carrier with the D33 bus
 side (16612s, CY2309, terminations) and the D34 OCuLink 4i; the PC gets
