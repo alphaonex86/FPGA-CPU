@@ -16,6 +16,7 @@ import csv
 import pathlib
 import re
 import sys
+import models3d
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 LIB = ROOT / "hw/lib"
@@ -216,7 +217,7 @@ def write_fp(name, rows, size, pitch, pad):
                    '"F.Mask"))')
     txt.append(f'\t(fp_rect (start {-half - 0.3:.2f} {half + 0.3:.2f}) '
                f'(end {half + 0.3:.2f} {-half - 0.3:.2f}) (stroke (width '
-               '0.05) (type default)) (fill none) (layer "F.Courtyard"))')
+               '0.05) (type default)) (fill none) (layer "F.CrtYd"))')
     txt.append(f'\t(fp_rect (start {-half:.2f} {half:.2f}) (end {half:.2f} '
                f'{-half:.2f}) (stroke (width 0.1) (type default)) '
                '(fill none) (layer "F.Fab"))')
@@ -238,7 +239,7 @@ def main():
         sym_text, pin_count, unit_tally = write_symbol(name, rows)
         fp_text, pad_count = write_fp(name, rows, size, pitch, pad)
         (LIB / f"{name}_FPGA.kicad_sym").write_text(sym_text)
-        (PRETTY / f"{name}_BGA.kicad_mod").write_text(fp_text)
+        (PRETTY / f"{name}_BGA.kicad_mod").write_text(models3d.with_models(fp_text, strict=False))
         ok = (pin_count == pad_count == len(balls) == size * size)
         # KiCad io check: both files must parse with the installed kicad-cli
         import subprocess

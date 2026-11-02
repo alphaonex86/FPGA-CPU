@@ -8,4 +8,9 @@
 		(fp_rect (start -0.800000 -0.400000) (end 0.800000 0.400000) (layer "F.CrtYd") (width 0.05))
 		(pad "1" smd rect (at -0.50 0) (size 0.50 0.55) (layers "F.Cu" "F.Paste" "F.Mask"))
 		(pad "2" smd rect (at 0.50 0) (size 0.50 0.55) (layers "F.Cu" "F.Paste" "F.Mask"))
+		(model "${KIPRJMOD}/../lib/3dmodels/C_0402_1005Metric.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)

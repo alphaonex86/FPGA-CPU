@@ -102,4 +102,9 @@
 			(pad "B94" smd circle (at 0.40 6.00) (size 0.45 0.45) (layers "F.Cu" "F.Mask"))
 			(pad "B95" smd circle (at 1.20 6.00) (size 0.45 0.45) (layers "F.Cu" "F.Mask"))
 			(pad "B96" smd circle (at 2.00 6.00) (size 0.45 0.45) (layers "F.Cu" "F.Mask"))
+		(model "${KIPRJMOD}/../lib/3dmodels/BGA-96_9.0x13.0mm_Layout2x3x16_P0.8mm.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)

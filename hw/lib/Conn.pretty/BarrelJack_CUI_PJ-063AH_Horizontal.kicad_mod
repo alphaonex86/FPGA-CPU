@@ -45,4 +45,9 @@
 		(remove_unused_layers no)
 		(uuid "a15e4e26-333b-4c9b-803f-e0ff9f539c8c")
 	)
+		(model "${KIPRJMOD}/../lib/3dmodels/BarrelJack_CUI_PJ-063AH_Horizontal.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)

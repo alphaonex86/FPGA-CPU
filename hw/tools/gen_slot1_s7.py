@@ -43,6 +43,7 @@ import pathlib
 import re
 import subprocess
 import sys
+import models3d
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT = ROOT / "hw/slot1-cyclonev"
@@ -108,8 +109,8 @@ def emit_lib(out_text):
     lib, name = (out_text.split('(footprint "')[-1].split('"')[0]).split(":")
     path = ROOT / "hw/lib" / ("%s.pretty" % lib) / ("%s.kicad_mod" % name)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(out_text.replace('(footprint "%s:%s"' % (lib, name),
-                                     '(footprint "%s"' % name) + "\n")
+    path.write_text(models3d.with_models(out_text.replace(
+        '(footprint "%s:%s"' % (lib, name), '(footprint "%s"' % name), strict=False) + "\n")
 
 
 def bga96_pads():
@@ -613,7 +614,8 @@ def main():
         "\n".join(seg) + "\n" + "\n".join(
             [u1, u2, u7] + dies + translators + js + pdn + rls) + "\n)\n"
     path = OUT / "slot1-cyclonev.kicad_pcb"
-    path.write_text(text)
+    models3d.copy_models()
+    path.write_text(models3d.with_models(text, strict=True))
 
     # ---- footprint libraries (kicad-cli DRC resolves nicknames) -------
     # Slot1 / Interposer come from S4 and are untouched; the placeholder

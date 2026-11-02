@@ -16,4 +16,9 @@
 			(pad "8" thru_hole circle (at 2.54 1.27) (size 1.5 1.5) (drill 0.9) (layers "*.Cu" "*.Mask"))
 			(pad "9" thru_hole circle (at 5.08 -1.27) (size 1.5 1.5) (drill 0.9) (layers "*.Cu" "*.Mask"))
 			(pad "10" thru_hole circle (at 5.08 1.27) (size 1.5 1.5) (drill 0.9) (layers "*.Cu" "*.Mask"))
+		(model "${KIPRJMOD}/../lib/3dmodels/PinHeader_2x05_P2.54mm_Vertical.step"
+			(offset (xyz -5.08 -1.27 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 -90))
+		)
 	)

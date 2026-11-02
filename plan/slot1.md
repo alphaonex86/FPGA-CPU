@@ -544,7 +544,12 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   Slot 1 <-> DE25-Standard adapter (bus at 66 MHz, 2:1 multiplexed,
   `slot1_variants.md` common facts).
 - **3D models** (operator 2026-11-02): every footprint of the slot 1 PCBs
-  carries a 3D model, kept in the tree.
+  carries a 3D model, kept in the tree. Done 2026-11-02:
+  `hw/tools/models3d.py` maps each footprint to a KiCad stock model
+  copied into `hw/lib/3dmodels` (rotation/offset checked with
+  `kicad-cli pcb render`); gen_lib.py and gen_slot1_s7.py emit the models,
+  `models3d.py <board>` adds them to an existing board. No model: U2 (the
+  card edge is the PCB) and U7 (placeholder, NM47).
 - **D22** (decided 2026-10-21, amended 2026-10-22 twice by operator: first
   6, then 8 copper layers, same answer as the D5 pattern) Slot 1
   cartridge = 8 layers: signals F&B (B.Cu gets the die escapes, F.Cu the
@@ -1030,3 +1035,10 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   and a pipelined data path; the C2 cartridge targets 100 MHz (440BX
   with 100/66# floating; D27 allows 66). The variant A bus unit has the
   same loop.
+- **NM47** (placeholder land patterns, found with the 3D models
+  2026-11-02): Translator_TSSOP20 is no real TSSOP-20: its two pad rows
+  are offset 1.84 mm from each other (spans -3.85..2.01 and -2.01..3.85
+  instead of +-2.93) and pins 11..20 run in the same direction as 1..10
+  (neither a top nor a bottom view). U7 (VTT_tracker) is a 5-pad stand-in
+  for the TPS51200. Both must become the chosen parts' land patterns
+  (D17/D35) before S8 routes the slot nets for fabrication.

@@ -490,6 +490,11 @@
 	(pad "AB20" smd roundrect (at 10.500 -8.500) (size 0.3 0.3) (layers "F.Cu" "F.Paste" "F.Mask"))
 	(pad "AB21" smd roundrect (at 10.500 -9.500) (size 0.3 0.3) (layers "F.Cu" "F.Paste" "F.Mask"))
 	(pad "AB22" smd roundrect (at 10.500 -10.500) (size 0.3 0.3) (layers "F.Cu" "F.Paste" "F.Mask"))
-	(fp_rect (start -11.30 11.30) (end 11.30 -11.30) (stroke (width 0.05) (type default)) (fill none) (layer "F.Courtyard"))
+	(fp_rect (start -11.30 11.30) (end 11.30 -11.30) (stroke (width 0.05) (type default)) (fill none) (layer "F.CrtYd"))
 	(fp_rect (start -11.00 11.00) (end 11.00 -11.00) (stroke (width 0.1) (type default)) (fill none) (layer "F.Fab"))
+	(model "${KIPRJMOD}/../lib/3dmodels/BGA-484_23.0x23.0mm_Layout22x22_P1.0mm.step"
+		(offset (xyz 0 0 0))
+		(scale (xyz 1 1 1))
+		(rotate (xyz 0 0 -90))
+	)
 )

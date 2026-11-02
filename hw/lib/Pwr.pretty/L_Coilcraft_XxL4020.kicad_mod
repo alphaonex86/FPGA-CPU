@@ -18,4 +18,9 @@
 		(layers "F.Cu" "F.Mask" "F.Paste")
 		(uuid "359c5a1d-cbac-4646-9ee9-155e5df5bc2e")
 	)
+		(model "${KIPRJMOD}/../lib/3dmodels/L_Coilcraft_XAL4020-XXX.step"
+			(offset (xyz 0 0 0))
+			(scale (xyz 1 1 1))
+			(rotate (xyz 0 0 0))
+		)
 	)
