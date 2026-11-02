@@ -331,6 +331,27 @@ independent of the variant A routing; bitstream `build.sh c2cart`
 - Variant A also gets D35 later: its 1.35 V banks cannot take the 16612's
   3.3 V A-port outputs (receive-only nets there, NM45 option 1).
 
+## C2 cartridge with its own PCIe (D34)
+
+`hw/slot1-c2pcie/` (to do). The D33 board (bus side, 16612s, CY2309,
+CB3T3245s, EPCQ, power tree) with a Cyclone V GX instead of the E and an
+OCuLink 4i receptacle (SFF-8612, 42 circuits) instead of the J5 link; the
+N100 host plugs an OCuLink cable (or a slot / M.2 -> OCuLink adapter).
+- FPGA: F484 GX, pins only on balls that are IO on every 5CGXFC4/C5/C7/C9
+  and 5CGTFD9 (224 common IO, the same 3A..8A banks as the E; the six
+  GXB channels L0-L5, REFCLK0L/1L and the GXB supplies sit on the same
+  balls in all five) [FPGAlist/CycloneV_GX/pins]: the density (and GX
+  Gen1 vs GT Gen2) stays a purchase choice.
+- PCIe x4 on the bottom-left Hard IP: lanes 0-3 = GXB channels Ch0-Ch3
+  (L0..L3), Ch4 = the transmit CMU PLL, Ch5 free [ug_c5_pcie_avst Figure
+  4-38]; pin_perst = nPERSTL1 (R17, bank 5A) [same, pin_perst]; refclk on
+  a dedicated REFCLK pin, 100 MHz from the cable (common clock).
+- OCuLink endpoint side [SFF-9402 Rev 1.1 Table 6-1, SFF-8621 column]:
+  A3/A4 PERp0/n0 ... A18/A19 PERp3/n3 (host -> us: GXB RX), B3/B4 PETp0/n0
+  ... B18/B19 PETp3/n3 (us -> host: GXB TX, 0.1 uF series caps here),
+  B12/B13 REFCLK+/-, A12 PERST#, A13 CPRSNT# (endpoint ties it low),
+  A9/A10 2W-CLK/DATA, B9 BP_TYPE, B10 CWAKE#, A1/B21/B1/A21 power: no wire.
+
 ## Shadow RAM (`shadow.c`)
 
 440BX PAM0-PAM6 (config 0:0:0 0x59-0x5f, datasheet 290633-001 sec.

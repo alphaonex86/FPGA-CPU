@@ -1,0 +1,2 @@
+# Terasic DE25 boards (variant B adapter D36, cpu_core.md E1); docs/ is not versioned, ../../fetch.sh restores it
+docs/DE25-Standard_user_manual_2025-10-07.pdf https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/7704/P0781.pdf

@@ -1,0 +1,8 @@
+# Altera Cyclone V GX/GT pin tables (D34 C2 PCIe cartridge, F484 migration set) — fetch with ../../fetch.sh
+# IDs from the docs.altera.com search API (POST /api/khub/clustered-search)
+pins/5cgxfc4.txt https://docs.altera.com/api/khub/documents/kXokm_DqK9gv3_FS~FPGmA/content
+pins/5cgxfc5.txt https://docs.altera.com/api/khub/documents/ZWxg~OE_Zxd40Bpdf_gbXQ/content
+pins/5cgxfc7.txt https://docs.altera.com/api/khub/documents/TjiXlAqcIiQfWpCfmv24nQ/content
+pins/5cgxfc9.txt https://docs.altera.com/api/khub/documents/EK9KBhJt3unW79gDI~X6Hw/content
+pins/5cgtfd9.txt https://docs.altera.com/api/khub/documents/~PCPy6nFOFLNu3bD5pp10g/content
+docs/ug_c5_pcie_avst.pdf https://docs.altera.com/api/khub/maps/arUuT5ZuJzpmpDCN0rZolQ/attachments/kr0H~GLvNmbUxlXu0SDlkw-arUuT5ZuJzpmpDCN0rZolQ/content

@@ -39,3 +39,5 @@ parts/ti_sn74lvc16t245.pdf https://www.ti.com/lit/ds/symlink/sn74lvc16t245.pdf
 parts/ti_tlv6700.pdf https://www.ti.com/lit/ds/symlink/tlv6700.pdf
 # Cypress 38-07140 Rev. *S (Infineon CY2305 / CY2309: the C2 cartridge CY2309); the distributor copy
 parts/infineon_cy2305.pdf https://store.comet.bg/download-file.php?id=9870
+# SNIA SFF-9402 Rev 1.1 multi-protocol internal cable pinouts (D34 OCuLink SFF-8611 4i host link)
+parts/snia_sff9402_rev1.1.pdf https://members.snia.org/document/dl/27380
