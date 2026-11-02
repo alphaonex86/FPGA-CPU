@@ -209,7 +209,7 @@ the DMA mirror.
     Vivado needs the ncurses 5 ABI (Gentoo sys-libs/ncurses-compat, else
     the script's .so.6 shim). Decision 2026-11-01 (operator): C2 bench
     board Puzhi PZ-A7200T-KFB (Vivado part xc7a200tfbg484-2).
-    Purchase (operator 2026-11-02): from Alibaba,
+    Purchase (operator 2026-11-02): from AliExpress (preferred) or Alibaba,
     https://www.alibaba.com/product-detail/PuZhi-PZ-A7200T-KFB-Evaluation-Kit_1600869306098.html
     (after the C2 viability verdict, D31).
   - Dropped: LiteFury/NiteFury (M.2, too few I/O); Tagus, AC701, Cyclone V
