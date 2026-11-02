@@ -3,8 +3,9 @@
 // 0xf4 (the written byte is the exit code), 256 bytes of MMIO scratch at
 // 0xd0000 and at 0xa0000, an interrupt source at 0xf5 (writing N asserts
 // INTR, acknowledged with vector 0x20 + N) and at 0xf7 (writing N asserts
-// INTR N ms later, vector 0x28), and a 4 KB byte FIFO at 0x1f0 (writes push,
-// reads pop; empty pops 0xff). Anything else floats high.
+// INTR N ms later, vector 0x28), a 4 KB byte FIFO at 0x1f0 (writes push,
+// reads pop; empty pops 0xff) and a board reset when 0xcf9 is written with
+// bits 2:1 set (the 440BX hard reset). Anything else floats high.
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +18,7 @@ struct sim {
     uint8_t *rom;
     uint32_t rom_base;
     uint8_t scratch[2][256];
-    int intr_on;
+    int intr_on, reset;
     uint8_t vector;
     double intr_at;                  // 0xf7: when INTR rises (0: none)
     uint8_t fifo[4096];
@@ -79,6 +80,8 @@ static void sim_write(struct bus *b, int space, uint32_t addr, int size, uint32_
         exit((int)(value & 0xff));
     else if (addr == 0xf7)
         s->intr_at = now() + 1e-3 * (value & 0xff);
+    else if (addr == 0xcf9 && (value & 6) == 6)
+        s->reset = 1;
     else if (addr == 0x1f0) {
         for (int i = 0; i < size; i++) {
             if (s->fifo_head - s->fifo_tail == sizeof(s->fifo)) {
@@ -107,15 +110,21 @@ static void sim_io_rep(struct bus *b, uint16_t port, int size, uint32_t count, u
     }
 }
 
-static int sim_intr(struct bus *b)
+static unsigned sim_status(struct bus *b)
 {
     struct sim *s = b->priv;
+    if (s->reset) {   // the devices' state at a board reset
+        s->reset = 0;
+        s->intr_on = 0;
+        s->intr_at = 0;
+        return BUS_RESET;
+    }
     if (s->intr_at && now() >= s->intr_at) {
         s->intr_at = 0;
         s->intr_on = 1;
         s->vector = 0x28;
     }
-    return s->intr_on;
+    return s->intr_on ? BUS_INTR : 0;
 }
 
 static uint8_t sim_inta(struct bus *b)
@@ -148,6 +157,6 @@ struct bus *bus_sim_open(const char *rom_path)
     }
     s->rom_base = (uint32_t)(0x100000000ull - (uint64_t)n);
     fclose(f);
-    s->bus = (struct bus){ sim_read, sim_write, sim_io_rep, sim_intr, sim_inta, s };
+    s->bus = (struct bus){ sim_read, sim_write, sim_io_rep, sim_status, sim_inta, s };
     return &s->bus;
 }

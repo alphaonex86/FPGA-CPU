@@ -31,8 +31,8 @@ too. Nothing is bought before the viability verdict below.
 
 - Guest RAM: 0-0x9ffff and 1 MB up (option `-m`, default 256 MB);
   0xa0000-0xdffff (VGA, option ROMs) goes to the board.
-- BIOS ROM read once over the bus (`-r`, default 256 KB) into read-only
-  memslots at the top of 4 GB and (its last 128 KB) at 0xe0000: KVM cannot
+- BIOS ROM read over the bus at each board reset (`-r`, default 256 KB;
+  it may have been flashed) into read-only memslots at the top of 4 GB and (its last 128 KB) at 0xe0000: KVM cannot
   execute from MMIO; ROM writes exit to the bus.
 - I/O and MMIO exits: split into aligned 1/2/4-byte bus cycles (a dword
   at port 0xf6 is two word cycles, as the chipset splits it).
@@ -48,6 +48,12 @@ too. Nothing is bought before the viability verdict below.
   `rep ins` is batched, up to 1 KB) and once per MMIO write: coalescing
   keeps the exit in the kernel. Measured (7950X3D, sim backend): a VGA
   dword write 2.0 us coalesced vs 6.4 us trapped.
+- Board reset (RESET#; also awaited at start): the VMM waits for its end,
+  reads the ROM again, sets PAM0-6 to 0, restores the vCPU's power-on
+  state (EDX = signature, reset vector FFFFFFF0h or 000FFFF0h with the A6#
+  strap) and drops coalesced writes not yet on the bus; guest RAM is kept,
+  like DRAM. The test ROM ends with a 0xcf9 hard reset and checks EDX,
+  PAM and its RAM marker after it (mutations fail steps 14 and 15).
 - KVM's private pages (VMX TSS, EPT identity map) sit just below the ROM
   window (the defaults fall inside a 512 KB+ ROM on Intel hosts).
 - CPUID: max leaf 2, signature `-s` (default 0x683, P-III cB0), features
@@ -63,8 +69,9 @@ too. Nothing is bought before the viability verdict below.
 One 64-bit posted write per cycle, the command in the offset, so a bus
 write costs one PCIe TLP and a read one TLP + one read completion (the
 FPGA delays the completion until the bus cycle ends). STATUS carries INTR,
-a sticky bus error and a sticky protocol error; INTA runs the acknowledge
-cycle. The bridge takes requests strictly in order, one at a time (a
+a sticky bus error, a sticky protocol error, the board reset (RESET#
+asserted or since the last read; bus cycles under it fail and are not
+errors) and the A6# strap; INTA runs the acknowledge cycle. The bridge takes requests strictly in order, one at a time (a
 command holds later TLPs by flow control until its reply), so the REP
 window is never refilled under a running REP.
 
@@ -81,8 +88,10 @@ window is never refilled under a running REP.
     data[4]}`; INTA `{0x40}`; REP `{0x20 | write << 2 | log2 size,
     port[2], count[2]}` + a write's data.
   - up: reply `{0x80}` + payload (read: 4 bytes, INTA: 1, REP read:
-    count x size); status `{0x40 | error << 1 | INTR}` on an INTR change or
-    a failed cycle, always before the reply.
+    count x size); status `{0x40 | A6# << 3 | board reset << 2 | error <<
+    1 | INTR}` on a level change or a failed cycle, always before the
+    reply, and every 2^16 clocks between commands (a card reset relearns
+    the levels; until then the card reports the board in reset).
 - REP data is buffered whole on the receiving side (a 4 KB REP costs
   ~80 us of link time next to ~600 us of PCI I/O cycles).
 - Tested: the whole test ROM through the RTL (2.7 M bridge clocks, link
@@ -138,8 +147,10 @@ window is never refilled under a running REP.
   `p6_bif` (copied to `rtl/tests/c2/`, the FPGAmotherboard chipset
   front end, whose protocol checks stop the run) as the chipset; two
   mutations (write data lane, write request code) fail the run.
-- Straps A[12:5]# and RESET# are outputs for the bridge; not yet sent to
-  the VMM (a link status bit for the board reset is next).
+- RESET# and the A6# strap (reset vector) cross to the link clock in
+  `c2_bus_sync` and reach the VMM in the status message; a request under
+  RESET# ends in a bus error at once. The other straps (IOQ depth, BINIT#,
+  cluster ID) need nothing from the agent: one transaction at a time.
 - `c2_bus_sync` crosses the bus port from the link clock to BCLK (toggle
   handshake each way, the request fields held by the cartridge); the sim
   runs BCLK at 14 ns against the 20 ns link clock.

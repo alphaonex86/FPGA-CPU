@@ -4,6 +4,10 @@
 #include <stdint.h>
 
 enum { BUS_MEM = 0, BUS_IO = 1 };
+// status(): INTR asserted; board reset (RESET# asserted, or a reset since
+// the last call: bus cycles meanwhile are lost); A6# strap of the last reset
+// (reset vector 000FFFF0h)
+enum { BUS_INTR = 1, BUS_RESET = 2, BUS_LOW_VECTOR = 4 };
 
 struct bus {
     // size 1, 2 or 4 bytes, naturally aligned (the VMM splits the rest)
@@ -11,7 +15,7 @@ struct bus {
     void (*write)(struct bus *b, int space, uint32_t addr, int size, uint32_t value);
     // count I/O cycles of one size at one port (string I/O), data in buf
     void (*io_rep)(struct bus *b, uint16_t port, int size, uint32_t count, uint8_t *buf, int write);
-    int (*intr)(struct bus *b);       // INTR is asserted
+    unsigned (*status)(struct bus *b);   // BUS_INTR | BUS_RESET | BUS_LOW_VECTOR
     uint8_t (*inta)(struct bus *b);   // interrupt-acknowledge cycle: the vector
     void *priv;
 };
@@ -19,7 +23,9 @@ struct bus {
 // FPGA bridge register block (BAR0, little endian), rtl/c2 implements it:
 //   0x000 R   ID: 0x43324231 ("C2B1")
 //   0x008 R   STATUS: bit 0 INTR asserted, bit 1 bus error, bit 2 protocol
-//             error (bad BAR0 access or link byte); errors sticky, read clears
+//             error (bad BAR0 access or link byte), bit 3 board reset
+//             (RESET# asserted or since the last read), bit 4 the A6# strap;
+//             bits 1-3 sticky, read clears
 //   0x010 R   RDATA: data of the last read cycle; the completion waits for it
 //   0x018 R   INTA: runs an interrupt-acknowledge cycle, returns the vector
 //   0x100 W   cycle: one 64-bit write {data[63:32], addr[31:0]} at
@@ -39,6 +45,7 @@ enum {
     C2B_ID = 0x000, C2B_STATUS = 0x008, C2B_RDATA = 0x010, C2B_INTA = 0x018,
     C2B_CYCLE = 0x100, C2B_REP = 0x180, C2B_WINDOW = 0x1000, C2B_WINDOW_SIZE = 0x1000,
     C2B_ID_VALUE = 0x43324231,
+    C2B_ST_INTR = 1, C2B_ST_BUS_ERR = 2, C2B_ST_PROTO_ERR = 4, C2B_ST_RESET = 8, C2B_ST_LOW_VECTOR = 16,
 };
 
 // BAR0 accesses: the mapped PCI resource, or the bridge RTL model (bus_rtl.cpp)

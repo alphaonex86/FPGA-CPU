@@ -177,18 +177,18 @@ module ax7a035b_top #(
     // ---- the cartridge: on J11, or in this FPGA
     logic [7:0] up_link;
     if (LOOPBACK) begin : loop
-        logic        bus_req, bus_space, bus_write, bus_inta, bus_done, bus_err, intr;
+        logic        bus_req, bus_space, bus_write, bus_inta, bus_done, bus_err, intr, board_reset;
         logic [31:0] bus_addr, bus_wdata, bus_rdata;
         logic [1:0]  bus_size;
         logic        serial_valid, serial_ready;
         logic [7:0]  serial_byte, up_cart;
         c2_cart cart (
             .clk(lclk), .rst(lrst), .down, .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta,
-            .bus_addr, .bus_size, .bus_wdata, .bus_done, .bus_rdata, .bus_err, .intr
+            .bus_addr, .bus_size, .bus_wdata, .bus_done, .bus_rdata, .bus_err, .intr, .board_reset, .low_vector(1'b0)
         );
         c2_loop_target #(.ROM_HEX(ROM_HEX)) target (
             .clk(lclk), .rst(lrst), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_addr, .bus_size, .bus_wdata,
-            .bus_done, .bus_rdata, .bus_err, .intr, .serial_valid, .serial_byte, .serial_ready, .post()
+            .bus_done, .bus_rdata, .bus_err, .intr, .board_reset, .serial_valid, .serial_byte, .serial_ready, .post()
         );
         c2_uart_tx uart (
             .clk(lclk), .rst(lrst), .valid(serial_valid), .data(serial_byte), .ready(serial_ready), .tx(uart_tx)

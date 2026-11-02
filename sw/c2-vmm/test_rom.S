@@ -1,15 +1,32 @@
 # c2-vmm test ROM (sim / rtl backends, 64 KB at 0xf0000): serial, POST
-# code, MMIO round trip, RAM, an injected interrupt, string I/O, shadow RAM;
-# exit port 0xf4: 0 pass, else the failed step.
+# code, MMIO round trip, RAM, an injected interrupt, string I/O, shadow RAM,
+# a board reset (0xcf9); exit port 0xf4: 0 pass, else the failed step.
+# Expects the default signature 0x683 (c2-vmm -s) in EDX at reset.
         .code16
         .text
-start:  cli
+start:  mov     %edx, %ebp
+        cli
         xor     %ax, %ax
         mov     %ax, %ss
         mov     %ax, %ds
         mov     $0x7000, %sp
         mov     $0x11, %al
         out     %al, $0x80
+        cmp     $0x683, %ebp
+        mov     $14, %bl
+        jne     fail
+        # after the board reset (RAM keeps the marker): PAM1 is 0 again,
+        # 0xc0000 back on the bus (floats high)
+        cmpw    $0x5aa5, 0x600
+        jne     1f
+        mov     $0xc000, %ax
+        mov     %ax, %es
+        cmpl    $0xffffffff, %es:0x10
+        mov     $15, %bl
+        jne     fail
+        xor     %bl, %bl
+        jmp     fail
+1:
         # serial
         mov     $msg, %si
 1:      mov     %cs:(%si), %al
@@ -183,7 +200,14 @@ start:  cli
         cmpl    $0x600dc0de, %es:0x10
         mov     $9, %bl
         jne     fail
-        xor     %bl, %bl
+        # board reset (440BX hard reset), halted until the vCPU restarts
+        movw    $0x5aa5, 0x600
+        mov     $6, %al
+        mov     $0xcf9, %dx
+        out     %al, %dx
+        sti
+1:      hlt
+        jmp     1b
 fail:   mov     %bl, %al
         out     %al, $0xf4
         jmp     .

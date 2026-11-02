@@ -13,7 +13,7 @@ extern "C" {
 #include "bus.h"
 }
 
-enum : uint32_t { BUS_LATENCY = 8, TIMEOUT = 50000000, BAR_BASE = 0xf0000000, REQUESTER = 0x0100, COMPLETER = 0x0200 };
+enum : uint32_t { BUS_LATENCY = 8, RESET_CLOCKS = 200, TIMEOUT = 50000000, BAR_BASE = 0xf0000000, REQUESTER = 0x0100, COMPLETER = 0x0200 };
 
 struct beat {
     uint64_t data;
@@ -39,6 +39,17 @@ static uint8_t tag;
 static uint32_t bswap(uint32_t v)
 {
     return __builtin_bswap32(v);
+}
+
+// the bus_sim devices' INTR and board reset (RESET_CLOCKS cartridge clocks)
+static uint32_t reset_left;
+static void board_edge()
+{
+    unsigned st = dev->status(dev);
+    top->intr = st & BUS_INTR;
+    if (st & BUS_RESET) reset_left = RESET_CLOCKS;
+    else if (reset_left) reset_left--;
+    top->board_rst = reset_left != 0;
 }
 
 #ifdef C2_P6
@@ -79,7 +90,7 @@ static void cclk_edge()
         bus_busy = true;
     } else if (!top->bus_req)
         bus_busy = false;
-    top->intr = dev->intr(dev);
+    board_edge();
     return;
 #endif
 #ifdef C2_LOOP_TARGET
@@ -107,7 +118,7 @@ static void cclk_edge()
         bus_busy = true;
         bus_wait = BUS_LATENCY;
     }
-    top->intr = dev->intr(dev);
+    board_edge();
 }
 
 // one 2 ns step; true when the user clock rose

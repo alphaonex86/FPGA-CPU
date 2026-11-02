@@ -33,8 +33,10 @@ module c2_card #(
     state_t state;
 
     // STATUS: bit 0 INTR, bit 1 bus error, bit 2 protocol error (a bad BAR0
-    // access or link byte); the error bits are sticky, a STATUS read clears
-    logic        intr, err_bus, err_proto;
+    // access or link byte), bit 3 board reset (RESET# asserted, or since the
+    // last read; also until the cartridge's first status), bit 4 the A6#
+    // strap of the last reset; bits 1-3 are sticky, a STATUS read clears
+    logic        intr, err_bus, err_proto, board_reset, reset_seen, low_vector;
     logic [31:0] rdata;            // the last read cycle / INTA vector
     logic [63:0] resp;
     logic        resp_window;      // RESP returns the window word
@@ -96,6 +98,9 @@ module c2_card #(
             intr      <= 0;
             err_bus   <= 0;
             err_proto <= 0;
+            board_reset <= 1;
+            reset_seen  <= 0;
+            low_vector  <= 0;
             rx_busy   <= 0;
             down      <= '0;
         end else begin
@@ -141,9 +146,10 @@ module c2_card #(
                     else case (req_addr)
                         13'h000: resp <= {32'd0, ID};
                         13'h008: begin
-                            resp      <= {61'd0, err_proto, err_bus, intr};
+                            resp      <= {59'd0, low_vector, board_reset || reset_seen, err_proto, err_bus, intr};
                             err_bus   <= 0;
                             err_proto <= 0;
+                            reset_seen <= 0;
                         end
                         13'h010: resp <= {32'd0, rdata};
                         13'h018: begin   // INTA: {0x40}, reply 1 byte
@@ -203,9 +209,12 @@ module c2_card #(
                     rx_i  <= '0;
                     if (rx_len == '0) state <= IDLE;
                     else rx_busy <= 1;
-                end else if (up[7:2] == 6'b010000) begin
-                    intr <= up[0];
+                end else if (up[7:4] == 4'b0100) begin
+                    intr        <= up[0];
+                    board_reset <= up[2];
+                    low_vector  <= up[3];
                     if (up[1]) err_bus <= 1;
+                    if (up[2]) reset_seen <= 1;
                 end else if (up != 8'h00)
                     err_proto <= 1;
             end

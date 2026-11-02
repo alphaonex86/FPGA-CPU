@@ -35,12 +35,12 @@ int main(int argc, char **argv)
     }
 
     double t = now_us();
-    for (int i = 0; i < count; i++) b->intr(b);
+    for (int i = 0; i < count; i++) b->status(b);
     printf("STATUS read (PCIe round trip): %.2f us\n", (now_us() - t) / count);
 
     t = now_us();
     for (int i = 0; i < count; i++) b->write(b, BUS_MEM, SCRATCH, 4, (uint32_t)i);
-    b->intr(b);   // after the posted writes; reports their errors
+    b->status(b);   // after the posted writes; reports their errors
     printf("memory write cycle (posted):   %.2f us\n", (now_us() - t) / count);
 
     t = now_us();

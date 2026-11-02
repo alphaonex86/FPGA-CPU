@@ -3,7 +3,8 @@
 // at the top of 4 GB (ROM_HEX, 32-bit words), 256-byte scratch RAMs at
 // 0xd0000 and 0xa0000, serial out at 0x3f8 (status 0x60 at 0x3fd), POST
 // code at 0x80, INTR at 0xf5 (vector 0x20 + N) and at 0xf7 (N ms later,
-// vector 0x28), a 4 KB byte FIFO at 0x1f0; anything else floats high.
+// vector 0x28), a 4 KB byte FIFO at 0x1f0, a board reset of 1 ms when
+// 0xcf9 is written with bits 2:1 set; anything else floats high.
 module c2_loop_target #(
     parameter string ROM_HEX     = "test_rom.hex",
     parameter int    CLOCKS_MS   = 50000           // clocks per millisecond
@@ -21,6 +22,7 @@ module c2_loop_target #(
     output logic [31:0] bus_rdata,
     output logic        bus_err,      // a write to the full FIFO
     output logic        intr,
+    output logic        board_reset,
     // serial byte out (to a UART), POST code
     output logic        serial_valid,
     output logic [7:0]  serial_byte,
@@ -39,6 +41,7 @@ module c2_loop_target #(
     logic [1:0]  byte_i;
     logic [7:0]  vector;
     logic [31:0] delay;                       // 0xf7 countdown (clocks)
+    logic [31:0] reset_left;                  // board reset countdown (clocks)
 
     wire       is_mem    = !bus_space;
     wire       is_io     = bus_space;
@@ -55,6 +58,7 @@ module c2_loop_target #(
     always_ff @(posedge clk) rom_q <= rom[bus_addr[15:2]];
 
     assign bus_done     = state == DONE;
+    assign board_reset  = reset_left != '0;
     assign serial_valid = state == BYTES && is_io && bus_write && bus_addr == 32'h3f8;
     assign serial_byte  = bus_wdata[7:0];
 
@@ -63,10 +67,16 @@ module c2_loop_target #(
             state     <= IDLE;
             intr      <= 0;
             delay     <= '0;
+            reset_left <= '0;
             fifo_head <= '0;
             fifo_tail <= '0;
             post      <= '0;
         end else begin
+            if (reset_left != '0) begin   // the devices' state at a board reset
+                reset_left <= reset_left - 1'b1;
+                intr       <= 0;
+                delay      <= '0;
+            end
             if (delay != '0) begin
                 delay <= delay - 1'b1;
                 if (delay == 32'd1) begin
@@ -102,6 +112,7 @@ module c2_loop_target #(
                         vector <= 8'h20 + bus_wdata[7:0];
                     end
                     if (is_io && bus_write && bus_addr == 32'hf7) delay <= bus_wdata[7:0] * CLOCKS_MS;
+                    if (is_io && bus_write && bus_addr == 32'hcf9 && bus_wdata[2:1] == 2'b11) reset_left <= CLOCKS_MS;
                     state <= DONE;
                 end
             end

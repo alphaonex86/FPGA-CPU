@@ -1,7 +1,9 @@
 // The c2_cart board bus port from the link clock (mclk) to the board bus
 // clock (sclk, BCLK): toggle handshake each way. The request fields need no
 // synchronizer: the master holds them from bus_req until bus_done, and the
-// slave side reads them only after the request toggle crossed.
+// slave side reads them only after the request toggle crossed. The board
+// reset level crosses through 2 flops, the A6# strap (reset vector
+// 000FFFF0h) is taken once that level fell: stable by then.
 module c2_bus_sync (
     // master side (c2_cart)
     input  logic        mclk,
@@ -10,16 +12,30 @@ module c2_bus_sync (
     output logic        m_done,
     output logic [31:0] m_rdata,
     output logic        m_err,
+    output logic        m_reset,
+    output logic        m_low_vector,
     // slave side (c2_p6_agent), same fields, held until s_done
     input  logic        sclk,
     input  logic        srst,
     output logic        s_req,
     input  logic        s_done,
     input  logic [31:0] s_rdata,
-    input  logic        s_err
+    input  logic        s_err,
+    input  logic        s_reset,       // RESET# asserted
+    input  logic        s_low_vector   // A6# sampled at the end of RESET#
 );
     logic       req_t, ack_t, busy;
-    logic [2:0] req_s, ack_s;          // 2 synchronizer stages + edge history
+    logic [2:0] req_s, ack_s, reset_s; // 2 synchronizer stages + edge history
+
+    assign m_reset = reset_s[1];
+    always_ff @(posedge mclk) begin
+        reset_s <= {reset_s[1:0], s_reset};
+        if (reset_s[2] && !reset_s[1]) m_low_vector <= s_low_vector;
+        if (mrst) begin
+            reset_s      <= '0;
+            m_low_vector <= 0;
+        end
+    end
 
     // master: start on bus_req (not in its done clock, when it still stands)
     always_ff @(posedge mclk) begin

@@ -11,9 +11,15 @@
 
 enum { BAR_SIZE = C2B_WINDOW + C2B_WINDOW_SIZE };
 
+struct fpga {
+    struct bus bus;
+    struct bar *bar;
+    int reset_seen;   // a board reset not yet reported by status()
+};
+
 static struct bar *bar_of(struct bus *b)
 {
-    return b->priv;
+    return ((struct fpga *)b->priv)->bar;
 }
 
 static uint32_t rd32(struct bus *b, uint32_t off)
@@ -32,11 +38,22 @@ static void cycle(struct bus *b, int space, int write, uint32_t addr, int size, 
     wr64(b, C2B_CYCLE + 8 * (uint32_t)(space << 3 | write << 2 | log2_size), (uint64_t)data << 32 | addr);
 }
 
+// STATUS keeps a board reset for status(); the bus cycles it cut are
+// expected to fail
+static uint32_t read_status(struct bus *b)
+{
+    struct fpga *f = b->priv;
+    uint32_t status = rd32(b, C2B_STATUS);
+    if (status & C2B_ST_RESET) f->reset_seen = 1;
+    if (f->reset_seen) status &= ~(uint32_t)C2B_ST_BUS_ERR;
+    return status;
+}
+
 static void check_error(struct bus *b, int space, uint32_t addr)
 {
-    uint32_t status = rd32(b, C2B_STATUS);
-    if (status & 6) {
-        fprintf(stderr, "c2-vmm: %s error at %s %08x\n", status & 2 ? "bus" : "bridge protocol",
+    uint32_t status = read_status(b);
+    if (status & (C2B_ST_BUS_ERR | C2B_ST_PROTO_ERR)) {
+        fprintf(stderr, "c2-vmm: %s error at %s %08x\n", status & C2B_ST_BUS_ERR ? "bus" : "bridge protocol",
                 space == BUS_IO ? "io" : "mem", addr);
         exit(1);
     }
@@ -84,14 +101,18 @@ static void fpga_io_rep(struct bus *b, uint16_t port, int size, uint32_t count, 
 }
 
 // polled every exit: also reports a bus error of a posted write cycle
-static int fpga_intr(struct bus *b)
+static unsigned fpga_status(struct bus *b)
 {
-    uint32_t status = rd32(b, C2B_STATUS);
-    if (status & 6) {
-        fprintf(stderr, "c2-vmm: %s error (a write cycle)\n", status & 2 ? "bus" : "bridge protocol");
+    struct fpga *f = b->priv;
+    uint32_t status = read_status(b);
+    if (status & (C2B_ST_BUS_ERR | C2B_ST_PROTO_ERR)) {
+        fprintf(stderr, "c2-vmm: %s error (a write cycle)\n", status & C2B_ST_BUS_ERR ? "bus" : "bridge protocol");
         exit(1);
     }
-    return status & 1;
+    unsigned r = (status & C2B_ST_INTR ? BUS_INTR : 0u) | (f->reset_seen ? BUS_RESET : 0u)
+               | (status & C2B_ST_LOW_VECTOR ? BUS_LOW_VECTOR : 0u);
+    f->reset_seen = 0;
+    return r;
 }
 
 static uint8_t fpga_inta(struct bus *b)
@@ -101,16 +122,17 @@ static uint8_t fpga_inta(struct bus *b)
 
 struct bus *bus_bar_open(struct bar *bar)
 {
-    struct bus *b = calloc(1, sizeof(*b));
-    if (!b) return NULL;
-    *b = (struct bus){ fpga_read, fpga_write, fpga_io_rep, fpga_intr, fpga_inta, bar };
-    uint32_t id = rd32(b, C2B_ID);
+    struct fpga *f = calloc(1, sizeof(*f));
+    if (!f) return NULL;
+    f->bus = (struct bus){ fpga_read, fpga_write, fpga_io_rep, fpga_status, fpga_inta, f };
+    f->bar = bar;
+    uint32_t id = rd32(&f->bus, C2B_ID);
     if (id != C2B_ID_VALUE) {
         fprintf(stderr, "c2-vmm: BAR0 ID %08x, not the C2 bridge (%08x)\n", id, C2B_ID_VALUE);
-        free(b);
+        free(f);
         return NULL;
     }
-    return b;
+    return &f->bus;
 }
 
 static uint64_t mmio_read(struct bar *bar, uint32_t off, int size)

@@ -143,8 +143,8 @@ module c2_p6_agent (
         if (rst) begin
             state <= IDLE;
         end else if (reset_q) begin
-            // RESET# (or a board reset under a transaction): abandon it
-            if (state != IDLE && state != DONE) begin
+            // RESET#: the transaction under way or a new request ends in an error
+            if (state != DONE && (state != IDLE || bus_req)) begin
                 bus_err <= 1;
                 state   <= DONE;
             end else

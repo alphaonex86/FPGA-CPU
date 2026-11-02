@@ -1,8 +1,10 @@
 // Slot 1 C2 cartridge side (plan/slot1_c2.md "Bridge RTL"): receives a
 // command from the card (c2_card.sv), runs its cycles on a generic board
 // bus port (the P6 bus agent; the testbench in simulation), then replies.
-// Up-link messages: {0x80} + reply payload; {0x40 | error << 1 | INTR}
-// whenever INTR changes or a cycle failed, always before the reply.
+// Up-link messages: {0x80} + reply payload; the status {0x40 | A6# << 3 |
+// board reset << 2 | error << 1 | INTR} whenever its levels change or a
+// cycle failed (always before the reply), and every 2^16 clocks between
+// commands (so a card reset later learns the levels).
 module c2_cart (
     input  logic        clk,
     input  logic        rst,
@@ -19,7 +21,9 @@ module c2_cart (
     input  logic        bus_done,
     input  logic [31:0] bus_rdata,
     input  logic        bus_err,
-    input  logic        intr
+    input  logic        intr,
+    input  logic        board_reset,   // the board's RESET#
+    input  logic        low_vector     // A6# strap: reset vector 000FFFF0h
 );
     typedef enum logic [3:0] {
         R_HDR, R_FIELDS, R_DATA, E_ADDR, E_LOAD, E_BUS, E_STORE, T_STATUS, T_HDR, T_DATA
@@ -34,7 +38,10 @@ module c2_cart (
     logic [12:0] count, elem;      // REP: element count and index
     logic [12:0] bytes, byte_i;    // data bytes (link side)
     logic [31:0] result;           // CYCLE read / INTA reply
-    logic        err_event, intr_sent;
+    logic        err_event;
+    logic [2:0]  levels_sent;      // {low_vector, board_reset, intr}
+    logic [15:0] status_age;       // clocks since the last status message
+    wire  [2:0]  levels = {low_vector, board_reset, intr};
 
     // the REP data buffer, 1024 x 32 with byte writes
     logic [31:0] buffer [1024];
@@ -71,16 +78,18 @@ module c2_cart (
             state     <= R_HDR;
             bus_req   <= 0;
             err_event <= 0;
-            intr_sent <= 0;
+            status_age <= '1;   // the first status right after reset
             up        <= '0;
         end else begin
             up <= '0;
+            status_age <= status_age + 1'b1;
             case (state)
             R_HDR: begin
-                if (intr != intr_sent || err_event) begin   // status between commands
-                    up        <= {6'b010000, err_event, intr};
-                    intr_sent <= intr;
-                    err_event <= 0;
+                if (levels != levels_sent || err_event || &status_age) begin   // status between commands
+                    up          <= {4'b0100, levels[2:1], err_event, levels[0]};
+                    levels_sent <= levels;
+                    err_event   <= 0;
+                    status_age  <= '0;
                 end
                 byte_i <= '0;
                 elem   <= '0;
@@ -134,10 +143,11 @@ module c2_cart (
                 state <= cmd == C_REP && elem != count - 13'd1 ? E_ADDR : T_STATUS;
             end
             T_STATUS: begin
-                if (intr != intr_sent || err_event) begin
-                    up        <= {6'b010000, err_event, intr};
-                    intr_sent <= intr;
-                    err_event <= 0;
+                if (levels != levels_sent || err_event) begin
+                    up          <= {4'b0100, levels[2:1], err_event, levels[0]};
+                    levels_sent <= levels;
+                    err_event   <= 0;
+                    status_age  <= '0;
                 end
                 state <= T_HDR;
             end

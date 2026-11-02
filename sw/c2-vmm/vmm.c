@@ -13,6 +13,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 #include "bus.h"
 #include "shadow.h"
@@ -130,6 +131,52 @@ static void flush_coalesced(struct bus *b)
     }
 }
 
+// the vCPU at power-on (KVM's reset state), restored at each board reset:
+// EDX = the signature, the reset vector FFFFFFF0h or with A6# 000FFFF0h
+static struct kvm_regs reset_regs;
+static struct kvm_sregs reset_sregs;
+static struct kvm_fpu reset_fpu;
+static struct kvm_vcpu_events reset_events;
+
+static void cpu_reset(int vcpu, uint32_t signature, int low_vector)
+{
+    struct kvm_regs regs = reset_regs;
+    struct kvm_sregs sregs = reset_sregs;
+    regs.rdx = signature;
+    sregs.cs.base = low_vector ? 0xf0000 : 0xffff0000;
+    xioctl(vcpu, KVM_SET_REGS, &regs, "KVM_SET_REGS");
+    xioctl(vcpu, KVM_SET_SREGS, &sregs, "KVM_SET_SREGS");
+    xioctl(vcpu, KVM_SET_FPU, &reset_fpu, "KVM_SET_FPU");
+    xioctl(vcpu, KVM_SET_VCPU_EVENTS, &reset_events, "KVM_SET_VCPU_EVENTS");
+}
+
+static double now_s(void)
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return (double)t.tv_sec + 1e-9 * (double)t.tv_nsec;
+}
+
+// a board reset (also at start): its end awaited, then what a CPU sees after
+// it: PAM back to 0, the BIOS ROM read again (it may have been flashed), the
+// vCPU at the reset vector; coalesced writes not yet on the bus are dropped
+// and guest RAM is kept, as DRAM keeps its content. Returns the status.
+static unsigned board_reset(struct bus *b, int vcpu, uint8_t *rom, uint64_t rom_size, uint32_t signature)
+{
+    __atomic_store_n(&ring->first, __atomic_load_n(&ring->last, __ATOMIC_ACQUIRE), __ATOMIC_RELEASE);
+    double deadline = now_s() + 5;
+    unsigned st;
+    while ((st = b->status(b)) & BUS_RESET) {
+        if (now_s() > deadline) die("the board stays in reset (5 s), or the cartridge does not report");
+        usleep(10);
+    }
+    bus_access(b, BUS_MEM, (uint32_t)(0x100000000ull - rom_size), rom, (int)rom_size, 0);
+    shadow_reset();
+    cpu_reset(vcpu, signature, st & BUS_LOW_VECTOR);
+    fprintf(stderr, "c2-vmm: board reset, reset vector %s\n", st & BUS_LOW_VECTOR ? "000ffff0" : "fffffff0");
+    return st;
+}
+
 static void on_tick(int sig)
 {
     (void)sig;
@@ -182,15 +229,18 @@ int main(int argc, char **argv)
     uint8_t *ram = alloc_mem(ram_size);
     add_slot(vm, 0, 0, 0xa0000, ram, 0);
     add_slot(vm, 1, 0x100000, ram_size - 0x100000, ram + 0x100000, 0);
-    // the BIOS ROM, read once from the board, at the top of 4 GB
+    // the BIOS ROM, read from the board at each reset, at the top of 4 GB
     // (read-only: writes exit to the bus)
     uint8_t *rom = alloc_mem(rom_size);
-    bus_access(b, BUS_MEM, (uint32_t)(0x100000000ull - rom_size), rom, (int)rom_size, 0);
     add_slot(vm, 2, 0x100000000ull - rom_size, rom_size, rom, 1);
     shadow_init(vm, ram, rom, rom_size);
 
     int vcpu = xioctl(vm, KVM_CREATE_VCPU, 0, "KVM_CREATE_VCPU");
     set_cpuid(kvm, vcpu, signature);
+    xioctl(vcpu, KVM_GET_REGS, &reset_regs, "KVM_GET_REGS");
+    xioctl(vcpu, KVM_GET_SREGS, &reset_sregs, "KVM_GET_SREGS");
+    xioctl(vcpu, KVM_GET_FPU, &reset_fpu, "KVM_GET_FPU");
+    xioctl(vcpu, KVM_GET_VCPU_EVENTS, &reset_events, "KVM_GET_VCPU_EVENTS");
     int run_size = xioctl(kvm, KVM_GET_VCPU_MMAP_SIZE, 0, "KVM_GET_VCPU_MMAP_SIZE");
     struct kvm_run *run = mmap(NULL, run_size, PROT_READ | PROT_WRITE, MAP_SHARED, vcpu, 0);
     if (run == MAP_FAILED) die("mmap kvm_run: %s", strerror(errno));
@@ -212,10 +262,15 @@ int main(int argc, char **argv)
     if (setitimer(ITIMER_REAL, &tick, NULL)) die("setitimer: %s", strerror(errno));
     atexit(report);
 
+    board_reset(b, vcpu, rom, rom_size, signature);
+    unsigned halt_reset = 0;   // a board reset seen while halted
     for (;;) {
+        unsigned st = b->status(b) | halt_reset;
+        halt_reset = 0;
+        if (st & BUS_RESET) st = board_reset(b, vcpu, rom, rom_size, signature);
         // INTR: acknowledged on the bus once the guest can take it
         run->request_interrupt_window = 0;
-        if (b->intr(b)) {
+        if (st & BUS_INTR) {
             if (run->ready_for_interrupt_injection) {
                 struct kvm_interrupt irq = { .irq = b->inta(b) };
                 xioctl(vcpu, KVM_INTERRUPT, &irq, "KVM_INTERRUPT");
@@ -263,11 +318,14 @@ int main(int argc, char **argv)
         case KVM_EXIT_IRQ_WINDOW_OPEN:
         case KVM_EXIT_INTR:
             break;
-        case KVM_EXIT_HLT:
-            // no in-kernel irqchip: HLT returns here; wait for INTR
+        case KVM_EXIT_HLT: {
+            // no in-kernel irqchip: HLT returns here; wait for INTR (or a reset)
             if (!run->if_flag) die("HLT with interrupts disabled");
-            while (!b->intr(b)) usleep(10);
+            unsigned hst;
+            while (!((hst = b->status(b)) & (BUS_INTR | BUS_RESET))) usleep(10);
+            halt_reset = hst & BUS_RESET;
             break;
+        }
         case KVM_EXIT_SHUTDOWN:
             die("guest shutdown (triple fault)");
         case KVM_EXIT_FAIL_ENTRY:
