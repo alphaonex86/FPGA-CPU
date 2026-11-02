@@ -94,11 +94,21 @@ filtering), AGP cards.
   A[35:32]#, DEP[7:0]#, AP[1:0]#, AERR#, BERR#, BINIT# + free M8 = CLK0n,
   a clock input); RP#/RSP# and the free K19/K20 are 1.35 V (bank 7A),
   below a 3.3 V receiver's VIH, so they stay off the link.
-- Cartridge header J5: 2 x 20, 2.54 mm (the Puzhi card's 40-pin format,
-  catalog: "40P x 2 ports, 62 single-ended"): odd pins signals, even pins
-  GND, so every ribbon wire runs next to a ground. Its exact pin order must
-  follow the card header's power / ground pins (the card's manual, not in
-  the catalog): open; a mismatch would short a signal to a card supply.
+- Cartridge header J5: 2 x 20, 2.54 mm, pin order of the ALINX 40-pin
+  expansion header (AX7035B manual sec. 17, J9/J10: 1 GND, 2 +5 V, 3-36
+  I/O behind 33 ohm, 37-38 GND, 39-40 +3.3 V): the 18 signals on odd pins
+  3-35, even pins 4-36 GND on the cartridge (the card drives those I/O
+  low: returns next to every signal wire), 1/37/38 GND, 2/39/40 not
+  connected (no supply crosses the cable). A card with another header
+  order (Puzhi: "40P x 2 ports, 62 single-ended", order unpublished) needs
+  its manual checked first: a mismatch would short a signal to a card
+  supply.
+- Card candidates (nothing bought, operator 2026-11-02; the bridge needs
+  little logic, an XC7A35T is plenty and in free Vivado): ALINX AX7A035B
+  (XC7A35T, PCIe 2.0, 2 x 40-pin ALINX headers, public manual; ~302 EUR
+  ex VAT at botland.store) or Puzhi PZ-A735T-KFB (the PZ-A7200T-KFB board
+  with an XC7A35T, ~240-280 USD: Alibaba sample, Puzhi eBay store 279.99;
+  header order unpublished). Buy from AliExpress or Alibaba.
 - Down (card -> cartridge): clock (to M8) + 8 data; up: clock + 8 data.
   Bytes framed in-band (idle 0x00, a frame header byte with type and
   length); 50 MHz SDR first: 50 MB/s each way (DDR later if the cable
