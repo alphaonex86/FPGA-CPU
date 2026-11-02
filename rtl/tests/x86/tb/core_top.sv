@@ -33,9 +33,9 @@ module core_top (
     logic [31:0] st_wait_kind [8];   // head waits by the head uop kind (kind_t)
     logic [31:0] st_dr [4];          // decode redirects: not followed, falsely taken, target, cut
     logic [31:0] st_mp_wait, st_refill;   // flushing branch: result -> retire; flush -> next retire
-    logic [31:0] st_fl [4];               // flushes: P-predicted Jcc, indirect / RET, other branch, K_DF
+    logic [31:0] st_fl [5];               // flushes: P-predicted Jcc, indirect, RET, other branch, K_DF
     logic [31:0] mp_cycle [ROB_N];
-    logic        ind [ROB_N];       // the ROB entry is an indirect branch (RET, CALL / JMP r/m)
+    logic        ind [ROB_N];       // the ROB entry is an indirect branch (RET: predicted taken)
     logic        refill;
 
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000),
@@ -79,7 +79,7 @@ module core_top (
             insns <= 32'd0;
             {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush, st_mp_wait, st_refill} <= '0;
             refill <= 1'b0;
-            for (int i = 0; i < 4; i++) st_fl[i] <= 32'd0;
+            for (int i = 0; i < 5; i++) st_fl[i] <= 32'd0;
             for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
             for (int i = 0; i < 4; i++) st_dr[i] <= 32'd0;
         end else begin
@@ -117,7 +117,7 @@ module core_top (
                 logic [TAG_W-1:0] t;
                 t = core.rob_head + TAG_W'(core.r_n - 2'd1);
                 st_mp_wait <= st_mp_wait + cycles - mp_cycle[t];
-                c = core.rob[t].kind == K_DF ? 3 : core.rob[t].bp_jcc ? 0 : ind[t] ? 1 : 2;
+                c = core.rob[t].kind == K_DF ? 4 : core.rob[t].bp_jcc ? 0 : ind[t] ? (core.rob[t].bp_taken ? 2 : 1) : 3;
                 st_fl[c] <= st_fl[c] + 32'd1;
             end
             if (core.flush) refill <= 1'b1;
@@ -174,7 +174,7 @@ module core_top (
             $display("stats: flushing branch result -> retire %0d cycles, flush -> next retire %0d cycles",
                      st_mp_wait, st_refill);
         if (stats)
-            $display("stats: flushes: Jcc %0d, indirect / RET %0d, other branch %0d, DF %0d",
-                     st_fl[0], st_fl[1], st_fl[2], st_fl[3]);
+            $display("stats: flushes: Jcc %0d, indirect %0d, RET %0d, other branch %0d, DF %0d",
+                     st_fl[0], st_fl[1], st_fl[2], st_fl[3], st_fl[4]);
     end
 endmodule

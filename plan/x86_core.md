@@ -133,6 +133,11 @@ replicated per read port plus a live-value table.
    CoreMark 3,908 -> 2,243, c1 273 -> 158; 3.444 CoreMark/MHz (290,354
    cycles per iteration), IPC c1 1.292, c2 1.125, c4 1.079.
    `rtl/tools/x86_synth.sh` compiles the core (sources in `x86_files.sh`).
+   CoreMark run with TAGE: flushes Jcc 2,243, indirect CALL/JMP 424 (not
+   predicted), RET 159; head waits LD 32,929, ALU 28,284, MD 17,167, ST
+   16,942; decode redirects 13,281 (taken not followed 8,358): BTB 128
+   entries IPC 1.127 -> 1.138, 512 -> 1.149 (the BTB would move to M10K,
+   read with the next fetch address).
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div
