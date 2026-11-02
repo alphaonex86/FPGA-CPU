@@ -37,7 +37,7 @@ def main():
         return "$%d" % rnd.choice([rnd.randrange(-128, 128), rnd.randrange(-2**lim, 2**lim)])
 
     def insn():
-        k = rnd.randrange(28)
+        k = rnd.randrange(30)
         x = rnd.choice("lllbw")   # operand size suffix of forms 0-9
         a = rnd.choice(ALU) + x
         if k == 0:
@@ -141,6 +141,14 @@ def main():
             if rnd.randrange(2):
                 return ["%s %s, %s" % (op, sreg(y), sreg(y))]
             return ["%s $%d, %s" % (op, rnd.randrange(256), rnd.choice([sreg(y), mem()]))]
+        if k == 27:
+            return [rnd.choice(["clc", "stc", "cmc", "sahf", "lahf"])]
+        if k == 28:   # XADD / CMPXCHG, LOCK on memory
+            y = rnd.choice("lwb")
+            if rnd.randrange(2):
+                return ["%s%s%s %s, %s" % (rnd.choice(["", "lock "]), rnd.choice(["xadd", "cmpxchg"]), y,
+                                          sreg(y), mem())]
+            return ["%s%s %s, %s" % (rnd.choice(["xadd", "cmpxchg"]), y, sreg(y), sreg(y))]
         return ["nop"]
 
     def run(n):
@@ -167,11 +175,14 @@ def main():
             body = run(rnd.randrange(1, 6))
             if rnd.randrange(2):   # frame pointer: LEAVE restores ESP, EBP
                 body = ["push %ebp", "mov %esp, %ebp", *body, "pushl $7", "leave"]
-            subs.append(["S%d:" % l, *body, "rep ret" if rnd.randrange(4) == 0 else "ret"])
+            pop = rnd.choice([0, 0, 4, 8])   # RET imm16: the caller pushes them
+            ret = "ret $%d" % pop if pop else "rep ret" if rnd.randrange(4) == 0 else "ret"
+            subs.append(["S%d:" % l, *body, ret])
+            args = ["pushl $%d" % i for i in range(pop // 4)]
             if rnd.randrange(2):
-                return ["call S%d" % l]
+                return [*args, "call S%d" % l]
             r = reg()
-            return ["lea S%d, %s" % (l, r), "call *%s" % r]
+            return [*args, "lea S%d, %s" % (l, r), "call *%s" % r]
         if k == 3:
             l, r = next(labels), reg()
             return ["lea L%d, %s" % (l, r), "jmp *%s" % r, *run(2), "L%d:" % l]

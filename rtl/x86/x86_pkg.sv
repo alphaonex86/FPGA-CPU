@@ -23,6 +23,7 @@ package x86_pkg;
                               A_SHL, A_SHR, A_SAR, A_ROL, A_ROR, A_NOT, A_NEG,
                               A_SETCC, A_CMOV, A_SIGN, A_SHLD, A_SHRD,
                               A_BSF, A_BSR, A_BSWAP, A_BT, A_BTS, A_BTR, A_BTC,
+                              A_CLC, A_STC, A_CMC, A_SAHF, A_LAHF,
                               A_MUL, A_IMUL, A_MULH, A_IMULH, A_IMUL2,
                               A_DIV, A_IDIV, A_DIVR, A_IDIVR} aop_t;
 

@@ -68,12 +68,14 @@ replicated per read port plus a live-value table.
    gshare + static BTFN at decode / P, a 32-entry fetch BTB that learns decode's taken
    decisions, an 8-entry return stack; mispredicts flush the cycle after
    they retire. Subset: ALU/shift/rotate/SHLD/SHRD/BSF/BSR/BSWAP/BT/BTS/BTR/BTC
-   (a register bit offset on a register only)/SETcc/CMOVcc/
+   (a register bit offset on a register only)/XADD/CMPXCHG/CLC/STC/CMC/
+   SAHF/LAHF/SETcc/CMOVcc/
    MUL/IMUL/DIV/IDIV on 8/16/32-bit operands (QEMU flag semantics), loads/stores,
    stack, branches (LOOP/LOOPE/LOOPNE: ECX - 1 written, taken when ECX != 1;
    JECXZ), [REP] MOVS/STOS/LODS, CMPS, [REPE/REPNE] SCAS (REP CMPS would
    need 7 uops: K_ILL), DF 0 / 1 (decode reads the architectural DF; a
-   CLD/STD that changes it retires as K_DF and flushes); prefixes 66, F3, F2 and
+   CLD/STD that changes it retires as K_DF and flushes), RET imm16;
+   prefixes 66, F3, F2, F0 (LOCK: a no-op on one core; bus LOCK# in M8) and
    CS/DS/ES/SS. A REP iteration is the instruction looping on itself: uop 0
    leaves when ECX = 0 (else ECX -= 1), decode predicts the loop, the BTB
    learns it; up to 6 uops per instruction (P pushes a long slot 0 in two

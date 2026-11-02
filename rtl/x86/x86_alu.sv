@@ -11,7 +11,8 @@
 // the lowest / highest set bit of b, a when b is 0; flags of a logic op on b
 // (QEMU CC_OP_LOGIC). BT/BTS/BTR/BTC: CF = bit b mod width of a, the other
 // flags kept (QEMU with one instruction per block: gen_compute_eflags, CF
-// replaced).
+// replaced). CLC/STC/CMC, SAHF (SF ZF AF PF CF from a[7:0]), LAHF (y =
+// SF ZF 0 AF 0 PF 1 CF).
 module x86_alu
     import x86_pkg::*;
 (
@@ -133,6 +134,15 @@ module x86_alu
             A_CMOV:  y = cond_taken(cond, fin) ? b : a;
             A_SIGN:  y = {32{sz == SZ16 ? b[15] : b[31]}};
             A_BSWAP: y = {a[7:0], a[15:8], a[23:16], a[31:24]};
+            A_CLC, A_STC, A_CMC: begin
+                f = fin;
+                f.cf = op == A_STC || op == A_CMC && !fin.cf;
+            end
+            A_SAHF: begin
+                f = fin;
+                {f.sf, f.zf, f.af, f.pf, f.cf} = {a[7], a[6], a[4], a[2], a[0]};
+            end
+            A_LAHF: y = {24'd0, fin.sf, fin.zf, 1'b0, fin.af, 1'b0, fin.pf, 1'b1, fin.cf};
             A_BT, A_BTS, A_BTR, A_BTC: begin
                 logic [31:0] m;
                 m = 32'd1 << (sz == SZ16 ? {1'b0, b[3:0]} : b[4:0]);

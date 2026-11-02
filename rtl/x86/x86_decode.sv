@@ -1,12 +1,13 @@
 // One x86 instruction -> up to 3 uops (plan/x86_core.md M2 subset, 32-bit
 // code; prefixes 66, CS/DS/ES/SS (no-ops in the flat model), F3 / F2 on
-// string ops, F3 on RET): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
+// string ops, F3 on RET, F0 LOCK: a no-op on one core): ALU ops 00-3D, 80/81/83, INC/DEC 40-4F + FE/FF
 // /0 /1, TEST 84/85/A8/A9/F6/F7 /0, NOT/NEG F6/F7 /2 /3, shifts and
 // rotates C0/C1/D0-D3 (not RCL/RCR), MOV 88-8B/B0-BF/C6/C7 /0,
 // SHLD/SHRD, BSF/BSR, BSWAP, BT/BTS/BTR/BTC (r/m with a register offset:
-// register only), MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, IMUL 0F AF/69/6B,
+// register only), MOVZX/MOVSX, SETcc, CMOVcc, CBW/CWDE/CWD/CDQ, XCHG, XADD,
+// CMPXCHG, CLC/STC/CMC, SAHF/LAHF, IMUL 0F AF/69/6B,
 // MUL/IMUL/DIV/IDIV F6/F7 /4-/7 (x86_muldiv), LEA, PUSH
-// r32/imm/r/m, POP r32, CALL rel32/r32, RET, LEAVE, JMP rel/r/m, Jcc
+// r32/imm/r/m, POP r32, CALL rel32/r32, RET [imm16], LEAVE, JMP rel/r/m, Jcc
 // rel8/rel32, LOOP/LOOPE/LOOPNE/JECXZ, NOP, HLT, CLD/STD (K_DF when DF
 // changes), [REP] MOVS/STOS/LODS, CMPS, [REPE/REPNE] SCAS (not REP CMPS:
 // 7 uops), up to 6 uops: uop then uop_b. Anything else is one K_ILL uop.
@@ -87,21 +88,23 @@ module x86_decode
     function automatic logic reads_flags(input aop_t a);
         return (a == A_ADC || a == A_SBB || a == A_INC || a == A_DEC || a == A_SHL || a == A_SHR
                 || a == A_SAR || a == A_ROL || a == A_ROR || a == A_SHLD || a == A_SHRD || a == A_SETCC || a == A_CMOV
-                || a == A_BT || a == A_BTS || a == A_BTR || a == A_BTC);
+                || a == A_BT || a == A_BTS || a == A_BTR || a == A_BTC
+                || a == A_CLC || a == A_STC || a == A_CMC || a == A_SAHF || a == A_LAHF);
     endfunction
 
     // d = f(src): d is read only to merge
     function automatic logic moves(input aop_t a);
         return (a == A_MOV || a == A_ZX8 || a == A_ZX16 || a == A_SX8 || a == A_SX16
-                || a == A_SIGN || a == A_SETCC);
+                || a == A_SIGN || a == A_SETCC || a == A_LAHF);
     endfunction
 
     function automatic logic writes_dst(input aop_t a);
-        return !(a == A_CMP || a == A_TEST || a == A_BT);
+        return !(a == A_CMP || a == A_TEST || a == A_BT || a == A_CLC || a == A_STC || a == A_CMC
+                 || a == A_SAHF);
     endfunction
 
     function automatic logic writes_flags(input aop_t a);
-        return !(moves(a) || a == A_NOT || a == A_CMOV || a == A_BSWAP);
+        return !(moves(a) || a == A_NOT || a == A_CMOV || a == A_BSWAP);   // LAHF: in moves
     endfunction
 
     function automatic aop_t grp2(input logic [2:0] g);
@@ -294,6 +297,54 @@ module x86_decode
         for (int j = 0; j < 2; j++) if (j < int'(no) - 1) uo[j].eop = 1'b0;
     endtask
 
+    // up to 6 uops s[0 .. c-1] -> uop, uop_b; the last one ends the instruction
+    task automatic emit(input uop_t [5:0] s, input int c, output uop_t [2:0] uo, output logic [1:0] no,
+                        output uop_t [2:0] ub, output logic [1:0] nb);
+        for (int i = 0; i < 6; i++) s[i].eop = i == c - 1;
+        uo = s[2:0];
+        no = 2'(c > 3 ? 3 : c);
+        ub = s[5:3];
+        nb = 2'(c > 3 ? c - 3 : 0);
+    endtask
+
+    // XADD r/m, reg: TMP = r/m + reg; reg = r/m; r/m = TMP. CMPXCHG r/m, reg:
+    // CMP eAX, r/m; r/m = Z ? reg : r/m; eAX = NZ ? r/m : eAX (memory: the
+    // store always writes)
+    task automatic xadd_cmpxchg(input logic is_xadd, input logic [1:0] sz, output uop_t [5:0] s,
+                                output int c);
+        logic [3:0] rg, rr;
+        logic hg, hr;
+        uop_t st;
+        rg = gpr(reg_f, sz); hg = ghi(reg_f, sz);
+        rr = gpr(rm, sz);    hr = ghi(rm, sz);
+        st = mop; st.kind = K_ST; st.osz = sz; st.s3 = R_TMP2; st.us3 = 1'b1;
+        s = '0;
+        if (is_xadd && !mem) begin
+            s[0] = alu(A_ADD, sz, rr, hr, 1'b1, rg, hg, 32'd0); s[0].dst = R_TMP; s[0].dhi = 1'b0;
+            s[1] = alu(A_MOV, sz, rg, hg, 1'b1, rr, hr, 32'd0);
+            s[2] = alu(A_MOV, sz, rr, hr, 1'b1, R_TMP, 1'b0, 32'd0);
+            c = 3;
+        end else if (is_xadd) begin
+            s[0] = load_tmp(sz);
+            s[1] = alu(A_ADD, sz, R_TMP, 1'b0, 1'b1, rg, hg, 32'd0); s[1].dst = R_TMP2;
+            s[2] = alu(A_MOV, sz, rg, hg, 1'b1, R_TMP, 1'b0, 32'd0);
+            s[3] = st;
+            c = 4;
+        end else if (!mem) begin
+            s[0] = alu(A_CMP, sz, 4'd0, 1'b0, 1'b1, rr, hr, 32'd0);
+            s[1] = alu(A_CMOV, sz, rr, hr, 1'b1, rg, hg, 32'd0); s[1].cond = 4'h4;
+            s[2] = alu(A_CMOV, sz, 4'd0, 1'b0, 1'b1, rr, hr, 32'd0); s[2].cond = 4'h5;
+            c = 3;
+        end else begin
+            s[0] = load_tmp(sz);
+            s[1] = alu(A_CMP, sz, 4'd0, 1'b0, 1'b1, R_TMP, 1'b0, 32'd0);
+            s[2] = alu(A_CMOV, sz, R_TMP, 1'b0, 1'b1, rg, hg, 32'd0); s[2].cond = 4'h4; s[2].dst = R_TMP2;
+            s[3] = st;
+            s[4] = alu(A_CMOV, sz, 4'd0, 1'b0, 1'b1, R_TMP, 1'b0, 32'd0); s[4].cond = 4'h5;
+            c = 5;
+        end
+    endtask
+
     // XCHG r/m, reg: TMP <- reg; reg <- r/m; r/m <- TMP
     task automatic xchg(input logic [1:0] sz, input logic [2:0] r, input logic [2:0] m,
                         input logic m_mem, output uop_t [2:0] uo, output logic [1:0] no);
@@ -348,7 +399,7 @@ module x86_decode
                 p66 = p66 || x == 8'h66;
                 prep = prep || x == 8'hF3;
                 prepne = prepne || x == 8'hF2;
-                pbad = pbad || !(x == 8'h66 || x == 8'hF3 || x == 8'hF2 || x == 8'h26 || x == 8'h2E || x == 8'h36
+                pbad = pbad || !(x == 8'h66 || x == 8'hF3 || x == 8'hF2 || x == 8'hF0 || x == 8'h26 || x == 8'h2E || x == 8'h36
                                  || x == 8'h3E);
             end
         ib = bytes >> (8 * npfx);
@@ -410,6 +461,8 @@ module x86_decode
 
         uop[0] = u;
         uop[0].kind = K_ILL;
+        uop_b = '0;
+        n_b = 2'd0;
         casez (op)
             8'b00???000: alu_modrm(aop, SZ8, 1'b1, 1'b1, 32'd0, uop, n);
             8'b00???001: alu_modrm(aop, wsz, 1'b1, 1'b1, 32'd0, uop, n);
@@ -494,6 +547,12 @@ module x86_decode
                         end
                 end
                 8'hAF: imul2(1'b1, 32'd0, uop, n);
+                8'hC0, 8'hC1, 8'hB0, 8'hB1: begin   // XADD / CMPXCHG r/m, reg
+                    uop_t [5:0] s;
+                    int c;
+                    xadd_cmpxchg(op2[6], op2[0] ? wsz : SZ8, s, c);
+                    emit(s, c, uop, n, uop_b, n_b);
+                end
                 8'b101?_?011: if (!mem)   // A3/AB/B3/BB BT/BTS/BTR/BTC r/m, reg
                     alu_modrm(op2[4:3] == 2'd0 ? A_BT : op2[4:3] == 2'd1 ? A_BTS : op2[4:3] == 2'd2 ? A_BTR : A_BTC,
                               wsz, 1'b1, 1'b1, 32'd0, uop, n);
@@ -527,6 +586,10 @@ module x86_decode
                 uop[0].dst = {1'b0, reg_f}; uop[0].wdst = 1'b1;
             end
             8'h90: uop[0].kind = K_ALU;   // NOP: A_ADD writing nothing
+            8'hF5: uop[0] = alu(A_CMC, SZ32, 4'd0, 1'b0, 1'b0, 4'd0, 1'b0, 32'd0);
+            8'hF8, 8'hF9: uop[0] = alu(op[0] ? A_STC : A_CLC, SZ32, 4'd0, 1'b0, 1'b0, 4'd0, 1'b0, 32'd0);
+            8'h9E: uop[0] = alu(A_SAHF, SZ8, 4'd0, 1'b1, 1'b0, 4'd0, 1'b0, 32'd0);   // a = AH
+            8'h9F: uop[0] = alu(A_LAHF, SZ8, 4'd0, 1'b1, 1'b0, 4'd0, 1'b0, 32'd0);   // AH = flags
             8'hFC, 8'hFD: begin           // CLD / STD: a NOP unless DF changes
                 uop[0].kind = op[0] == df ? K_ALU : K_DF;
                 uop[0].dst = {3'd0, op[0]};
@@ -541,11 +604,11 @@ module x86_decode
             8'b10110???: uop[0] = alu(A_MOV, SZ8, gpr(op[2:0], SZ8), ghi(op[2:0], SZ8),
                                       1'b0, 4'd0, 1'b0, sx8(1));
             8'b10111???: uop[0] = alu(A_MOV, wsz, {1'b0, op[2:0]}, 1'b0, 1'b0, 4'd0, 1'b0, imm_at(1, wsz));
-            8'hC3: if (!p66) begin   // RET: LD TMP <- [ESP]; ESP += 4; JMP TMP
+            8'hC3, 8'hC2: if (!p66) begin   // RET [imm16]: LD TMP <- [ESP]; ESP += 4 [+ imm16]; JMP TMP
                 uop[0] = u; uop[0].kind = K_LD; uop[0].eop = 1'b0;
                 uop[0].dst = R_TMP; uop[0].wdst = 1'b1;
                 uop[0].s1 = R_ESP; uop[0].us1 = 1'b1;
-                uop[1] = esp_add(32'd4); uop[1].eop = 1'b0;
+                uop[1] = esp_add(32'd4 + (op[0] ? 32'd0 : {16'd0, b(2), b(1)})); uop[1].eop = 1'b0;
                 uop[2] = jmp_ind(R_TMP);
                 uop[2].pred_taken = 1'b1;
                 n = 2'd3;
@@ -618,8 +681,6 @@ module x86_decode
         // string ops: [REP] uop 0 leaves for next_eip when ECX is 0, else
         // ECX -= 1; one iteration follows and the instruction continues at
         // itself (predicted, the BTB learns the loop)
-        uop_b = '0;
-        n_b = 2'd0;
         if (op[7:4] == 4'hA && (op[3:2] == 2'b01 || op[3:1] >= 3'b101)) begin
             uop_t [6:0]  s;
             uop_t        m;
@@ -682,19 +743,13 @@ module x86_decode
                 c = c + 1;
                 if (c > 6) pbad = 1'b1;   // REP CMPS
             end
-            for (int i = 0; i < 6; i++) begin
-                s[i].eop = i == c - 1;
-                if (prep || prepne) s[i].next_eip = eip;
-            end
-            uop = s[2:0];
-            n = 2'(c > 3 ? 3 : c);
-            uop_b = s[5:3];
-            n_b = 2'(c > 3 ? c - 3 : 0);
+            if (prep || prepne) for (int i = 0; i < 6; i++) s[i].next_eip = eip;
+            emit(s[5:0], c, uop, n, uop_b, n_b);
             redirect = prep || prepne;
             target = eip;
         end else if (prepne || prep && op != 8'hC3) pbad = 1'b1;   // REP RET is RET
         call = !p66 && (op == 8'hE8 || op == 8'hFF && reg_f == 3'd2 && !mem);
-        ret = !p66 && op == 8'hC3;
+        ret = !p66 && (op == 8'hC3 || op == 8'hC2);
         if (fault || pbad) begin
             uop = '0;
             uop[0] = u;
