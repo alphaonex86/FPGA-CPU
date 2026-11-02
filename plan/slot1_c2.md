@@ -103,9 +103,9 @@ filtering), AGP cards.
   every signal wire), 1/37/38 GND, 2/39/40 not connected (no supply
   crosses the cable). A card with another header order needs its manual
   checked first: a mismatch would short a signal to a card supply.
-- Card (nothing bought; operator 2026-11-02: one order ~2026-11-16,
+- Card (decided by the operator 2026-11-02: AX7A035B, one order ~2026-11-16,
   arrival ~2026-12-16): ALINX AX7A035B (XC7A35T-2FGG484I, PCIe 2.0 x2,
-  one usable 40-pin header J11, public manual; ~211-299 USD), preferred
+  one usable 40-pin header J11, public manual; ~211-299 USD), chosen
   over Puzhi PZ-A735T-KFB (239 USD Alibaba, header order only in the
   docs sent after purchase). Details and seller questions:
   `FPGAlist/c2_cards/README.md`.

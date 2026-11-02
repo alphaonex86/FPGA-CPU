@@ -7,7 +7,7 @@ drives the cable link to the Slot 1 cartridge (J5). An XC7A35T is enough
 Purchase plan (operator 2026-11-02): one order around 2026-11-16, arrival
 expected around 2026-12-16; AliExpress first, then Alibaba.
 
-## Choice: ALINX AX7A035B (public manual) over Puzhi PZ-A735T-KFB
+## Choice: ALINX AX7A035B (operator 2026-11-02) over Puzhi PZ-A735T-KFB
 
 | | ALINX AX7A035B | Puzhi PZ-A735T-KFB |
 |---|---|---|
