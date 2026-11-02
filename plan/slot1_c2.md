@@ -95,20 +95,20 @@ filtering), AGP cards.
   a clock input); RP#/RSP# and the free K19/K20 are 1.35 V (bank 7A),
   below a 3.3 V receiver's VIH, so they stay off the link.
 - Cartridge header J5: 2 x 20, 2.54 mm, pin order of the ALINX 40-pin
-  expansion header (AX7035B manual sec. 17, J9/J10: 1 GND, 2 +5 V, 3-36
-  I/O behind 33 ohm, 37-38 GND, 39-40 +3.3 V): the 18 signals on odd pins
-  3-35, even pins 4-36 GND on the cartridge (the card drives those I/O
-  low: returns next to every signal wire), 1/37/38 GND, 2/39/40 not
-  connected (no supply crosses the cable). A card with another header
-  order (Puzhi: "40P x 2 ports, 62 single-ended", order unpublished) needs
-  its manual checked first: a mismatch would short a signal to a card
-  supply.
-- Card candidates (nothing bought, operator 2026-11-02; the bridge needs
-  little logic, an XC7A35T is plenty and in free Vivado): ALINX AX7A035B
-  (XC7A35T, PCIe 2.0, 2 x 40-pin ALINX headers, public manual; ~302 EUR
-  ex VAT at botland.store) or Puzhi PZ-A735T-KFB (the PZ-A7200T-KFB board
-  with an XC7A35T, ~240-280 USD: Alibaba sample, Puzhi eBay store 279.99;
-  header order unpublished). Buy from AliExpress or Alibaba.
+  expansion header (AX7A035B manual REV 1.1 sec. 3.11, J11: 1 GND, 2 +5 V,
+  3-36 I/O behind 33 ohm in bank 16, 37-38 GND, 39-40 +3.3 V; table in
+  `FPGAlist/c2_cards/README.md`): the 18 signals on odd pins 3-35 + pin 36,
+  the up clock on 19 (card MRCC input), even pins 4-34 GND on the
+  cartridge (the card bitstream drives those I/O low: a return next to
+  every signal wire), 1/37/38 GND, 2/39/40 not connected (no supply
+  crosses the cable). A card with another header order needs its manual
+  checked first: a mismatch would short a signal to a card supply.
+- Card (nothing bought; operator 2026-11-02: one order ~2026-11-16,
+  arrival ~2026-12-16): ALINX AX7A035B (XC7A35T-2FGG484I, PCIe 2.0 x2,
+  one usable 40-pin header J11, public manual; ~211-299 USD), preferred
+  over Puzhi PZ-A735T-KFB (239 USD Alibaba, header order only in the
+  docs sent after purchase). Details and seller questions:
+  `FPGAlist/c2_cards/README.md`.
 - Down (card -> cartridge): clock (to M8) + 8 data; up: clock + 8 data.
   Bytes framed in-band (idle 0x00, a frame header byte with type and
   length); 50 MHz SDR first: 50 MB/s each way (DDR later if the cable
@@ -128,13 +128,12 @@ filtering), AGP cards.
 ## Next
 
 0. Cartridge PCB (D32): S6 netlist (TA_ nets, 17 0-ohm RL01-RL17, J5),
-   S7 placement, S8 re-route; J5 pin order once the card header pinout
-   is known.
+   S7 placement, S8 re-route; J5 in the ALINX J11 order.
 1. Bridge protocol: burst write (framebuffer pages) in bus.h; VMM
    framebuffer mirror (dirty logging). Done: string I/O as one REP
    command through a 4 KB BAR window (a sector: ~64 8-byte window reads
    instead of 256 read round trips; DMA into host memory later).
-2. FPGA bridge v0 on the Puzhi board: PCIe 7 Series IP (x2 Gen2) + BAR0
+2. FPGA bridge v0 on the AX7A035B: PCIe 7 Series IP (x2 Gen2) + BAR0
    block + a loopback bus target (scratch RAM, POST port), then measure
    the N100 round trip per cycle (goal < 2-3 us, D28).
 3. P6 bus agent: request/response phases, snoop stall (HIT# + HITM#), DMA
