@@ -66,6 +66,7 @@ module x86_core
     logic [31:0]          ras [RAS_N];      // return stack, decode-time, may be wrong
     logic [$clog2(RAS_N)-1:0] ras_sp;       // top = ras[ras_sp - 1]
     logic [2:0]           d_call, d_ret, d_ind;
+    logic [2:0]           p_mis_t, p_mis_nt;   // frontend next != taken target / fall-through
     logic [2:0]           p_valid, p_redirect, p_call, p_ret, p_ind, p_mis;
     uop_t [2:0][2:0]      p_uop, p_uop_ret;
     logic [2:0][1:0]      p_n;
@@ -136,7 +137,8 @@ module x86_core
                 p_uop_ret[k][0].pred_taken = p_dir[k];
                 p_uop_ret[k][0].imm2 = 32'h4000;   // bit 14: P-predicted
             end
-            p_mis[k] = p_want[k] != p_next[k];
+            // mismatches precomputed at the load: dir only selects (timing)
+            p_mis[k] = p_ret[k] ? p_want[k] != p_next[k] : !p_ind[k] && (p_dir[k] ? p_mis_t[k] : p_mis_nt[k]);
             p_take[k] = p_valid[k] && !stop && !(k != 0 && p_lk[k]);
             if (p_valid[k] && !stop && k != 0 && p_lk[k]) begin
                 p_redir = 1'b1;
@@ -266,6 +268,9 @@ module x86_core
             p_next <= x_next;
             for (int k = 0; k < 3; k++) begin
                 p_seq[k] <= x_eip[k] + 32'(x_len[k]);
+                p_mis_nt[k] <= x_eip[k] + 32'(x_len[k]) != x_next[k];
+                p_mis_t[k] <= (d_uop[k][0].kind == K_BR && !d_uop[k][0].uncond && !d_uop[k][0].ecxz
+                               ? d_uop[k][0].imm : d_target[k]) != x_next[k];
                 p_lk[k] <= d_n_b[k] != 2'd0;
                 p_jcc[k] <= d_uop[k][0].kind == K_BR && !d_uop[k][0].uncond && !d_uop[k][0].ecxz;
             end
@@ -285,7 +290,7 @@ module x86_core
     end
 
     x86_tage tage (.clk(clk), .rst(rst), .look(dec_take), .look_pc(x_eip), .p_busy(p_valid != 3'd0),
-                   .btfn(p_redirect), .dir(tg_dir), .p_push(p_push), .push(p_take & p_jcc),
+                   .btfn(p_redirect), .dir(tg_dir), .p_push(p_push), .jcc(p_jcc), .push(p_take & p_jcc),
                    .room(tg_room), .flush(flush), .ret(tg_ret), .ret_taken(tg_taken));
 
 

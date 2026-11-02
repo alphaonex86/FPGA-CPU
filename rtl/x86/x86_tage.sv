@@ -19,7 +19,8 @@ module x86_tage
     input  logic [2:0]       btfn,        // P: static direction of slot k
     output logic [2:0]       dir,         // P: predicted direction of slot k
     input  logic             p_push,      // P pushes its group ...
-    input  logic [2:0]       push,        // ... with these slots' Jcc, in order
+    input  logic [2:0]       jcc,         // ... whose Jcc slots are these (queue positions)
+    input  logic [2:0]       push,        // ... of which these are pushed (a prefix)
     output logic             room,        // the queue takes a group's 3 Jcc
     input  logic             flush,
     input  logic [2:0]       ret,         // retired queued Jcc, in order
@@ -216,19 +217,27 @@ module x86_tage
             gh_prev <= rgh;
             qt <= qh;
         end else if (p_push) begin
-            logic [GH-1:0] h;
+            // entries at positions fixed by jcc, only the count by push (timing)
             logic [QW:0] t;
-            h = gh;
+            logic [2:0]  p;   // predictions of the Jcc slots, in order
+            logic [1:0]  n;
             t = qt;
+            p = '0;
             for (int k = 0; k < 3; k++)
-                if (push[k]) begin
-                    h = {h[GH-2:0], m[k].pred};
+                if (jcc[k]) begin
                     bmq[t[QW-1:0]] <= m[k];
+                    p[2'(t - qt)] = m[k].pred;
                     t = t + 1'b1;
                 end
+            n = 2'(push[0]) + 2'(push[1]) + 2'(push[2]);
             gh_prev <= gh;
-            gh <= h;
-            qt <= t;
+            case (n)
+                2'd1: gh <= {gh[GH-2:0], p[0]};
+                2'd2: gh <= {gh[GH-3:0], p[0], p[1]};
+                2'd3: gh <= {gh[GH-4:0], p[0], p[1], p[2]};
+                default: ;
+            endcase
+            qt <= qt + (QW + 1)'(n);
         end
     end
 endmodule
