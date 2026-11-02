@@ -1,4 +1,4 @@
-# Slot 1 C2 bench PCIe card candidates (plan/slot1_c2.md) — fetch with ../../fetch.sh
+# Slot 1 C2 bench PCIe card documents, versioned offline copies (provenance only; ../../fetch.sh restores a lost file while the link lives)
 puzhi/puzhi_product_guide_2026.pdf https://macrogroup.ru/upload/iblock/a34/nyq0t24opo1rumzac89f60pe6kaxruy6/Puzhi-Product-Guide-ARM-FPGA-Solution-Provider_EN_Macro_Group_2026.pdf
 puzhi/puzhi_product_guide_2025.pdf https://macrogroup.ru/upload/iblock/5e3/o5hthn50zok4i0zuydafulso6pvlde0u/2025-PuZhi_web.pdf
 alinx/AX7A035B_user_manual.pdf https://botland.com.pl/img/cms/products_29039/AX7A035B%20user%20manual.pdf

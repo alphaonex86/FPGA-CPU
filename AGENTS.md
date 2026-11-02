@@ -78,6 +78,8 @@ chipset, same sockets; source of `sockets/kicad/`).
 ## Rules
 
 - Everything on disk is English.
+- Every document used is kept offline in the tree, never only as a link: seller and
+  hardware-specific links die fast (operator, 2026-11-02).
 - Slot 1 / Socket 370 FSB may run at 66 MHz when that gives a large benefit
   (board RAM only for DMA) (operator, 2026-11-01).
 - CPU goal is maximum performance inside the selected Cyclone V: large rewrites,

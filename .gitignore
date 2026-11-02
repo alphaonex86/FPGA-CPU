@@ -5,7 +5,6 @@ FPGAlist/*/models/
 FPGAlist/*/boards/
 FPGAlist/*/reference/
 FPGAlist/*/software/*
-FPGAlist/c2_cards/*/
 !FPGAlist/*/software/SHA1SUMS
 sockets/socket*/**/*.pdf
 sockets/parts/

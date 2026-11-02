@@ -2,7 +2,8 @@
 
 The card holds the PCIe endpoint + BAR0 block (`sw/c2-vmm/bus.h`) and
 drives the cable link to the Slot 1 cartridge (J5). An XC7A35T is enough
-(free Vivado). Documents: `../../fetch.sh sources.txt` (not versioned).
+(free Vivado). All documents are kept here, versioned (seller links die
+fast); `sources.txt` only records where each came from.
 
 Purchase plan (operator 2026-11-02): one order around 2026-11-16, arrival
 expected around 2026-12-16; AliExpress first, then Alibaba.
