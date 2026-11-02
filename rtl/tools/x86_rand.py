@@ -115,15 +115,19 @@ def main():
             cnt = rnd.choice(["$%d" % rnd.randrange(32), "%cl"])
             return ["%s%s %s, %s, %s" % (rnd.choice(["shld", "shrd"]), y, cnt, sreg(y),
                                          rnd.choice([sreg(y), mem()]))]
-        if k == 24:   # [REP] MOVS / STOS / LODS (DF = 0), ESI / EDI inside the buffer
+        if k == 24:   # [REP / REPNE] MOVS / CMPS / STOS / LODS / SCAS, DF set each time
             sz = rnd.choice("bwl")
+            op = rnd.choice(["movs", "cmps", "stos", "lods", "scas"])
             n = rnd.randrange(7)
-            r = rnd.randrange(3) != 0
-            w = {"b": 1, "w": 2, "l": 4}[sz] * (n if r else 1)
-            lines = ["push %edi", "lea %d(%%edi), %%esi" % rnd.randrange(65 - w),
-                     "lea %d(%%edi), %%edi" % rnd.randrange(65 - w), "mov $%d, %%ecx" % n,
-                     ("rep " if r else "") + rnd.choice(["movs", "stos", "lods"]) + sz, "pop %edi"]
-            return (["cld"] if rnd.randrange(4) == 0 else []) + lines
+            r = op != "cmps" and rnd.randrange(3) != 0   # no REP CMPS (7 uops)
+            pre = "repne " if r and rnd.randrange(2) else "rep " if r else ""
+            d = rnd.randrange(2)
+            w = {"b": 1, "w": 2, "l": 4}[sz]
+            span = w * (n if r else 1)
+            lo, hi = (max(span - w, 0), 64 - w) if d else (0, 64 - span)
+            return ["push %edi", "lea %d(%%edi), %%esi" % rnd.randrange(lo, hi + 1),
+                    "lea %d(%%edi), %%edi" % rnd.randrange(lo, hi + 1), "mov $%d, %%ecx" % n,
+                    "std" if d else "cld", pre + op + sz, "pop %edi"]
         if k == 25:   # BSF / BSR (zero sources included), BSWAP
             if rnd.randrange(3) == 0:
                 return ["bswap %s" % reg()]

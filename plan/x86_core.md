@@ -71,7 +71,9 @@ replicated per read port plus a live-value table.
    (a register bit offset on a register only)/SETcc/CMOVcc/
    MUL/IMUL/DIV/IDIV on 8/16/32-bit operands (QEMU flag semantics), loads/stores,
    stack, branches (LOOP/LOOPE/LOOPNE: ECX - 1 written, taken when ECX != 1;
-   JECXZ), [REP] MOVS/STOS/LODS (DF = 0); prefixes 66, F3 and
+   JECXZ), [REP] MOVS/STOS/LODS, CMPS, [REPE/REPNE] SCAS (REP CMPS would
+   need 7 uops: K_ILL), DF 0 / 1 (decode reads the architectural DF; a
+   CLD/STD that changes it retires as K_DF and flushes); prefixes 66, F3, F2 and
    CS/DS/ES/SS. A REP iteration is the instruction looping on itself: uop 0
    leaves when ECX = 0 (else ECX -= 1), decode predicts the loop, the BTB
    learns it; up to 6 uops per instruction (P pushes a long slot 0 in two
@@ -104,7 +106,11 @@ replicated per read port plus a live-value table.
    ALMs, worst path wb tag -> operand bypass mux -> ALU shift -> ZF.
    With gshare: 54.95 MHz, 49,476 ALMs, 3 M10K, worst path ROB head ->
    retire valid -> gshare write index -> M10K address (then: the table
-   write registered).
+   write registered): 53.85 MHz, 49,516 ALMs (with BT, LOOP), worst path
+   wb2 tag compare -> operand bypass mux -> ALU shifter -> ZF; then the
+   bypass tags are compared in S against the buses that are wb1 / wb2 in
+   the X cycle, X keeps only the mux on registered selects (a simulation
+   check compares them with the old X-stage match).
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div

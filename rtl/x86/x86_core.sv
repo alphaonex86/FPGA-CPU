@@ -103,7 +103,7 @@ module x86_core
 
     genvar gi;
     generate for (gi = 0; gi < 3; gi = gi + 1) begin : dec
-        x86_decode d (.bytes(x_bytes[gi]), .eip(x_eip[gi]), .len(x_len[gi]), .npfx(x_npfx[gi]),
+        x86_decode d (.bytes(x_bytes[gi]), .eip(x_eip[gi]), .len(x_len[gi]), .npfx(x_npfx[gi]), .df(df),
                       .fault(x_fault[gi]),
                       .call(d_call[gi]), .ret(d_ret[gi]),
                       .uop(d_uop[gi]), .n(d_n[gi]), .uop_b(d_uop_b[gi]), .n_b(d_n_b[gi]),
@@ -136,7 +136,7 @@ module x86_core
             p_uop_ret[k][2].imm = p_ret[k] ? p_want[k] : p_uop[k][2].imm;
             if (p_jcc[k]) begin
                 p_uop_ret[k][0].pred_taken = p_dir[k];
-                p_uop_ret[k][0].imm2 = 32'({p_bctr[k], p_bidx[k]});
+                p_uop_ret[k][0].imm2 = 32'({1'b1, p_bctr[k], p_bidx[k]});   // bit 14: P-predicted
             end
             p_mis[k] = p_want[k] != p_next[k];
             p_take[k] = p_valid[k] && !stop && !(k != 0 && p_lk[k]);
@@ -180,7 +180,7 @@ module x86_core
         logic        mispred;
         logic        fault;          // divide error: halts at retire (no exceptions yet)
         logic [31:0] redirect_pc;
-        logic        bp_jcc, bp_taken;   // conditional branch, predicted taken
+        logic        bp_jcc, bp_taken;   // branch predicted by P (gshare), predicted taken
         logic [13:0] bp_info;            // its counter and table index
     } rob_t;
 
@@ -327,6 +327,7 @@ module x86_core
     // ---------------- retire ----------------
     logic [1:0]  r_n;            // uops retired this cycle
     logic        r_flush, r_halt, r_ill, r_store;
+    logic        df, r_dfw;      // direction flag (decode reads it), set by a retiring K_DF
     logic [31:0] r_flush_pc;
     logic        flush;           // r_flush one cycle later: clears the pipeline
     logic [31:0] flush_pc;
@@ -336,6 +337,7 @@ module x86_core
         r_flush = 1'b0;
         r_halt = 1'b0;
         r_ill = 1'b0;
+        r_dfw = 1'b0;
         r_store = 1'b0;
         r_flush_pc = 32'd0;
         stop = halted || flush;
@@ -349,9 +351,10 @@ module x86_core
                 if (e.kind == K_ST) r_store = 1'b1;
                 if (e.kind == K_HLT) begin r_halt = 1'b1; stop = 1'b1; end
                 if (e.kind == K_ILL || e.fault) begin r_halt = 1'b1; r_ill = 1'b1; stop = 1'b1; end
-                if (e.kind == K_BR && e.mispred) begin
+                if (e.kind == K_BR && e.mispred || e.kind == K_DF) begin
                     r_flush = 1'b1;
-                    r_flush_pc = e.redirect_pc;
+                    r_flush_pc = e.kind == K_DF ? e.next_eip : e.redirect_pc;
+                    r_dfw = e.kind == K_DF;
                     stop = 1'b1;
                 end
             end else stop = 1'b1;
@@ -435,7 +438,7 @@ module x86_core
     endfunction
 
     function automatic logic needs_rs(input kind_t k);
-        return !(k == K_HLT || k == K_ILL);
+        return !(k == K_HLT || k == K_ILL || k == K_DF);
     endfunction
 
     always_comb begin
@@ -569,7 +572,10 @@ module x86_core
     logic [NP-1:0][RS_N-1:0] req, grant;
     logic                    md_busy;
     logic [NP-1:0] ix_valid;   // issue registers
-    rs_t [NP-1:0]  ix;
+    rs_t [NP-1:0]  ix, ixn;
+    // X: uncaptured source i (3 = flags) of port p is on wb1 / wb2 bus q
+    // (the tags compared in S, off the X operand path)
+    logic [NP-1:0][3:0][NW-1:0] ix_on1, ix_on2, on1_n, on2_n;
     logic [RS_N-1:0]         md_wait;   // K_MD uops not issued yet
     logic [1:0][TAG_W-1:0] gtag;        // ALU grants: wake dependents now
 
@@ -612,41 +618,34 @@ module x86_core
         for (int p = 0; p < NP; p++)
             for (int e = 0; e < RS_N; e++)
                 grant[p][e] = req[p][e] && (req[p] & older[e]) == '0 && !halted;
-        for (int p = 0; p < 2; p++) begin
-            rs_t g;
-            g = pick(grant[p]);
-            gtag[p] = g.tag;
-        end
+        for (int p = 0; p < NP; p++) ixn[p] = pick(grant[p]);
+        for (int p = 0; p < 2; p++) gtag[p] = ixn[p].tag;
     end
 
     // ---------------- X / A: execute, address ----------------
     logic [RS_W-1:0] ix_slot;   // memory port: RS entry
 
     // operand: captured, else the producer result on wb1 / wb2
-    function automatic logic [31:0] opnd(input src_t x);
-        logic [31:0] v = x.value;
-        if (!x.captured)
-            for (int q = 0; q < NW; q++) begin
-                if (wb2_valid[q] && wb2_tag[q] == x.tag) v = wb2_value[q];
-                if (wb_valid[q] && wb_tag[q] == x.tag) v = wb_value[q];
-            end
+    function automatic logic [31:0] opnd(input logic [31:0] v, input logic [NW-1:0] on1, on2);
+        for (int q = 0; q < NW; q++) begin
+            if (on2[q]) v = wb2_value[q];
+            if (on1[q]) v = wb_value[q];
+        end
         return v;
     endfunction
 
-    function automatic flags_t fopnd(input fsrc_t x);
-        flags_t v = x.value;
-        if (!x.captured)
-            for (int q = 0; q < NW; q++) begin
-                if (wb2_valid[q] && wb2_tag[q] == x.tag) v = wb2_flags[q];
-                if (wb_valid[q] && wb_tag[q] == x.tag) v = wb_flags[q];
-            end
+    function automatic flags_t fopnd(input flags_t v, input logic [NW-1:0] on1, on2);
+        for (int q = 0; q < NW; q++) begin
+            if (on2[q]) v = wb2_flags[q];
+            if (on1[q]) v = wb_flags[q];
+        end
         return v;
     endfunction
 
-    function automatic rs_t resolve(input rs_t r);
+    function automatic rs_t resolve(input rs_t r, input logic [3:0][NW-1:0] on1, on2);
         rs_t x = r;
-        for (int i = 0; i < 3; i++) x.src[i].value = opnd(r.src[i]);
-        x.fsrc.value = fopnd(r.fsrc);
+        for (int i = 0; i < 3; i++) x.src[i].value = opnd(r.src[i].value, on1[i], on2[i]);
+        x.fsrc.value = fopnd(r.fsrc.value, on1[3], on2[3]);
         return x;
     endfunction
 
@@ -658,7 +657,7 @@ module x86_core
     rs_t [NP-1:0]     xr;    // issue registers with resolved operands
     logic [1:0][31:0] alu_y;
     flags_t [1:0]     alu_f;
-    always_comb for (int p = 0; p < NP; p++) xr[p] = resolve(ix[p]);
+    always_comb for (int p = 0; p < NP; p++) xr[p] = resolve(ix[p], ix_on1[p], ix_on2[p]);
 
     // a source value, AH..BH moved down
     function automatic logic [31:0] byte_hi(input logic [31:0] v, input logic hi);
@@ -685,8 +684,12 @@ module x86_core
                         cap = i < 3 ? ix[p].src[i].captured : ix[p].fsrc.captured;
                         t = i < 3 ? ix[p].src[i].tag : ix[p].fsrc.tag;
                         hit = 1'b0;
-                        for (int q = 0; q < NW; q++)
+                        for (int q = 0; q < NW; q++) begin
                             hit = hit || wb_valid[q] && wb_tag[q] == t || wb2_valid[q] && wb2_tag[q] == t;
+                            if (ix_on1[p][i][q] != (!cap && wb_valid[q] && wb_tag[q] == t)
+                                || ix_on2[p][i][q] != (!cap && wb2_valid[q] && wb2_tag[q] == t))
+                                $error("port %0d source %0d bus %0d: bypass select from S is wrong", p, i, q);
+                        end
                         if (!cap && !hit) $error("port %0d source %0d: tag %0d on no bypass", p, i, t);
                     end
 `endif
@@ -783,6 +786,26 @@ module x86_core
         ex_fault = '0;
         ex_fault[2] = md_done && md_fault;
     end
+
+    // bypass selects of the uops issuing now: X / M results are on wb1 in
+    // their X cycle, wb1 on wb2
+    always_comb begin
+        logic [NW-1:0][TAG_W-1:0] ex_tag;
+        ex_tag[0] = ix[0].tag;
+        ex_tag[1] = ix[1].tag;
+        ex_tag[2] = md_done ? md_tag : am_tag;
+        for (int p = 0; p < NP; p++)
+            for (int i = 0; i < 4; i++) begin
+                logic cap;
+                logic [TAG_W-1:0] t;
+                cap = i < 3 ? ixn[p].src[i].captured : ixn[p].fsrc.captured;
+                t = i < 3 ? ixn[p].src[i].tag : ixn[p].fsrc.tag;
+                for (int q = 0; q < NW; q++) begin
+                    on1_n[p][i][q] = !cap && ex_valid[q] && ex_tag[q] == t;
+                    on2_n[p][i][q] = !cap && wb_valid[q] && wb_tag[q] == t;
+                end
+            end
+    end
     always_comb begin
         for (int p = 0; p < 2; p++) begin
             ew_valid[p] = grant[p] != '0;
@@ -819,6 +842,7 @@ module x86_core
             sq_tail <= '0;
             halted <= 1'b0;
             illegal <= 1'b0;
+            df <= 1'b0;
             alu_port <= 1'b0;
             for (int r = 0; r < NREG; r++) arch[r] <= 32'd0;
             arch[R_ESP] <= 32'h0010_0000;
@@ -841,6 +865,7 @@ module x86_core
                     end
                 end
             if (r_halt) halted <= 1'b1;
+            if (r_dfw) df <= rob[TAG_W'(rob_head + TAG_W'(r_n - 2'd1))].dst[0];
             if (r_ill) illegal <= 1'b1;
             if (!flush) begin
                 rob_head <= rob_head + TAG_W'(r_n);
@@ -873,8 +898,10 @@ module x86_core
                 // S -> X / A
                 for (int p = 0; p < NP; p++) begin
                     ix_valid[p] <= grant[p] != '0;
-                    ix[p] <= pick(grant[p]);
+                    ix[p] <= ixn[p];
                 end
+                ix_on1 <= on1_n;
+                ix_on2 <= on2_n;
                 ix_slot <= slot_of(grant[2]);
                 for (int p = 0; p < NP; p++)
                     for (int e = 0; e < RS_N; e++)
@@ -951,7 +978,7 @@ module x86_core
                         rob[rn[k].tag] <= '{done: !needs_rs(u.kind), kind: u.kind,
                             dst: u.dst, wdst: u.wdst, wflags: u.wflags, eop: u.eop, value: 32'd0,
                             flags: '0, next_eip: u.next_eip, mispred: 1'b0, fault: 1'b0, redirect_pc: 32'd0,
-                            bp_jcc: u.kind == K_BR && !u.uncond && !u.ecxz, bp_taken: u.pred_taken,
+                            bp_jcc: u.kind == K_BR && u.imm2[14], bp_taken: u.pred_taken,
                             bp_info: u.imm2[13:0]};
                         if (u.kind == K_ST) sq[rn[k].sq_snap[SQ_W-1:0]].addr_valid <= 1'b0;
                         if (u.wdst) begin
