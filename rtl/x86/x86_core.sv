@@ -234,7 +234,8 @@ module x86_core
     logic [RS_N-1:0]  older [RS_N];   // older[e][f]: entry f is older than e
     logic [1:0]       alu_port;       // ALU of the next dispatched ALU uop
     sq_t              sq [SQ_N];
-    logic [SQ_W:0]    sq_head, sq_tail;      // with wrap bit
+    logic [SQ_W:0]    sq_head, sq_cmt, sq_tail;   // with wrap bit; [head, cmt) retired
+    logic             drain;                      // the head entry (retired) writes memory
     logic [31:0]      arch [NREG];
     flags_t           arch_flags;
     logic             rat_rob [NREG];
@@ -357,7 +358,10 @@ module x86_core
             ret_flags[k] = e.flags;
         end
     end
-    assign store_en = r_store;
+    // retired stores drain to memory one per cycle, in order; until then
+    // loads still see them in the queue (forwarding / overlap replay)
+    assign drain = sq_head != sq_cmt;
+    assign store_en = drain;
     assign store_addr = sq[sq_head[SQ_W-1:0]].addr;
     assign store_data = sq[sq_head[SQ_W-1:0]].data;
     assign store_size = sq[sq_head[SQ_W-1:0]].size;
@@ -538,7 +542,7 @@ module x86_core
             ds_rs[k].sq_snap = dq[k].sq_snap;
             for (int q = 0; q < SQ_N; q++)
                 ds_rs[k].sq_older[q] = (SQ_W + 1)'(SQ_W'(SQ_W'(q) - sq_head[SQ_W-1:0])) < dq[k].sq_snap - sq_head
-                                       && !(r_store && SQ_W'(q) == sq_head[SQ_W-1:0]);
+                                       && !(drain && SQ_W'(q) == sq_head[SQ_W-1:0]);
             ds_rs[k].sq_idx = dq[k].sq_snap[SQ_W-1:0];
             sr[0] = u.s1; su[0] = u.us1;
             sr[1] = u.s2; su[1] = u.us2;
@@ -885,8 +889,7 @@ module x86_core
             rob_tail <= '0;
             rob_count <= '0;
             for (int e = 0; e < RS_N; e++) rs[e].valid <= 1'b0;
-            sq_tail <= sq_head + (SQ_W + 1)'(r_store);   // retired stores leave
-            sq_head <= sq_head + (SQ_W + 1)'(r_store);
+            sq_tail <= sq_cmt;   // retired stores stay until drained
             for (int r = 0; r < NREG; r++) rat_rob[r] <= 1'b0;
             frat_rob <= 1'b0;
             ix_valid <= '0;
@@ -897,6 +900,7 @@ module x86_core
         end
         if (rst) begin
             sq_head <= '0;
+            sq_cmt <= '0;
             sq_tail <= '0;
             halted <= 1'b0;
             illegal <= 1'b0;
@@ -925,9 +929,10 @@ module x86_core
             if (r_halt) halted <= 1'b1;
             if (r_dfw) df <= rob[TAG_W'(rob_head + TAG_W'(r_n - 2'd1))].dst[0];
             if (r_ill) illegal <= 1'b1;
+            sq_head <= sq_head + (SQ_W + 1)'(drain);
             if (!flush) begin
                 rob_head <= rob_head + TAG_W'(r_n);
-                if (r_store) sq_head <= sq_head + 1'b1;
+                if (r_store) sq_cmt <= sq_cmt + 1'b1;
                 // wb1 -> ROB
                 for (int p = 0; p < NW; p++)
                     if (wb_valid[p]) begin
@@ -1012,9 +1017,9 @@ module x86_core
                             row = row | ds_slot[k];
                         end
                 end
-                // a retiring store leaves the loads' older sets (its entry
+                // a drained store leaves the loads' older sets (its entry
                 // is reused by a younger store)
-                if (r_store)
+                if (drain)
                     for (int e = 0; e < RS_N; e++) rs[e].sq_older[sq_head[SQ_W-1:0]] <= 1'b0;
                 // R: ROB, RAT, store queue entry -> D
                 for (int k = 0; k < 3; k++) begin

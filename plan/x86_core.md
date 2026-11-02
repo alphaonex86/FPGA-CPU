@@ -204,6 +204,27 @@ replicated per read port plus a live-value table.
    or later (a load matching a store without data replays): 4.757
    CoreMark/MHz (210,238 cycles, IPC 1.615; load head waits 31,234 ->
    20,384).
+   Window: ROB 32 / RS 24 4.793, ROB 64 / RS 16 4.757, ROB 64 / RS 24
+   4.847 (+1.9 %): not the limit. Cycles now (`+stats`, 1 iteration): uop
+   queue empty 46,209, flush -> next retire 20,641 (1,833 flushes), decode
+   redirects 9,252, head waits LD 20,384, MD 11,880, ALU 8,735: the
+   frontend (refill depth, redirects) leads.
+   Early wakeup perf build (3 ALUs): 53.16 MHz, 66,712 ALMs (4.510 x 53.16
+   = 240 vs 4.101 x 56.87 = 233: +2.8 % net); worst path RS ready -> grant
+   -> pick -> bypass tag compare -> X operand -> ALU. Tried: the bypass selects
+   compared for every RS entry, in parallel with select, and picked by the
+   grant: does not route (perf recipe, 67,574 ALMs; 512 comparators fed by
+   every bus and RS tag); reverted.
+   Two-phase stores perf build: 54.48 MHz, 66,402 ALMs (4.757 x 54.48 =
+   259 CoreMark on ideal memory); worst path the wakeup loop: RS ready ->
+   grant -> picked tag -> compare with waiting tags (RS and D) -> ready.
+   Tried: the ALU wakeup comparing every waiting tag with every RS entry's
+   tag, independent of the grant, ORing the granted entries' matches: 52.19
+   MHz, 69,593 ALMs (worst path now the load wakeup: bypass -> AGU -> store
+   queue lo +- 1 adders -> a_ok -> wakeup -> ready); reverted.
+   Senior store queue: retire only commits a store (sq_cmt); the queue
+   drains [head, cmt) to memory one per cycle, in order, and a flush keeps
+   the retired entries: CoreMark unchanged (4.756), the L1D drain port.
    Perf builds: load check in A 58.2 MHz (61,462 ALMs), + BTB RAM 55.23
    MHz (59,392 ALMs; same worst path, placement spread ~5 %): S, sq_head ->
    count of known store addresses -> load request -> grant -> pick ->
@@ -242,6 +263,25 @@ replicated per read port plus a live-value table.
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.
 3. M3 loads/stores, LSQ, L1I/L1D, then L2; Dhrystone/CoreMark for x86 IPC.
+   *Proposed* (keeps what M2 relies on: a load's dependents wake in A, so
+   a hit is known in A; RAM reads addressed by the value a register takes):
+   - Test bench: one memory port with a fixed latency (cycles, a
+     `+mem_lat` plusarg) and 32-byte bursts, the shape of the socket bus
+     units (M8).
+   - L1D 16 KB, 4-way, 32-byte lines, write-back. Tags in MLAB, read
+     unregistered with the AGU address in A (hit and way join the store
+     queue check: a miss does not wake); data in M10K, two dword banks
+     (even / odd) addressed at the A -> M edge, so any access inside an
+     aligned 8-byte window reads in one cycle; a line-crossing access
+     takes a slow path (two accesses).
+   - A missing load leaves the RS waiting on its line (no replay loop),
+     woken when the fill writes it; one miss in flight first, then more.
+   - Stores write L1D at retire (the store queue drains to it); a miss
+     allocates and holds the drain.
+   - L1I 16 KB, 4-way, 32-byte lines, read with pc_f's next value like the
+     BTB; the 30-byte window reads two 16-byte half-line banks; a miss
+     stalls fetch.
+   - L2 256 KB in M10K behind both, then the bus unit.
 4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,
    interrupts, I/O ports, CPUID/MSRs; test386 and the single-step datasets
