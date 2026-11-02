@@ -6,7 +6,9 @@
 // c2_loop_target (RTL devices, the bring-up bitstream's); with C2_P6 the
 // bus port crosses to BCLK (c2_bus_sync) and runs c2_p6_agent on a P6 bus
 // whose chipset is FPGAcommon's p6_bif, the testbench serves its host port.
-// board_rst: the board's reset (into the cartridge, or p6_bif's reset).
+// board_rst: the board's reset (into the cartridge, or p6_bif's reset);
+// cpu_pins: the chipset's CMOS outputs {SMI#, INIT#, NMI, STPCLK#, A20M#},
+// asserted (into the cartridge, with C2_P6 through c2_bus_sync).
 module c2_sim_top #(
     parameter int    LINK_DELAY = 3,     // cartridge-side registers each way (I/O, cable)
     /* verilator lint_off UNUSEDPARAM */   // used with C2_LOOP_TARGET only
@@ -33,6 +35,7 @@ module c2_sim_top #(
     output logic        bus_space,
     output logic        bus_write,
     output logic        bus_inta,
+    output logic        bus_special,
     output logic [31:0] bus_addr,
     output logic [1:0]  bus_size,
     output logic [31:0] bus_wdata,
@@ -42,6 +45,7 @@ module c2_sim_top #(
     input  logic        intr,
     /* verilator lint_off UNUSEDSIGNAL */   // the loop target makes its own
     input  logic        board_rst,
+    input  logic [4:0]  cpu_pins,
     /* verilator lint_on UNUSEDSIGNAL */
     output logic        serial_valid,
     output logic [7:0]  serial_byte,
@@ -59,6 +63,8 @@ module c2_sim_top #(
     input  logic [63:0] host_rdata,
     input  logic        host_rvalid,
     input  logic [7:0]  inta_vector,
+    output logic        spc_stb,
+    output logic [2:0]  spc_type,
     output logic [8:0]  p6_err,
     output logic        p6_cpu_ready
 `endif
@@ -103,33 +109,37 @@ module c2_sim_top #(
     assign down_cart = down_pipe[LINK_DELAY - 1];
 
 `ifdef C2_LOOP_TARGET
-    logic        t_done, t_err, t_intr, t_reset;
+    logic        t_done, t_err, t_intr, t_reset, t_a20m, t_stpclk, t_nmi, t_init;
     logic [31:0] t_rdata;
     logic [7:0]  post;
     c2_cart cart (
-        .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta,
+        .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special,
         .bus_addr, .bus_size, .bus_wdata, .bus_done(t_done), .bus_rdata(t_rdata), .bus_err(t_err), .intr(t_intr),
-        .board_reset(t_reset), .low_vector(1'b0)
+        .board_reset(t_reset), .low_vector(1'b0), .a20m(t_a20m), .stpclk(t_stpclk), .nmi(t_nmi), .init(t_init),
+        .smi(1'b0)
     );
     // simulated time advances only with BAR0 accesses: 1 "ms" of the 0xf7
     // timer is 50 clocks here, so it fires while the guest loops
     c2_loop_target #(.ROM_HEX(ROM_HEX), .CLOCKS_MS(50)) target (
-        .clk(cclk), .rst, .bus_req, .bus_space, .bus_write, .bus_inta, .bus_addr, .bus_size, .bus_wdata,
-        .bus_done(t_done), .bus_rdata(t_rdata), .bus_err(t_err), .intr(t_intr), .board_reset(t_reset),
-        .serial_valid, .serial_byte, .serial_ready, .post
+        .clk(cclk), .rst, .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special, .bus_addr, .bus_size,
+        .bus_wdata, .bus_done(t_done), .bus_rdata(t_rdata), .bus_err(t_err), .intr(t_intr), .board_reset(t_reset),
+        .a20m(t_a20m), .stpclk(t_stpclk), .nmi(t_nmi), .init(t_init), .serial_valid, .serial_byte, .serial_ready, .post
     );
 `elsif C2_P6
     logic        p_done, p_err, s_req, s_done, s_err, m_reset, m_low_vector;
     logic [31:0] p_rdata, s_rdata;
+    logic [4:0]  m_pins;
     c2_cart cart (
-        .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta,
+        .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special,
         .bus_addr, .bus_size, .bus_wdata, .bus_done(p_done), .bus_rdata(p_rdata), .bus_err(p_err), .intr,
-        .board_reset(m_reset), .low_vector(m_low_vector)
+        .board_reset(m_reset), .low_vector(m_low_vector), .a20m(m_pins[0]), .stpclk(m_pins[1]), .nmi(m_pins[2]),
+        .init(m_pins[3]), .smi(m_pins[4])
     );
     c2_bus_sync bus_sync (
         .mclk(cclk), .mrst(rst), .m_req(bus_req), .m_done(p_done), .m_rdata(p_rdata), .m_err(p_err),
-        .m_reset, .m_low_vector,
-        .sclk(bclk), .srst(rst), .s_req, .s_done, .s_rdata, .s_err, .s_reset(cpu_reset), .s_low_vector(straps[6])
+        .m_reset, .m_low_vector, .m_pins,
+        .sclk(bclk), .srst(rst), .s_req, .s_done, .s_rdata, .s_err, .s_reset(cpu_reset), .s_low_vector(straps[6]),
+        .s_pins(cpu_pins)
     );
     assign serial_valid = 0;
     assign serial_byte  = '0;
@@ -146,7 +156,8 @@ module c2_sim_top #(
     wire [63:0] d_n   = ~(d_cpu | d_cs);
     wire        ads_n = ~(ads_cpu | ads_cs), drdy_n = ~(drdy_cpu | drdy_cs);
     c2_p6_agent agent (
-        .clk(bclk), .rst, .bus_req(s_req), .bus_space, .bus_write, .bus_inta, .bus_addr, .bus_size, .bus_wdata,
+        .clk(bclk), .rst, .bus_req(s_req), .bus_space, .bus_write, .bus_inta, .bus_special, .bus_addr, .bus_size,
+        .bus_wdata,
         .bus_done(s_done), .bus_rdata(s_rdata), .bus_err(s_err),
         .reset_n(!reset_cs), .a_n(a_n[12:5]), .ads_n, .bnr_n(!bnr_cs), .bpri_n(!bpri_cs), .trdy_n(!trdy_cs),
         .dbsy_n(!dbsy_cs), .drdy_n, .rs_n(~rs_cs), .d_n,
@@ -166,15 +177,16 @@ module c2_sim_top #(
         .io_stb(), .io_we(), .io_addr(), .io_size(), .io_wdata(), .io_rdata(32'd0), .io_hit(1'b0),
         .host_req, .host_we, .host_addr, .host_wdata, .host_be, .host_dram(), .host_io, .host_attr(), .host_dc(),
         .host_lock(), .host_smmem(), .host_ready, .host_rdata, .host_rvalid, .host_err(1'b0),
-        .spc_stb(), .spc_type(), .inta_stb(), .inta_vector,
+        .spc_stb, .spc_type, .inta_stb(), .inta_vector,
         .snoop_stall(1'b0), .dma_req(1'b0), .dma_gnt(), .snp_line('0), .snp_inv(1'b0), .snp_ok(),
         .cpu_ready(p6_cpu_ready), .err(p6_err)
     );
 `else
     c2_cart cart (
-        .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta,
+        .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special,
         .bus_addr, .bus_size, .bus_wdata, .bus_done, .bus_rdata, .bus_err, .intr,
-        .board_reset(board_rst), .low_vector(1'b0)
+        .board_reset(board_rst), .low_vector(1'b0), .a20m(cpu_pins[0]), .stpclk(cpu_pins[1]), .nmi(cpu_pins[2]),
+        .init(cpu_pins[3]), .smi(cpu_pins[4])
     );
     assign serial_valid = 0;
     assign serial_byte  = '0;

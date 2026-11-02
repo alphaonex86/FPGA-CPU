@@ -35,8 +35,11 @@ module c2_card #(
     // STATUS: bit 0 INTR, bit 1 bus error, bit 2 protocol error (a bad BAR0
     // access or link byte), bit 3 board reset (RESET# asserted, or since the
     // last read; also until the cartridge's first status), bit 4 the A6#
-    // strap of the last reset; bits 1-3 are sticky, a STATUS read clears
-    logic        intr, err_bus, err_proto, board_reset, reset_seen, low_vector;
+    // strap of the last reset, bits 5-6 A20M# and STPCLK# asserted, bits 7-9
+    // an NMI, INIT# or SMI# assertion; bits 1-3 and 7-9 are sticky, a STATUS
+    // read clears
+    logic        intr, err_bus, err_proto, board_reset, reset_seen, low_vector, a20m, stpclk;
+    logic [2:0]  events;           // {smi, init, nmi}
     logic [31:0] rdata;            // the last read cycle / INTA vector
     logic [63:0] resp;
     logic        resp_window;      // RESP returns the window word
@@ -71,6 +74,7 @@ module c2_card #(
     wire [13:0] rep_bytes = {1'b0, rep_count} << lsz;
     wire        rep_ok    = lsz != 2'd3 && req_wdata[63:45] == '0 && rep_count != '0 && rep_bytes <= 14'd4096;
     wire        rx_byte   = up_valid && rx_busy && state == WAIT;
+    wire        status_read = accept && !req_write && req_addr == 13'h008;
 
     assign req_ready = state == IDLE;
     assign rsp_valid = state == RESP;
@@ -101,6 +105,9 @@ module c2_card #(
             board_reset <= 1;
             reset_seen  <= 0;
             low_vector  <= 0;
+            a20m        <= 0;
+            stpclk      <= 0;
+            events      <= '0;
             rx_busy   <= 0;
             down      <= '0;
         end else begin
@@ -136,6 +143,11 @@ module c2_card #(
                         rx_len     <= req_addr[5] ? 13'd0 : rep_bytes[12:0];
                         rx_window  <= !req_addr[5];
                         state      <= SEND;
+                    end else if (req_addr == 13'h020 && req_wdata[63:3] == '0) begin
+                        // Special Transaction: {0x48 | sub-code}
+                        tx_hdr[0]  <= {5'b01001, req_wdata[2:0]};
+                        tx_hdr_len <= 4'd1;
+                        state      <= SEND;
                     end else if (!is_window)
                         err_proto <= 1;
                 end else begin
@@ -146,10 +158,12 @@ module c2_card #(
                     else case (req_addr)
                         13'h000: resp <= {32'd0, ID};
                         13'h008: begin
-                            resp      <= {59'd0, low_vector, board_reset || reset_seen, err_proto, err_bus, intr};
+                            resp      <= {54'd0, events, stpclk, a20m, low_vector, board_reset || reset_seen,
+                                          err_proto, err_bus, intr};
                             err_bus   <= 0;
                             err_proto <= 0;
                             reset_seen <= 0;
+                            events     <= '0;
                         end
                         13'h010: resp <= {32'd0, rdata};
                         13'h018: begin   // INTA: {0x40}, reply 1 byte
@@ -215,6 +229,10 @@ module c2_card #(
                     low_vector  <= up[3];
                     if (up[1]) err_bus <= 1;
                     if (up[2]) reset_seen <= 1;
+                end else if (up[7:2] == 6'b010100) begin
+                    {stpclk, a20m} <= up[1:0];
+                end else if (up[7:3] == 5'b01100) begin
+                    events <= up[2:0] | (status_read ? '0 : events);   // not the ones just read
                 end else if (up != 8'h00)
                     err_proto <= 1;
             end

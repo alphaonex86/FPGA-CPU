@@ -66,12 +66,17 @@ static void remap(int s)
     }
 }
 
-void shadow_init(int vm, uint8_t *ram, uint8_t *rom, uint64_t rom_size)
+void shadow_init(uint8_t *ram, uint8_t *rom, uint64_t rom_size)
 {
-    vm_fd = vm;
     shadow_ram = ram + 0xc0000;
     rom_e0000 = rom + rom_size - 0x20000;
-    shadow_reset();
+}
+
+void shadow_bind(int vm)
+{
+    vm_fd = vm;
+    memset(mapped, 0, sizeof(mapped));
+    for (int s = 0; s < NSEG; s++) remap(s);
 }
 
 void shadow_reset(void)

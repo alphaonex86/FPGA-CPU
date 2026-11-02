@@ -14,7 +14,7 @@ enum { BAR_SIZE = C2B_WINDOW + C2B_WINDOW_SIZE };
 struct fpga {
     struct bus bus;
     struct bar *bar;
-    int reset_seen;   // a board reset not yet reported by status()
+    unsigned events;   // BUS_RESET / NMI / INIT / SMI not yet reported by status()
 };
 
 static struct bar *bar_of(struct bus *b)
@@ -44,8 +44,9 @@ static uint32_t read_status(struct bus *b)
 {
     struct fpga *f = b->priv;
     uint32_t status = rd32(b, C2B_STATUS);
-    if (status & C2B_ST_RESET) f->reset_seen = 1;
-    if (f->reset_seen) status &= ~(uint32_t)C2B_ST_BUS_ERR;
+    f->events |= (status & C2B_ST_RESET ? BUS_RESET : 0u) | (status & C2B_ST_NMI ? BUS_NMI : 0u)
+               | (status & C2B_ST_INIT ? BUS_INIT : 0u) | (status & C2B_ST_SMI ? BUS_SMI : 0u);
+    if (f->events & BUS_RESET) status &= ~(uint32_t)C2B_ST_BUS_ERR;
     return status;
 }
 
@@ -109,10 +110,15 @@ static unsigned fpga_status(struct bus *b)
         fprintf(stderr, "c2-vmm: %s error (a write cycle)\n", status & C2B_ST_BUS_ERR ? "bus" : "bridge protocol");
         exit(1);
     }
-    unsigned r = (status & C2B_ST_INTR ? BUS_INTR : 0u) | (f->reset_seen ? BUS_RESET : 0u)
-               | (status & C2B_ST_LOW_VECTOR ? BUS_LOW_VECTOR : 0u);
-    f->reset_seen = 0;
+    unsigned r = f->events | (status & C2B_ST_INTR ? BUS_INTR : 0u) | (status & C2B_ST_LOW_VECTOR ? BUS_LOW_VECTOR : 0u)
+               | (status & C2B_ST_A20M ? BUS_A20M : 0u) | (status & C2B_ST_STPCLK ? BUS_STPCLK : 0u);
+    f->events = 0;
     return r;
+}
+
+static void fpga_special(struct bus *b, int code)
+{
+    wr64(b, C2B_SPECIAL, (uint64_t)code);
 }
 
 static uint8_t fpga_inta(struct bus *b)
@@ -124,7 +130,7 @@ struct bus *bus_bar_open(struct bar *bar)
 {
     struct fpga *f = calloc(1, sizeof(*f));
     if (!f) return NULL;
-    f->bus = (struct bus){ fpga_read, fpga_write, fpga_io_rep, fpga_status, fpga_inta, f };
+    f->bus = (struct bus){ fpga_read, fpga_write, fpga_io_rep, fpga_status, fpga_special, fpga_inta, f };
     f->bar = bar;
     uint32_t id = rd32(&f->bus, C2B_ID);
     if (id != C2B_ID_VALUE) {

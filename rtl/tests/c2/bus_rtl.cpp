@@ -13,7 +13,7 @@ extern "C" {
 #include "bus.h"
 }
 
-enum : uint32_t { BUS_LATENCY = 8, RESET_CLOCKS = 200, TIMEOUT = 50000000, BAR_BASE = 0xf0000000, REQUESTER = 0x0100, COMPLETER = 0x0200 };
+enum : uint32_t { BUS_LATENCY = 8, RESET_CLOCKS = 200, PULSE_CLOCKS = 8, TIMEOUT = 50000000, BAR_BASE = 0xf0000000, REQUESTER = 0x0100, COMPLETER = 0x0200 };
 
 struct beat {
     uint64_t data;
@@ -41,8 +41,9 @@ static uint32_t bswap(uint32_t v)
     return __builtin_bswap32(v);
 }
 
-// the bus_sim devices' INTR and board reset (RESET_CLOCKS cartridge clocks)
-static uint32_t reset_left;
+// the bus_sim devices' INTR, board reset (RESET_CLOCKS cartridge clocks)
+// and CPU pins (NMI, INIT#, SMI# pulses of PULSE_CLOCKS)
+static uint32_t reset_left, pulse_left[3];
 static void board_edge()
 {
     unsigned st = dev->status(dev);
@@ -50,6 +51,14 @@ static void board_edge()
     if (st & BUS_RESET) reset_left = RESET_CLOCKS;
     else if (reset_left) reset_left--;
     top->board_rst = reset_left != 0;
+    const unsigned edge[3] = { BUS_NMI, BUS_INIT, BUS_SMI };
+    unsigned pins = (st & BUS_A20M ? 1 : 0) | (st & BUS_STPCLK ? 2 : 0);
+    for (int i = 0; i < 3; i++) {
+        if (st & edge[i]) pulse_left[i] = PULSE_CLOCKS;
+        else if (pulse_left[i]) pulse_left[i]--;
+        if (pulse_left[i]) pins |= 4u << i;
+    }
+    top->cpu_pins = pins;
 }
 
 #ifdef C2_P6
@@ -59,6 +68,7 @@ static void board_edge()
 static bool host_acked;
 static void host_edge()
 {
+    if (top->spc_stb) dev->special(dev, top->spc_type);
     top->host_ready = top->host_rvalid = 0;
     if (host_acked || !top->host_req) {
         host_acked = false;
@@ -111,6 +121,8 @@ static void cclk_edge()
         top->bus_rdata = 0;
         if (top->bus_inta)
             top->bus_rdata = dev->inta(dev);
+        else if (top->bus_special)
+            dev->special(dev, top->bus_wdata & 7);
         else if (top->bus_write)
             dev->write(dev, top->bus_space, top->bus_addr, size, top->bus_wdata);
         else

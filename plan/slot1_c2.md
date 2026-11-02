@@ -54,6 +54,20 @@ too. Nothing is bought before the viability verdict below.
   strap) and drops coalesced writes not yet on the bus; guest RAM is kept,
   like DRAM. The test ROM ends with a 0xcf9 hard reset and checks EDX,
   PAM and its RAM marker after it (mutations fail steps 14 and 15).
+- CPU pins (status bits; edges kept until handled): INIT# restarts the
+  vCPU like a reset but keeps PAM and the x87 state; NMI via KVM_NMI;
+  A20M# maps 0x100000-0x10ffff onto 0-0xffff (memslot 3: all real mode
+  reaches; A20M# in protected mode is undefined); STPCLK# stops the vCPU
+  after a Stop Grant Acknowledge until negated; SMI# is counted and
+  ignored (no SMM yet). HLT sends a Halt Transaction (the chipset wants
+  every one) and waits; HLT with IF = 0 waits for an event. A triple fault
+  sends Shutdown and waits for INIT# / RESET# (PIIX4: INIT#), then opens a
+  new KVM VM over the same memory: on this AMD host KVM reinitialises the
+  VMCB at a shutdown and the vCPU then makes no progress (seen in this
+  session, KVM 7.1.8). Test ROM steps 16-21: NMI, STPCLK#, Halt count,
+  A20M# wrap both ways, port 0x92 INIT# (PAM kept), triple fault; the
+  mutations (no KVM_NMI, no Halt, no A20 alias, INIT as a reset) fail
+  their steps.
 - KVM's private pages (VMX TSS, EPT identity map) sit just below the ROM
   window (the defaults fall inside a 512 KB+ ROM on Intel hosts).
 - CPUID: max leaf 2, signature `-s` (default 0x683, P-III cB0), features
@@ -71,7 +85,8 @@ write costs one PCIe TLP and a read one TLP + one read completion (the
 FPGA delays the completion until the bus cycle ends). STATUS carries INTR,
 a sticky bus error, a sticky protocol error, the board reset (RESET#
 asserted or since the last read; bus cycles under it fail and are not
-errors) and the A6# strap; INTA runs the acknowledge cycle. The bridge takes requests strictly in order, one at a time (a
+errors), the A6# strap, A20M# / STPCLK# and sticky NMI / INIT# / SMI#
+edges; INTA runs the acknowledge cycle, SPECIAL a Special Transaction. The bridge takes requests strictly in order, one at a time (a
 command holds later TLPs by flow control until its reply), so the REP
 window is never refilled under a running REP.
 
@@ -85,13 +100,15 @@ window is never refilled under a running REP.
 - Link messages, one byte per clock, 0x00 between messages; one command
   in flight, every command answered:
   - down: CYCLE `{0x80 | space << 3 | write << 2 | log2 size, addr[4],
-    data[4]}`; INTA `{0x40}`; REP `{0x20 | write << 2 | log2 size,
-    port[2], count[2]}` + a write's data.
+    data[4]}`; INTA `{0x40}`; SPECIAL `{0x48 | sub-code}`; REP `{0x20 |
+    write << 2 | log2 size, port[2], count[2]}` + a write's data.
   - up: reply `{0x80}` + payload (read: 4 bytes, INTA: 1, REP read:
     count x size); status `{0x40 | A6# << 3 | board reset << 2 | error <<
     1 | INTR}` on a level change or a failed cycle, always before the
-    reply, and every 2^16 clocks between commands (a card reset relearns
-    the levels; until then the card reports the board in reset).
+    reply; between commands pins `{0x50 | STPCLK# << 1 | A20M#}` on a
+    change and events `{0x60 | SMI# << 2 | INIT# << 1 | NMI}` on an
+    assertion edge; both level messages every 2^16 clocks (a card reset
+    relearns the levels; until then the card reports the board in reset).
 - REP data is buffered whole on the receiving side (a 4 KB REP costs
   ~80 us of link time next to ~600 us of PCI I/O cycles).
 - Tested: the whole test ROM through the RTL (2.7 M bridge clocks, link
@@ -151,11 +168,22 @@ window is never refilled under a running REP.
   `c2_bus_sync` and reach the VMM in the status message; a request under
   RESET# ends in a bus error at once. The other straps (IOQ depth, BINIT#,
   cluster ID) need nothing from the agent: one transaction at a time.
+- Special Transactions (REQa 01000, REQb[0]#, sub-code on BE[7:0]#, No
+  Data expected): Halt, Shutdown, Stop Grant Acknowledge from the VMM;
+  p6_bif's spc_stb reaches the sim devices.
+- CMOS inputs A20M#, STPCLK#, NMI, INIT#, SMI# cross in `c2_bus_sync`
+  (2 flops; the edge pins stretched 7 BCLKs first, as INIT# / SMI# may be
+  2 BCLKs = 15 ns at 133 MHz, shorter than a link clock). Sim devices and
+  `c2_loop_target` model the PIIX4 port 0x92 (FAST_A20, FAST_INIT), the
+  Shutdown -> INIT# rule and a test port 0xf8 (NMI, STPCLK#, Halt / Stop
+  Grant counts).
 - `c2_bus_sync` crosses the bus port from the link clock to BCLK (toggle
   handshake each way, the request fields held by the cartridge); the sim
   runs BCLK at 14 ns against the 20 ns link clock.
-- Not yet: HIT# / HITM# snoop stall and the DMA mirror, the CMOS pins (INTR via LINT0,
-  NMI, INIT#, SMI#, A20M#, STPCLK# with its Stop Grant special cycle).
+- Not yet: HIT# / HITM# snoop stall and the DMA mirror; SMM (SMI
+  Acknowledge, SMMEM#, 440BX SMRAM); IGNNE# / FERR# (KVM has no FERR#);
+  FLUSH#; the cartridge top with its pins (INTR / LINT0 also through
+  `c2_bus_sync` there).
 
 ## Shadow RAM (`shadow.c`)
 
@@ -257,6 +285,7 @@ filtering), AGP cards.
 2. AX7A035B on arrival (~2026-12-16): bring-up steps of "Card
    bitstream"; done before it: IP, top, J11 I/O, builds, flash script,
    c2-probe.
-3. P6 bus agent: request/response phases, snoop stall (HIT# + HITM#), DMA
-   mirror (slot1_variants common facts), A20M#, INIT#, SMI#, STPCLK#.
+3. P6 bus agent: snoop stall (HIT# + HITM#), DMA mirror (slot1_variants
+   common facts), SMM. Done: transactions, RESET# / straps, CMOS pins,
+   Special Transactions.
 4. VMM: MSI through VFIO instead of polling, SMM, microcode-update MSRs.

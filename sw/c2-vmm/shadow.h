@@ -4,7 +4,9 @@
 #include <stdint.h>
 #include <sys/ioctl.h>
 
-void shadow_init(int vm, uint8_t *ram, uint8_t *rom, uint64_t rom_size);
+void shadow_init(uint8_t *ram, uint8_t *rom, uint64_t rom_size);
+// a new VM: its memslots for the current map
+void shadow_bind(int vm);
 // a board reset: PAM0-PAM6 back to 0 (every segment to PCI / the ROM)
 void shadow_reset(void);
 // every guest I/O write (also forwarded to the bus): tracks PAM writes

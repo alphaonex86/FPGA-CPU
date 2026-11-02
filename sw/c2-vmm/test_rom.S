@@ -1,6 +1,7 @@
 # c2-vmm test ROM (sim / rtl backends, 64 KB at 0xf0000): serial, POST
 # code, MMIO round trip, RAM, an injected interrupt, string I/O, shadow RAM,
-# a board reset (0xcf9); exit port 0xf4: 0 pass, else the failed step.
+# NMI, STPCLK#, Halt, A20M#, INIT#, shutdown, a board reset (0xcf9); exit
+# port 0xf4: 0 pass, else the failed step.
 # Expects the default signature 0x683 (c2-vmm -s) in EDX at reset.
         .code16
         .text
@@ -15,18 +16,16 @@ start:  mov     %edx, %ebp
         cmp     $0x683, %ebp
         mov     $14, %bl
         jne     fail
-        # after the board reset (RAM keeps the marker): PAM1 is 0 again,
-        # 0xc0000 back on the bus (floats high)
-        cmpw    $0x5aa5, 0x600
-        jne     1f
+        # the phase in RAM (INIT# and resets keep it): 0 power-on, 1 after
+        # INIT#, 2 after the shutdown's INIT#, 3 after the board reset
         mov     $0xc000, %ax
         mov     %ax, %es
-        cmpl    $0xffffffff, %es:0x10
-        mov     $15, %bl
-        jne     fail
-        xor     %bl, %bl
-        jmp     fail
-1:
+        cmpb    $1, 0x600
+        je      after_init
+        cmpb    $2, 0x600
+        je      after_shutdown
+        cmpb    $3, 0x600
+        je      after_reset
         # serial
         mov     $msg, %si
 1:      mov     %cs:(%si), %al
@@ -200,20 +199,103 @@ start:  mov     %edx, %ebp
         cmpl    $0x600dc0de, %es:0x10
         mov     $9, %bl
         jne     fail
+        # NMI (0xf8 bit 0): vector 2 sets 0x501; an I/O exit per try
+        movw    $nmi_isr, 2 * 4
+        movw    %cs, 2 * 4 + 2
+        movb    $0, 0x501
+        mov     $1, %al
+        out     %al, $0xf8
+        mov     $100000, %ecx
+1:      cmpb    $1, 0x501
+        je      2f
+        in      $0x80, %al
+        dec     %ecx
+        jnz     1b
+2:      mov     $16, %bl
+        test    %ecx, %ecx
+        jz      fail
+        # STPCLK# (0xf8 bit 1) until the VMM's Stop Grant Acknowledge,
+        # counted in 0xf8 bits 7:0
+        mov     $2, %al
+        out     %al, $0xf8
+        mov     $100000, %ecx
+1:      in      $0xf8, %al
+        cmp     $1, %al
+        je      2f
+        dec     %ecx
+        jnz     1b
+2:      mov     $17, %bl
+        test    %ecx, %ecx
+        jz      fail
+        # the HLT of step 5 went out as a Halt Transaction (0xf8 bits 15:8)
+        in      $0xf8, %ax
+        test    %ah, %ah
+        mov     $18, %bl
+        jz      fail
+        # A20M# (port 0x92 bit 1 = 0 since reset): 0xffff:0x8010 wraps to
+        # 0x8000; with FAST_A20 it is 0x108000 (fresh RAM: 0)
+        movl    $0x12345678, 0x8000
+        mov     $0xffff, %ax
+        mov     %ax, %es
+        cmpl    $0x12345678, %es:0x8010
+        mov     $19, %bl
+        jne     fail
+        mov     $2, %al
+        out     %al, $0x92
+        mov     $100000, %ecx
+1:      cmpl    $0, %es:0x8010
+        je      2f
+        in      $0x80, %al
+        dec     %ecx
+        jnz     1b
+2:      mov     $20, %bl
+        test    %ecx, %ecx
+        jz      fail
+        # INIT# (port 0x92 bit 0; A20M# again): the vCPU restarts
+        movb    $1, 0x600
+        mov     $1, %al
+        out     %al, $0x92
+        sti
+1:      hlt
+        jmp     1b
+
+        # INIT# keeps the chipset: PAM1 still 3, 0xc0010 the shadow RAM
+after_init:
+        cmpl    $0x600dc0de, %es:0x10
+        mov     $21, %bl
+        jne     fail
+        # triple fault (IDT limit 0): the Shutdown Transaction, the PIIX4
+        # answers with INIT#
+        movb    $2, 0x600
+        lidt    %cs:idt_none
+        int     $3
+
         # board reset (440BX hard reset), halted until the vCPU restarts
-        movw    $0x5aa5, 0x600
+after_shutdown:
+        movb    $3, 0x600
         mov     $6, %al
         mov     $0xcf9, %dx
         out     %al, %dx
         sti
 1:      hlt
         jmp     1b
+
+        # the reset set PAM1 to 0: 0xc0000 on the bus again (floats high)
+after_reset:
+        cmpl    $0xffffffff, %es:0x10
+        mov     $15, %bl
+        jne     fail
+        xor     %bl, %bl
 fail:   mov     %bl, %al
         out     %al, $0xf4
         jmp     .
 
 isr:    movb    $1, 0x500
         iret
+nmi_isr: movb   $1, 0x501
+        iret
+idt_none: .word 0
+        .long   0
 
 msg:    .asciz  "c2-vmm: serial ok\n"
 rep_msg: .ascii "c2-vmm: string I/O ok\n"

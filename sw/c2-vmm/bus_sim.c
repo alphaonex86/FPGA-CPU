@@ -4,8 +4,12 @@
 // 0xd0000 and at 0xa0000, an interrupt source at 0xf5 (writing N asserts
 // INTR, acknowledged with vector 0x20 + N) and at 0xf7 (writing N asserts
 // INTR N ms later, vector 0x28), a 4 KB byte FIFO at 0x1f0 (writes push,
-// reads pop; empty pops 0xff) and a board reset when 0xcf9 is written with
-// bits 2:1 set (the 440BX hard reset). Anything else floats high.
+// reads pop; empty pops 0xff), a board reset when 0xcf9 is written with
+// bits 2:1 set (the 440BX hard reset), the PIIX4 port 0x92 (bit 1 FAST_A20:
+// A20M# = !bit 1, bit 0 0 -> 1: INIT#), the CPU pin test port 0xf8 (write
+// bit 0: an NMI, bit 1: STPCLK# until a Stop Grant Acknowledge; read: Halt
+// count << 8 | Stop Grant count) and Special Transactions (Shutdown ->
+// INIT#, as the PIIX4 does). Anything else floats high.
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +22,8 @@ struct sim {
     uint8_t *rom;
     uint32_t rom_base;
     uint8_t scratch[2][256];
-    int intr_on, reset;
+    int intr_on, reset, stpclk, nmi, init;
+    uint8_t port92, halts, stop_grants;
     uint8_t vector;
     double intr_at;                  // 0xf7: when INTR rises (0: none)
     uint8_t fifo[4096];
@@ -54,6 +59,8 @@ static uint32_t sim_read(struct bus *b, int space, uint32_t addr, int size)
         return v;
     }
     if (space == BUS_IO && addr == 0x3fd) return 0x60;   // LSR: transmitter empty
+    if (space == BUS_IO && addr == 0x92) return s->port92;
+    if (space == BUS_IO && addr == 0xf8) return ((uint32_t)s->halts << 8 | s->stop_grants) & ((1u << 8 * size) - 1);
     if (space == BUS_IO && addr == 0x1f0) {
         for (int i = 0; i < size; i++)
             v |= (uint32_t)(s->fifo_tail != s->fifo_head ? s->fifo[s->fifo_tail++ % sizeof(s->fifo)] : 0xff) << 8 * i;
@@ -82,6 +89,13 @@ static void sim_write(struct bus *b, int space, uint32_t addr, int size, uint32_
         s->intr_at = now() + 1e-3 * (value & 0xff);
     else if (addr == 0xcf9 && (value & 6) == 6)
         s->reset = 1;
+    else if (addr == 0x92) {
+        if (value & 1 && !(s->port92 & 1)) s->init = 1;
+        s->port92 = (uint8_t)value;
+    } else if (addr == 0xf8) {
+        if (value & 1) s->nmi = 1;
+        if (value & 2) s->stpclk = 1;
+    }
     else if (addr == 0x1f0) {
         for (int i = 0; i < size; i++) {
             if (s->fifo_head - s->fifo_tail == sizeof(s->fifo)) {
@@ -113,18 +127,36 @@ static void sim_io_rep(struct bus *b, uint16_t port, int size, uint32_t count, u
 static unsigned sim_status(struct bus *b)
 {
     struct sim *s = b->priv;
+    unsigned st = 0;
     if (s->reset) {   // the devices' state at a board reset
-        s->reset = 0;
-        s->intr_on = 0;
+        s->reset = s->intr_on = s->stpclk = s->nmi = s->init = 0;
         s->intr_at = 0;
-        return BUS_RESET;
+        s->port92 = 0;
+        st = BUS_RESET;
     }
     if (s->intr_at && now() >= s->intr_at) {
         s->intr_at = 0;
         s->intr_on = 1;
         s->vector = 0x28;
     }
-    return s->intr_on ? BUS_INTR : 0;
+    st |= (s->intr_on ? BUS_INTR : 0u) | (s->port92 & 2 ? 0u : BUS_A20M) | (s->stpclk ? BUS_STPCLK : 0u)
+        | (s->nmi ? BUS_NMI : 0u) | (s->init ? BUS_INIT : 0u);
+    s->nmi = s->init = 0;
+    return st;
+}
+
+static void sim_special(struct bus *b, int code)
+{
+    struct sim *s = b->priv;
+    if (code == BUS_SHUTDOWN) s->init = 1;
+    else if (code == BUS_HALT) s->halts++;
+    else if (code == BUS_STOP_GRANT) {
+        s->stpclk = 0;
+        s->stop_grants++;
+    } else {
+        fprintf(stderr, "c2-vmm sim: unexpected Special Transaction %d\n", code);
+        exit(1);
+    }
 }
 
 static uint8_t sim_inta(struct bus *b)
@@ -157,6 +189,6 @@ struct bus *bus_sim_open(const char *rom_path)
     }
     s->rom_base = (uint32_t)(0x100000000ull - (uint64_t)n);
     fclose(f);
-    s->bus = (struct bus){ sim_read, sim_write, sim_io_rep, sim_status, sim_inta, s };
+    s->bus = (struct bus){ sim_read, sim_write, sim_io_rep, sim_status, sim_special, sim_inta, s };
     return &s->bus;
 }

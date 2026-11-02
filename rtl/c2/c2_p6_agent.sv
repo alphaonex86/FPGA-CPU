@@ -1,7 +1,8 @@
 // P6 (Slot 1 / Socket 370) bus agent of the C2 cartridge: each cycle of the
 // c2_cart board bus port becomes one P6 bus transaction as symmetric agent 0,
 // one at a time, uncached: Memory Data Read, Memory Write (may be retried),
-// I/O Read / Write, Interrupt Acknowledge; a Retry response re-issues it.
+// I/O Read / Write, Interrupt Acknowledge, Special (sub-code on BE[7:0]#);
+// a Retry response re-issues it.
 // No cache: HIT#/HITM# are never driven (the DMA mirror is a later step).
 // [PPRO1] Pentium Pro Family Developer's Manual vol. 1 (sockets/socket370/
 // pentium_pro_developers_manual_vol1.pdf), [HWDM] P6 Family Hardware
@@ -18,6 +19,7 @@ module c2_p6_agent (
     input  logic        bus_space,    // 0 memory, 1 I/O
     input  logic        bus_write,
     input  logic        bus_inta,
+    input  logic        bus_special,  // Special Transaction, sub-code in bus_wdata[2:0]
     input  logic [31:0] bus_addr,
     input  logic [1:0]  bus_size,     // log2 bytes, naturally aligned
     input  logic [31:0] bus_wdata,
@@ -70,12 +72,17 @@ module c2_p6_agent (
 
     // ---- the request
     wire [2:0] lane   = bus_inta ? 3'd0 : bus_addr[2:0];   // INTA: vector on D[7:0]#
-    wire [7:0] be     = (bus_size == 2'd2 ? 8'h0f : bus_size == 2'd1 ? 8'h03 : 8'h01) << lane;
-    wire [4:0] reqa   = bus_inta ? 5'b01000 : bus_space ? {4'b1000, bus_write}
+    wire       central = bus_inta || bus_special;                // REQa 01000
+    wire       writes  = bus_write && !central;                  // carries write data
+    wire       reads   = !bus_write && !bus_special;             // takes data (or INTA)
+    wire [7:0] be     = bus_special ? {5'd0, bus_wdata[2:0]}
+                      : (bus_size == 2'd2 ? 8'h0f : bus_size == 2'd1 ? 8'h03 : 8'h01) << lane;
+    wire [4:0] reqa   = central ? 5'b01000 : bus_space ? {4'b1000, bus_write}
                       : bus_write ? 5'b00111 : 5'b00110;
-    wire [35:3] addr_a = bus_inta ? '0 : {4'd0, bus_space ? 16'd0 : bus_addr[31:16], bus_addr[15:3]};
+    wire [35:3] addr_a = central ? '0 : {4'd0, bus_space ? 16'd0 : bus_addr[31:16], bus_addr[15:3]};
     // clock B: ATTR (UC), DID (agent 0, symmetric) and EXF all zero, BE on
-    // Ab[15:8]#; REQb = DSZ 00, LEN 00 (0-8 bytes) [HWDM] A.1.7-A.1.43
+    // Ab[15:8]# (0 for INTA); REQb = DSZ 00, LEN 00 (0-8 bytes), a Special's
+    // REQb[0]# [HWDM] A.1.7-A.1.43, [PPRO1] 5.2.3.6
     wire [35:3] addr_b = bus_inta ? '0 : {20'd0, be, 5'd0};
 
     // ---- reset, arbitration [PPRO1] 4.1.5: agent 0 waits >= 3 clocks
@@ -160,6 +167,7 @@ module c2_p6_agent (
             end
             REQ_A: begin               // ADS# on the pins; clock B next
                 a_drv   <= addr_b;
+                req_drv <= {4'd0, bus_special};
                 state   <= REQ_B;
             end
             REQ_B: begin               // our ADS# observed now
@@ -171,14 +179,14 @@ module c2_p6_agent (
                 // request-initiated write data: TRDY# observed with DBSY#
                 // inactive -> DRDY# + data next clock, one chunk, no DBSY#
                 // [PPRO1] 4.6.2.1
-                if (head && bus_write && !bus_inta && !wrote && trdy_q && !dbsy_q) begin
+                if (head && writes && !wrote && trdy_q && !dbsy_q) begin
                     drdy_drv <= 1;
                     d_drv    <= {32'd0, bus_wdata} << (8 * lane);
                     wrote    <= 1;
                 end
                 if (rs_seen && head) begin
                     if (rs_q == RS_RETRY) state <= IDLE;
-                    else if (rs_q == RS_NORMAL && !(bus_write && !bus_inta)) begin
+                    else if (rs_q == RS_NORMAL && reads) begin
                         // read data starts with the response [PPRO1] 4.6.2.2
                         if (drdy_q) begin
                             bus_rdata <= 32'(d_q >> (8 * lane));
@@ -186,7 +194,7 @@ module c2_p6_agent (
                         end else
                             state <= DATA;
                     end else begin
-                        bus_err <= !(rs_q == RS_NODATA && bus_write && !bus_inta && wrote);
+                        bus_err <= !(rs_q == RS_NODATA && (bus_special || writes && wrote));
                         state   <= DONE;
                     end
                 end

@@ -3,8 +3,11 @@
 // bus port (the P6 bus agent; the testbench in simulation), then replies.
 // Up-link messages: {0x80} + reply payload; the status {0x40 | A6# << 3 |
 // board reset << 2 | error << 1 | INTR} whenever its levels change or a
-// cycle failed (always before the reply), and every 2^16 clocks between
-// commands (so a card reset later learns the levels).
+// cycle failed (always before the reply); between commands the pins
+// {0x50 | STPCLK# << 1 | A20M#} when they change, the events {0x60 | SMI#
+// << 2 | INIT# << 1 | NMI} on their assertion edges, and both level
+// messages every 2^16 clocks (so a card reset later learns the levels).
+// The pin inputs are synchronous to clk, asserted high.
 module c2_cart (
     input  logic        clk,
     input  logic        rst,
@@ -15,6 +18,7 @@ module c2_cart (
     output logic        bus_space,     // 0 memory, 1 I/O
     output logic        bus_write,
     output logic        bus_inta,      // interrupt acknowledge: vector in bus_rdata[7:0]
+    output logic        bus_special,   // Special Transaction, sub-code in bus_wdata[2:0]
     output logic [31:0] bus_addr,
     output logic [1:0]  bus_size,      // log2 bytes
     output logic [31:0] bus_wdata,
@@ -23,14 +27,19 @@ module c2_cart (
     input  logic        bus_err,
     input  logic        intr,
     input  logic        board_reset,   // the board's RESET#
-    input  logic        low_vector     // A6# strap: reset vector 000FFFF0h
+    input  logic        low_vector,    // A6# strap: reset vector 000FFFF0h
+    input  logic        a20m,
+    input  logic        stpclk,
+    input  logic        nmi,
+    input  logic        init,
+    input  logic        smi
 );
     typedef enum logic [3:0] {
         R_HDR, R_FIELDS, R_DATA, E_ADDR, E_LOAD, E_BUS, E_STORE, T_STATUS, T_HDR, T_DATA
     } state_t;
     state_t state;
 
-    typedef enum logic [1:0] { C_CYCLE, C_INTA, C_REP } cmd_t;
+    typedef enum logic [1:0] { C_CYCLE, C_INTA, C_REP, C_SPECIAL } cmd_t;
     cmd_t        cmd;
     logic        write;
     logic [63:0] fields;           // little-endian bytes: CYCLE addr, data; REP port, count
@@ -39,9 +48,11 @@ module c2_cart (
     logic [12:0] bytes, byte_i;    // data bytes (link side)
     logic [31:0] result;           // CYCLE read / INTA reply
     logic        err_event;
-    logic [2:0]  levels_sent;      // {low_vector, board_reset, intr}
-    logic [15:0] status_age;       // clocks since the last status message
-    wire  [2:0]  levels = {low_vector, board_reset, intr};
+    logic [4:0]  levels_sent;      // {stpclk, a20m, low_vector, board_reset, intr}
+    logic [15:0] status_age;       // clocks since both level messages went out
+    logic [2:0]  events, ev_q;     // pending {smi, init, nmi} edges, last levels
+    wire  [4:0]  levels = {stpclk, a20m, low_vector, board_reset, intr};
+    wire  [2:0]  ev_rise = {smi, init, nmi} & ~ev_q;
 
     // the REP data buffer, 1024 x 32 with byte writes
     logic [31:0] buffer [1024];
@@ -79,17 +90,30 @@ module c2_cart (
             bus_req   <= 0;
             err_event <= 0;
             status_age <= '1;   // the first status right after reset
+            events    <= '0;
+            ev_q      <= '0;
             up        <= '0;
         end else begin
             up <= '0;
             status_age <= status_age + 1'b1;
+            ev_q   <= {smi, init, nmi};
+            events <= events | ev_rise;
             case (state)
             R_HDR: begin
-                if (levels != levels_sent || err_event || &status_age) begin   // status between commands
-                    up          <= {4'b0100, levels[2:1], err_event, levels[0]};
-                    levels_sent <= levels;
-                    err_event   <= 0;
+                // between commands: status, pins, events, one per clock
+                if (&status_age) begin
+                    levels_sent <= ~levels;
                     status_age  <= '0;
+                end else if (levels[2:0] != levels_sent[2:0] || err_event) begin
+                    up               <= {4'b0100, levels[2:1], err_event, levels[0]};
+                    levels_sent[2:0] <= levels[2:0];
+                    err_event        <= 0;
+                end else if (levels[4:3] != levels_sent[4:3]) begin
+                    up               <= {6'b010100, levels[4:3]};
+                    levels_sent[4:3] <= levels[4:3];
+                end else if (events != '0) begin
+                    up     <= {5'b01100, events};
+                    events <= ev_rise;
                 end
                 byte_i <= '0;
                 elem   <= '0;
@@ -101,6 +125,10 @@ module c2_cart (
                 end else if (down == 8'h40) begin
                     cmd   <= C_INTA;
                     state <= E_ADDR;
+                end else if (down[7:3] == 5'b01001) begin
+                    cmd    <= C_SPECIAL;
+                    fields <= {29'd0, down[2:0], 32'd0};   // the sub-code as data
+                    state  <= E_ADDR;
                 end else if (down[7:3] == 5'b00100) begin
                     cmd         <= C_REP;
                     bus_space   <= 1;
@@ -125,8 +153,9 @@ module c2_cart (
             end
             E_ADDR: state <= E_LOAD;   // buffer read of the element
             E_LOAD: begin
-                bus_inta  <= cmd == C_INTA;
-                bus_write <= write && cmd != C_INTA;
+                bus_inta    <= cmd == C_INTA;
+                bus_special <= cmd == C_SPECIAL;
+                bus_write   <= write && (cmd == C_CYCLE || cmd == C_REP);
                 bus_addr  <= cmd == C_REP ? {16'd0, fields[47:32]} : fields[31:0];
                 bus_wdata <= (cmd == C_REP ? buf_q >> 8 * lane : fields[63:32]) & size_mask;
                 bus_req   <= 1;
@@ -143,11 +172,10 @@ module c2_cart (
                 state <= cmd == C_REP && elem != count - 13'd1 ? E_ADDR : T_STATUS;
             end
             T_STATUS: begin
-                if (levels != levels_sent || err_event) begin
-                    up          <= {4'b0100, levels[2:1], err_event, levels[0]};
-                    levels_sent <= levels;
-                    err_event   <= 0;
-                    status_age  <= '0;
+                if (levels[2:0] != levels_sent[2:0] || err_event) begin
+                    up               <= {4'b0100, levels[2:1], err_event, levels[0]};
+                    levels_sent[2:0] <= levels[2:0];
+                    err_event        <= 0;
                 end
                 state <= T_HDR;
             end

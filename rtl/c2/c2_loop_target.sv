@@ -4,7 +4,11 @@
 // 0xd0000 and 0xa0000, serial out at 0x3f8 (status 0x60 at 0x3fd), POST
 // code at 0x80, INTR at 0xf5 (vector 0x20 + N) and at 0xf7 (N ms later,
 // vector 0x28), a 4 KB byte FIFO at 0x1f0, a board reset of 1 ms when
-// 0xcf9 is written with bits 2:1 set; anything else floats high.
+// 0xcf9 is written with bits 2:1 set, the PIIX4 port 0x92 (bit 1 FAST_A20:
+// A20M# = !bit 1, bit 0 0 -> 1: INIT#), the CPU pin test port 0xf8 (write
+// bit 0: an NMI, bit 1: STPCLK# until a Stop Grant Acknowledge; read: Halt
+// count << 8 | Stop Grant count), Special Transactions (Shutdown -> INIT#
+// as the PIIX4 does); anything else floats high.
 module c2_loop_target #(
     parameter string ROM_HEX     = "test_rom.hex",
     parameter int    CLOCKS_MS   = 50000           // clocks per millisecond
@@ -15,6 +19,7 @@ module c2_loop_target #(
     input  logic        bus_space,
     input  logic        bus_write,
     input  logic        bus_inta,
+    input  logic        bus_special,
     input  logic [31:0] bus_addr,
     input  logic [1:0]  bus_size,
     input  logic [31:0] bus_wdata,
@@ -23,6 +28,10 @@ module c2_loop_target #(
     output logic        bus_err,      // a write to the full FIFO
     output logic        intr,
     output logic        board_reset,
+    output logic        a20m,
+    output logic        stpclk,
+    output logic        nmi,
+    output logic        init,
     // serial byte out (to a UART), POST code
     output logic        serial_valid,
     output logic [7:0]  serial_byte,
@@ -42,6 +51,8 @@ module c2_loop_target #(
     logic [7:0]  vector;
     logic [31:0] delay;                       // 0xf7 countdown (clocks)
     logic [31:0] reset_left;                  // board reset countdown (clocks)
+    logic [7:0]  port92, halts, stop_grants;
+    logic [4:0]  nmi_left, init_left;         // pin pulses (clocks)
 
     wire       is_mem    = !bus_space;
     wire       is_io     = bus_space;
@@ -59,6 +70,9 @@ module c2_loop_target #(
 
     assign bus_done     = state == DONE;
     assign board_reset  = reset_left != '0;
+    assign a20m         = !port92[1];
+    assign nmi          = nmi_left != '0;
+    assign init         = init_left != '0;
     assign serial_valid = state == BYTES && is_io && bus_write && bus_addr == 32'h3f8;
     assign serial_byte  = bus_wdata[7:0];
 
@@ -68,6 +82,12 @@ module c2_loop_target #(
             intr      <= 0;
             delay     <= '0;
             reset_left <= '0;
+            port92    <= '0;
+            halts     <= '0;
+            stop_grants <= '0;
+            nmi_left  <= '0;
+            init_left <= '0;
+            stpclk    <= 0;
             fifo_head <= '0;
             fifo_tail <= '0;
             post      <= '0;
@@ -76,7 +96,11 @@ module c2_loop_target #(
                 reset_left <= reset_left - 1'b1;
                 intr       <= 0;
                 delay      <= '0;
+                port92     <= '0;
+                stpclk     <= 0;
             end
+            if (nmi_left != '0) nmi_left <= nmi_left - 1'b1;
+            if (init_left != '0) init_left <= init_left - 1'b1;
             if (delay != '0) begin
                 delay <= delay - 1'b1;
                 if (delay == 32'd1) begin
@@ -93,6 +117,14 @@ module c2_loop_target #(
                     data  <= {24'd0, vector};
                     intr  <= 0;
                     state <= DONE;
+                end else if (bus_special) begin
+                    if (bus_wdata[2:0] == 3'd1) init_left <= '1;
+                    if (bus_wdata[2:0] == 3'd3) halts <= halts + 1'b1;
+                    if (bus_wdata[2:0] == 3'd6) begin
+                        stpclk      <= 0;
+                        stop_grants <= stop_grants + 1'b1;
+                    end
+                    state <= DONE;
                 end else if (at_rom && !bus_write)
                     state <= ROM_RD;
                 else if (scratch_d || scratch_a) begin
@@ -106,6 +138,16 @@ module c2_loop_target #(
                     state <= BYTES;
                 else begin
                     if (is_io && !bus_write && bus_addr == 32'h3fd) data <= 32'h60;
+                    if (is_io && !bus_write && bus_addr == 32'h92) data <= {24'd0, port92} & mask;
+                    if (is_io && !bus_write && bus_addr == 32'hf8) data <= {16'd0, halts, stop_grants} & mask;
+                    if (is_io && bus_write && bus_addr == 32'h92) begin
+                        if (bus_wdata[0] && !port92[0]) init_left <= '1;
+                        port92 <= bus_wdata[7:0];
+                    end
+                    if (is_io && bus_write && bus_addr == 32'hf8) begin
+                        if (bus_wdata[0]) nmi_left <= '1;
+                        if (bus_wdata[1]) stpclk <= 1;
+                    end
                     if (is_io && bus_write && bus_addr == 32'h80) post <= bus_wdata[7:0];
                     if (is_io && bus_write && bus_addr == 32'hf5) begin
                         intr   <= 1;
