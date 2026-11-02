@@ -7,7 +7,7 @@ set -eu
 tests=()
 for t; do tests+=("$(realpath "$t")"); done
 cd "$(dirname "$0")/.."
-out=build/x86/core
+out=${X86_CORE_OUT:-build/x86/core}   # model + traces (x86_rand_test.sh: its own)
 mkdir -p "$out"
 . tools/x86_files.sh
 nice -n 19 verilator --cc --exe --build -j 0 -Wall -Wno-UNUSEDSIGNAL --top-module core_top \

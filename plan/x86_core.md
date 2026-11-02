@@ -170,6 +170,15 @@ replicated per read port plus a live-value table.
    not followed 8,021 -> 5,072, the rest is set / clear thrash). Tried:
    P never clears a Jcc's entry (one redirect per loop exit, not two):
    3.629, falsely taken 3,360 -> 10,809; rejected.
+   Multiply latency 2 (no input register): 3.956 (+1.6 %); not taken, the
+   X bypass mux would feed the 33 x 33 product (the unit did not route).
+   Routing: the banked-queue build routed (58,529 ALMs, 46.24 MHz, worst
+   path TAGE RAM -> dir -> P redirect -> fetch queue write enables); the
+   next two did not (peak vertical interconnect 97 % in one region at 53 %
+   ALMs). Pipeline and fetch-queue data registers no longer depend on
+   flush / redirect (only the valid bits do): fewer enables, the redirect
+   off ~2,500 register enables. The uop queue writes every valid P slot
+   (room is checked for all of them), only its tail follows p_take.
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div

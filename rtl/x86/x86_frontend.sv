@@ -127,38 +127,16 @@ module x86_frontend
             valid <= 3'd0;
         end else begin
             f1_valid <= issue;
-            f1_pc <= pc_f;
-            f1_bytes <= fetch_data;
-            f1_mark <= f0_mark;
             if (issue) begin
                 pc_f <= f0_mark.taken ? {f0_mark.target[31:4], 4'd0} : pc_f + 32'd16;
                 f0_off <= f0_mark.taken ? f0_mark.target[3:0] : 4'd0;
             end
             f2_valid <= f1_valid;
-            f2_pc <= f1_pc;
-            f2_bytes <= f1_bytes;
-            f2_mark <= f1_mark;
-            if (push) begin
-                logic [15:0][4:0] nx;
-                for (int i = 0; i < 16; i++) nx[i] = 5'(i) + 5'(pd_len[i]);
-                fq[fq_tail] <= {f2_pc, f2_bytes, pd_len, pd_npfx, nx, pd_fault, f2_mark};   // block_t order
-                fq_tail <= fq_tail + 2'd1;
-            end
+            if (push) fq_tail <= fq_tail + 2'd1;
             if (pop) fq_head <= fq_head + 2'd1;
             fq_count <= fq_count + 3'(push) - 3'(pop);
             if (out_free) begin
                 valid <= x_valid;
-                for (int k = 0; k < 3; k++) begin
-                    bytes[k] <= fq[fq_head].bytes[8*s[k][3:0] +: 8*15];
-                    // blocks are 16-byte aligned: EIP = {pc[31:4], offset}
-                    eip[k] <= {fq[fq_head].pc[31:4], s[k][3:0]};
-                    next[k] <= fq[fq_head].mark.taken && last[k] ? fq[fq_head].mark.target
-                               : {fq[fq_head].pc[31:4] + 28'(fq[fq_head].nx[s[k][3:0]][4]),
-                                  fq[fq_head].nx[s[k][3:0]][3:0]};
-                    len[k] <= fq[fq_head].len[s[k][3:0]];
-                    npfx[k] <= fq[fq_head].npfx[s[k][3:0]];
-                    fault[k] <= fq[fq_head].fault[s[k][3:0]];
-                end
                 if (x_valid[0]) begin
                     off <= {1'b0, pop && fq[fq_head].mark.taken ? fq[fq_head].mark.target[3:0] : x_next[3:0]};
                     for (int k = 0; k < 3; k++)
@@ -166,6 +144,34 @@ module x86_frontend
                 end
             end
         end
+    end
+
+    // data: written whatever the redirect (the valid bits above drop it), so
+    // the redirect only drives the control registers (timing)
+    always_ff @(posedge clk) begin
+        f1_pc <= pc_f;
+        f1_bytes <= fetch_data;
+        f1_mark <= f0_mark;
+        f2_pc <= f1_pc;
+        f2_bytes <= f1_bytes;
+        f2_mark <= f1_mark;
+        if (push) begin
+            logic [15:0][4:0] nx;
+            for (int i = 0; i < 16; i++) nx[i] = 5'(i) + 5'(pd_len[i]);
+            fq[fq_tail] <= {f2_pc, f2_bytes, pd_len, pd_npfx, nx, pd_fault, f2_mark};   // block_t order
+        end
+        if (out_free)
+            for (int k = 0; k < 3; k++) begin
+                bytes[k] <= fq[fq_head].bytes[8*s[k][3:0] +: 8*15];
+                // blocks are 16-byte aligned: EIP = {pc[31:4], offset}
+                eip[k] <= {fq[fq_head].pc[31:4], s[k][3:0]};
+                next[k] <= fq[fq_head].mark.taken && last[k] ? fq[fq_head].mark.target
+                           : {fq[fq_head].pc[31:4] + 28'(fq[fq_head].nx[s[k][3:0]][4]),
+                              fq[fq_head].nx[s[k][3:0]][3:0]};
+                len[k] <= fq[fq_head].len[s[k][3:0]];
+                npfx[k] <= fq[fq_head].npfx[s[k][3:0]];
+                fault[k] <= fq[fq_head].fault[s[k][3:0]];
+            end
     end
 
     // BTB update registered first: off the decode -> redirect path

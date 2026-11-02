@@ -805,6 +805,34 @@ module x86_core
         ew_tag[2] = md_done ? md_tag : am_tag;
     end
 
+    // pipeline data: written whatever the flush (the valid bits drop it), so
+    // the flush only drives control registers
+    always_ff @(posedge clk) begin
+        wb_value <= ex_value;
+        wb_flags <= ex_flags;
+        wb_mispred <= ex_mispred;
+        wb_redirect_pc <= ex_redirect_pc;
+        wb_br <= ex_br;
+        wb_fault <= ex_fault;
+        for (int p = 0; p < 2; p++) wb_tag[p] <= ix[p].tag;
+        wb_tag[2] <= md_done ? md_tag : am_tag;
+        wb2_tag <= wb_tag;
+        wb2_value <= wb_value;
+        wb2_flags <= wb_flags;
+        ix <= ixn;
+        ix_on1 <= on1_n;
+        ix_on2 <= on2_n;
+        ix_slot <= slot_of(grant[2]);
+        am_tag <= ix[2].tag;
+        am_addr <= agu(xr[2]);
+        am_data <= ix[2].u.us3 ? byte_hi(xr[2].src[2].value, ix[2].u.hi3) : ix[2].u.imm2;
+        am_osz <= ix[2].u.osz;
+        am_lext <= ix[2].u.lext;
+        am_dhi <= ix[2].u.dhi;
+        am_sq_snap <= ix[2].sq_snap;
+        am_slot <= ix_slot;
+    end
+
     // ---------------- state update ----------------
     always_ff @(posedge clk) begin
         flush <= r_flush && !rst;
@@ -875,26 +903,9 @@ module x86_core
                     end
                 // X / M -> wb1 -> wb2
                 wb_valid <= ex_valid;
-                wb_value <= ex_value;
-                wb_flags <= ex_flags;
-                wb_mispred <= ex_mispred;
-                wb_redirect_pc <= ex_redirect_pc;
-                wb_br <= ex_br;
-                wb_fault <= ex_fault;
-                for (int p = 0; p < 2; p++) wb_tag[p] <= ix[p].tag;
-                wb_tag[2] <= md_done ? md_tag : am_tag;
                 wb2_valid <= wb_valid;
-                wb2_tag <= wb_tag;
-                wb2_value <= wb_value;
-                wb2_flags <= wb_flags;
                 // S -> X / A
-                for (int p = 0; p < NP; p++) begin
-                    ix_valid[p] <= grant[p] != '0;
-                    ix[p] <= ixn[p];
-                end
-                ix_on1 <= on1_n;
-                ix_on2 <= on2_n;
-                ix_slot <= slot_of(grant[2]);
+                for (int p = 0; p < NP; p++) ix_valid[p] <= grant[p] != '0;
                 for (int p = 0; p < NP; p++)
                     for (int e = 0; e < RS_N; e++)
                         if (p != 2 && grant[p][e]) rs[e].valid <= 1'b0;
@@ -902,14 +913,6 @@ module x86_core
                     if (grant[2][e]) rs[e].issued <= 1'b1;
                 // A -> M
                 am_valid <= ix_valid[2];
-                am_tag <= ix[2].tag;
-                am_addr <= agu(xr[2]);
-                am_data <= ix[2].u.us3 ? byte_hi(xr[2].src[2].value, ix[2].u.hi3) : ix[2].u.imm2;
-                am_osz <= ix[2].u.osz;
-                am_lext <= ix[2].u.lext;
-                am_dhi <= ix[2].u.dhi;
-                am_sq_snap <= ix[2].sq_snap;
-                am_slot <= ix_slot;
                 // X store: its queue entry, done (no result)
                 if (ix_valid[4]) begin
                     sq[ix[4].sq_idx] <= '{addr_valid: 1'b1, size: ix[4].u.osz, addr: agu(xr[4]),
@@ -991,20 +994,22 @@ module x86_core
                 rob_count <= rob_count + (TAG_W + 1)'(rn_n) - (TAG_W + 1)'(r_n);
                 if (rn_n != 2'd0) sq_tail <= rn[rn_n - 2'd1].sq_snap
                                              + (SQ_W + 1)'(rn[rn_n - 2'd1].u.kind == K_ST);
-                // uop queue
+                // uop queue: every valid slot written (room for p_all), the
+                // tail moved past the taken ones only (timing: p_take is late)
                 begin
                     logic [3:0] t, pushed;
                     t = uq_tail;
+                    pushed = 4'd0;
                     if (p_push)
                         for (int k = 0; k < 3; k++)
-                            if (p_take[k])
+                            if (p_valid[k])
                                 for (int i = 0; i < 3; i++)
                                     if (i < int'(p_n[k])) begin
                                         uq[t] <= p_uop_ret[k][i];
                                         t = t + 4'd1;
+                                        if (p_take[k]) pushed = pushed + 4'd1;
                                     end
-                    pushed = t - uq_tail;   // 4-bit: wraps with the pointers
-                    uq_tail <= t;
+                    uq_tail <= uq_tail + pushed;
                     uq_head <= uq_head + 4'(rn_n);
                     uq_count <= uq_count + 5'(pushed) - 5'(rn_n);
                 end
