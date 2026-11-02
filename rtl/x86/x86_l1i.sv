@@ -73,23 +73,17 @@ module x86_l1i
         for (gw = 0; gw < WAYS; gw = gw + 1) begin : wy
             logic t_we;
             (* ramstyle = "no_rw_check" *) tg_t t [SETS];
-            (* ramstyle = "MLAB, no_rw_check" *) tg_t s [SETS];   // snoop copy
             (* ramstyle = "no_rw_check" *) logic [127:0] d [SETS];
-            initial for (int i = 0; i < SETS; i++) begin
-                t[i] = '0;
-                s[i] = '0;
-            end
+            initial for (int i = 0; i < SETS; i++) t[i] = '0;
             assign t_we = inv || fill && f_way == 2'(gw);
             always_ff @(posedge clk) begin
-                if (t_we) begin
-                    t[t_wa] <= t_wd;
-                    s[t_wa] <= t_wd;
-                end
+                if (t_we) t[t_wa] <= t_wd;
                 if (fill && f_way == 2'(gw)) d[f_line[5 +: SW]] <= mem_rdata[128 * gb +: 128];
                 t_rd[gb][gw] <= t[n_set[gb]];
                 d_rd[gb][gw] <= d[n_set[gb]];
             end
-            assign s_rd[gb][gw] = s[sn_line[gb][5 +: SW]];
+            x86_ram_async #(.W($bits(tg_t)), .N(SETS)) s (.clk(clk), .we(t_we), .wa(t_wa), .wd(t_wd),   // snoop copy
+                                                          .ra(sn_line[gb][5 +: SW]), .q(s_rd[gb][gw]));
         end
     end endgenerate
 

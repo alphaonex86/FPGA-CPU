@@ -77,17 +77,15 @@ module x86_l1d
     genvar gc, gw;
     generate for (gc = 0; gc < 3; gc = gc + 1) begin : tc
         for (gw = 0; gw < WAYS; gw = gw + 1) begin : tw
-            (* ramstyle = "MLAB, no_rw_check" *) tg_t t [SETS];
-            initial for (int i = 0; i < SETS; i++) t[i] = '0;
-            always_ff @(posedge clk) if (t_we && t_way == 2'(gw)) t[t_set] <= t_wd;
-            assign t_rd[gc][gw] = t[t_ra[gc]];
+            x86_ram_async #(.W($bits(tg_t)), .N(SETS)) t (.clk(clk), .we(t_we && t_way == 2'(gw)),
+                                                          .wa(t_set), .wd(t_wd), .ra(t_ra[gc]),
+                                                          .q(t_rd[gc][gw]));
         end
     end endgenerate
 
     // ---------------- data banks: [bank] rows {set, way}, 16 bytes
-    logic [1:0]                   b_we;
     logic [1:0][SW+1:0]           b_wa, b_ra;
-    logic [1:0][15:0]             b_be;
+    logic [1:0][15:0]             b_be;          // zero: no write (no separate enable: M10K inference)
     logic [1:0][127:0]            b_wd, b_rd;
     genvar gb;
     generate for (gb = 0; gb < 2; gb = gb + 1) begin : bk
@@ -95,8 +93,7 @@ module x86_l1d
         // store, still queued, forwards or replays it)
         logic [15:0][7:0] mem [SETS * WAYS];
         always_ff @(posedge clk) begin
-            if (b_we[gb])
-                for (int i = 0; i < 16; i++) if (b_be[gb][i]) mem[b_wa[gb]][i] <= b_wd[gb][8*i +: 8];
+            for (int i = 0; i < 16; i++) if (b_be[gb][i]) mem[b_wa[gb]][i] <= b_wd[gb][8*i +: 8];
             b_rd[gb] <= mem[b_ra[gb]];
         end
     end endgenerate
@@ -222,7 +219,6 @@ module x86_l1d
         for (int b = 0; b < 2; b++)
             b_ra[b] = st == S_EVRD ? {f_line[5 +: SW], f_way} : {set_of(a_bdw[b]), a_bway[b]};
         // writes: the fill, else the drain
-        b_we = '0;
         b_wa = '0;
         b_be = '0;
         b_wd = '0;
@@ -232,7 +228,6 @@ module x86_l1d
         t_wd = '0;
         if (st == S_FILL) begin
             for (int b = 0; b < 2; b++) begin
-                b_we[b] = 1'b1;
                 b_wa[b] = {f_line[5 +: SW], f_way};
                 b_be[b] = '1;
                 for (int j = 0; j < 4; j++) b_wd[b][32*j +: 32] = f_buf[32 * (2 * j + b) +: 32];
@@ -252,7 +247,6 @@ module x86_l1d
                 m4 = d_dw[0] == 1'(b) ? d_m8[3:0] : d_m8[7:4];
                 w4 = d_dw[0] == 1'(b) ? d_w8[31:0] : d_w8[63:32];
                 if (m4 != 4'd0 && bdw[29:3] == d_line) begin
-                    b_we[b] = 1'b1;
                     b_wa[b] = {d_line[5 +: SW], d_way};
                     b_be[b] = 16'(m4) << (4 * bdw[2:1]);
                     b_wd[b] = 128'(w4) << (32 * bdw[2:1]);

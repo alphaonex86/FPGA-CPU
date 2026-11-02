@@ -137,13 +137,14 @@ module x86_core
     logic [31:4]       fetch_next, fetch_pc;
     logic              ic_hit, ic_sn_hit, ic_sq_busy, pr_req, pr_done, d_step;
     logic              code_pend, code_pend_q;   // a store to code waits for its drain
+    logic              ic_inv;                   // the drained store targets code
     logic [8*30-1:0]   ic_bytes;
     logic [1:0][31:5]  sn_line;
     logic [31:5]       ic_miss_line, d_line;
     x86_l1i u_l1i (.clk(clk), .rst(rst), .pc_n(fetch_next), .pc_f(fetch_pc),
                    .hold(code_pend || code_pend_q), .hit(ic_hit), .bytes(ic_bytes),
                    .sn_line(sn_line), .sn_hit(ic_sn_hit),
-                   .inv(d_step && sq[sq_head[SQ_W-1:0]].code), .inv_line(d_line),
+                   .inv(ic_inv), .inv_line(d_line),
                    .miss_line(ic_miss_line), .sq_busy(ic_sq_busy), .pr_req(pr_req), .pr_done(pr_done),
                    .mem_req(im_req), .mem_addr(im_addr), .mem_ready(im_ready),
                    .mem_rvalid(im_rvalid), .mem_rdata(l2_rdata));
@@ -290,6 +291,7 @@ module x86_core
     sq_t              sq [SQ_N];
     logic [SQ_W:0]    sq_head, sq_cmt, sq_tail;   // with wrap bit; [head, cmt) retired
     logic             drain;                      // the head entry (retired) is in the L1D: leaves
+    assign ic_inv = d_step && sq[sq_head[SQ_W-1:0]].code;
     logic [31:0]      arch [NREG];
     flags_t           arch_flags;
     logic             rat_rob [NREG];

@@ -10,7 +10,7 @@ src=$(realpath "$1")
 trace=${2:+$(realpath "$2")}
 cd "$(dirname "$0")/.."
 check=ext/x86_trace_check
-[[ -x $check ]] || { echo "run rtl/tools/setup.sh first"; exit 1; }
+[[ -x $check ]] || { echo "run rtl/tools/setup.sh first" >&2; exit 1; }
 name=$(basename "${src%.*}")
 mkdir -p build/x86
 objs=()
