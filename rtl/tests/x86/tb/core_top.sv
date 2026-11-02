@@ -41,6 +41,7 @@ module core_top (
     logic [31:0] mp_cycle [ROB_N];
     logic        ind [ROB_N];       // the ROB entry is an indirect branch (RET: predicted taken)
     logic        refill;
+    logic [31:0] st_x [4], st_rn [4];   // instructions extracted, uops renamed per cycle
 
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000),
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
@@ -93,6 +94,7 @@ module core_top (
             for (int i = 0; i < 5; i++) st_fl[i] <= 32'd0;
             for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
             for (int i = 0; i < 4; i++) st_dr[i] <= 32'd0;
+            for (int i = 0; i < 4; i++) {st_x[i], st_rn[i]} <= '0;
         end else begin
             logic [31:0] r [8];
             flags_t      f;
@@ -118,6 +120,9 @@ module core_top (
                 st_dr[c] <= st_dr[c] + 32'd1;
             end
             if (core.flush) st_flush <= st_flush + 32'd1;
+            if (core.fe.out_free && !core.fe_redirect && !core.flush)
+                st_x[$countones(core.fe.x_valid)] <= st_x[$countones(core.fe.x_valid)] + 32'd1;
+            st_rn[core.rn_n] <= st_rn[core.rn_n] + 32'd1;
             begin
                 int n0, n1, n2;
                 n0 = $countones(core.req[0]);
@@ -198,6 +203,9 @@ module core_top (
 
     final begin
         $fclose(trace);
+        if (stats)
+            $display("stats: per cycle: extracted 0/1/2/3 %0d %0d %0d %0d (output free), renamed 0/1/2/3 %0d %0d %0d %0d",
+                     st_x[0], st_x[1], st_x[2], st_x[3], st_rn[0], st_rn[1], st_rn[2], st_rn[3]);
         if (stats)
             $display("stats: retire 0: ROB empty %0d, head waits %0d; uop queue empty %0d; decode redirects %0d; flushes %0d",
                      st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush);

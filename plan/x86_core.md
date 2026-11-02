@@ -291,6 +291,14 @@ replicated per read port plus a live-value table.
      read hit answers 2 cycles after it is taken; an L1D write-back
      allocates without reading memory. CoreMark unchanged (380 L2
      misses, setup only).
+   - Extraction continues into the next queued block (`+stats`: per
+     CoreMark iteration 51K cycles had extracted 1-2 instructions at a
+     block end with the next block queued): 4.756 -> 4.908. An
+     instruction of more than 3 uops (string ops, CALL m32, XADD /
+     CMPXCHG m) must go first, else decode refetches it ("cut" redirects:
+     c3 3 -> 142); x86_predecode flags them (`multi`) and extraction stops
+     before them: 4.925 CoreMark/MHz (203,029 cycles, IPC 1.672), c3
+     1.124 -> 1.128.
    Next:
    - A missing load leaves the RS waiting on its line (no replay loop),
      woken when the fill writes it; more misses in flight.

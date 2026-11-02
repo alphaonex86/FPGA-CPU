@@ -11,10 +11,10 @@ module predecode_check #(
 );
     logic [N-1:0][3:0] len, npfx, len_r, npfx_r;
     logic [N-1:0][1:0] map, map_r;
-    logic [N-1:0]      fault, fault_r;
+    logic [N-1:0]      fault, fault_r, multi;   // multi: not checked (performance only)
 
     x86_predecode #(.N(N)) dut (.clk(clk), .bytes(bytes), .d32(d32), .len(len),
-                                .npfx(npfx), .map(map), .fault(fault));
+                                .npfx(npfx), .map(map), .fault(fault), .multi(multi));
 
     genvar i;
     generate for (i = 0; i < N; i = i + 1) begin : ref_at

@@ -14,9 +14,17 @@ module x86_predecode #(
     output logic [N-1:0][3:0]   len,      // valid when !fault
     output logic [N-1:0][3:0]   npfx,
     output logic [N-1:0][1:0]   map,
-    output logic [N-1:0]        fault     // unsupported (#UD) or > 15 bytes (#GP)
+    output logic [N-1:0]        fault,    // unsupported (#UD) or > 15 bytes (#GP)
+    output logic [N-1:0]        multi     // may decode to more than 3 uops (x86_decode n_b)
 );
     localparam int B = N + 14;
+
+    // MOVS / CMPS / STOS / LODS / SCAS (with REP), CALL m32, XADD / CMPXCHG m
+    function automatic logic is_multi(input logic [7:0] op, input logic [7:0] b1, input logic [7:0] b2);
+        return op[7:4] == 4'hA && (op[2] || op[3] && op[1])
+            || op == 8'hFF && b1[5:3] == 3'd2 && b1[7:6] != 2'b11
+            || op == 8'h0F && (b1 == 8'hC0 || b1 == 8'hC1 || b1 == 8'hB0 || b1 == 8'hB1) && b2[7:6] != 2'b11;
+    endfunction
 
     function automatic logic is_prefix(input logic [7:0] x);
         case (x)
@@ -31,11 +39,11 @@ module x86_predecode #(
     logic [B-1:0]                 pfx, p66, p67;
     logic [B-1:0][1:0][1:0][3:0]  oplen;
     logic [B-1:0][1:0]            opmap;
-    logic [B-1:0]                 opunsup;
+    logic [B-1:0]                 opunsup, opmulti;
     logic [B-1:0]                 pfx_q, p66_q, p67_q;
     logic [B-1:0][1:0][1:0][3:0]  oplen_q;
     logic [B-1:0][1:0]            opmap_q;
-    logic [B-1:0]                 opunsup_q;
+    logic [B-1:0]                 opunsup_q, opmulti_q;
     logic                         d32_q;
 
     assign padded = {80'd0, bytes};
@@ -45,6 +53,7 @@ module x86_predecode #(
         assign pfx[j] = is_prefix(bytes[8*j +: 8]);
         assign p66[j] = bytes[8*j +: 8] == 8'h66;
         assign p67[j] = bytes[8*j +: 8] == 8'h67;
+        assign opmulti[j] = is_multi(padded[8*j +: 8], padded[8*j + 8 +: 8], padded[8*j + 16 +: 8]);
         x86_opdecode od (.win(padded[8*j +: 8*11]), .len(oplen[j]), .map(opmap[j]),
                          .unsup(opunsup[j]));
     end endgenerate
@@ -56,6 +65,7 @@ module x86_predecode #(
         oplen_q   <= oplen;
         opmap_q   <= opmap;
         opunsup_q <= opunsup;
+        opmulti_q <= opmulti;
         d32_q     <= d32;
     end
 
@@ -77,12 +87,14 @@ module x86_predecode #(
             npfx[i] = 4'd0;
             map[i] = 2'd0;
             fault[i] = 1'b0;
+            multi[i] = 1'b0;
             for (int t = 0; t < 15; t++)
                 if (at_t[t]) begin
                     total = total | 5'(t + oplen_q[i+t][asz16][osz16]);
                     npfx[i] = npfx[i] | 4'(t);
                     map[i] = map[i] | opmap_q[i+t];
                     fault[i] = fault[i] | opunsup_q[i+t];
+                    multi[i] = multi[i] | opmulti_q[i+t];
                 end
             fault[i] = fault[i] | total > 5'd15 | run[14] & pfx_q[i+14];
             len[i] = total[3:0];
