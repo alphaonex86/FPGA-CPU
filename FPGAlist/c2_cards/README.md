@@ -79,4 +79,18 @@ D7/C7 (manual sec. 3.4).
    both ends, 15-20 cm) and a 2 x 20 2.54 mm -> 1.27 mm adapter board (the
    cartridge J5 is a 1.27 mm header; plan/slot1.md D32 amendment).
 
-The host PC needs a free PCIe x4 or x16 slot (x2 card).
+The host PC needs a free slot the x4 edge fits (x4/x8/x16, or an x16
+slot wired x1: the link then trains x1 Gen2, 500 MB/s, far above the
+50 MB/s cable link). This dev host (Gigabyte B650 AORUS ELITE AX): GPU in
+the CPU x16 slot; the chipset slots are x16 wired x1 and hold the BCM57810
+(x8 card at x1) and likely the AX200 card: free one before bring-up. A
+chipset slot adds a hop to the measured read latency (worst case).
+
+## Re-check before purchase (2026-11-02)
+
+Against manual REV 1.1: J11 order and bank-16 3.3 V (sec. 3.11), PCIe
+pins + 100 MHz slot refclk (sec. 3.4), slot 12 V power (sec. 3.15),
+sys clock R4/T4, key F15, LEDs, UART L15 all match `ax7a035b.xdc`;
+`build.tcl` builds the x2 Gen2 IP on xc7a35tfgg484-2 with timing met.
+Open until the schematic arrives: PERST# not on an FPGA pin (power-up
+load ~24 ms < 100 ms; host resets reach the core as link down).
