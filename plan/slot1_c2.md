@@ -20,7 +20,8 @@ too. Nothing is bought before the viability verdict below.
 | VMM (KVM, one vCPU, bus backends) | `sw/c2-vmm/` | v0 + 440BX shadow RAM: test ROM passes on the sim backend |
 | BAR0 bus protocol | `sw/c2-vmm/bus.h` | v0 defined |
 | PCIe card: endpoint + BAR0 block -> cable link | `rtl/c2/` (vendor-neutral, PCIe IP wrapper) | to do |
-| Cable link protocol (card <-> cartridge) | `rtl/c2/` | to do |
+| Cable link protocol (card <-> cartridge) | `rtl/c2/`; 22 cartridge balls (D32: 17 at 3.3 V, 2 at 1.35 V, 3 free) | to do |
+| Cartridge PCB: link header + 19 selection 0-ohms (D32) | `hw/slot1-cyclonev` generators | to do |
 | Cartridge: link + P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | `rtl/c2/` on the A cartridge | to do |
 | Bench: host <-> PCIe card round trip | hardware | after the verdict |
 

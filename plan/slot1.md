@@ -513,6 +513,14 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   (vendor PCIe IP in a thin wrapper). Reason: several parts from different
   sellers, any one out of stock stops the plan. Design first, buy after
   the viability verdict (`slot1_c2.md`).
+- **D32** (decided 2026-11-02 by the operator) C2 link on the cartridge:
+  the 19 FPGA balls of the host signals no documented D8 chipset uses
+  (A[35:32]#, AP[1:0]#, DEP[7:0]#, RP#, RSP#, AERR#, BERR#, BINIT#; 440BX
+  290633-001 Table 2-2 p.2-2 "not supported"; VT82C694T Table 3 and i810
+  GMCH: HA[31:3]# only; i820 unverified) plus the 3 free balls go to a
+  link header, the translators kept: a 0402 0-ohm between each of the 19
+  balls and its translator channel (fitted for variant A, not fitted for
+  C2), the header on the ball side.
 - **D22** (decided 2026-10-21, amended 2026-10-22 twice by operator: first
   6, then 8 copper layers, same answer as the D5 pattern) Slot 1
   cartridge = 8 layers: signals F&B (B.Cu gets the die escapes, F.Cu the
