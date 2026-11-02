@@ -324,6 +324,16 @@ replicated per read port plus a live-value table.
      303,771 -> 249,126 cycles (-18%; -8% at latency 20); with two hits per
      line -18%; `x4_jump.S` (a new page per load) unchanged at 131,119
      (without the stream check +62%); CoreMark unchanged.
+   - Perf builds with the caches (seeds 6 / 1 / 2): 47.16 / 46.86 / 48.02
+     MHz (64 % ALMs, 405 RAM blocks); the fitter spread is ~5 %, so single
+     builds cannot rank changes below that. Worst paths: the two-cycle
+     loops RS ready -> grant -> pick -> bypass -> AGU -> L1D tags -> a_hit
+     -> early wakeup -> ready, and RS ready -> grant -> bypass tag compare
+     -> X operand. Tried: the L1D bank / store-queue +-1 dword from their
+     own adders (imm +- 4) instead of after the AGU: mean 47.58 MHz, noise;
+     reverted. Load and mul/div dependents woken at the result (M) instead
+     of a cycle ahead: 50.7 MHz but 4.925 -> 4.532 CoreMark/MHz (230 vs
+     232 CoreMark): rejected.
    Next:
    - More L1D misses in flight to L2; prefetch only cacheable memory once
      M5 has memory types (MTRR / PCD).
