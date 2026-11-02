@@ -69,7 +69,8 @@ chipset, same sockets; source of `sockets/kicad/`).
   footprints, symbols, 3D models, pin maps.
 - `isa/` — x86 ISA manuals.
 - `plan/` — `interposers.md` (4 interposer boards, tasks, status), `slot1.md`, `slot1_variants.md` (A/B/C1/C2 study), `x86_core.md` (x86 core architecture),
-  `cpu_core.md` (base core evaluation) and `prompt.md`.
+  `cpu_core.md` (base core evaluation), `slot1_c2.md` (C2: N100 + FPGA bridge) and `prompt.md`.
+- `sw/c2-vmm/` — Slot 1 C2 VMM (KVM); `test.sh` runs its test ROM.
 - `fetch.sh <sources.txt>...` — (re)downloads every file listed in a
   `sources.txt` (`sockets/local-sources.txt`: local `file://` copies);
   vendor-login software is listed in each folder's README.

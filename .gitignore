@@ -22,3 +22,4 @@ sockets/slot1/**/*.html
 # rtl/tools/setup.sh downloads (VexiiRiscv, SpinalHDL, sbt)
 rtl/ext/
 rtl/build/
+sw/*/build/
