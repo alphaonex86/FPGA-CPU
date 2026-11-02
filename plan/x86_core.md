@@ -309,9 +309,24 @@ replicated per read port plus a live-value table.
      L1D writes the line back if dirty (probe) before L2 is read. Not
      covered: a line evicted from the L1I while its instructions are in
      flight, then stored to.
+   - Load misses (`x4_miss.S`, one load per line: 64 KB twice, 512 KB):
+     303,771 cycles at memory latency 10 (137,842 at 1, 469,706 at 20); an
+     L2 hit costs 4.5 cycles per line, an L2 miss 16 (latency + ~6).
+     Measured and dropped: a missed load waiting in the RS for the fill
+     instead of replaying (+0.5% cycles; with independent hits in the loop
+     +0.1%: they cannot retire past the miss). A next-line prefetch in the
+     blocking L2 gains nothing either (the demand waits behind it).
+   - L2 front and memory engine split: read hits are served while the
+     engine reads memory, a read waiting on the engine's line takes the
+     memory data. Stream prefetch: once demand reads stream (each within
+     PF + 1 lines after the last), the next line of the 4 KB page is read
+     when the front and engine are idle (PF = 1; 2 is slower). x4_miss
+     303,771 -> 249,126 cycles (-18%; -8% at latency 20); with two hits per
+     line -18%; `x4_jump.S` (a new page per load) unchanged at 131,119
+     (without the stream check +62%); CoreMark unchanged.
    Next:
-   - A missing load leaves the RS waiting on its line (no replay loop),
-     woken when the fill writes it; more misses in flight.
+   - More L1D misses in flight to L2; prefetch only cacheable memory once
+     M5 has memory types (MTRR / PCD).
    - The bus unit behind L2 (M8).
 4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,
