@@ -17,7 +17,8 @@ done
 rm -f "$out/obj/c2-vmm-rtl"
 nice -n 19 verilator --cc --exe --build -j 0 -Wall -Wno-UNUSEDSIGNAL --top-module c2_sim_top --Mdir "$out/obj" \
     -CFLAGS "-O2 -I$here" -LDFLAGS "${objs[*]}" -o c2-vmm-rtl \
-    "$rtl"/c2/c2_card.sv "$rtl"/c2/c2_cart.sv "$rtl"/tests/c2/c2_sim_top.sv "$rtl"/tests/c2/bus_rtl.cpp \
+    "$rtl"/c2/c2_afifo.sv "$rtl"/c2/c2_req_sync.sv "$rtl"/c2/xilinx/c2_tlp.sv "$rtl"/c2/c2_card.sv "$rtl"/c2/c2_cart.sv \
+    "$rtl"/tests/c2/c2_sim_top.sv "$rtl"/tests/c2/bus_rtl.cpp \
     > "$out/build.log" 2>&1 || { grep -m20 -A3 "%Error\|%Warning\|error:" "$out/build.log"; exit 1; }
 as --32 -o "$out/test_rom.o" test_rom.S
 objcopy -O binary -j .text "$out/test_rom.o" "$out/test_rom.bin"

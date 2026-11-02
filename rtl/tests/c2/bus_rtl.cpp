@@ -1,27 +1,54 @@
-// c2-vmm "rtl" backend: BAR0 accesses drive the Verilator model of the
-// bridge (c2_sim_top.sv: card + link + cartridge); the cartridge's bus
-// cycles are served by the bus_sim devices, BUS_LATENCY clocks each.
+// c2-vmm "rtl" backend: each BAR0 access becomes a PCIe TLP on the
+// AXI4-Stream port of the Verilator model (c2_sim_top.sv: c2_tlp + card +
+// link + cartridge), completions are checked field by field; the
+// cartridge's bus cycles are served by the bus_sim devices.
+// Time step 2 ns: PCIe user clock 125 MHz, link and cartridge clocks
+// 50 MHz, the cartridge's 6 ns after the card's.
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 #include "Vc2_sim_top.h"
 extern "C" {
 #include "bus.h"
 }
 
-enum { BUS_LATENCY = 8, TIMEOUT = 10000000 };
+enum : uint32_t { BUS_LATENCY = 8, TIMEOUT = 50000000, BAR_BASE = 0xf0000000, REQUESTER = 0x0100, COMPLETER = 0x0200 };
+
+struct beat {
+    uint64_t data;
+    uint8_t keep;
+    bool last;
+};
 
 static Vc2_sim_top *top;
 static struct bus *dev;
-static int bus_wait;    // clocks left in the current bus cycle; -1 none
-static uint64_t clocks;
+static uint64_t t;
+static bool bus_busy;
+static uint32_t bus_wait;
+static bool rx_accepted;
+static std::vector<beat> tx_beats;
+static uint8_t tag;
 
-static void tick()
+[[noreturn]] static void fail(const char *what)
 {
-    top->clk = 0;
-    top->eval();
-    top->intr = dev->intr(dev);
-    top->bus_done = 0;
-    if (top->bus_req && bus_wait < 0) {
+    fprintf(stderr, "c2-vmm rtl: %s\n", what);
+    exit(1);
+}
+
+static uint32_t bswap(uint32_t v)
+{
+    return __builtin_bswap32(v);
+}
+
+// the board: one bus cycle at a time, BUS_LATENCY cartridge clocks each
+static void cclk_edge()
+{
+    if (top->bus_done) {
+        top->bus_done = 0;
+        bus_busy = false;
+    } else if (bus_busy && --bus_wait == 0)
+        top->bus_done = 1;
+    if (!bus_busy && top->bus_req) {
         int size = 1 << top->bus_size;
         top->bus_err = 0;
         top->bus_rdata = 0;
@@ -31,56 +58,89 @@ static void tick()
             dev->write(dev, top->bus_space, top->bus_addr, size, top->bus_wdata);
         else
             top->bus_rdata = dev->read(dev, top->bus_space, top->bus_addr, size);
+        bus_busy = true;
         bus_wait = BUS_LATENCY;
     }
-    if (bus_wait == 0) top->bus_done = 1;
-    if (bus_wait >= 0) bus_wait--;
-    top->eval();
-    top->clk = 1;
-    top->eval();
-    clocks++;
+    top->intr = dev->intr(dev);
 }
 
-static void wait_for(bool (*cond)(), const char *what)
+// one 2 ns step; true when the user clock rose
+static bool step()
 {
-    for (int i = 0; !cond(); i++) {
-        if (i == TIMEOUT) {
-            fprintf(stderr, "c2-vmm rtl: timeout waiting for %s\n", what);
-            exit(1);
-        }
-        tick();
+    t++;
+    bool u = t % 4 < 2, l = t % 10 < 5, c = (t + 7) % 10 < 5;
+    bool u_rise = u && !top->uclk, c_rise = c && !top->cclk;
+    if (u_rise) {
+        if (top->tx_tvalid && top->tx_tready) tx_beats.push_back({top->tx_tdata, top->tx_tkeep, (bool)top->tx_tlast});
+        rx_accepted = top->rx_tvalid && top->rx_tready;
     }
+    top->uclk = u;
+    top->lclk = l;
+    top->cclk = c;
+    top->eval();
+    if (c_rise) {
+        cclk_edge();
+        top->eval();
+    }
+    return u_rise;
 }
 
-static void request(bool write, uint32_t off, uint64_t value)
+static void ucycle()
 {
-    top->req_valid = 1;
-    top->req_write = write;
-    top->req_addr = off;
-    top->req_wdata = value;
+    while (!step()) {}
+}
+
+static void send_tlp(const std::vector<uint32_t> &dw)
+{
+    for (size_t i = 0; i < dw.size(); i += 2) {
+        bool two = i + 1 < dw.size();
+        top->rx_tdata = dw[i] | (two ? (uint64_t)dw[i + 1] << 32 : 0);
+        top->rx_tkeep = two ? 0xff : 0x0f;
+        top->rx_tlast = i + 2 >= dw.size();
+        top->rx_tvalid = 1;
+        top->rx_tuser = 1 << 2;   // BAR0 hit
+        top->eval();
+        for (uint32_t n = 0;; n++) {
+            if (n == TIMEOUT) fail("timeout: TLP not accepted");
+            ucycle();
+            if (rx_accepted) break;
+        }
+    }
+    top->rx_tvalid = 0;
     top->eval();
-    wait_for([] { return (bool)top->req_ready; }, "req_ready");
-    tick();
-    top->req_valid = 0;
 }
 
 static uint64_t rtl_read(struct bar *, uint32_t off, int size)
 {
-    request(false, off, 0);
-    wait_for([] { return (bool)top->rsp_valid; }, "rsp_valid");
-    uint64_t v = top->rsp_data;
-    tick();
-    return size == 8 ? v : (uint32_t)v;
+    uint32_t len = size / 4, t_ag = tag++;
+    tx_beats.clear();
+    send_tlp({ len, REQUESTER << 16 | t_ag << 8 | (len == 2 ? 0xffu : 0x0fu), BAR_BASE + off });
+    for (uint32_t n = 0; tx_beats.empty() || !tx_beats.back().last; n++) {
+        if (n == TIMEOUT) fail("timeout: no completion");
+        ucycle();
+    }
+    // CplD: {DW1, DW0}, {data 0, DW2}, [{-, data 1}]
+    if (tx_beats.size() != (len == 2 ? 3u : 2u)) fail("completion: wrong beat count");
+    uint32_t dw0 = (uint32_t)tx_beats[0].data, dw1 = (uint32_t)(tx_beats[0].data >> 32);
+    uint32_t dw2 = (uint32_t)tx_beats[1].data;
+    if (dw0 != (0x4a000000u | len)) fail("completion: DW0 (fmt, type, length)");
+    if (dw1 != (COMPLETER << 16 | len * 4)) fail("completion: DW1 (completer, status, byte count)");
+    if (dw2 != (REQUESTER << 16 | t_ag << 8 | (off & 0x7c))) fail("completion: DW2 (requester, tag, lower address)");
+    if (tx_beats.back().keep != (len == 2 ? 0x0f : 0xff)) fail("completion: last beat keep");
+    uint64_t v = bswap((uint32_t)(tx_beats[1].data >> 32));
+    if (len == 2) v |= (uint64_t)bswap((uint32_t)tx_beats[2].data) << 32;
+    return v;
 }
 
 static void rtl_write64(struct bar *, uint32_t off, uint64_t value)
 {
-    request(true, off, value);
+    send_tlp({ 0x40000002u, REQUESTER << 16 | (uint32_t)tag++ << 8 | 0xffu, BAR_BASE + off,
+               bswap((uint32_t)value), bswap((uint32_t)(value >> 32)) });
 }
 
 static void report()
 {
-    fprintf(stderr, "c2-vmm rtl: %llu bridge clocks\n", (unsigned long long)clocks);
+    fprintf(stderr, "c2-vmm rtl: %.3f ms simulated\n", (double)t * 2e-6);
 }
 
 extern "C" struct bus *bus_rtl_open(const char *rom_path)
@@ -88,11 +148,12 @@ extern "C" struct bus *bus_rtl_open(const char *rom_path)
     dev = bus_sim_open(rom_path);
     if (!dev) return nullptr;
     top = new Vc2_sim_top;
-    bus_wait = -1;
+    top->completer_id = COMPLETER;
+    top->tx_tready = 1;
     top->rst = 1;
-    for (int i = 0; i < 4; i++) tick();
+    for (int i = 0; i < 100; i++) step();
     top->rst = 0;
-    tick();
+    for (int i = 0; i < 100; i++) step();
     atexit(report);
     static struct bar bar = { rtl_read, rtl_write64, nullptr };
     return bus_bar_open(&bar);

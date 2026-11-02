@@ -3,7 +3,8 @@
 // PCIe IP wrapper feeds it), and the link to the cartridge (c2_cart.sv):
 // one byte per clock each way, 0x00 between messages. One command at a
 // time: a request that needs the cartridge holds req_ready low until the
-// cartridge's reply, so BAR0 requests run strictly in order.
+// cartridge's reply, so BAR0 requests run strictly in order. The up bytes
+// come through a clock-crossing FIFO: up_valid marks each one.
 module c2_card (
     input  logic        clk,
     input  logic        rst,
@@ -17,7 +18,9 @@ module c2_card (
     output logic [63:0] rsp_data,
     // link
     output logic [7:0]  down,
-    input  logic [7:0]  up
+    input  logic [7:0]  up,
+    input  logic        up_valid,
+    input  logic        ext_err      // PCIe / link-FIFO fault: sets the protocol error
 );
     localparam logic [31:0] ID = 32'h43324231;   // "C2B1"
 
@@ -59,7 +62,7 @@ module c2_card (
     wire [12:0] rep_count = req_wdata[44:32];
     wire [13:0] rep_bytes = {1'b0, rep_count} << lsz;
     wire        rep_ok    = lsz != 2'd3 && req_wdata[63:45] == '0 && rep_count != '0 && rep_bytes <= 14'd4096;
-    wire        rx_byte   = rx_busy && state == WAIT;
+    wire        rx_byte   = up_valid && rx_busy && state == WAIT;
 
     assign req_ready = state == IDLE;
     assign rsp_valid = state == RESP;
@@ -177,16 +180,19 @@ module c2_card (
                     state   <= resp_vector ? RESP : IDLE;
                     resp    <= {56'd0, up};   // INTA: the 1-byte reply is the vector
                 end
-            end else if (up == 8'h80 && state == WAIT) begin
-                rdata <= '0;
-                rx_i  <= '0;
-                if (rx_len == '0) state <= IDLE;
-                else rx_busy <= 1;
-            end else if (up[7:2] == 6'b010000) begin
-                intr <= up[0];
-                if (up[1]) err_bus <= 1;
-            end else if (up != 8'h00)
-                err_proto <= 1;
+            end else if (up_valid) begin
+                if (up == 8'h80 && state == WAIT) begin
+                    rdata <= '0;
+                    rx_i  <= '0;
+                    if (rx_len == '0) state <= IDLE;
+                    else rx_busy <= 1;
+                end else if (up[7:2] == 6'b010000) begin
+                    intr <= up[0];
+                    if (up[1]) err_bus <= 1;
+                end else if (up != 8'h00)
+                    err_proto <= 1;
+            end
+            if (ext_err) err_proto <= 1;
         end
     end
 endmodule
