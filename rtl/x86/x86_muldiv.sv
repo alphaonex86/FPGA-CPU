@@ -30,7 +30,9 @@ module x86_muldiv
     output logic [TAG_W-1:0] done_tag,
     output logic [31:0]      done_value,
     output flags_t           done_flags,
-    output logic             done_fault
+    output logic             done_fault,
+    output logic             next,       // done next cycle (unless killed) ...
+    output logic [TAG_W-1:0] next_tag    // ... with this tag
 );
     function automatic logic is_div(input aop_t o);
         return o == A_DIV || o == A_IDIV;
@@ -218,5 +220,7 @@ module x86_muldiv
         done_value = d_fin ? merge(d_old, d_y, d_sz == SZ8 ? SZ16 : d_sz, 1'b0) : m3_value;
         done_flags = m3_flags;
         done_fault = d_fin && (d_fault || q_ovf);
+        next = m2_v || d_run && d_cnt == 6'd1;
+        next_tag = m2_v ? m2_tag : d_tag;
     end
 endmodule

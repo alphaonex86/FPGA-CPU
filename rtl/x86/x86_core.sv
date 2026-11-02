@@ -750,7 +750,8 @@ module x86_core
     assign m_ok = am_ok && !md_done;   // bus 2 taken by mul/div: replay
 
     // ---------------- port 3: multiply / divide ----------------
-    logic             md_done, md_fault;
+    logic             md_done, md_fault, md_next;
+    logic [TAG_W-1:0] md_next_tag;
     logic [TAG_W-1:0] md_tag;
     logic [31:0]      md_value;
     flags_t           md_flags;
@@ -759,7 +760,8 @@ module x86_core
                      .b(xr[3].u.us2 ? byte_hi(xr[3].src[1].value, xr[3].u.hi2) : xr[3].u.imm),
                      .c(xr[3].u.us3 ? xr[3].src[2].value : 32'd0), .tag(xr[3].tag),
                      .busy(md_busy), .done(md_done), .done_tag(md_tag), .done_value(md_value),
-                     .done_flags(md_flags), .done_fault(md_fault));
+                     .done_flags(md_flags), .done_fault(md_fault),
+                     .next(md_next), .next_tag(md_next_tag));
 
     // ---------------- results of X, M and port 3 ----------------
     logic [NW-1:0]          ex_valid;
@@ -828,8 +830,10 @@ module x86_core
             ew_valid[abus(a)] = grant[aport(a)] != '0;
             ew_tag[abus(a)] = gtag[a];
         end
-        ew_valid[2] = ex_valid[2];
-        ew_tag[2] = md_done ? md_tag : am_tag;
+        // bus 2 a cycle ahead: mul/div done next cycle, else a load in A
+        // that M will complete (its check is done, the bus free)
+        ew_valid[2] = md_next || ix_valid[2] && a_ok;
+        ew_tag[2] = md_next ? md_next_tag : ix[2].tag;
     end
 
     // pipeline data: written whatever the flush (the valid bits drop it), so
