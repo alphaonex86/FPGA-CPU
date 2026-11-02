@@ -3,7 +3,9 @@
 // clock: the link clock as the cartridge receives it) -> up link through
 // c2_afifo back into the link clock. The C++ testbench (bus_rtl.cpp) plays
 // the PCIe IP and the board; with C2_LOOP_TARGET defined the board is
-// c2_loop_target (RTL devices, the bring-up bitstream's).
+// c2_loop_target (RTL devices, the bring-up bitstream's); with C2_P6 the
+// bus port runs c2_p6_agent on a P6 bus whose chipset is FPGAcommon's
+// p6_bif (one clock, cclk, for now), the testbench serves its host port.
 module c2_sim_top #(
     parameter int    LINK_DELAY = 3,     // cartridge-side registers each way (I/O, cable)
     /* verilator lint_off UNUSEDPARAM */   // used with C2_LOOP_TARGET only
@@ -40,6 +42,21 @@ module c2_sim_top #(
     output logic        serial_valid,
     output logic [7:0]  serial_byte,
     input  logic        serial_ready
+`ifdef C2_P6
+    ,
+    output logic        host_req,
+    output logic        host_we,
+    output logic        host_io,
+    output logic [35:3] host_addr,
+    output logic [63:0] host_wdata,
+    output logic [7:0]  host_be,
+    input  logic        host_ready,
+    input  logic [63:0] host_rdata,
+    input  logic        host_rvalid,
+    input  logic [7:0]  inta_vector,
+    output logic [8:0]  p6_err,
+    output logic        p6_cpu_ready
+`endif
 );
     logic        start, write, done, tlp_err;
     logic [12:0] addr;
@@ -94,6 +111,52 @@ module c2_sim_top #(
         .clk(cclk), .rst, .bus_req, .bus_space, .bus_write, .bus_inta, .bus_addr, .bus_size, .bus_wdata,
         .bus_done(t_done), .bus_rdata(t_rdata), .bus_err(t_err), .intr(t_intr),
         .serial_valid, .serial_byte, .serial_ready, .post
+    );
+`elsif C2_P6
+    logic        p_done, p_err;
+    logic [31:0] p_rdata;
+    c2_cart cart (
+        .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta,
+        .bus_addr, .bus_size, .bus_wdata, .bus_done(p_done), .bus_rdata(p_rdata), .bus_err(p_err), .intr
+    );
+    assign serial_valid = 0;
+    assign serial_byte  = '0;
+
+    // the P6 bus: every line is the wired-OR of its open-drain drivers
+    logic [35:3] a_cpu, a_cs;
+    logic [4:0]  req_cpu, req_cs;
+    logic [63:0] d_cpu, d_cs;
+    logic [2:0]  rs_cs;
+    logic        ads_cpu, ads_cs, drdy_cpu, drdy_cs, dbsy_cs, trdy_cs, hit_cs, hitm_cs, bnr_cs, bpri_cs,
+                 br0_cpu, br0_cs, reset_cs, defer_cs, binit_cs, cpu_reset;
+    logic [12:5] straps;
+    wire [35:3] a_n   = ~(a_cpu | a_cs);
+    wire [63:0] d_n   = ~(d_cpu | d_cs);
+    wire        ads_n = ~(ads_cpu | ads_cs), drdy_n = ~(drdy_cpu | drdy_cs);
+    c2_p6_agent agent (
+        .clk(cclk), .rst, .bus_req, .bus_space, .bus_write, .bus_inta, .bus_addr, .bus_size, .bus_wdata,
+        .bus_done(p_done), .bus_rdata(p_rdata), .bus_err(p_err),
+        .reset_n(!reset_cs), .a_n(a_n[12:5]), .ads_n, .bnr_n(!bnr_cs), .bpri_n(!bpri_cs), .trdy_n(!trdy_cs),
+        .dbsy_n(!dbsy_cs), .drdy_n, .rs_n(~rs_cs), .d_n,
+        .a_drv(a_cpu), .req_drv(req_cpu), .ads_drv(ads_cpu), .br0_drv(br0_cpu), .drdy_drv(drdy_cpu),
+        .d_drv(d_cpu), .cpu_reset, .straps
+    );
+    // board bus decode: every memory address is PCI (no DRAM model), every
+    // I/O port goes to the host port
+    p6_bif #(.RESET_CLKS(24)) chipset (
+        .clk(cclk), .rst_n(!rst), .a_n, .req_n(~(req_cpu | req_cs)), .ads_n, .d_n, .drdy_n,
+        .dbsy_n(!dbsy_cs), .hit_n(!hit_cs), .hitm_n(!hitm_cs), .bnr_n(!bnr_cs), .lock_n(1'b1),
+        .binit_n(!binit_cs),
+        .a_drv(a_cs), .req_drv(req_cs), .ads_drv(ads_cs), .d_drv(d_cs), .rs_drv(rs_cs), .trdy_drv(trdy_cs),
+        .drdy_drv(drdy_cs), .dbsy_drv(dbsy_cs), .hit_drv(hit_cs), .hitm_drv(hitm_cs), .bnr_drv(bnr_cs),
+        .bpri_drv(bpri_cs), .br0_drv(br0_cs), .reset_drv(reset_cs), .defer_drv(defer_cs), .binit_drv(binit_cs),
+        .mem_addr(), .mem_we(), .mem_sel_dram(1'b0), .mem_sel_pci(1'b1),
+        .io_stb(), .io_we(), .io_addr(), .io_size(), .io_wdata(), .io_rdata(32'd0), .io_hit(1'b0),
+        .host_req, .host_we, .host_addr, .host_wdata, .host_be, .host_dram(), .host_io, .host_attr(), .host_dc(),
+        .host_lock(), .host_smmem(), .host_ready, .host_rdata, .host_rvalid, .host_err(1'b0),
+        .spc_stb(), .spc_type(), .inta_stb(), .inta_vector,
+        .snoop_stall(1'b0), .dma_req(1'b0), .dma_gnt(), .snp_line('0), .snp_inv(1'b0), .snp_ok(),
+        .cpu_ready(p6_cpu_ready), .err(p6_err)
     );
 `else
     c2_cart cart (

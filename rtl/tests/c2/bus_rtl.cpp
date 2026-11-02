@@ -40,10 +40,52 @@ static uint32_t bswap(uint32_t v)
     return __builtin_bswap32(v);
 }
 
+#ifdef C2_P6
+// the chipset's host port (rtl/ext/fpgacommon/p6_bif.v, HOSTPORT.md): one
+// access per request, ready and rvalid in the same clock; byte lanes are
+// natural, the access is the lowest live lane and the live lane count
+static bool host_acked;
+static void host_edge()
+{
+    top->host_ready = top->host_rvalid = 0;
+    if (host_acked || !top->host_req) {
+        host_acked = false;
+        return;
+    }
+    int lane = __builtin_ctz(top->host_be), size = __builtin_popcount(top->host_be);
+    uint32_t addr = (uint32_t)(top->host_addr << 3) + lane;
+    int space = top->host_io ? BUS_IO : BUS_MEM;
+    if (top->host_io) addr &= 0xffff;
+    if (top->host_we)
+        dev->write(dev, space, addr, size, (uint32_t)(top->host_wdata >> (8 * lane)));
+    else
+        top->host_rdata = (uint64_t)dev->read(dev, space, addr, size) << (8 * lane);
+    top->host_ready = top->host_rvalid = 1;
+    host_acked = true;
+}
+#endif
+
 // the board: one bus cycle at a time, BUS_LATENCY cartridge clocks each
-// (with C2_LOOP_TARGET the RTL target serves them: print its serial out)
+// (with C2_LOOP_TARGET the RTL target serves them: print its serial out;
+// with C2_P6 the chipset's host port is served)
 static void cclk_edge()
 {
+#ifdef C2_P6
+    if (top->p6_err) {
+        fprintf(stderr, "c2-vmm rtl: P6 chipset protocol error 0x%x\n", top->p6_err);
+        exit(1);
+    }
+    host_edge();
+    // the vector must stand before the chipset's INTA strobe: take it
+    // when the cartridge starts the interrupt-acknowledge cycle
+    if (top->bus_req && top->bus_inta && !bus_busy) {
+        top->inta_vector = dev->inta(dev);
+        bus_busy = true;
+    } else if (!top->bus_req)
+        bus_busy = false;
+    top->intr = dev->intr(dev);
+    return;
+#endif
 #ifdef C2_LOOP_TARGET
     if (top->serial_valid) {
         putchar(top->serial_byte);
