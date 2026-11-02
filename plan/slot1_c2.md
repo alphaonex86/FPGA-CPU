@@ -377,10 +377,28 @@ reference clock pairs [xilinx/xc7a100tfgg484pkg.txt]; the card RTL
   PayPal); the PC side is a PCIe x4 -> OCuLink adapter and an OCuLink
   cable (eBay, PayPal). Bench: the cartridge on the desk on its own
   supply, PC on OCuLink, LOOPBACK bitstream (no Slot 1 board needed).
-- To do: power tree (VCCINT/VCCBRAM 1.0 V, VCCAUX 1.8 V, MGTAVCC 1.0 V,
-  MGTAVTT 1.2 V, VCCO), SPI x4 configuration flash, JTAG header, pin
-  map (16612 LVTTL banks at 3.3 V, the D37 direct receive on a VREF
-  bank), timing of the P6 agent on the Artix -2.
+- PCIe lanes (Vivado 2025.2, pcie_7x x4 on xc7a100tfgg484-2: lane k on
+  GTPE2_CHANNEL_X0Y(7-k), site -> pins by get_package_pins): lane 0 TX
+  D7/C7 RX D9/C9, lane 1 B6/A6 B10/A10, lane 2 D5/C5 D11/C11, lane 3
+  B4/A4 B8/A8 (MGTPTXP3..0_216); refclk MGTREFCLK1 F10/E10. The same
+  lanes 0-1 as the AX7A035B. x4 Gen2 needs the 128-bit 125 MHz (or
+  64-bit 250 MHz) interface: the board wires x4, the bitstream may stay
+  x2 Gen2 (64-bit, current RTL) or x4 Gen1.
+- Bank plan (ball centroids in the footprint orientation, ball 22 to the
+  card edge): banks 14/15/16 face the edge, 13 the right middle, 34/35
+  and GTP 216 the far side. Bank 15 at 1.8 V: the 15 RX lines straight
+  from the contacts (SSTL18_I, INTERNAL_VREF 0.90: AGTL+ 0.6 V low /
+  1.5 V high leave 0.2 / 0.5 V; no divider). Banks 14 (45 IO after the
+  SPI x4 flash pins), 16 and 13 at 3.3 V: 111 bus nets (64 data,
+  34 address, 7 tx, 6 control) + 11 CMOS + BCLK (MRCC, LVCMOS33: the
+  2.5 V clock passes VIH 2.0 V) + PERST# = 124 of 130. Banks 34/35
+  unused (VCCO to 3.3 V). Bank 0 and CFGBVS at 3.3 V.
+- Power: VCCINT + VCCBRAM 1.0 V, VCCAUX + VCCO15 1.8 V, MGTAVCC 1.0 V and
+  MGTAVTT 1.2 V on their own regulators, VCCO 3.3 V; order VCCINT ->
+  VCCAUX -> VCCO, MGTAVCC after VCCINT, MGTAVTT after MGTAVCC [UG482].
+- To do: the c2art board in gen_c2cart_assign/s6/s7 (Xilinx tables,
+  this bank plan, power tree, SPI flash, JTAG), timing of the P6 agent
+  on the Artix -2.
 
 ## SoM cartridge (D38, replaced by D39)
 
