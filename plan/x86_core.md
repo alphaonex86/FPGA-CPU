@@ -268,8 +268,9 @@ replicated per read port plus a live-value table.
    Done:
    - Test bench: one 32-byte line port, read latency `+mem_lat` (default
      10), writes posted, one read in flight: the shape of the socket bus
-     units (M8). `x86_rand.py ... stride`: the buffer is 6 copies 4 KB
-     apart (one L1D set: evictions, write-backs).
+     units (M8). `x86_rand.py ... stride`: the buffer is 10 copies
+     aliasing in one L1D set and two L2 sets (evictions, write-backs at
+     both levels).
    - L1D (`x86_l1d.sv`) 16 KB, 4-way, 32-byte lines, write-back,
      write-allocate, one miss in flight. Tags in MLAB, a copy per reader
      (the load's even and odd dword lines, the drain), read unregistered
@@ -285,13 +286,18 @@ replicated per read port plus a live-value table.
      one); a miss holds F0. The core shares the line port between L1I
      (first) and L1D, one read in flight. CoreMark 4.756 (265 L1I misses,
      setup only).
+   - L2 (`x86_l2.sv`) 256 KB (parameter KB), 4-way, 32-byte lines,
+     write-back, one request at a time between the L1 port and memory: a
+     read hit answers 2 cycles after it is taken; an L1D write-back
+     allocates without reading memory. CoreMark unchanged (380 L2
+     misses, setup only).
    Next:
    - A missing load leaves the RS waiting on its line (no replay loop),
      woken when the fill writes it; more misses in flight.
    - Stores to code (loaders, self-modifying code): a drained store
      invalidates its L1I line, L1I fills see dirty L1D lines; in-flight
      instructions in M5.
-   - L2 256 KB in M10K behind both, then the bus unit.
+   - The bus unit behind L2 (M8).
 4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,
    interrupts, I/O ports, CPUID/MSRs; test386 and the single-step datasets

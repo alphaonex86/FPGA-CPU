@@ -1,6 +1,7 @@
 // Out-of-order x86 integer core, M2 (plan/x86_core.md): flat 32-bit code,
-// L1I / L1D (x86_l1i, x86_l1d) sharing a 32-byte line memory port, 3 x86
-// instructions decoded and 3 uops renamed, issued and retired per cycle.
+// L1I / L1D (x86_l1i, x86_l1d) and L2 (x86_l2) on a 32-byte line memory
+// port, 3 x86 instructions decoded and 3 uops renamed, issued and retired
+// per cycle.
 // - Rename P6-style: results live in the ROB until retire, then in the
 //   architectural registers (arch); RAT entries point to a ROB tag or arch.
 //   The 6 arithmetic flags rename like a register (C2).
@@ -22,7 +23,7 @@ module x86_core
     input  logic                  clk,
     input  logic                  rst,
     input  logic [31:0]           reset_eip,
-    // memory (L1I / L1D lines): a read answered later, writes posted
+    // memory (L2 lines): a read answered later, writes posted
     output logic                  mem_req,
     output logic                  mem_we,
     output logic [31:5]           mem_addr,
@@ -98,33 +99,40 @@ module x86_core
     logic [31:0]          p_ras [RAS_N];    // return stack after the pushed group
     logic [$clog2(RAS_N)-1:0] p_sp;
 
-    // memory port: L1I first; one read in flight, its data to its requester
-    logic        im_req, im_ready, im_rvalid, dm_req, dm_we, dm_ready, dm_rvalid;
-    logic [31:5] im_addr, dm_addr;
-    logic        rd_busy, rd_i;
-    assign mem_req = (im_req || dm_req) && !rd_busy;
-    assign mem_we = !im_req && dm_we;
-    assign mem_addr = im_req ? im_addr : dm_addr;
-    assign im_ready = im_req && !rd_busy && mem_ready;
-    assign dm_ready = !im_req && !rd_busy && mem_ready;
-    assign im_rvalid = mem_rvalid && rd_i;
-    assign dm_rvalid = mem_rvalid && !rd_i;
+    // L2 port: L1I first; one read in flight, its data to its requester
+    logic         im_req, im_ready, im_rvalid, dm_req, dm_we, dm_ready, dm_rvalid;
+    logic [31:5]  im_addr, dm_addr;
+    logic         rd_busy, rd_i;
+    logic         l2_req, l2_we, l2_ready, l2_rvalid;
+    logic [31:5]  l2_addr;
+    logic [255:0] l2_wdata, l2_rdata;
+    assign l2_req = (im_req || dm_req) && !rd_busy;
+    assign l2_we = !im_req && dm_we;
+    assign l2_addr = im_req ? im_addr : dm_addr;
+    assign im_ready = im_req && !rd_busy && l2_ready;
+    assign dm_ready = !im_req && !rd_busy && l2_ready;
+    assign im_rvalid = l2_rvalid && rd_i;
+    assign dm_rvalid = l2_rvalid && !rd_i;
     always_ff @(posedge clk) begin
         if (rst) rd_busy <= 1'b0;
-        else if (mem_rvalid) rd_busy <= 1'b0;
-        else if (mem_req && mem_ready && !mem_we) begin
+        else if (l2_rvalid) rd_busy <= 1'b0;
+        else if (l2_req && l2_ready && !l2_we) begin
             rd_busy <= 1'b1;
             rd_i <= im_req;
         end
 `ifndef SYNTHESIS
-        if (!rst && mem_rvalid && !rd_busy) $error("memory read data with no read in flight");
+        if (!rst && l2_rvalid && !rd_busy) $error("L2 read data with no read in flight");
 `endif
     end
+    x86_l2 u_l2 (.clk(clk), .rst(rst), .req(l2_req), .we(l2_we), .addr(l2_addr), .wdata(l2_wdata),
+                 .ready(l2_ready), .rvalid(l2_rvalid), .rdata(l2_rdata),
+                 .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
+                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata));
 
     x86_frontend fe (.clk(clk), .rst(rst), .redirect(fe_redirect), .redirect_pc(fe_redirect_pc),
                      .take(dec_take),
                      .mem_req(im_req), .mem_addr(im_addr), .mem_ready(im_ready),
-                     .mem_rvalid(im_rvalid), .mem_rdata(mem_rdata),
+                     .mem_rvalid(im_rvalid), .mem_rdata(l2_rdata),
                      .valid(x_valid), .bytes(x_bytes), .eip(x_eip), .len(x_len), .npfx(x_npfx), .fault(x_fault),
                      .next(x_next), .btb_we(btb_we), .btb_set(fe_btb_set),
                      .btb_pc(fe_btb_pc), .btb_target(fe_btb_target));
@@ -781,8 +789,8 @@ module x86_core
                    .d_valid(sq_head != sq_cmt), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
                    .d_size(sq[sq_head[SQ_W-1:0]].size), .d_data(sq[sq_head[SQ_W-1:0]].data),
                    .d_done(drain),
-                   .mem_req(dm_req), .mem_we(dm_we), .mem_addr(dm_addr), .mem_wdata(mem_wdata),
-                   .mem_ready(dm_ready), .mem_rvalid(dm_rvalid), .mem_rdata(mem_rdata));
+                   .mem_req(dm_req), .mem_we(dm_we), .mem_addr(dm_addr), .mem_wdata(l2_wdata),
+                   .mem_ready(dm_ready), .mem_rvalid(dm_rvalid), .mem_rdata(l2_rdata));
     assign m_ok = am_ok && !md_done;   // bus 2 taken by mul/div: replay
 
     // ---------------- port 3: multiply / divide ----------------

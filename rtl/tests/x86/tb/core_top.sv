@@ -36,7 +36,8 @@ module core_top (
     logic [31:0] st_mp_wait, st_refill;   // flushing branch: result -> retire; flush -> next retire
     logic [31:0] st_fl [5];               // flushes: P-predicted Jcc, indirect, RET, other branch, K_DF
     logic [31:0] st_skew, st_alu3, st_mem2, st_replay, st_replay_md;   // issue contention
-    logic [31:0] st_miss, st_imiss, st_wb;   // L1I + L1D misses, L1I misses, writebacks
+    logic [31:0] st_miss, st_wb;              // L2 misses, writebacks
+    logic [31:0] st_imiss, st_dmiss, st_dwb;  // L1I, L1D misses, L1D writebacks
     logic [31:0] mp_cycle [ROB_N];
     logic        ind [ROB_N];       // the ROB entry is an indirect branch (RET: predicted taken)
     logic        refill;
@@ -85,7 +86,8 @@ module core_top (
             cycles <= 32'd0;
             insns <= 32'd0;
             {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush, st_mp_wait, st_refill} <= '0;
-            {st_skew, st_alu3, st_mem2, st_replay, st_replay_md, st_miss, st_imiss, st_wb} <= '0;
+            {st_skew, st_alu3, st_mem2, st_replay, st_replay_md, st_miss, st_wb} <= '0;
+            {st_imiss, st_dmiss, st_dwb} <= '0;
             rd_pend <= 1'b0;
             refill <= 1'b0;
             for (int i = 0; i < 5; i++) st_fl[i] <= 32'd0;
@@ -160,6 +162,9 @@ module core_top (
                         $display("%0d retire eop %0d next %08x dst %0d=%08x", cycles, ret_eop[k],
                                  ret_next_eip[k], ret_wdst[k] ? 32'(ret_dst[k]) : -1, ret_value[k]);
             end
+            if (core.im_ready) st_imiss <= st_imiss + 32'd1;
+            if (core.dm_req && core.dm_ready && !core.dm_we) st_dmiss <= st_dmiss + 32'd1;
+            if (core.dm_req && core.dm_ready && core.dm_we) st_dwb <= st_dwb + 32'd1;
             if (mem_rvalid) rd_pend <= 1'b0;
             else if (rd_pend) rd_cnt <= rd_cnt - 1;
             if (mem_req && mem_ready) begin
@@ -171,7 +176,6 @@ module core_top (
                     rd_cnt <= mem_lat - 1;
                     rd_line <= mem_addr;
                     st_miss <= st_miss + 32'd1;
-                    if (core.im_ready) st_imiss <= st_imiss + 32'd1;
                 end
             end
             for (int k = 0; k < 3; k++)
@@ -210,8 +214,8 @@ module core_top (
             $display("stats: issue: ALU ready on one port only (>= 2) %0d, >= 3 ALU ready on both %0d, >= 2 memory ready %0d; memory replays %0d (mul/div bus %0d)",
                      st_skew, st_alu3, st_mem2, st_replay, st_replay_md);
         if (stats)
-            $display("stats: misses: L1I %0d, L1D %0d, writebacks %0d (memory read latency %0d)",
-                     st_imiss, st_miss - st_imiss, st_wb, mem_lat);
+            $display("stats: misses: L1I %0d, L1D %0d (writebacks %0d), L2 %0d (writebacks %0d; memory read latency %0d)",
+                     st_imiss, st_dmiss, st_dwb, st_miss, st_wb, mem_lat);
         if (stats)
             $display("stats: flushes: Jcc %0d, indirect %0d, RET %0d, other branch %0d, DF %0d",
                      st_fl[0], st_fl[1], st_fl[2], st_fl[3], st_fl[4]);
