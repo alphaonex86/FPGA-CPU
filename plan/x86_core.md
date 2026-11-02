@@ -179,6 +179,19 @@ replicated per read port plus a live-value table.
    flush / redirect (only the valid bits do): fewer enables, the redirect
    off ~2,500 register enables. The uop queue writes every valid P slot
    (room is checked for all of them), only its tail follows p_take.
+   With TAGE stubbed out the default recipe does not route either (peak
+   vertical 79 %): the core needs the perf recipe (aggressive routability),
+   now `x86_synth.sh`'s default. Store port tree (f95404f), perf: 58.8
+   MHz, 64,551 ALMs, peak interconnect 68 % (3.894 x 58.8 = 229 CoreMark
+   on ideal memory); worst path sq_head -> store queue check -> m_ok -> bus
+   2 valid -> early wakeup -> RS ready. The load's store queue check moved
+   to A, registered for M (older store addresses are all known at issue),
+   overlap by dword equality and byte masks (a second forwarding store
+   replays): CoreMark cycles unchanged.
+   BTB 512 entries in RAM, read with pc_f's next value (no reset, a clear
+   does not check the tag: one port): 3.957 CoreMark/MHz (252,702 cycles).
+   Third ALU (port 5, result bus 3; rename rotates over the 3 ALUs): 4.101
+   CoreMark/MHz (243,864 cycles, IPC 1.392); its synthesis cost decides.
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div

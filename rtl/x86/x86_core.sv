@@ -689,39 +689,59 @@ module x86_core
     logic [TAG_W-1:0] am_tag;
     logic [31:0]      am_addr, am_data;   // am_data: a load's merge source
     logic [1:0]       am_osz, am_lext;
-    logic [SQ_W:0]    am_sq_snap;
     logic [RS_W-1:0]  am_slot;
+    logic             am_ok, am_fwd;      // store queue check (A)
+    logic [31:0]      am_fdata;
 
-    // ---------------- M: memory ----------------
-    // loads: forward from an older store at the same address at least as
-    // wide, replay on any other overlap
+    // ---------------- A: store queue check ----------------
+    // loads: forward from the one older store at the same address at least
+    // as wide, replay on any other overlap (or a second such store). Checked
+    // in A, registered for M: the older store addresses were all known at
+    // issue, and a store leaving the queue meanwhile has written memory.
+    // Overlap by dword (equal or adjacent) and byte masks: no subtraction.
+    function automatic logic [7:0] bmask(input logic [1:0] a, input logic [1:0] sz);
+        return (sz == SZ8 ? 8'h1 : sz == SZ16 ? 8'h3 : 8'hF) << a;
+    endfunction
+
     function automatic logic load_ok(input logic [SQ_W:0] snap, input logic [31:0] a,
                                      input logic [1:0] lsz,
                                      output logic fwd, output logic [31:0] fdata);
-        logic ok = 1'b1;
+        logic       ok, two;
+        logic [7:0] lm;
+        logic [29:0] lo_p1, lo_m1;
+        ok = 1'b1;
+        two = 1'b0;
         fwd = 1'b0;
         fdata = 32'd0;
+        lm = bmask(a[1:0], lsz);
+        lo_p1 = a[31:2] + 30'd1;
+        lo_m1 = a[31:2] - 30'd1;
         for (int k = 0; k < SQ_N; k++)
-            if ((SQ_W + 1)'(k) < snap - sq_head) begin
+            if ((SQ_W + 1)'(SQ_W'(SQ_W'(k) - sq_head[SQ_W-1:0])) < snap - sq_head) begin
                 sq_t s;
-                s = sq[SQ_W'(sq_head[SQ_W-1:0] + SQ_W'(k))];
+                logic [7:0] sm;
+                s = sq[k];
+                sm = bmask(s.addr[1:0], s.size);
                 if (!s.addr_valid) ok = 1'b0;
                 else if (s.addr == a && s.size >= lsz) begin
+                    two = fwd;
                     fwd = 1'b1;
-                    fdata = s.data;
-                end else if (a - s.addr < 32'd1 << s.size || s.addr - a < 32'd1 << lsz) ok = 1'b0;
+                    fdata = fdata | s.data;
+                end else if (s.addr[31:2] == a[31:2] && (sm & lm) != 8'd0
+                             || s.addr[31:2] == lo_p1 && (sm[3:0] & lm[7:4]) != 4'd0
+                             || s.addr[31:2] == lo_m1 && (sm[7:4] & lm[3:0]) != 4'd0) ok = 1'b0;
             end
-        return ok;
+        return ok && !two;
     endfunction
 
-    logic        m_ok, m_fwd;
-    logic [31:0] m_fdata;
+    logic        a_ok, a_fwd;
+    logic [31:0] a_fdata;
+    always_comb a_ok = load_ok(ix[2].sq_snap, agu(xr[2]), ix[2].u.osz, a_fwd, a_fdata);
+
+    // ---------------- M: memory ----------------
+    logic        m_ok;
     assign load_addr = am_addr;
-    always_comb begin
-        logic ld_ok;
-        ld_ok = load_ok(am_sq_snap, am_addr, am_osz, m_fwd, m_fdata);
-        m_ok = ld_ok && !md_done;   // bus 2 taken by mul/div: replay
-    end
+    assign m_ok = am_ok && !md_done;   // bus 2 taken by mul/div: replay
 
     // ---------------- port 3: multiply / divide ----------------
     logic             md_done, md_fault;
@@ -764,7 +784,7 @@ module x86_core
         ex_valid[2] = md_done || am_valid && m_ok;
         begin
             logic [31:0] raw;
-            raw = m_fwd ? m_fdata : load_data;
+            raw = am_fwd ? am_fdata : load_data;
             ex_value[2] = md_done ? md_value
                         : am_lext == LX_MERGE ? merge(am_data, raw, am_osz, am_dhi)
                                               : extend(raw, am_osz, am_lext == LX_SIGN);
@@ -829,7 +849,9 @@ module x86_core
         am_osz <= ix[2].u.osz;
         am_lext <= ix[2].u.lext;
         am_dhi <= ix[2].u.dhi;
-        am_sq_snap <= ix[2].sq_snap;
+        am_ok <= a_ok;
+        am_fwd <= a_fwd;
+        am_fdata <= a_fdata;
         am_slot <= ix_slot;
     end
 

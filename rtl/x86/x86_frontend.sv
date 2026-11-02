@@ -8,7 +8,8 @@
 // decode predicted there; F0 follows it, so the block ends at that
 // instruction and the next block is the target's. Each instruction carries
 // the EIP the frontend continues at (next); decode redirects and fixes the
-// BTB when it disagrees, so a stale entry only costs cycles.
+// BTB when it disagrees, so a stale entry only costs cycles. The BTB is a
+// RAM read with pc_f's next value (no reset: entries start invalid).
 module x86_frontend
     import x86_pkg::*;
 (
@@ -32,7 +33,7 @@ module x86_frontend
     input  logic [31:0]           btb_target
 );
     localparam int FQ_N = 4;
-    localparam int BTB_N = 32;
+    localparam int BTB_N = 512;
     localparam int BI_W = $clog2(BTB_N);
 
     typedef struct packed {
@@ -58,8 +59,9 @@ module x86_frontend
         mark_t             mark;
     } block_t;
 
-    btb_t             btb [BTB_N];
-    btb_t             bh;
+    (* ramstyle = "no_rw_check" *) btb_t btb [BTB_N];
+    btb_t             bh;           // the entry of pc_f's block
+    logic [31:0]      pc_n;         // pc_f's next value
     logic [3:0]       f0_off;       // first start offset in the block at pc_f
     mark_t            f0_mark, f1_mark, f2_mark;
 
@@ -85,7 +87,6 @@ module x86_frontend
 
     assign fetch_addr = pc_f;
     always_comb begin
-        bh = btb[pc_f[4 +: BI_W]];
         f0_mark.taken = bh.valid && bh.tag == pc_f[31:4+BI_W] && bh.off >= f0_off;
         f0_mark.moff = bh.off;
         f0_mark.target = bh.target;
@@ -113,9 +114,17 @@ module x86_frontend
     // the last valid instruction ends the block
     assign pop = out_free && x_valid[0] && (!x_valid[1] ? last[0] : !x_valid[2] ? last[1] : last[2]);
 
+    assign pc_n = rst || redirect ? {redirect_pc[31:4], 4'd0}
+                : !issue ? pc_f
+                : f0_mark.taken ? {f0_mark.target[31:4], 4'd0} : pc_f + 32'd16;
+    initial for (int i = 0; i < BTB_N; i++) btb[i] = '0;
+    always_ff @(posedge clk) begin
+        pc_f <= pc_n;
+        bh <= btb[pc_n[4 +: BI_W]];
+    end
+
     always_ff @(posedge clk) begin
         if (rst || redirect) begin
-            pc_f <= {redirect_pc[31:4], 4'd0};
             f0_off <= redirect_pc[3:0];
             off <= {1'b0, redirect_pc[3:0]};
             f1_valid <= 1'b0;
@@ -127,10 +136,7 @@ module x86_frontend
             valid <= 3'd0;
         end else begin
             f1_valid <= issue;
-            if (issue) begin
-                pc_f <= f0_mark.taken ? {f0_mark.target[31:4], 4'd0} : pc_f + 32'd16;
-                f0_off <= f0_mark.taken ? f0_mark.target[3:0] : 4'd0;
-            end
+            if (issue) f0_off <= f0_mark.taken ? f0_mark.target[3:0] : 4'd0;
             f2_valid <= f1_valid;
             if (push) fq_tail <= fq_tail + 2'd1;
             if (pop) fq_head <= fq_head + 2'd1;
@@ -182,8 +188,9 @@ module x86_frontend
         bu_set <= btb_set;
         bu_pc <= btb_pc;
         bu_target <= btb_target;
-        if (rst) for (int i = 0; i < BTB_N; i++) btb[i].valid <= 1'b0;
-        else if (bu_we && (bu_set || btb[bu_pc[4 +: BI_W]].tag == bu_pc[31:4+BI_W]))
+        // a clear does not check the tag (one RAM port): P clears a branch
+        // the frontend just followed, so the entry is almost always its own
+        if (bu_we)
             btb[bu_pc[4 +: BI_W]] <= {bu_set, bu_pc[31:4+BI_W], bu_pc[3:0], bu_target};   // btb_t order
     end
 endmodule
