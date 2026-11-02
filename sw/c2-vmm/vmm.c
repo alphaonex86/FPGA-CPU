@@ -128,11 +128,16 @@ int main(int argc, char **argv)
     if (kvm < 0) die("/dev/kvm: %s", strerror(errno));
     if (ioctl(kvm, KVM_GET_API_VERSION, 0) != KVM_API_VERSION) die("KVM API version");
     int vm = xioctl(kvm, KVM_CREATE_VM, 0, "KVM_CREATE_VM");
-    xioctl(vm, KVM_SET_TSS_ADDR, (void *)0xfffbd000ul, "KVM_SET_TSS_ADDR");
+    uint64_t ram_size = ram_mb << 20, rom_size = rom_kb << 10;
+    // Intel VMX keeps private pages here (TSS: 3, EPT identity map: 1, used
+    // without unrestricted guest); the defaults 0xfffbc000-0xfffbffff lie
+    // inside a ROM of 512 KB or more, so put them just below the ROM
+    uint64_t tss = 0x100000000ull - rom_size - 0x3000, identity_map = tss - 0x1000;
+    xioctl(vm, KVM_SET_TSS_ADDR, (void *)tss, "KVM_SET_TSS_ADDR");
+    xioctl(vm, KVM_SET_IDENTITY_MAP_ADDR, &identity_map, "KVM_SET_IDENTITY_MAP_ADDR");
 
     // RAM below the VGA hole and above 1 MB; 0xa0000-0xbffff is the
     // board's, 0xc0000-0xfffff follows the chipset's shadow map (shadow.c)
-    uint64_t ram_size = ram_mb << 20, rom_size = rom_kb << 10;
     uint8_t *ram = alloc_mem(ram_size);
     add_slot(vm, 0, 0, 0xa0000, ram, 0);
     add_slot(vm, 1, 0x100000, ram_size - 0x100000, ram + 0x100000, 0);

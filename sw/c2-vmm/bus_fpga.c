@@ -67,7 +67,6 @@ static void fpga_io_rep(struct bus *b, uint16_t port, int size, uint32_t count, 
             *(volatile uint64_t *)(bar_of(b) + off) = (uint64_t)n << 32 | port;
         } else {
             *(volatile uint64_t *)(bar_of(b) + off) = (uint64_t)n << 32 | port;
-            (void)rd32(b, C2B_REP_DONE);
             for (uint32_t i = 0; i < bytes; i += 8) {
                 uint64_t v = win[i / 8];
                 memcpy(buf + i, &v, bytes - i < 8 ? bytes - i : 8);

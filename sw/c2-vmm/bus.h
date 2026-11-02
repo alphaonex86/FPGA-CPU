@@ -21,18 +21,21 @@ struct bus {
 //   0x008 R   STATUS: bit 0 INTR asserted, bit 1 bus error (sticky, read clears)
 //   0x010 R   RDATA: data of the last read cycle; the completion waits for it
 //   0x018 R   INTA: runs an interrupt-acknowledge cycle, returns the vector
-//   0x020 R   REP_DONE: reads after the last REP command finished (1)
 //   0x100 W   cycle: one 64-bit write {data[63:32], addr[31:0]} at
 //             0x100 + 8 * (space << 3 | write << 2 | log2 size)
 //             (a write cycle is posted; a read cycle is followed by RDATA)
 //   0x180 W   REP: one 64-bit write {count[63:32], port[15:0]} at
 //             0x180 + 8 * (write << 2 | log2 size): count I/O cycles at
 //             the port, data in WINDOW (count * size <= 4096; a write
-//             fills WINDOW first, a read is followed by REP_DONE, then
-//             WINDOW holds the data)
+//             fills WINDOW first, a read is followed by WINDOW reads)
 //   0x1000    WINDOW: 4 KB
+// The bridge consumes BAR0 requests strictly in order, one at a time: a
+// cycle or REP command holds back every later request (PCIe flow control)
+// until its bus cycles end, so WINDOW is never refilled under a running
+// REP. Longest hold: a 4 KB REP of 8-bit ISA cycles, ~4 ms, inside the
+// host's PCIe completion timeout (range A, 50 us-10 ms: set it to >= 10 ms).
 enum {
-    C2B_ID = 0x000, C2B_STATUS = 0x008, C2B_RDATA = 0x010, C2B_INTA = 0x018, C2B_REP_DONE = 0x020,
+    C2B_ID = 0x000, C2B_STATUS = 0x008, C2B_RDATA = 0x010, C2B_INTA = 0x018,
     C2B_CYCLE = 0x100, C2B_REP = 0x180, C2B_WINDOW = 0x1000, C2B_WINDOW_SIZE = 0x1000,
     C2B_ID_VALUE = 0x43324231,
 };
