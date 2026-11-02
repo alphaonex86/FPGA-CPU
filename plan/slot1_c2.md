@@ -88,8 +88,38 @@ Risks only hardware can close: the real PCIe read latency of the N100 to
 the FPGA, the board's tolerance of long snoop stalls (440BX; VIA snoop
 filtering), AGP cards.
 
+## Cable link v0 (card <-> cartridge, D32)
+
+- Lines: 18 at 3.3 V LVCMOS on the cartridge (the 17 freed 3.3 V balls
+  A[35:32]#, DEP[7:0]#, AP[1:0]#, AERR#, BERR#, BINIT# + free M8 = CLK0n,
+  a clock input); RP#/RSP# and the free K19/K20 are 1.35 V (bank 7A),
+  below a 3.3 V receiver's VIH, so they stay off the link.
+- Cartridge header J5: 2 x 20, 2.54 mm (the Puzhi card's 40-pin format,
+  catalog: "40P x 2 ports, 62 single-ended"): odd pins signals, even pins
+  GND, so every ribbon wire runs next to a ground. Its exact pin order must
+  follow the card header's power / ground pins (the card's manual, not in
+  the catalog): open; a mismatch would short a signal to a card supply.
+- Down (card -> cartridge): clock (to M8) + 8 data; up: clock + 8 data.
+  Bytes framed in-band (idle 0x00, a frame header byte with type and
+  length); 50 MHz SDR first: 50 MB/s each way (DDR later if the cable
+  allows).
+- Budget per access: request 9 bytes (type, address, data) 180 ns down,
+  reply 5 bytes 100 ns up, + the P6 cycle on the board (~150 ns at 66 MHz,
+  ~1 us when the chipset forwards to ISA): small next to the ~5-10 us
+  KVM exit; framebuffer lines (32 bytes + 5) ~43 MB/s: 640x480x8 at 60 Hz
+  (18 MB/s) whole frames, larger modes dirty regions only.
+- DMA mirror: a board DMA write (device -> memory) is recorded and its
+  line copied up (board DRAM read on the bus, 37 bytes up, PCIe write into
+  guest RAM): ~40 MB/s; a board DMA read (memory -> device) stalls the
+  snoop while the line comes from guest RAM (request up, PCIe read ~1 us,
+  33 bytes down): ~2 us per line, ~16 MB/s, so a disk write by DMA is
+  ~half of UDMA/33.
+
 ## Next
 
+0. Cartridge PCB (D32): S6 netlist (TA_ nets, 17 0-ohm RL01-RL17, J5),
+   S7 placement, S8 re-route; J5 pin order once the card header pinout
+   is known.
 1. Bridge protocol: a repeated I/O cycle (string I/O) and a burst write
    (framebuffer pages) in bus.h; VMM framebuffer mirror (dirty logging).
 2. FPGA bridge v0 on the Puzhi board: PCIe 7 Series IP (x2 Gen2) + BAR0
