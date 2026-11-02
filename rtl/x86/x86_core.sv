@@ -222,7 +222,7 @@ module x86_core
     } rs_t;
 
     typedef struct packed {
-        logic        addr_valid;
+        logic        addr_valid, data_valid;
         logic [1:0]  size;
         logic [31:0] addr, data;
     } sq_t;
@@ -604,7 +604,10 @@ module x86_core
                    && rs[e].src[2].ready && rs[e].fsrc.ready;
             for (int a = 0; a < NA; a++) req[aport(a)][e] = srcs && is_alu(rs[e].u.kind) && rs[e].port == 2'(a);
             req[2][e] = srcs && rs[e].u.kind == K_LD && (rs[e].sq_older & sq_unknown) == '0;
-            req[4][e] = srcs && rs[e].u.kind == K_ST;
+            // stores: the address as soon as it is ready (younger loads
+            // wait for it), the data then or later (issued: address done)
+            req[4][e] = rs[e].valid && rs[e].u.kind == K_ST && rs[e].src[0].ready && rs[e].src[1].ready
+                        && (!rs[e].issued || rs[e].src[2].ready);
             // in order (MULH/DIVR read the unit's last result); nothing while
             // a division runs or is in X (it starts there)
             req[3][e] = srcs && md_wait[e] && (md_wait & older[e]) == '0 && !md_busy
@@ -686,7 +689,8 @@ module x86_core
                                 || ix_on2[p][i][q] != (!cap && wb2_valid[q] && wb2_tag[q] == t))
                                 $error("port %0d source %0d bus %0d: bypass select from S is wrong", p, i, q);
                         end
-                        if (!cap && !hit) $error("port %0d source %0d: tag %0d on no bypass", p, i, t);
+                        // a store issuing its address without its data
+                        if (!cap && !hit && !(p == 4 && i == 2 && !ix[p].src[2].ready)) $error("port %0d source %0d: tag %0d on no bypass", p, i, t);
                     end
 `endif
 
@@ -730,6 +734,7 @@ module x86_core
                 sm = bmask(s.addr[1:0], s.size);
                 if (!s.addr_valid) ok = 1'b0;
                 else if (s.addr == a && s.size >= lsz) begin
+                    if (!s.data_valid) ok = 1'b0;
                     two = fwd;
                     fwd = 1'b1;
                     fdata = fdata | s.data;
@@ -941,15 +946,25 @@ module x86_core
                 for (int p = 0; p < NP; p++) ix_valid[p] <= grant[p] != '0;
                 for (int p = 0; p < NP; p++)
                     for (int e = 0; e < RS_N; e++)
-                        if (p != 2 && grant[p][e]) rs[e].valid <= 1'b0;
-                for (int e = 0; e < RS_N; e++)
+                        if (p != 2 && p != 4 && grant[p][e]) rs[e].valid <= 1'b0;
+                for (int e = 0; e < RS_N; e++) begin
                     if (grant[2][e]) rs[e].issued <= 1'b1;
+                    if (grant[4][e]) begin
+                        if (rs[e].src[2].ready) rs[e].valid <= 1'b0;
+                        else rs[e].issued <= 1'b1;
+                    end
+                end
                 // A -> M
                 am_valid <= ix_valid[2];
                 // X store: its queue entry, done (no result)
-                if (ix_valid[4]) begin
-                    sq[ix[4].sq_idx] <= '{addr_valid: 1'b1, size: ix[4].u.osz, addr: agu(xr[4]),
-                        data: ix[4].u.us3 ? byte_hi(xr[4].src[2].value, ix[4].u.hi3) : ix[4].u.imm2};
+                if (ix_valid[4] && !ix[4].issued) begin
+                    sq[ix[4].sq_idx].addr_valid <= 1'b1;
+                    sq[ix[4].sq_idx].size <= ix[4].u.osz;
+                    sq[ix[4].sq_idx].addr <= agu(xr[4]);
+                end
+                if (ix_valid[4] && ix[4].src[2].ready) begin
+                    sq[ix[4].sq_idx].data_valid <= 1'b1;
+                    sq[ix[4].sq_idx].data <= ix[4].u.us3 ? byte_hi(xr[4].src[2].value, ix[4].u.hi3) : ix[4].u.imm2;
                     rob[ix[4].tag].done <= 1'b1;
                 end
                 // M: done or replay
@@ -1010,12 +1025,26 @@ module x86_core
                     if (2'(k) < rn_n) begin
                         uop_t u;
                         u = rn[k].u;
-                        rob[rn[k].tag] <= '{done: !needs_rs(u.kind), kind: u.kind,
-                            dst: u.dst, wdst: u.wdst, wflags: u.wflags, eop: u.eop, value: 32'd0,
-                            flags: '0, next_eip: u.next_eip, mispred: 1'b0, fault: 1'b0, redirect_pc: 32'd0,
-                            bp_jcc: u.kind == K_BR && !u.btbi && u.imm2[14], bp_taken: u.pred_taken,
-                            btbi: u.btbi, rcall: u.rcall, rret: u.rret};
-                        if (u.kind == K_ST) sq[rn[k].sq_snap[SQ_W-1:0]].addr_valid <= 1'b0;
+                        // value, flags, redirect_pc: written by wb before use
+                        // (off the rename -> ROB enable path)
+                        rob[rn[k].tag].done <= !needs_rs(u.kind);
+                        rob[rn[k].tag].kind <= u.kind;
+                        rob[rn[k].tag].dst <= u.dst;
+                        rob[rn[k].tag].wdst <= u.wdst;
+                        rob[rn[k].tag].wflags <= u.wflags;
+                        rob[rn[k].tag].eop <= u.eop;
+                        rob[rn[k].tag].next_eip <= u.next_eip;
+                        rob[rn[k].tag].mispred <= 1'b0;
+                        rob[rn[k].tag].fault <= 1'b0;
+                        rob[rn[k].tag].bp_jcc <= u.kind == K_BR && !u.btbi && u.imm2[14];
+                        rob[rn[k].tag].bp_taken <= u.pred_taken;
+                        rob[rn[k].tag].btbi <= u.btbi;
+                        rob[rn[k].tag].rcall <= u.rcall;
+                        rob[rn[k].tag].rret <= u.rret;
+                        if (u.kind == K_ST) begin
+                            sq[rn[k].sq_snap[SQ_W-1:0]].addr_valid <= 1'b0;
+                            sq[rn[k].sq_snap[SQ_W-1:0]].data_valid <= 1'b0;
+                        end
                         if (u.wdst) begin
                             rat_rob[u.dst] <= 1'b1;
                             rat_tag[u.dst] <= rn[k].tag;

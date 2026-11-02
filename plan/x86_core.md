@@ -197,6 +197,13 @@ replicated per read port plus a live-value table.
    mul/div done next cycle: its pipeline is fixed): their dependents wake
    then (load-to-use 3 -> 2, mul 3 -> 2, nothing speculative): 4.510
    CoreMark/MHz (221,724 cycles, IPC 1.531).
+   Mask build (2 ALUs): 58.83 MHz, 61,623 ALMs; worst path rename: uq_head
+   -> uop -> ROB entry write enable (value written 0 at rename): rename now
+   writes only the fields wb does not. Stores in two phases: the address as
+   soon as its sources are ready (younger loads wait for it), the data then
+   or later (a load matching a store without data replays): 4.757
+   CoreMark/MHz (210,238 cycles, IPC 1.615; load head waits 31,234 ->
+   20,384).
    Perf builds: load check in A 58.2 MHz (61,462 ALMs), + BTB RAM 55.23
    MHz (59,392 ALMs; same worst path, placement spread ~5 %): S, sq_head ->
    count of known store addresses -> load request -> grant -> pick ->
