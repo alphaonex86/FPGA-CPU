@@ -1,5 +1,6 @@
-// M2 testbench top: x86_core with an ideal 1 MB memory loaded from
-// +image=<hex> at 0x1000, writing the retire trace (one line per x86
+// M2 testbench top: x86_core with a 1 MB memory loaded from +image=<hex> at
+// 0x1000: ideal fetch port, line port of +mem_lat=<cycles> read latency
+// (default 10; writes posted, one read in flight), writing the retire trace (one line per x86
 // instruction, x86_trace_check format) to +trace=<file>; +debug prints the
 // frontend redirects, the extracted instructions, mul/div starts and results
 // and the retired uops; +stats a cycle breakdown at the end.
@@ -15,10 +16,12 @@ module core_top (
     localparam int MEM = 1 << 20;
 
     logic [7:0]  mem [MEM];
-    logic [31:0] fetch_addr, load_addr, load_data, store_addr, store_data;
+    logic [31:0] fetch_addr;
     logic [8*30-1:0] fetch_data;
-    logic        store_en;
-    logic [1:0]  store_size;
+    logic        mem_req, mem_we, mem_ready, mem_rvalid, rd_pend;
+    logic [31:5] mem_addr, rd_line;
+    logic [255:0] mem_wdata, mem_rdata;
+    int          mem_lat, rd_cnt;
     logic [2:0]  ret_valid, ret_eop, ret_wdst, ret_wflags;
     logic [2:0][31:0] ret_next_eip, ret_value;
     logic [2:0][3:0]  ret_dst;
@@ -35,15 +38,15 @@ module core_top (
     logic [31:0] st_mp_wait, st_refill;   // flushing branch: result -> retire; flush -> next retire
     logic [31:0] st_fl [5];               // flushes: P-predicted Jcc, indirect, RET, other branch, K_DF
     logic [31:0] st_skew, st_alu3, st_mem2, st_replay, st_replay_md;   // issue contention
+    logic [31:0] st_miss, st_wb;     // L1D misses, writebacks
     logic [31:0] mp_cycle [ROB_N];
     logic        ind [ROB_N];       // the ROB entry is an indirect branch (RET: predicted taken)
     logic        refill;
 
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000),
                    .fetch_addr(fetch_addr), .fetch_data(fetch_data),
-                   .load_addr(load_addr), .load_data(load_data),
-                   .store_en(store_en), .store_addr(store_addr), .store_data(store_data),
-                   .store_size(store_size),
+                   .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
+                   .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
                    .ret_valid(ret_valid), .ret_eop(ret_eop), .ret_next_eip(ret_next_eip),
                    .ret_wdst(ret_wdst), .ret_dst(ret_dst), .ret_value(ret_value),
                    .ret_wflags(ret_wflags), .ret_flags(ret_flags),
@@ -51,8 +54,10 @@ module core_top (
 
     always_comb begin
         for (int i = 0; i < 30; i++) fetch_data[8*i +: 8] = mem[20'(fetch_addr + 32'(i))];
-        for (int i = 0; i < 4; i++) load_data[8*i +: 8] = mem[20'(load_addr + 32'(i))];
+        for (int i = 0; i < 32; i++) mem_rdata[8*i +: 8] = mem[20'({rd_line, 5'd0} + 32'(i))];
     end
+    assign mem_ready = !rd_pend;
+    assign mem_rvalid = rd_pend && rd_cnt == 0;
 
     initial begin
         string image, tname;
@@ -64,6 +69,11 @@ module core_top (
         $readmemh(image, mem, 32'h1000);
         debug = $test$plusargs("debug");
         stats = $test$plusargs("stats");
+        if (!$value$plusargs("mem_lat=%d", mem_lat)) mem_lat = 10;
+        if (mem_lat < 1) begin
+            $display("+mem_lat must be >= 1");
+            $finish;
+        end
         trace = $fopen(tname, "w");
         if (trace == 0) begin
             $display("cannot write %s", tname);
@@ -79,7 +89,8 @@ module core_top (
             cycles <= 32'd0;
             insns <= 32'd0;
             {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush, st_mp_wait, st_refill} <= '0;
-            {st_skew, st_alu3, st_mem2, st_replay, st_replay_md} <= '0;
+            {st_skew, st_alu3, st_mem2, st_replay, st_replay_md, st_miss, st_wb} <= '0;
+            rd_pend <= 1'b0;
             refill <= 1'b0;
             for (int i = 0; i < 5; i++) st_fl[i] <= 32'd0;
             for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
@@ -153,9 +164,19 @@ module core_top (
                         $display("%0d retire eop %0d next %08x dst %0d=%08x", cycles, ret_eop[k],
                                  ret_next_eip[k], ret_wdst[k] ? 32'(ret_dst[k]) : -1, ret_value[k]);
             end
-            if (store_en)
-                for (int i = 0; i < 4; i++)
-                    if (i < 1 << store_size) mem[20'(store_addr + 32'(i))] <= store_data[8*i +: 8];
+            if (mem_rvalid) rd_pend <= 1'b0;
+            else if (rd_pend) rd_cnt <= rd_cnt - 1;
+            if (mem_req && mem_ready) begin
+                if (mem_we) begin
+                    for (int i = 0; i < 32; i++) mem[20'({mem_addr, 5'd0} + 32'(i))] <= mem_wdata[8*i +: 8];
+                    st_wb <= st_wb + 32'd1;
+                end else begin
+                    rd_pend <= 1'b1;
+                    rd_cnt <= mem_lat - 1;
+                    rd_line <= mem_addr;
+                    st_miss <= st_miss + 32'd1;
+                end
+            end
             for (int k = 0; k < 3; k++)
                 if (ret_valid[k]) begin
                     if (ret_wdst[k] && ret_dst[k] < 4'd8) r[ret_dst[k][2:0]] = ret_value[k];
@@ -191,6 +212,8 @@ module core_top (
         if (stats)
             $display("stats: issue: ALU ready on one port only (>= 2) %0d, >= 3 ALU ready on both %0d, >= 2 memory ready %0d; memory replays %0d (mul/div bus %0d)",
                      st_skew, st_alu3, st_mem2, st_replay, st_replay_md);
+        if (stats)
+            $display("stats: L1D: misses %0d, writebacks %0d (memory read latency %0d)", st_miss, st_wb, mem_lat);
         if (stats)
             $display("stats: flushes: Jcc %0d, indirect %0d, RET %0d, other branch %0d, DF %0d",
                      st_fl[0], st_fl[1], st_fl[2], st_fl[3], st_fl[4]);

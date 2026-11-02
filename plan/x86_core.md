@@ -263,24 +263,31 @@ replicated per read port plus a live-value table.
    133.48 MHz slow fix4 0C, 34,173 / 46,800 ALMs (73 %): the D11 bench
    board runs the core 2.4x faster but has little room left.
 3. M3 loads/stores, LSQ, L1I/L1D, then L2; Dhrystone/CoreMark for x86 IPC.
-   *Proposed* (keeps what M2 relies on: a load's dependents wake in A, so
-   a hit is known in A; RAM reads addressed by the value a register takes):
-   - Test bench: one memory port with a fixed latency (cycles, a
-     `+mem_lat` plusarg) and 32-byte bursts, the shape of the socket bus
-     units (M8).
-   - L1D 16 KB, 4-way, 32-byte lines, write-back. Tags in MLAB, read
-     unregistered with the AGU address in A (hit and way join the store
-     queue check: a miss does not wake); data in M10K, two dword banks
-     (even / odd) addressed at the A -> M edge, so any access inside an
-     aligned 8-byte window reads in one cycle; a line-crossing access
-     takes a slow path (two accesses).
+   Keeps what M2 relies on: a load's dependents wake in A, so a hit is
+   known in A; RAM reads addressed by the value a register takes.
+   Done:
+   - Test bench: one 32-byte line port, read latency `+mem_lat` (default
+     10), writes posted, one read in flight: the shape of the socket bus
+     units (M8). `x86_rand.py ... stride`: the buffer is 6 copies 4 KB
+     apart (one L1D set: evictions, write-backs).
+   - L1D (`x86_l1d.sv`) 16 KB, 4-way, 32-byte lines, write-back,
+     write-allocate, one miss in flight. Tags in MLAB, a copy per reader
+     (the load's even and odd dword lines, the drain), read unregistered
+     with the AGU address in A: the hit joins the store queue check (a
+     miss replays, does not wake). Data in M10K, even / odd dword banks
+     addressed at the A -> M edge: any access of up to 4 bytes reads in one
+     cycle, across lines too. The store queue drains into it with byte
+     enables (a line-crossing store in two steps); a miss holds the drain.
+     CoreMark 4.756 at mem_lat 10 (117 misses, all in the setup).
+   Next:
    - A missing load leaves the RS waiting on its line (no replay loop),
-     woken when the fill writes it; one miss in flight first, then more.
-   - Stores write L1D at retire (the store queue drains to it); a miss
-     allocates and holds the drain.
+     woken when the fill writes it; more misses in flight.
    - L1I 16 KB, 4-way, 32-byte lines, read with pc_f's next value like the
      BTB; the 30-byte window reads two 16-byte half-line banks; a miss
      stalls fetch.
+   - Stores to code (loaders, self-modifying code): a drained store
+     invalidates its L1I line, L1I fills see dirty L1D lines; in-flight
+     instructions in M5.
    - L2 256 KB in M10K behind both, then the bus unit.
 4. M4 uop cache, predictor tuning; fmax closure on 5CEFA9F23C8.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,

@@ -1,16 +1,17 @@
 #!/bin/bash
-# Usage: rtl/tools/x86_rand_test.sh <count> [first seed]
-# Runs <count> random programs (x86_rand.py) through x86_core_test.sh;
-# prints only failures and the summary.
+# Usage: rtl/tools/x86_rand_test.sh <count> [first seed] [stride]
+# Runs <count> random programs (x86_rand.py, its "stride" option passed on)
+# through x86_core_test.sh; prints only failures and the summary.
 set -eu
 count=$1
 seed=${2:-1}
+mode=${3:-}
 cd "$(dirname "$0")/.."
 dir=build/x86/rand
 mkdir -p "$dir"
 files=()
 for ((s = seed; s < seed + count; s++)); do
-    python3 -I tools/x86_rand.py "$s" "$dir/r$s.S"
+    python3 -I tools/x86_rand.py "$s" "$dir/r$s.S" $mode
     files+=("$dir/r$s.S")
 done
 log=$dir/run.log

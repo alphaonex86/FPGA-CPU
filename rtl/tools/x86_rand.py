@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-# Usage: rtl/tools/x86_rand.py <seed> <out.S>
+# Usage: rtl/tools/x86_rand.py <seed> <out.S> [stride]
 # Random terminating flat 32-bit program in the M2 decoder subset
 # (rtl/x86/x86_decode.sv): EDI = 64-byte buffer base, EBP = loop counter,
 # ESP = stack; EAX..ESI are free (8/16-bit forms included). Unaligned
 # buffer offsets and mixed sizes exercise store-to-load forwarding and
-# partial overlaps.
+# partial overlaps. "stride": the buffer is 6 copies 4 KB apart (one L1D
+# set each, more lines than ways: evictions, write-backs).
 import random
 import sys
 
@@ -17,8 +18,9 @@ JCC = ["jo", "jno", "jb", "jae", "je", "jne", "jbe", "ja",
 
 
 def main():
-    if len(sys.argv) != 3:
-        sys.exit("usage: x86_rand.py <seed> <out.S>")
+    if len(sys.argv) not in (3, 4) or sys.argv[3:] not in ([], ["stride"]):
+        sys.exit("usage: x86_rand.py <seed> <out.S> [stride]")
+    copies = 6 if sys.argv[3:] else 1
     rnd = random.Random(int(sys.argv[1]))
     labels = iter(range(1 << 30))
     subs = []
@@ -30,7 +32,7 @@ def main():
         return rnd.choice(REGS[sfx])
 
     def mem():
-        return "%d(%%edi)" % rnd.randrange(61)
+        return "%d(%%edi)" % (4096 * rnd.randrange(copies) + rnd.randrange(61))
 
     def imm(sfx="l"):
         lim = {"b": 7, "w": 15, "l": 31}[sfx]

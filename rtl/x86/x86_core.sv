@@ -1,5 +1,5 @@
 // Out-of-order x86 integer core, M2 (plan/x86_core.md): flat 32-bit code,
-// ideal memory ports, 3 x86 instructions decoded and 3 uops renamed,
+// ideal fetch port, L1 data cache (x86_l1d) on a 32-byte line memory port, 3 x86 instructions decoded and 3 uops renamed,
 // issued and retired per cycle.
 // - Rename P6-style: results live in the ROB until retire, then in the
 //   architectural registers (arch); RAT entries point to a ROB tag or arch.
@@ -14,8 +14,8 @@
 //   their dependents from wb1.
 // - Loads wait for every older store address, forward from an equal-address
 //   older store, replay on a partially overlapping one.
-// - Stores write memory at retire. A mispredicted branch retires, the
-//   pipeline flushes the next cycle.
+// - Retired stores drain into the L1D in order; a load that misses replays.
+//   A mispredicted branch retires, the pipeline flushes the next cycle.
 module x86_core
     import x86_pkg::*;
 (
@@ -24,12 +24,14 @@ module x86_core
     input  logic [31:0]           reset_eip,
     output logic [31:0]           fetch_addr,
     input  logic [8*30-1:0]       fetch_data,
-    output logic [31:0]           load_addr,     // ideal memory, same cycle
-    input  logic [31:0]           load_data,
-    output logic                  store_en,
-    output logic [31:0]           store_addr,
-    output logic [31:0]           store_data,
-    output logic [1:0]            store_size,    // SZ8 / SZ16 / SZ32
+    // memory (L1D lines): one request at a time, a read answered later
+    output logic                  mem_req,
+    output logic                  mem_we,
+    output logic [31:5]           mem_addr,
+    output logic [255:0]          mem_wdata,
+    input  logic                  mem_ready,
+    input  logic                  mem_rvalid,
+    input  logic [255:0]          mem_rdata,
     // retire trace: up to 3 uops per cycle, in order
     output logic [2:0]            ret_valid,
     output logic [2:0]            ret_eop,
@@ -235,7 +237,7 @@ module x86_core
     logic [1:0]       alu_port;       // ALU of the next dispatched ALU uop
     sq_t              sq [SQ_N];
     logic [SQ_W:0]    sq_head, sq_cmt, sq_tail;   // with wrap bit; [head, cmt) retired
-    logic             drain;                      // the head entry (retired) writes memory
+    logic             drain;                      // the head entry (retired) is in the L1D: leaves
     logic [31:0]      arch [NREG];
     flags_t           arch_flags;
     logic             rat_rob [NREG];
@@ -358,13 +360,8 @@ module x86_core
             ret_flags[k] = e.flags;
         end
     end
-    // retired stores drain to memory one per cycle, in order; until then
-    // loads still see them in the queue (forwarding / overlap replay)
-    assign drain = sq_head != sq_cmt;
-    assign store_en = drain;
-    assign store_addr = sq[sq_head[SQ_W-1:0]].addr;
-    assign store_data = sq[sq_head[SQ_W-1:0]].data;
-    assign store_size = sq[sq_head[SQ_W-1:0]].size;
+    // retired stores drain into the L1D one per cycle at most, in order;
+    // until then loads still see them in the queue (forwarding / overlap replay)
 
     // return stack as of retire: a flush restores it
     always_comb begin
@@ -749,13 +746,20 @@ module x86_core
         return ok && !two;
     endfunction
 
-    logic        a_ok, a_fwd;
-    logic [31:0] a_fdata;
-    always_comb a_ok = load_ok(ix[2].sq_snap, agu(xr[2]), ix[2].u.osz, a_fwd, a_fdata);
+    logic        a_ok, a_fwd, a_hit;
+    logic [31:0] a_fdata, load_data;
+    always_comb a_ok = load_ok(ix[2].sq_snap, agu(xr[2]), ix[2].u.osz, a_fwd, a_fdata) && (a_fwd || a_hit);
 
-    // ---------------- M: memory ----------------
+    // ---------------- M: L1D data ----------------
     logic        m_ok;
-    assign load_addr = am_addr;
+    x86_l1d u_l1d (.clk(clk), .rst(rst),
+                   .a_valid(ix_valid[2]), .a_addr(agu(xr[2])), .a_size(ix[2].u.osz), .a_hit(a_hit),
+                   .m_addr(am_addr), .m_data(load_data),
+                   .d_valid(sq_head != sq_cmt), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
+                   .d_size(sq[sq_head[SQ_W-1:0]].size), .d_data(sq[sq_head[SQ_W-1:0]].data),
+                   .d_done(drain),
+                   .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
+                   .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata));
     assign m_ok = am_ok && !md_done;   // bus 2 taken by mul/div: replay
 
     // ---------------- port 3: multiply / divide ----------------

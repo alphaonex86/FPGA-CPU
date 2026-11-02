@@ -19,7 +19,8 @@ for t in "${tests[@]}"; do
     python3 -I -c "import sys; d = open(sys.argv[1], 'rb').read(); open(sys.argv[2], 'w').write(''.join('%02x\n' % b for b in d))" \
         "build/x86/$name.bin" "$out/$name.hex"
     echo "== $name"
-    if "$out/obj/core_tb" "+image=$out/$name.hex" "+trace=$out/$name.trace"; then
+    # shellcheck disable=SC2086   # X86_TB_ARGS: extra plusargs, e.g. "+stats +mem_lat=20"
+    if "$out/obj/core_tb" "+image=$out/$name.hex" "+trace=$out/$name.trace" ${X86_TB_ARGS:-}; then
         tools/x86_test.sh "$t" "$out/$name.trace" || rc=1
     else
         rc=1
