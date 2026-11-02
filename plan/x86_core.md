@@ -140,6 +140,9 @@ replicated per read port plus a live-value table.
    read with the next fetch address). Indirect CALL/JMP r/m: P keeps the
    frontend's BTB target, a wrong one flushes at retire and writes the
    actual target into the BTB: indirect flushes 424 -> 273.
+   RET after a flush: the return stack is restored from a copy kept at
+   retire (CALL push store / RET jump): RET flushes 171 -> 1, 3.501
+   CoreMark/MHz (285,643 cycles per iteration, IPC 1.189).
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div

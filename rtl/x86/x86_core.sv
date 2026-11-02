@@ -65,6 +65,8 @@ module x86_core
     localparam int RAS_N = 8;
     logic [31:0]          ras [RAS_N];      // return stack, decode-time, may be wrong
     logic [$clog2(RAS_N)-1:0] ras_sp;       // top = ras[ras_sp - 1]
+    logic [31:0]          rras [RAS_N], rras_n [RAS_N];   // as of retire
+    logic [$clog2(RAS_N)-1:0] rras_sp, rras_sp_n;
     logic [2:0]           d_call, d_ret, d_ind;
     logic [2:0]           p_mis_t, p_mis_nt;   // frontend next != taken target / fall-through
     logic [2:0]           p_valid, p_redirect, p_call, p_ret, p_ind, p_mis;
@@ -181,6 +183,7 @@ module x86_core
         logic        fault;          // divide error: halts at retire (no exceptions yet)
         logic [31:0] redirect_pc;
         logic        btbi;               // CALL/JMP r/m: value = its EIP
+        logic        rcall, rret;
         logic        bp_jcc, bp_taken;   // branch predicted by P (x86_tage), predicted taken
     } rob_t;
 
@@ -283,6 +286,10 @@ module x86_core
             p_long <= 1'b0;
         end
         if (rst) ras_sp <= '0;
+        else if (flush) begin
+            ras <= rras;
+            ras_sp <= rras_sp;
+        end
         else if (p_push) begin
             ras <= p_ras;
             ras_sp <= p_sp;
@@ -345,6 +352,25 @@ module x86_core
     assign store_addr = sq[sq_head[SQ_W-1:0]].addr;
     assign store_data = sq[sq_head[SQ_W-1:0]].data;
     assign store_size = sq[sq_head[SQ_W-1:0]].size;
+
+    // return stack as of retire: a flush restores it
+    always_comb begin
+        rras_n = rras;
+        rras_sp_n = rras_sp;
+        for (int k = 0; k < 3; k++) begin
+            rob_t e;
+            e = rob[TAG_W'(rob_head + TAG_W'(k))];
+            if (ret_valid[k] && e.rcall) begin
+                rras_n[rras_sp_n] = e.next_eip;
+                rras_sp_n = rras_sp_n + 1'b1;
+            end
+            if (ret_valid[k] && e.rret) rras_sp_n = rras_sp_n - 1'b1;
+        end
+    end
+    always_ff @(posedge clk) begin
+        rras <= rras_n;
+        rras_sp <= rst ? '0 : rras_sp_n;
+    end
 
     // branch training: retired P-predicted Jcc, in order
     always_comb
@@ -945,7 +971,7 @@ module x86_core
                             dst: u.dst, wdst: u.wdst, wflags: u.wflags, eop: u.eop, value: 32'd0,
                             flags: '0, next_eip: u.next_eip, mispred: 1'b0, fault: 1'b0, redirect_pc: 32'd0,
                             bp_jcc: u.kind == K_BR && !u.btbi && u.imm2[14], bp_taken: u.pred_taken,
-                            btbi: u.btbi};
+                            btbi: u.btbi, rcall: u.rcall, rret: u.rret};
                         if (u.kind == K_ST) sq[rn[k].sq_snap[SQ_W-1:0]].addr_valid <= 1'b0;
                         if (u.wdst) begin
                             rat_rob[u.dst] <= 1'b1;

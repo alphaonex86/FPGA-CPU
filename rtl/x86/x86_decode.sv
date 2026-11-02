@@ -787,6 +787,13 @@ module x86_decode
             redirect = 1'b0;
             call = 1'b0;
             ret = 1'b0;
+            ind = 1'b0;
+        end
+        for (int k = 0; k < 3; k++) begin   // the retired return stack follows these
+            uop[k].rcall = call && uop[k].kind == K_ST;
+            uop_b[k].rcall = call && uop_b[k].kind == K_ST;
+            uop[k].rret = ret && uop[k].kind == K_BR;
+            uop_b[k].rret = ret && uop_b[k].kind == K_BR;
         end
         for (int k = 0; k < 3; k++)
             if (k < int'(n) && uop[k].kind == K_BR && uop[k].pred_taken) begin

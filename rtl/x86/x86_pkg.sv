@@ -44,6 +44,7 @@ package x86_pkg;
         logic        uncond;     // K_BR: JMP/CALL/RET
         logic        indirect;   // K_BR: target = s1 (RET)
         logic        btbi;       // K_BR: CALL/JMP r/m, target from the BTB; imm2 = its EIP
+        logic        rcall, rret;   // CALL's push (next_eip = return address), RET's jump
         logic        pred_taken; // K_BR: frontend followed the target
         logic        ecxz;       // K_BR: taken when s1 is 0, else s1 - 1 written (REP)
         logic        loopc;      // K_BR: s1 - 1 written, taken when s1 != 1 (and cond if rflags)
