@@ -7,7 +7,11 @@
 // {0x50 | STPCLK# << 1 | A20M#} when they change, the events {0x60 | SMI#
 // << 2 | INIT# << 1 | NMI} on their assertion edges, and both level
 // messages every 2^16 clocks (so a card reset later learns the levels).
-// The pin inputs are synchronous to clk, asserted high.
+// The pin inputs are synchronous to clk, asserted high. While link_lost
+// (the card reset the link, c2_bus_sync) a running bus cycle ends, the
+// command and its reply are dropped and nothing is sent; the level
+// messages go out 16 clocks after (the card drops the pipeline's stale
+// bytes first); link_flushed reports the flushed state.
 module c2_cart (
     input  logic        clk,
     input  logic        rst,
@@ -32,7 +36,9 @@ module c2_cart (
     input  logic        stpclk,
     input  logic        nmi,
     input  logic        init,
-    input  logic        smi
+    input  logic        smi,
+    input  logic        link_lost,
+    output logic        link_flushed
 );
     typedef enum logic [3:0] {
         R_HDR, R_FIELDS, R_DATA, E_ADDR, E_LOAD, E_BUS, E_STORE, T_STATUS, T_HDR, T_DATA
@@ -93,12 +99,21 @@ module c2_cart (
             events    <= '0;
             ev_q      <= '0;
             up        <= '0;
+            link_flushed <= 0;
         end else begin
             up <= '0;
             status_age <= status_age + 1'b1;
             ev_q   <= {smi, init, nmi};
             events <= events | ev_rise;
-            case (state)
+            link_flushed <= link_lost && state == R_HDR;
+            if (link_lost) begin
+                if (state != E_BUS || bus_done) begin
+                    bus_req <= 0;
+                    state   <= R_HDR;
+                end
+                err_event  <= 0;
+                status_age <= 16'hfff0;
+            end else case (state)
             R_HDR: begin
                 // between commands: status, pins, events, one per clock
                 if (&status_age) begin

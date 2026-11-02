@@ -142,19 +142,20 @@ module ax7a035b_top #(
     always_ff @(posedge lclk) tlp_err_s <= lrst ? '0 : {tlp_err_s[1:0], tlp_err_u};
 
     logic [7:0] down, up;
-    logic       up_valid, up_empty, up_overflow, up_overflow_l;
+    logic       up_valid, up_empty, up_overflow, up_overflow_l, link_quiet;
     logic [1:0] up_overflow_s;
     c2_card card (
         .clk(lclk), .rst(lrst), .req_valid, .req_ready, .req_write, .req_addr, .req_wdata, .rsp_valid, .rsp_data,
-        .down, .up, .up_valid, .ext_err(up_overflow_l || tlp_err_s[2])
+        .down, .up, .up_valid, .ext_err(up_overflow_l || tlp_err_s[2]), .link_quiet
     );
 
     // ---- link I/O
     (* IOB = "TRUE" *) logic [7:0] down_q;
     always_ff @(posedge lclk) down_q <= down;
     assign down_d = down_q;
+    // held low during a link reset (c2_card link_quiet)
     ODDR #(.DDR_CLK_EDGE("SAME_EDGE")) down_clk_oddr (
-        .C(lclk), .CE(1'b1), .D1(1'b0), .D2(1'b1), .R(1'b0), .S(1'b0), .Q(down_clk)
+        .C(lclk), .CE(1'b1), .D1(1'b0), .D2(!link_quiet), .R(1'b0), .S(1'b0), .Q(down_clk)
     );
     assign j11_gnd = '0;
 
@@ -186,7 +187,7 @@ module ax7a035b_top #(
         c2_cart cart (
             .clk(lclk), .rst(lrst), .down, .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special,
             .bus_addr, .bus_size, .bus_wdata, .bus_done, .bus_rdata, .bus_err, .intr, .board_reset, .low_vector(1'b0),
-            .a20m, .stpclk, .nmi, .init, .smi(1'b0)
+            .a20m, .stpclk, .nmi, .init, .smi(1'b0), .link_lost(link_quiet), .link_flushed()
         );
         c2_loop_target #(.ROM_HEX(ROM_HEX)) target (
             .clk(lclk), .rst(lrst), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special, .bus_addr, .bus_size,

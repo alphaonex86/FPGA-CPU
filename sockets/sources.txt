@@ -33,5 +33,7 @@ slot1/die/mt41k512m16_twindie_8gb_x16_ddr3l_auto.pdf https://www.farnell.com/dat
 parts/ti_sn74cb3t3245.pdf https://www.ti.com/lit/ds/symlink/sn74cb3t3245.pdf
 parts/ti_sn74avc8t245.pdf https://www.ti.com/lit/ds/symlink/sn74avc8t245.pdf
 parts/ti_sn74lvc8t245.pdf https://www.ti.com/lit/ds/symlink/sn74lvc8t245.pdf
+parts/ti_sn74gtl16612.pdf https://www.ti.com/lit/ds/symlink/sn74gtl16612.pdf
+parts/ti_sn74gtl2014.pdf https://www.ti.com/lit/ds/symlink/sn74gtl2014.pdf
 parts/ti_sn74lvc16t245.pdf https://www.ti.com/lit/ds/symlink/sn74lvc16t245.pdf
 parts/ti_tlv6700.pdf https://www.ti.com/lit/ds/symlink/tlv6700.pdf

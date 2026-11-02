@@ -9,7 +9,13 @@ module c2_card #(
     // no reply within 2^TIMEOUT_LOG2 clocks (~10 ms at 50 MHz: below the
     // host's PCIe completion timeout): the command is dropped, protocol
     // error, a read returns all ones
-    parameter int TIMEOUT_LOG2 = 19
+    parameter int TIMEOUT_LOG2 = 19,
+    // link reset (rst or a LINK_RESET write): the down clock stops for
+    // 2^QUIET_LOG2 clocks (~20 us), the cartridge flushes (c2_bus_sync
+    // watchdog: 64 BCLKs), then the first DRAIN up bytes are dropped: the
+    // ones left in the pipeline (cartridge, cable and FIFO registers)
+    parameter int QUIET_LOG2 = 10,
+    parameter int DRAIN = 8
 ) (
     input  logic        clk,
     input  logic        rst,
@@ -25,7 +31,8 @@ module c2_card #(
     output logic [7:0]  down,
     input  logic [7:0]  up,
     input  logic        up_valid,
-    input  logic        ext_err      // PCIe / link-FIFO fault: sets the protocol error
+    input  logic        ext_err,     // PCIe / link-FIFO fault: sets the protocol error
+    output logic        link_quiet   // stop the down clock
 );
     localparam logic [31:0] ID = 32'h43324231;   // "C2B1"
 
@@ -73,10 +80,14 @@ module c2_card #(
     wire [12:0] rep_count = req_wdata[44:32];
     wire [13:0] rep_bytes = {1'b0, rep_count} << lsz;
     wire        rep_ok    = lsz != 2'd3 && req_wdata[63:45] == '0 && rep_count != '0 && rep_bytes <= 14'd4096;
-    wire        rx_byte   = up_valid && rx_busy && state == WAIT;
+    logic [QUIET_LOG2:0] quiet;
+    logic [3:0]  drain;
+    assign link_quiet = !quiet[QUIET_LOG2];
+    wire        up_in     = up_valid && !link_quiet && drain == '0;
+    wire        rx_byte   = up_in && rx_busy && state == WAIT;
     wire        status_read = accept && !req_write && req_addr == 13'h008;
 
-    assign req_ready = state == IDLE;
+    assign req_ready = state == IDLE && !link_quiet;
     assign rsp_valid = state == RESP;
     assign rsp_data  = resp_window ? win_q : resp;
 
@@ -110,8 +121,12 @@ module c2_card #(
             events      <= '0;
             rx_busy   <= 0;
             down      <= '0;
+            quiet     <= '0;
+            drain     <= 4'(DRAIN);
         end else begin
             down <= '0;
+            if (link_quiet) quiet <= quiet + 1'b1;
+            else if (up_valid && drain != '0) drain <= drain - 4'd1;
             case (state)
             IDLE: if (accept) begin
                 resp_window <= 0;
@@ -143,6 +158,15 @@ module c2_card #(
                         rx_len     <= req_addr[5] ? 13'd0 : rep_bytes[12:0];
                         rx_window  <= !req_addr[5];
                         state      <= SEND;
+                    end else if (req_addr == 13'h028) begin
+                        // LINK_RESET: the board state is unknown until the next
+                        // status; the old link's errors and events are void
+                        quiet       <= '0;
+                        drain       <= 4'(DRAIN);
+                        board_reset <= 1;
+                        err_bus     <= 0;
+                        err_proto   <= 0;
+                        events      <= '0;
                     end else if (req_addr == 13'h020 && req_wdata[63:3] == '0) begin
                         // Special Transaction: {0x48 | sub-code}
                         tx_hdr[0]  <= {5'b01001, req_wdata[2:0]};
@@ -217,7 +241,7 @@ module c2_card #(
                     state   <= resp_vector ? RESP : IDLE;
                     resp    <= {56'd0, up};   // INTA: the 1-byte reply is the vector
                 end
-            end else if (up_valid) begin
+            end else if (up_in) begin
                 if (up == 8'h80 && state == WAIT) begin
                     rdata <= '0;
                     rx_i  <= '0;

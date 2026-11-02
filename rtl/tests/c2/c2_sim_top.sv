@@ -9,6 +9,10 @@
 // board_rst: the board's reset (into the cartridge, or p6_bif's reset);
 // cpu_pins: the chipset's CMOS outputs {SMI#, INIT#, NMI, STPCLK#, A20M#},
 // asserted (into the cartridge, with C2_P6 through c2_bus_sync).
+// link_quiet: the card stops the down clock (the testbench stops cclk with
+// C2_P6; otherwise the cartridge sees it as link_lost directly);
+// inject_*: replace a down byte, or an up byte as the card receives it
+// (link desync tests).
 module c2_sim_top #(
     parameter int    LINK_DELAY = 3,     // cartridge-side registers each way (I/O, cable)
     /* verilator lint_off UNUSEDPARAM */   // used with C2_LOOP_TARGET only
@@ -49,7 +53,12 @@ module c2_sim_top #(
     /* verilator lint_on UNUSEDSIGNAL */
     output logic        serial_valid,
     output logic [7:0]  serial_byte,
-    input  logic        serial_ready
+    input  logic        serial_ready,
+    output logic        link_quiet,
+    input  logic        inject_down_valid,
+    input  logic [7:0]  inject_down_byte,
+    input  logic        inject_up_valid,
+    input  logic [7:0]  inject_up_byte
 `ifdef C2_P6
     ,
     input  logic        bclk,        // the board's BCLK
@@ -94,7 +103,7 @@ module c2_sim_top #(
 
     c2_card card (
         .clk(lclk), .rst, .req_valid, .req_ready, .req_write, .req_addr, .req_wdata, .rsp_valid, .rsp_data,
-        .down(down_card), .up(up_card), .up_valid, .ext_err(up_overflow || tlp_err_s[2])
+        .down(down_card), .up(up_card), .up_valid, .ext_err(up_overflow || tlp_err_s[2]), .link_quiet
     );
 
     logic [7:0] down_pipe [LINK_DELAY], up_pipe [LINK_DELAY];
@@ -106,7 +115,11 @@ module c2_sim_top #(
             up_pipe[i]   <= up_pipe[i - 1];
         end
     end
-    assign down_cart = down_pipe[LINK_DELAY - 1];
+    assign down_cart = inject_down_valid ? inject_down_byte : down_pipe[LINK_DELAY - 1];
+`ifndef C2_P6
+    logic [1:0] quiet_s;
+    always_ff @(posedge cclk) quiet_s <= {quiet_s[0], link_quiet};
+`endif
 
 `ifdef C2_LOOP_TARGET
     logic        t_done, t_err, t_intr, t_reset, t_a20m, t_stpclk, t_nmi, t_init;
@@ -116,7 +129,7 @@ module c2_sim_top #(
         .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special,
         .bus_addr, .bus_size, .bus_wdata, .bus_done(t_done), .bus_rdata(t_rdata), .bus_err(t_err), .intr(t_intr),
         .board_reset(t_reset), .low_vector(1'b0), .a20m(t_a20m), .stpclk(t_stpclk), .nmi(t_nmi), .init(t_init),
-        .smi(1'b0)
+        .smi(1'b0), .link_lost(quiet_s[1]), .link_flushed()
     );
     // simulated time advances only with BAR0 accesses: 1 "ms" of the 0xf7
     // timer is 50 clocks here, so it fires while the guest loops
@@ -126,18 +139,18 @@ module c2_sim_top #(
         .a20m(t_a20m), .stpclk(t_stpclk), .nmi(t_nmi), .init(t_init), .serial_valid, .serial_byte, .serial_ready, .post
     );
 `elsif C2_P6
-    logic        p_done, p_err, s_req, s_done, s_err, m_reset, m_low_vector;
+    logic        p_done, p_err, s_req, s_done, s_err, m_reset, m_low_vector, link_lost, link_flushed;
     logic [31:0] p_rdata, s_rdata;
     logic [4:0]  m_pins;
     c2_cart cart (
         .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special,
         .bus_addr, .bus_size, .bus_wdata, .bus_done(p_done), .bus_rdata(p_rdata), .bus_err(p_err), .intr,
         .board_reset(m_reset), .low_vector(m_low_vector), .a20m(m_pins[0]), .stpclk(m_pins[1]), .nmi(m_pins[2]),
-        .init(m_pins[3]), .smi(m_pins[4])
+        .init(m_pins[3]), .smi(m_pins[4]), .link_lost, .link_flushed
     );
     c2_bus_sync bus_sync (
         .mclk(cclk), .mrst(rst), .m_req(bus_req), .m_done(p_done), .m_rdata(p_rdata), .m_err(p_err),
-        .m_reset, .m_low_vector, .m_pins,
+        .m_reset, .m_low_vector, .m_pins, .m_link_lost(link_lost), .m_link_flushed(link_flushed),
         .sclk(bclk), .srst(rst), .s_req, .s_done, .s_rdata, .s_err, .s_reset(cpu_reset), .s_low_vector(straps[6]),
         .s_pins(cpu_pins)
     );
@@ -186,7 +199,7 @@ module c2_sim_top #(
         .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta, .bus_special,
         .bus_addr, .bus_size, .bus_wdata, .bus_done, .bus_rdata, .bus_err, .intr,
         .board_reset(board_rst), .low_vector(1'b0), .a20m(cpu_pins[0]), .stpclk(cpu_pins[1]), .nmi(cpu_pins[2]),
-        .init(cpu_pins[3]), .smi(cpu_pins[4])
+        .init(cpu_pins[3]), .smi(cpu_pins[4]), .link_lost(quiet_s[1]), .link_flushed()
     );
     assign serial_valid = 0;
     assign serial_byte  = '0;
@@ -197,7 +210,8 @@ module c2_sim_top #(
     logic up_overflow_w, up_valid_n;
     logic [1:0] up_overflow_s;
     c2_afifo #(.W(8), .AW(3)) up_fifo (
-        .wclk(cclk), .wrst(rst), .we(1'b1), .wd(up_pipe[LINK_DELAY - 1]), .overflow(up_overflow_w),
+        .wclk(cclk), .wrst(rst), .we(1'b1), .wd(inject_up_valid ? inject_up_byte : up_pipe[LINK_DELAY - 1]),
+        .overflow(up_overflow_w),
         .rclk(lclk), .rrst(rst), .re(1'b1), .rd(up_card), .empty(up_valid_n)
     );
     assign up_valid = !up_valid_n;

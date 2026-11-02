@@ -4,16 +4,24 @@
 // cartridge's bus cycles are served by the bus_sim devices.
 // Time step 2 ns: PCIe user clock 125 MHz, link and cartridge clocks
 // 50 MHz, the cartridge's 6 ns after the card's; with C2_P6 the board's
-// BCLK at 14 ns (71 MHz, asynchronous to the link).
+// BCLK at 14 ns (71 MHz, asynchronous to the link). With C2_P6 the
+// cartridge clock stops while the card's link_quiet (link reset). Before
+// the VMM starts, half a command goes into the cartridge and its clock
+// stops (a card that died mid-command) until the link reset of
+// bus_bar_open, which must flush it: no bus cycle may run it; a bad up
+// byte before it leaves a protocol error the link reset must clear. After
+// each link reset, stale bytes as left in the up pipeline: the card drops
+// them.
 #include <cstdio>
 #include <cstdlib>
+#include <deque>
 #include <vector>
 #include "Vc2_sim_top.h"
 extern "C" {
 #include "bus.h"
 }
 
-enum : uint32_t { BUS_LATENCY = 8, RESET_CLOCKS = 200, PULSE_CLOCKS = 8, TIMEOUT = 50000000, BAR_BASE = 0xf0000000, REQUESTER = 0x0100, COMPLETER = 0x0200 };
+enum : uint32_t { INJECT_ADDR = 0x00563412, BUS_LATENCY = 8, RESET_CLOCKS = 200, PULSE_CLOCKS = 8, TIMEOUT = 50000000, BAR_BASE = 0xf0000000, REQUESTER = 0x0100, COMPLETER = 0x0200 };
 
 struct beat {
     uint64_t data;
@@ -29,6 +37,8 @@ static uint32_t bus_wait;
 static bool rx_accepted;
 static std::vector<beat> tx_beats;
 static uint8_t tag;
+static bool c_rose, quiet_q, cart_held;
+static std::deque<uint8_t> up_inject;   // replace the next up bytes
 
 [[noreturn]] static void fail(const char *what)
 {
@@ -78,6 +88,7 @@ static void host_edge()
     uint32_t addr = (uint32_t)(top->host_addr << 3) + lane;
     int space = top->host_io ? BUS_IO : BUS_MEM;
     if (top->host_io) addr &= 0xffff;
+    if (addr == INJECT_ADDR) fail("the injected half command ran a bus cycle");
     if (top->host_we)
         dev->write(dev, space, addr, size, (uint32_t)(top->host_wdata >> (8 * lane)));
     else
@@ -117,6 +128,7 @@ static void cclk_edge()
         top->bus_done = 1;
     if (!bus_busy && top->bus_req) {
         int size = 1 << top->bus_size;
+        if (top->bus_addr == INJECT_ADDR) fail("the injected half command ran a bus cycle");
         top->bus_err = 0;
         top->bus_rdata = 0;
         if (top->bus_inta)
@@ -138,7 +150,20 @@ static bool step()
 {
     t++;
     bool u = t % 4 < 2, l = t % 10 < 5, c = (t + 7) % 10 < 5;
+    if (top->link_quiet) cart_held = false;
+    c = c && !cart_held;
+#ifdef C2_P6
+    c = c && !top->link_quiet;
+#endif
     bool u_rise = u && !top->uclk, c_rise = c && !top->cclk;
+    c_rose = c_rise;
+    if (quiet_q && !top->link_quiet) up_inject.insert(up_inject.end(), { 0x55, 0x80, 0x41 });
+    quiet_q = top->link_quiet;
+    top->inject_up_valid = c_rise && !up_inject.empty();
+    if (top->inject_up_valid) {
+        top->inject_up_byte = up_inject.front();
+        up_inject.pop_front();
+    }
 #ifdef C2_P6
     bool b = t % 7 < 4, b_rise = b && !top->bclk;
     top->bclk = b;
@@ -237,7 +262,20 @@ extern "C" struct bus *bus_rtl_open(const char *rom_path)
     top->rst = 1;
     for (int i = 0; i < 100; i++) step();
     top->rst = 0;
+    for (uint32_t n = 0; top->link_quiet; n++) {
+        if (n == TIMEOUT) fail("timeout: link quiet after reset");
+        step();
+    }
     for (int i = 0; i < 100; i++) step();
+    // a memory write cycle's header and 3 of its 8 field bytes
+    up_inject.push_back(0x55);
+    for (uint8_t b : { 0x86, 0x12, 0x34, 0x56 }) {
+        top->inject_down_valid = 1;
+        top->inject_down_byte = b;
+        do step(); while (!c_rose);
+    }
+    top->inject_down_valid = 0;
+    cart_held = true;
     atexit(report);
     static struct bar bar = { rtl_read, rtl_write64, nullptr };
     return bus_bar_open(&bar);

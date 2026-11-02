@@ -93,9 +93,9 @@ module c2_p6_agent (
     always_ff @(posedge clk) begin
         if (rst || reset_q) arb <= '0;
         else if (arb != 3'd7) arb <= arb + 1'b1;
+        br0_drv <= !(rst || reset_q) && arb >= 3'd4;   // arb >= 5 next clock, a flop for the I/O cell
         if (reset_q) straps <= a_q;     // the last value before the edge
     end
-    assign br0_drv = arb >= 3'd5;
 
     // ---- request stall [PPRO1] 4.1.3.2: BNR# sampled every other clock in
     // stalled / throttled (first 2 clocks after RESET#), the 3rd clock after
@@ -141,6 +141,11 @@ module c2_p6_agent (
     assign issue    = state == IDLE && bus_req && may_issue;
     assign bus_done = state == DONE;
 
+    // read data: every DRDY# while waiting; the last one before DONE is ours
+    // (data phases follow the response order), so RS# stays off this enable
+    always_ff @(posedge clk)
+        if ((state == WAIT || state == DATA) && drdy_q) bus_rdata <= 32'(d_q >> (8 * lane));
+
     always_ff @(posedge clk) begin
         a_drv    <= '0;
         req_drv  <= '0;
@@ -157,13 +162,15 @@ module c2_p6_agent (
             end else
                 state <= IDLE;
         end else case (state)
-            IDLE: if (issue) begin
-                a_drv   <= addr_a;
-                req_drv <= reqa;
-                ads_drv <= 1;
+            IDLE: begin
                 bus_err <= 0;
                 wrote   <= 0;
-                state   <= REQ_A;
+                if (issue) begin
+                    a_drv   <= addr_a;
+                    req_drv <= reqa;
+                    ads_drv <= 1;
+                    state   <= REQ_A;
+                end
             end
             REQ_A: begin               // ADS# on the pins; clock B next
                 a_drv   <= addr_b;
@@ -186,23 +193,16 @@ module c2_p6_agent (
                 end
                 if (rs_seen && head) begin
                     if (rs_q == RS_RETRY) state <= IDLE;
-                    else if (rs_q == RS_NORMAL && reads) begin
+                    else if (rs_q == RS_NORMAL && reads)
                         // read data starts with the response [PPRO1] 4.6.2.2
-                        if (drdy_q) begin
-                            bus_rdata <= 32'(d_q >> (8 * lane));
-                            state     <= DONE;
-                        end else
-                            state <= DATA;
-                    end else begin
+                        state <= drdy_q ? DONE : DATA;
+                    else begin
                         bus_err <= !(rs_q == RS_NODATA && (bus_special || writes && wrote));
                         state   <= DONE;
                     end
                 end
             end
-            DATA: if (drdy_q) begin
-                bus_rdata <= 32'(d_q >> (8 * lane));
-                state     <= DONE;
-            end
+            DATA: if (drdy_q) state <= DONE;
             DONE: state <= IDLE;
             default: state <= IDLE;
         endcase

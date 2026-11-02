@@ -1,0 +1,209 @@
+	(footprint "PinHeader_2x20_P1.27mm_Vertical_SMD"
+		(layer "F.Cu")
+		(at 71.000000 10.750000)
+		(descr "S7 placement; nets assigned by S8")
+		(attr smd)
+		(fp_text reference "J5" (at 0.0 4.450000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+		(fp_text value "J5" (at 0.0 5.850000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
+		(fp_rect (start -12.935000 -3.650000) (end 12.935000 3.650000) (layer "F.CrtYd") (width 0.05))
+		(pad "1" smd rect
+		(at -12.0650 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "2" smd rect
+		(at -12.0650 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "3" smd rect
+		(at -10.7950 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "4" smd rect
+		(at -10.7950 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "5" smd rect
+		(at -9.5250 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "6" smd rect
+		(at -9.5250 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "7" smd rect
+		(at -8.2550 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "8" smd rect
+		(at -8.2550 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "9" smd rect
+		(at -6.9850 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "10" smd rect
+		(at -6.9850 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "11" smd rect
+		(at -5.7150 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "12" smd rect
+		(at -5.7150 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "13" smd rect
+		(at -4.4450 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "14" smd rect
+		(at -4.4450 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "15" smd rect
+		(at -3.1750 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "16" smd rect
+		(at -3.1750 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "17" smd rect
+		(at -1.9050 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "18" smd rect
+		(at -1.9050 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "19" smd rect
+		(at -0.6350 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "20" smd rect
+		(at -0.6350 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "21" smd rect
+		(at 0.6350 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "22" smd rect
+		(at 0.6350 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "23" smd rect
+		(at 1.9050 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "24" smd rect
+		(at 1.9050 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "25" smd rect
+		(at 3.1750 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "26" smd rect
+		(at 3.1750 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "27" smd rect
+		(at 4.4450 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "28" smd rect
+		(at 4.4450 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "29" smd rect
+		(at 5.7150 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "30" smd rect
+		(at 5.7150 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "31" smd rect
+		(at 6.9850 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "32" smd rect
+		(at 6.9850 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "33" smd rect
+		(at 8.2550 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "34" smd rect
+		(at 8.2550 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "35" smd rect
+		(at 9.5250 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "36" smd rect
+		(at 9.5250 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "37" smd rect
+		(at 10.7950 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "38" smd rect
+		(at 10.7950 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "39" smd rect
+		(at 12.0650 1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+		(pad "40" smd rect
+		(at 12.0650 -1.9500)
+		(size 0.74 2.4)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+	)
+	)

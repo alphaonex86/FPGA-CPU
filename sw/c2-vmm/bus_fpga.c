@@ -138,6 +138,9 @@ struct bus *bus_bar_open(struct bar *bar)
         free(f);
         return NULL;
     }
+    // a command a previous run left in the cartridge (card timeout, VMM
+    // killed) would desync the link
+    wr64(&f->bus, C2B_LINK_RESET, 0);
     return &f->bus;
 }
 

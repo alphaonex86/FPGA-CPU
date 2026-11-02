@@ -6,8 +6,11 @@ instance per bank unit), the SC242 CPU symbol (4 units), 20 8-channel
 translator chips (A side = FPGA net, B side = S_<sig> contact net),
 4 DDR3L x16 dies + the DDR_VTT tracker (cartridge RAM), headers (FPGA
 JTAG, passive-serial config, 12 V barrel, board-rail feed), the D23 power
-tree + decoupling from slot1_pdn.py (also written to pdn.csv for S7) and
-one PWR_FLAG per net hosting a power-input pin.  No wires: every pin gets
+tree + decoupling from slot1_pdn.py (also written to pdn.csv for S7), the
+D32 C2 link (J5 on the 17 free 3.3 V balls + M8, each ball's translator
+channel behind a 0402 0-ohm RL01..RL17 on net TA_<signal>: fitted for
+variant A, not fitted for C2) and one PWR_FLAG per net hosting a
+power-input pin.  No wires: every pin gets
 a local label at its world position.  One net per physical rail:
 VCCPD of the 3.3 V banks sits on VCCIO33, the 1.35 V banks' VCCIO on
 VDDR3, the 2.5 V CMOS translator side on VCC_AUX25 (power.md topology).
@@ -17,6 +20,8 @@ hw/slot1-cyclonev/slot1-cyclonev.net: kicad-cli netlist export; audit:
   (a) for the direct signal (BCLK) the contact too, or (b) a translator A
   pin; the S_<signal> net holds the contact and the paired translator B
   pin, and the chip/channel matches pins.csv translator T<dd>c<d>;
+- every LINK signal's ball net holds its J5 pin and RL pin 1, TA_<signal>
+  holds RL pin 2 and the translator A pin;
 - every ddr3.csv ball's net also reaches the die pins of its rank/lane
   (die-pin mapping per D18-MN24: rank0 = die0/die1, rank1 = die2/die3);
 - ERC --severity-error: 0 violations.
@@ -40,6 +45,14 @@ PARTS = ROOT / "hw/lib/Slot1_Parts.kicad_sym"
 FPGACSV = ROOT / "FPGAlist/CycloneV_A9/pins/5cefa9_f484.csv"
 
 BCLK = "BCLK"
+# D32 C2 link header J5 (plan/slot1_c2.md "Cable link v0"; the ALINX J11
+# pin order): pin -> FPGA ball net. Down = card -> cartridge.
+LINK_DCLK = ("M8", "LINK_DCLK")          # CLK0n, the free 3B clock input
+LINK = {**{3 + 2 * k: "DEP[%d]#" % k for k in range(8)},          # down data
+        19: "AP[0]#",                                              # up clock
+        **{23 + 2 * k: s for k, s in enumerate(                    # up data
+            ["A[32]#", "A[33]#", "A[34]#", "A[35]#", "AP[1]#", "AERR#", "BERR#"])},
+        36: "BINIT#"}
 VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5,
          "VCCPGM18": 1.8, "VCCIO33": 3.3, "VDDR3": 1.35}
 BRAIL = {"AGTL+ (OD, VTT 1.5 V, VREF 2/3 VTT)": "VTT15",
@@ -192,6 +205,14 @@ def main():
     fpganet_of = {b: ball_ddr.get(b) or sig_of_ball.get(b)
                   or slot1_fpga_net(b, f, conf_by.get(b, ""))
                   for b, f in func_by.items()}
+    assert fpganet_of[LINK_DCLK[0]] == "NC_" + LINK_DCLK[0], "M8 not free"
+    fpganet_of[LINK_DCLK[0]] = LINK_DCLK[1]
+    link_sigs = sorted(LINK.values(), key=lambda s: next(
+        i for i, r in enumerate(pinsrows) if r["signal"] == s))
+    assert len(link_sigs) == 17 and all(
+        next(r for r in pinsrows if r["signal"] == s)["vccio"] == "3.3 V"
+        for s in link_sigs), "D32 link: 17 balls at 3.3 V"
+    rl_of = {s: "RL%02d" % k for k, s in enumerate(link_sigs, 1)}
     errs = t6.cv_supply_errors(func_by, fpganet_of, VOLTS)
     if errs:
         print(f"SUPPLY ERRORS ({len(errs)}):", *errs, sep="\n   ")
@@ -203,7 +224,8 @@ def main():
          ("hw_n:" + tsym[0], tsym[1]), ("hw_n:" + ddsym[0], ddsym[1]),
          ("hw_n:" + tracksym[0], tracksym[1])] + t6.stock_defs(
             [("Connector_Generic", ["Conn_02x03_Odd_Even",
-                                    "Conn_02x05_Odd_Even", "Conn_01x03"]),
+                                    "Conn_02x05_Odd_Even", "Conn_02x20_Odd_Even",
+                                    "Conn_01x03"]),
              ("Connector", ["Barrel_Jack"]),
              ("Device", ["C", "R", "L", "Fuse", "FerriteBead"])])
         + [("hw_n:" + d[0], d[1]) for d in t6.parse_lib(PARTS)
@@ -240,7 +262,8 @@ def main():
                 side = num[0]
                 s = chip.get("c" + num[1:])
                 if s:
-                    lab[num] = s if side == "A" else "S_" + s
+                    lab[num] = ("TA_" + s if s in rl_of else s) \
+                        if side == "A" else "S_" + s
                 else:
                     lab[num] = "NC_%s_%s" % (ref, num)
         flagged |= t6.power_nets(tpins, lab)
@@ -328,6 +351,22 @@ def main():
         parts.append(t6.header(ref, nick, nets, 700.0, 580.0 + k * 44.0,
                                flagged))
 
+    # ---- D32 C2 link: J5 (1/37/38 and even 4-34 GND, 2/39/40 open) ---
+    j5 = ["GND" if n in (1, 37, 38) or (n % 2 == 0 and 4 <= n <= 34)
+          else LINK.get(n) or (LINK_DCLK[1] if n == 21 else t6.NOCONNECT)
+          for n in range(1, 41)]
+    parts.append(t6.header("J5", "Connector_Generic:Conn_02x20_Odd_Even", j5,
+                           760.0, 600.0, flagged))
+    rdef = next(d for d in t6.parse_lib(pathlib.Path(t6.STOCK + "Device.kicad_sym"))
+                if d[0] == "R")
+    rpins = sorted((p for ps in rdef[2].values() for p in ps),
+                   key=lambda p: int(p["num"]))
+    for k, sig in enumerate(link_sigs):
+        parts.append(t6.syminst("Device:R", rl_of[sig], 800.0 + (k % 6) * 15.0,
+                                580.0 + (k // 6) * 20.0, 1, rpins,
+                                {"1": sig, "2": "TA_" + sig}, value="0R",
+                                footprint="Resistor_SMD:R_0402_1005Metric"))
+
     # ---- power tree + decoupling (D23) ---------------------------------
     pdn_rows = slot1_pdn.build(fpganet_of, [(c["ref"], c["a"], c["b"])
                                             for c in chips])
@@ -366,13 +405,22 @@ def main():
         m = re.match(r"T(\d+)c(\d+)$", tr)
         cid, ch = int(m.group(1)), int(m.group(2))
         ref = "TR%02d" % cid
-        if (ref, "A%d" % ch) not in set(nets.get(t6.esc(sig), [])):
+        anet = set(nets.get(t6.esc(("TA_" + sig) if sig in rl_of else sig), []))
+        if (ref, "A%d" % ch) not in anet:
             fails.append(f"{sig}: net missing {ref} A{ch}")
+        if sig in rl_of:
+            j5pin = str(next(n for n, s in LINK.items() if s == sig))
+            if not ({("J5", j5pin), (rl_of[sig], "1")}
+                    <= set(nets.get(t6.esc(sig), []))) or \
+                    (rl_of[sig], "2") not in anet:
+                fails.append(f"{sig}: link J5 {j5pin} / {rl_of[sig]} wiring")
         if (ref, "B%d" % ch) not in snds:
             fails.append(f"{sig}: S_ net missing {ref} B{ch}")
         if fpganet_of.get(ball) != sig or \
                 not has(t6.esc(sig), "U1", ball):
             fails.append(f"{sig}: net missing FPGA ball {ball}")
+    if not {("U1", LINK_DCLK[0]), ("J5", "21")} <= set(nets.get(LINK_DCLK[1], [])):
+        fails.append(f"{LINK_DCLK[1]}: net missing U1 {LINK_DCLK[0]} or J5 21")
     nfail0 = len(fails)
 
     # DDR3 nets: each ball's net must include U1's ball and the right dies

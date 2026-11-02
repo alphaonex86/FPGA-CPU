@@ -37,6 +37,10 @@ struct bus {
 //   0x010 R   RDATA: data of the last read cycle; the completion waits for it
 //   0x018 R   INTA: runs an interrupt-acknowledge cycle, returns the vector
 //   0x020 W   SPECIAL: a Special Transaction, the sub-code in bits 2:0
+//   0x028 W   LINK_RESET: the cartridge drops any command it holds (the
+//             card stops the link clock ~20 us; reset at power-up too);
+//             STATUS shows a board reset until the cartridge's next
+//             status, its errors and events are cleared
 //   0x100 W   cycle: one 64-bit write {data[63:32], addr[31:0]} at
 //             0x100 + 8 * (space << 3 | write << 2 | log2 size)
 //             (a write cycle is posted; a read cycle is followed by RDATA)
@@ -52,6 +56,7 @@ struct bus {
 // host's PCIe completion timeout (range A, 50 us-10 ms: set it to >= 10 ms).
 enum {
     C2B_ID = 0x000, C2B_STATUS = 0x008, C2B_RDATA = 0x010, C2B_INTA = 0x018, C2B_SPECIAL = 0x020,
+    C2B_LINK_RESET = 0x028,
     C2B_CYCLE = 0x100, C2B_REP = 0x180, C2B_WINDOW = 0x1000, C2B_WINDOW_SIZE = 0x1000,
     C2B_ID_VALUE = 0x43324231,
     C2B_ST_INTR = 1, C2B_ST_BUS_ERR = 2, C2B_ST_PROTO_ERR = 4, C2B_ST_RESET = 8, C2B_ST_LOW_VECTOR = 16,

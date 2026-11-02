@@ -6,6 +6,9 @@
 // vector 000FFFF0h) is taken once the reset level fell: stable by then. The
 // edge-triggered pins (NMI, INIT#, SMI#: 2 BCLKs minimum) are stretched by
 // 7 BCLKs first, so the link clock sees them at any BCLK.
+// Link watchdog: the link clock is the card's (c2_card stops it for a link
+// reset); 64 BCLKs without it -> m_link_lost, set at once (the clock may be
+// stopped), held until the master reports itself flushed.
 module c2_bus_sync (
     // master side (c2_cart)
     input  logic        mclk,
@@ -17,6 +20,8 @@ module c2_bus_sync (
     output logic        m_reset,
     output logic        m_low_vector,
     output logic [4:0]  m_pins,
+    output logic        m_link_lost,
+    input  logic        m_link_flushed,
     // slave side (c2_p6_agent), same fields, held until s_done
     input  logic        sclk,
     input  logic        srst,
@@ -56,6 +61,24 @@ module c2_bus_sync (
             m_low_vector <= 0;
         end
     end
+
+    logic       alive_t, lost;
+    logic [2:0] alive_s;
+    logic [1:0] flushed_s, lost_m;
+    logic [5:0] still;                 // BCLKs without a link clock edge
+    always_ff @(posedge mclk) alive_t <= !alive_t;
+    always_ff @(posedge sclk) begin
+        alive_s   <= {alive_s[1:0], alive_t};
+        flushed_s <= {flushed_s[0], m_link_flushed};
+        still     <= alive_s[2] != alive_s[1] ? '0 : still + {5'd0, !(&still)};
+        if (srst) lost <= 0;
+        else if (&still) lost <= 1;
+        else if (flushed_s[1]) lost <= 0;
+    end
+    always_ff @(posedge mclk or posedge lost)
+        if (lost) lost_m <= '1;
+        else      lost_m <= {lost_m[0], 1'b0};
+    assign m_link_lost = lost_m[1];
 
     // master: start on bus_req (not in its done clock, when it still stands)
     always_ff @(posedge mclk) begin

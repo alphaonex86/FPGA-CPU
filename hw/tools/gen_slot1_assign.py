@@ -359,7 +359,7 @@ def io_standard(kind, ball):
         return "3.3-V LVTTL (2.5 V swing in, NM21)"
     if kind == "cmos":
         return "3.3-V LVTTL"
-    return ("SSTL-135 CLASS I" if BALLS[ball]["bank"] in ("7A", "8A")
+    return ("SSTL-135" if BALLS[ball]["bank"] in ("7A", "8A")   # no class on Cyclone V [cv_5v2 vol1]
             else "3.3-V LVTTL")
 
 OUT.mkdir(exist_ok=True)

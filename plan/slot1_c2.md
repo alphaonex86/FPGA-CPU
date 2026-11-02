@@ -21,10 +21,12 @@ too. Nothing is bought before the viability verdict below.
 | BAR0 bus protocol | `sw/c2-vmm/bus.h` | v0 defined |
 | PCIe card: BAR0 block -> cable link | `rtl/c2/c2_card.sv` | v0, simulated end to end (`test_rtl.sh`) |
 | PCIe card: 7 Series PCIe IP wrapper (TLP <-> BAR0 request port) | `rtl/c2/xilinx/` | bitstream builds, timing met; LOOPBACK variant for bring-up |
-| Cable link protocol (card <-> cartridge) | `rtl/c2/`; 22 cartridge balls (D32: 17 at 3.3 V, 2 at 1.35 V, 3 free) | v0 simulated through 3 clock domains; card I/O cells in the AX7A035B bitstream; cartridge I/O cells to do |
+| Cable link protocol (card <-> cartridge) | `rtl/c2/`; 22 cartridge balls (D32: 17 at 3.3 V, 2 at 1.35 V, 3 free) | v0 simulated through 3 clock domains, link reset; I/O cells in both bitstreams |
 | Cartridge: link -> command executor on a generic bus port | `rtl/c2/c2_cart.sv` | v0, simulated |
 | Cartridge PCB: link header J5 + 17 selection 0-ohms (D32) | `hw/slot1-cyclonev` generators | S6 netlist + S7 placement done; link nets unrouted like every slot net |
-| Cartridge: link + P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | `rtl/c2/c2_p6_agent.sv` | v0 (uncached cycles, agent 0) simulated against FPGAcommon's p6_bif; snoop / DMA mirror, CMOS pins, link CDC to do |
+| Cartridge: link + P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | `rtl/c2/c2_p6_agent.sv` | v0 (uncached cycles, agent 0, CMOS pins, Special Transactions) simulated against FPGAcommon's p6_bif; snoop / DMA mirror to do |
+| Cartridge bitstream (variant A PCB, 5CEFA9) | `rtl/c2/cyclonev/` | builds, timing met at BCLK 66 MHz with the P6 pin timing constrained |
+| Dedicated C2 cartridge PCB; C2 cartridge with its own PCIe (Cyclone V GX) | `hw/` | decided 2026-11-02 (D33, D34), to design |
 | Bench: host <-> PCIe card round trip | hardware | after the verdict |
 
 ## VMM v0 (`sw/c2-vmm`, `test.sh`)
@@ -86,7 +88,9 @@ FPGA delays the completion until the bus cycle ends). STATUS carries INTR,
 a sticky bus error, a sticky protocol error, the board reset (RESET#
 asserted or since the last read; bus cycles under it fail and are not
 errors), the A6# strap, A20M# / STPCLK# and sticky NMI / INIT# / SMI#
-edges; INTA runs the acknowledge cycle, SPECIAL a Special Transaction. The bridge takes requests strictly in order, one at a time (a
+edges; INTA runs the acknowledge cycle, SPECIAL a Special Transaction,
+LINK_RESET (0x028) resynchronizes the link (the VMM issues it at open).
+The bridge takes requests strictly in order, one at a time (a
 command holds later TLPs by flow control until its reply), so the REP
 window is never refilled under a running REP.
 
@@ -118,6 +122,19 @@ window is never refilled under a running REP.
   MRd 1-2 DW on BAR0, UR otherwise); `c2_req_sync.sv` (PCIe user clock to
   link clock, toggle handshake), `c2_afifo.sv` (up link on the returned
   clock). `test_rtl.sh` drives real TLPs through all three clocks.
+- Link reset (the card's reset, or LINK_RESET at VMM open): a command left
+  half sent (card reset) or a reply still due (card timeout) would desync
+  the link. The card stops the down clock for 2^10 clocks (~20 us) and
+  holds BAR0; `c2_bus_sync` sees no link clock edge for 64 BCLKs and sets
+  the cartridge's link_lost at once (asynchronous set, the clock may be
+  stopped); c2_cart lets a running bus cycle end, drops the command and
+  its reply, reports flushed, and sends its levels 16 clocks after the
+  loss clears; the card drops the first 8 up bytes after the quiet (stale
+  pipeline bytes), clears its sticky errors and events and shows the
+  board in reset until that status. `test_rtl.sh` injects half a command
+  with the cartridge clock stopped, a bad up byte and stale bytes after
+  every quiet; mutations (no link reset, no flush, no watchdog, no drain,
+  no sticky clear) each fail a backend.
 - Not yet: a link check (CRC).
 
 ## Card bitstream (`rtl/c2/xilinx`, AX7A035B)
@@ -182,8 +199,31 @@ window is never refilled under a running REP.
   runs BCLK at 14 ns against the 20 ns link clock.
 - Not yet: HIT# / HITM# snoop stall and the DMA mirror; SMM (SMI
   Acknowledge, SMMEM#, 440BX SMRAM); IGNNE# / FERR# (KVM has no FERR#);
-  FLUSH#; the cartridge top with its pins (INTR / LINT0 also through
-  `c2_bus_sync` there).
+  FLUSH#.
+
+## Cartridge bitstream (`rtl/c2/cyclonev`, variant A PCB)
+
+- `c2_cart_top.sv`: c2_cart on the received link clock (M8), c2_bus_sync,
+  c2_p6_agent on BCLK through `c2_bclk_pll` (normal mode: the raw pin ->
+  I/O register clock path is ~5 ns, which would capture the chipset's data
+  of the same edge); open-drain pins; `gen_qsf.py` makes the QSF from
+  `hw/slot1-cyclonev/pins.csv` and the J5 table (every net a port or
+  listed unused); `build.sh` fails on any critical warning, an unplaced,
+  ignored, unpackable or incomplete pin assignment, a latch or timing.
+- Every P6 flop sits in an I/O cell (inputs, open-drain outputs; the
+  agent is synthesized without synchronous controls so they pack). The
+  P6 pins are constrained to the Pentium II edge-finger timing [p2 Table
+  12: valid 0.71-4.66 ns, setup 1.97, hold 1.61, for its 100 MHz bus;
+  the chipset's own timing does not scale with the period] through the
+  pass-gate (0-0.3 ns) and the cartridge traces (0.1-0.3 ns).
+- BCLK 66 MHz (D27): at 100 / 133 MHz the one-clock reactions cross the
+  die (control pins on both edges, NM46). 2026-11-02: 513 ALMs, 684
+  registers; slack: P6 outputs +0.58 ns, core +0.82, link +6.7.
+- AGTL+ drive: 3.3-V LVTTL 16 mA, SSTL-135 series 34 ohm (no RZQ); the
+  1.35 V outputs cannot pull a double-terminated line below VIL (NM45):
+  a driving GTL+ buffer on the outputs (D35).
+- The board must run 66 MHz: 100/66# low on the cartridge (a tie on the
+  next PCB revision) or the board's FSB jumper.
 
 ## Shadow RAM (`shadow.c`)
 
@@ -276,9 +316,10 @@ filtering), AGP cards.
 
 ## Next
 
-0. Cartridge PCB (D32): done S6 netlist (TA_ nets, RL01-RL17, J5,
-   LINK_DCLK on M8) and S7 placement; the link nets get tracks with the
-   other slot nets (S8c phase 2).
+0. Cartridge PCBs: variant A (D32): done S6 netlist (TA_ nets, RL01-RL17,
+   J5, LINK_DCLK on M8) and S7 placement; the link nets get tracks with
+   the other slot nets (S8c phase 2). New (D33-D35): a dedicated C2
+   cartridge, a C2 cartridge with its own PCIe, GTL+ output buffers.
 1. Bridge protocol: burst write (framebuffer pages, coalesced runs) in
    bus.h; VMM LFB mirror (dirty logging). Done: string I/O as one REP
    command through a 4 KB BAR window; coalesced ATA data / VGA writes.

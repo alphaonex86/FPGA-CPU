@@ -13,7 +13,10 @@ stages column-packed in the strip y 47.0..57.8 the D16 growth added, U1
 small capacitors on B.Cu over its supply/GND via-in-pad pairs (D25),
 the rest below U1, translator capacitors on B.Cu on the VCCA/VCCB stitch
 vias, DDR3 die capacitors in the free F.Cu right of and below the dies
-(B.Cu under the dies is their escape layer).  Keep-out zones: the connector cavity band (y 3.5..7.0, no
+(B.Cu under the dies is their escape layer), the D32 C2 link header J5
+(1.27 mm 2x20 SMD, the only free F.Cu strip that size: between the
+cavity band and U1) and its 0-ohm RL01..RL17 on B.Cu next to their
+translator's A pin.  Keep-out zones: the connector cavity band (y 3.5..7.0, no
 footprints: finger faces reach y 3.5, and the connector plastic shadows
 the band above them per DG Fig 4/6), the key notch mouth (no
 tracks/vias, finger necks per DG Detail A) and the SECC retention bands
@@ -409,6 +412,71 @@ def pdn_place(u1_xy, u1_local, tr_at, tss):
     return out, list(protos.values())
 
 
+def footprint_boxes(texts):
+    """per side: courtyards and pad boxes (x0, y0, x1, y1) of inline
+    footprints; a through-hole footprint occupies both sides"""
+    cyd, pads = {"F": [], "B": []}, {"F": [], "B": []}
+    for t in texts:
+        side = re.search(r'\(layer "([FB])\.Cu"\)', t).group(1)
+        x, y = map(float, re.search(r"\(at (-?[\d.]+) (-?[\d.]+)\)", t).groups())
+        c = [float(v) for v in re.search(r"\(fp_rect \(start (-?[\d.]+) (-?[\d.]+)\) "
+                                         r"\(end (-?[\d.]+) (-?[\d.]+)\)", t).groups()]
+        box = (x + c[0], y + c[1], x + c[2], y + c[3])
+        sides = "FB" if "(attr through_hole)" in t else side
+        for sd in sides:
+            cyd[sd].append(box)
+        for m in re.finditer(r'\(pad "[^"]*"\s+(\w+)\s+\w+\s+\(at (-?[\d.]+) (-?[\d.]+)[^)]*\)'
+                             r'\s+\(size ([\d.]+) ([\d.]+)\)', t):
+            px, py, w, h = (float(v) for v in m.groups()[1:])
+            b = (x + px - w / 2, y + py - h / 2, x + px + w / 2, y + py + h / 2)
+            for sd in ("FB" if m.group(1) == "thru_hole" else side):
+                pads[sd].append(b)
+    return cyd, pads
+
+
+def overlaps(a, b, gap):
+    return a[0] < b[2] + gap and b[0] < a[2] + gap and a[1] < b[3] + gap and b[1] < a[3] + gap
+
+
+def link_resistors(tr_at, tss, placed):
+    """RL01..RL17 on B.Cu, each at the free spot nearest its translator
+    channel's A pad: courtyards 0.1 mm apart, pads 0.45 mm (via radius +
+    clearance, S8b drills vias in F pad centres) from every F pad"""
+    net = (OUT / "slot1-cyclonev.net").read_text()
+    net = net[net.index("(nets"):]
+    node_net = {}
+    for blk in re.split(r"\n\t\t\(net\b", net)[1:]:
+        name = re.search(r'\(name "([^"]*)"\)', blk).group(1)
+        for ref, pin in re.findall(r'\(ref "([^"]+)"\)\s*\(pin "([^"]+)"\)', blk):
+            node_net[ref, pin] = name
+    a_pad = {re.search(r'"(\w+)"', p).group(1): tuple(map(float, re.search(
+        r"\(at (-?[\d.]+) (-?[\d.]+)\)", p).groups())) for p in tss}
+    pads, cyd = orient(*stock_pads("Resistor_SMD", "R_0402_1005Metric"), "+x", "B")
+    cyd_b, pad_f = footprint_boxes(placed)
+    cyd_b, pad_f = cyd_b["B"], pad_f["F"]
+    out = []
+    for ref in sorted({r for r, _ in node_net if re.match(r"RL\d+$", r)}):
+        tr, ch = next(k for k, n in node_net.items()
+                      if n == node_net[ref, "2"] and k[0].startswith("TR"))
+        ax, ay = tr_at[tr][0] + a_pad[ch][0], tr_at[tr][1] + a_pad[ch][1]
+        spots = sorted(((ax + 0.1 * i, ay + 0.1 * j) for i in range(-60, 61)
+                        for j in range(-60, 61)),
+                       key=lambda q: (q[0] - ax) ** 2 + (q[1] - ay) ** 2)
+        for x, y in spots:
+            box = (x + cyd[0], y + cyd[1], x + cyd[2], y + cyd[3])
+            if box[0] < RET or box[1] < 7.0 or box[2] > W - RET or box[3] > H:
+                continue
+            pb = footprint_boxes([fp("Pwr:R_0402_1005Metric", ref, x, y, pads, cyd, side="B")])[1]["B"]
+            if not any(overlaps(box, c, 0.1) for c in cyd_b) and \
+                    not any(overlaps(a, b, 0.45) for a in pb for b in pad_f):
+                break
+        else:
+            raise SystemExit("FAIL: no B.Cu spot for %s near %s %s" % (ref, tr, ch))
+        out.append(fp("Pwr:R_0402_1005Metric", ref, x, y, pads, cyd, side="B"))
+        cyd_b.append(box)
+    return out
+
+
 def keepout(x0, y0, x1, y1, footprints, uid):
     return (
         '\t(zone (net 0) (net_name "") (layers "F.Cu") (uuid "%s")\n'
@@ -499,6 +567,17 @@ def main():
     js.append(fp("Conn:Header_1x03", "J4", 53.0, 44.0,
                  conn_pads(3, False), (-3.8, -2.9, 3.8, 2.9),
                  attr="through_hole"))
+    # odd (signal) row toward U1, even (ground) row toward the card edge;
+    # courtyard = pads + 0.5 mm (the stock one adds 1.1 mm across the rows
+    # and would overlap U1's by 0.47 mm; leg tips end inside the pads)
+    j5p = orient(*stock_pads("Connector_PinHeader_1.27mm",
+                             "PinHeader_2x20_P1.27mm_Vertical_SMD"), "-y", "F")[0]
+    j5b = footprint_boxes([fp("Conn:J5", "J5", 0.0, 0.0, j5p, (0, 0, 0, 0))])[1]["F"]
+    j5c = (min(b[0] for b in j5b) - 0.5, min(b[1] for b in j5b) - 0.5,
+           max(b[2] for b in j5b) + 0.5, max(b[3] for b in j5b) + 0.5)
+    js.append(fp("Conn:PinHeader_2x20_P1.27mm_Vertical_SMD", "J5", 71.0,
+                 7.1 - j5c[1], j5p, j5c))
+    rls = link_resistors(tr_at, tss, [u1, u2, u7] + dies + translators + js + pdn)
 
     # ---- outline -------------------------------------------------------
     o = [(0.0, 0.0), (KEY_C - KEY_W / 2, 0.0), (KEY_C - KEY_W / 2, KEY_D),
@@ -532,7 +611,7 @@ def main():
         keepout_no_tracks(KEY_C - 1.0, 0.0, KEY_C + 1.0, KEY_D,
                           "10000000-0007-4000-8000-000000000004") + \
         "\n".join(seg) + "\n" + "\n".join(
-            [u1, u2, u7] + dies + translators + js + pdn) + "\n)\n"
+            [u1, u2, u7] + dies + translators + js + pdn + rls) + "\n)\n"
     path = OUT / "slot1-cyclonev.kicad_pcb"
     path.write_text(text)
 

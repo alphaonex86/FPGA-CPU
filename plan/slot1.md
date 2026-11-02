@@ -521,6 +521,30 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   link header, the translators kept: a 0402 0-ohm between each of the 19
   balls and its translator channel (fitted for variant A, not fitted for
   C2), the header on the ball side.
+  Amended 2026-11-02 (implementation, S6/S7): 17 0-ohm RL01..RL17, on the
+  17 3.3 V balls only (RP#/RSP# at 1.35 V stay off the link and keep their
+  translators); M8 (CLK0n) on net LINK_DCLK; J5 is a 1.27 mm 2 x 20 SMD
+  header (pin order of the ALINX J11; a 2.54 mm 2 x 20 fits nowhere on
+  F.Cu, the only free strip is 26 x 7 mm between the cavity band and U1)
+  at (71.0, 10.75) mm, odd row toward U1; the cable side adapts 1.27 to
+  2.54 mm (`FPGAlist/c2_cards/README.md`). RL01..RL17 on B.Cu next to
+  their translator's A pad.
+- **D33** (decided 2026-11-02 by the operator) A dedicated C2 cartridge
+  PCB: Slot 1 edge + a small Cyclone V E (F484, the A ball map where it
+  migrates) + translators + the link header; no DDR3, a simple power
+  tree; independent of the variant A DDR3 routing.
+- **D34** (decided 2026-11-02 by the operator) A second C2 cartridge with
+  its own PCIe: Cyclone V GX on the cartridge and a PCIe cable connector
+  to the host, no separate FPGA card (new pin map: the GX does not
+  migrate from the A9, `slot1_variants.md` C2).
+- **D35** (decided 2026-11-02 by the operator, NM45) The cartridges drive
+  AGTL+ outputs through a driving GTL+ buffer, not the pass-gate alone
+  (direction control on the bidirectional lines).
+- **D36** (decided 2026-11-02 by the operator) Variant B gets its PCB: a
+  Slot 1 <-> DE25-Standard adapter (bus at 66 MHz, 2:1 multiplexed,
+  `slot1_variants.md` common facts).
+- **3D models** (operator 2026-11-02): every footprint of the slot 1 PCBs
+  carries a 3D model, kept in the tree.
 - **D22** (decided 2026-10-21, amended 2026-10-22 twice by operator: first
   6, then 8 copper layers, same answer as the D5 pattern) Slot 1
   cartridge = 8 layers: signals F&B (B.Cu gets the die escapes, F.Cu the
@@ -971,3 +995,38 @@ J1 JTAG / J2 config / J3 12 V barrel / J4 rails headers.
   local optimum of this congestion profile, and further movement
   needs a structural input (more free routing layers, wider gaps,
   or a changed board order), not another router-order/pricing trick.
+- **NM45** (AGTL+ low level through the pass-gate, 2026-11-02): with a
+  GTL2003-class pass-gate (D17) the FPGA buffer itself sinks the bus:
+  the spec wants Ron <= 16.67 Ohm and VIL <= 0.82 V [p2 Table 6] into
+  RTT = 56 Ohm at each end [p2 Table 8], the processor end being the
+  cartridge's (slot1_notes R3). Low level from the Quartus IBIS export
+  of the C2 cartridge fit (`quartus_eda --board_signal_integrity=on
+  --format=ibis`; pull-down curves typ / weak corner, a 5 Ohm FET
+  added in the second figure):
+  | driver | Rdrv | both ends terminated (28 Ohm) | processor end only (56 Ohm) |
+  |---|---|---|---|
+  | 3.3-V LVTTL 16 mA | 18-22 Ohm | 0.59-0.73 V | 0.36-0.47 V |
+  | SSTL-135 Rs 34 Ohm (no smaller) | 36-51 Ohm | 0.87-0.99 V: FAILS | 0.59-0.71 V |
+  The D20 1.35 V balls cannot pull a double-terminated line below VIL,
+  and in C2 they carry REQ[4:0]# and DRDY#; the 3.3 V balls work with
+  thin margin (0.09 V at the weak corner). 440BX UP boards may terminate
+  at the processor only [p2 2.1 p17: "a single set of termination
+  resistors (i.e., those on the processor substrate) with the Intel
+  440BX AGPset"], which NM4 must check per D8 board. Fix options (open,
+  the translator part is not chosen yet): only receive-only nets on
+  1.35 V balls (RS[2:0]#, TRDY#, RESET#, BPRI#, DEFER#, RSP#, BR1# = 9 of
+  18), or a driving GTL+ buffer instead of a pass-gate on the outputs.
+- **NM46** (P6 control pins on both die edges, 2026-11-02, C2 cartridge
+  top `rtl/c2/cyclonev`): ADS#/BNR#/BPRI#/BR0# sit in bank 4A (bottom
+  edge) and TRDY#/DBSY#/DRDY#/RS#/REQ#/RESET# in 7A/8A (top, the D20
+  overflow). The bus agent's one-clock observe -> decide -> drive loop
+  then crosses half the die: worst path ADS# input register (I/O cell
+  X69 Y0) -> issue logic at Y49-63 = 6.35 ns of routing; BCLK slack at
+  133 MHz -2.55 ns, the same fit at 100 MHz -0.05 ns. QSF experiment:
+  the 4 bank-4A pins moved onto the unused (in C2) 7A/8A balls of
+  DEFER#/HIT#/HITM#/LOCK# -> -1.89 ns at 133 MHz, then limited by RS# ->
+  read data (D# balls on every 3.3 V bank). Verdict: 133 MHz needs the
+  control pins grouped on one edge (before the slot nets are routed)
+  and a pipelined data path; the C2 cartridge targets 100 MHz (440BX
+  with 100/66# floating; D27 allows 66). The variant A bus unit has the
+  same loop.
