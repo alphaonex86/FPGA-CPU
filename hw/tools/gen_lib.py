@@ -27,6 +27,9 @@ VARIANTS = [
      22, 1.0, 0.30),
     ("FPGA_CycloneV_5CGXFC5_F484", "FPGAlist/CycloneV_GX/pins/5cgxfc5_f484.csv",
      22, 1.0, 0.30),
+    # D39; land 0.45 mm under the UG475 Table A-1 FG/FGG maximum of 0.50 mm
+    ("FPGA_Artix7_XC7A100T_FGG484", "FPGAlist/c2_cards/xilinx/xc7a100t_fgg484.csv",
+     22, 1.0, 0.45),
     ("FPGA_Ti180_TI180G400", "FPGAlist/Ti180_G400/pins/ti180g400.csv",
      20, 0.8, 0.28),
 ]

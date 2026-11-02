@@ -46,6 +46,7 @@ MODELS = {
     "TI_RHL0014A": ("Package_DFN_QFN.3dshapes/Texas_S-PVQFN-N14.step", 0, (0, 0)),
     "FPGA_CycloneV_5CEFA9_F484_BGA": ("Package_BGA.3dshapes/BGA-484_23.0x23.0mm_Layout22x22_P1.0mm.step", -90, (0, 0)),
     "FPGA_CycloneV_5CGXFC5_F484_BGA": ("Package_BGA.3dshapes/BGA-484_23.0x23.0mm_Layout22x22_P1.0mm.step", -90, (0, 0)),
+    "FPGA_Artix7_XC7A100T_FGG484_BGA": ("Package_BGA.3dshapes/BGA-484_23.0x23.0mm_Layout22x22_P1.0mm.step", -90, (0, 0)),
     "FBGA96_x16": ("Package_BGA.3dshapes/BGA-96_9.0x13.0mm_Layout2x3x16_P0.8mm.step", 0, (0, 0)),
     "Translator_TSSOP20": ("Package_SO.3dshapes/TSSOP-20_4.4x6.5mm_P0.65mm.step", -90, (0, 0)),
     "PinHeader_2x20_P1.27mm_Vertical_SMD": ("Connector_PinHeader_1.27mm.3dshapes/PinHeader_2x20_P1.27mm_Vertical_SMD.step", -90, (0, 0)),
