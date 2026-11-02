@@ -18,7 +18,8 @@ struct bus {
 
 // FPGA bridge register block (BAR0, little endian), rtl/c2 implements it:
 //   0x000 R   ID: 0x43324231 ("C2B1")
-//   0x008 R   STATUS: bit 0 INTR asserted, bit 1 bus error (sticky, read clears)
+//   0x008 R   STATUS: bit 0 INTR asserted, bit 1 bus error, bit 2 protocol
+//             error (bad BAR0 access or link byte); errors sticky, read clears
 //   0x010 R   RDATA: data of the last read cycle; the completion waits for it
 //   0x018 R   INTA: runs an interrupt-acknowledge cycle, returns the vector
 //   0x100 W   cycle: one 64-bit write {data[63:32], addr[31:0]} at
@@ -40,5 +41,16 @@ enum {
     C2B_ID_VALUE = 0x43324231,
 };
 
+// BAR0 accesses: the mapped PCI resource, or the bridge RTL model (bus_rtl.cpp)
+struct bar {
+    uint64_t (*read)(struct bar *bar, uint32_t off, int size);   // size 4 or 8
+    void (*write64)(struct bar *bar, uint32_t off, uint64_t value);
+    volatile uint8_t *base;
+};
+
 struct bus *bus_sim_open(const char *rom_path);
 struct bus *bus_fpga_open(const char *bar_path);
+struct bus *bus_bar_open(struct bar *bar);   // the bridge protocol on any BAR0
+#ifdef C2_RTL
+struct bus *bus_rtl_open(const char *rom_path);   // RTL model + bus_sim devices
+#endif

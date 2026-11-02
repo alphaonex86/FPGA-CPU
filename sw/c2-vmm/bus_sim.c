@@ -1,22 +1,43 @@
 // Test bus without the board: the ROM file at the top of 4 GB, a serial
 // transmitter at 0x3f8 (stdout), POST codes at 0x80 (stderr), an exit port at
 // 0xf4 (the written byte is the exit code), 256 bytes of MMIO scratch at
-// 0xd0000, and an interrupt source at 0xf5: writing N asserts INTR,
-// acknowledged with vector 0x20 + N. Anything else floats high.
+// 0xd0000 and at 0xa0000, an interrupt source at 0xf5 (writing N asserts
+// INTR, acknowledged with vector 0x20 + N) and at 0xf7 (writing N asserts
+// INTR N ms later, vector 0x28), and a 4 KB byte FIFO at 0x1f0 (writes push,
+// reads pop; empty pops 0xff). Anything else floats high.
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 #include "bus.h"
 
 struct sim {
     struct bus bus;
     uint8_t *rom;
     uint32_t rom_base;
-    uint8_t scratch[256];
+    uint8_t scratch[2][256];
     int intr_on;
     uint8_t vector;
+    double intr_at;                  // 0xf7: when INTR rises (0: none)
+    uint8_t fifo[4096];
+    uint32_t fifo_head, fifo_tail;   // free-running byte counts
 };
+
+static double now(void)
+{
+    struct timespec t;
+    clock_gettime(CLOCK_MONOTONIC, &t);
+    return (double)t.tv_sec + 1e-9 * (double)t.tv_nsec;
+}
+
+static uint8_t *scratch_at(struct sim *s, int space, uint32_t addr)
+{
+    if (space != BUS_MEM) return NULL;
+    if (addr >= 0xd0000 && addr < 0xd0100) return s->scratch[0] + (addr - 0xd0000);
+    if (addr >= 0xa0000 && addr < 0xa0100) return s->scratch[1] + (addr - 0xa0000);
+    return NULL;
+}
 
 static uint32_t sim_read(struct bus *b, int space, uint32_t addr, int size)
 {
@@ -26,19 +47,26 @@ static uint32_t sim_read(struct bus *b, int space, uint32_t addr, int size)
         memcpy(&v, s->rom + (addr - s->rom_base), size);
         return v;
     }
-    if (space == BUS_MEM && addr >= 0xd0000 && addr < 0xd0100) {
-        memcpy(&v, s->scratch + (addr - 0xd0000), size);
+    uint8_t *scratch = scratch_at(s, space, addr);
+    if (scratch) {
+        memcpy(&v, scratch, size);
         return v;
     }
     if (space == BUS_IO && addr == 0x3fd) return 0x60;   // LSR: transmitter empty
+    if (space == BUS_IO && addr == 0x1f0) {
+        for (int i = 0; i < size; i++)
+            v |= (uint32_t)(s->fifo_tail != s->fifo_head ? s->fifo[s->fifo_tail++ % sizeof(s->fifo)] : 0xff) << 8 * i;
+        return v;
+    }
     return size == 4 ? 0xffffffffu : (1u << 8 * size) - 1;
 }
 
 static void sim_write(struct bus *b, int space, uint32_t addr, int size, uint32_t value)
 {
     struct sim *s = b->priv;
-    if (space == BUS_MEM && addr >= 0xd0000 && addr < 0xd0100) {
-        memcpy(s->scratch + (addr - 0xd0000), &value, size);
+    uint8_t *scratch = scratch_at(s, space, addr);
+    if (scratch) {
+        memcpy(scratch, &value, size);
         return;
     }
     if (space != BUS_IO) return;
@@ -49,7 +77,17 @@ static void sim_write(struct bus *b, int space, uint32_t addr, int size, uint32_
         fprintf(stderr, "POST %02x\n", value & 0xff);
     else if (addr == 0xf4)
         exit((int)(value & 0xff));
-    else if (addr == 0xf5) {
+    else if (addr == 0xf7)
+        s->intr_at = now() + 1e-3 * (value & 0xff);
+    else if (addr == 0x1f0) {
+        for (int i = 0; i < size; i++) {
+            if (s->fifo_head - s->fifo_tail == sizeof(s->fifo)) {
+                fprintf(stderr, "c2-vmm sim: FIFO at 0x1f0 full\n");
+                exit(1);
+            }
+            s->fifo[s->fifo_head++ % sizeof(s->fifo)] = (uint8_t)(value >> 8 * i);
+        }
+    } else if (addr == 0xf5) {
         s->intr_on = 1;
         s->vector = (uint8_t)(0x20 + (value & 0xff));
     }
@@ -71,7 +109,13 @@ static void sim_io_rep(struct bus *b, uint16_t port, int size, uint32_t count, u
 
 static int sim_intr(struct bus *b)
 {
-    return ((struct sim *)b->priv)->intr_on;
+    struct sim *s = b->priv;
+    if (s->intr_at && now() >= s->intr_at) {
+        s->intr_at = 0;
+        s->intr_on = 1;
+        s->vector = 0x28;
+    }
+    return s->intr_on;
 }
 
 static uint8_t sim_inta(struct bus *b)

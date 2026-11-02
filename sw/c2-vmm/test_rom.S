@@ -1,6 +1,6 @@
-# c2-vmm test ROM (sim backend, 64 KB at 0xf0000): serial, POST code, MMIO
-# round trip, RAM, an injected interrupt; exit port 0xf4: 0 pass, else the
-# failed step.
+# c2-vmm test ROM (sim / rtl backends, 64 KB at 0xf0000): serial, POST
+# code, MMIO round trip, RAM, an injected interrupt, string I/O, shadow RAM;
+# exit port 0xf4: 0 pass, else the failed step.
         .code16
         .text
 start:  cli
@@ -68,12 +68,73 @@ start:  cli
         movl    $0, 0x2000
         movl    $0, 0x2004
         mov     $4, %cx
-        mov     $0x1f0, %dx
+        mov     $0x170, %dx
         rep insw
         cmpl    $0xffffffff, 0x2000
         mov     $10, %bl
         jne     fail
         cmpl    $0xffffffff, 0x2004
+        jne     fail
+        # string I/O both ways through the FIFO port 0x1f0 (coalesced
+        # writes): ROM bytes out as words and dwords, back into RAM, compared
+        push    %ds
+        push    %cs
+        pop     %ds
+        xor     %si, %si
+        mov     $0x1f0, %dx
+        mov     $256, %cx
+        rep outsw
+        mov     $64, %cx
+        rep outsl
+        pop     %ds
+        mov     $0x3000, %di
+        mov     $256, %cx
+        rep insw
+        mov     $64, %cx
+        rep insl
+        push    %ds
+        push    %cs
+        pop     %ds
+        xor     %si, %si
+        mov     $0x3000, %di
+        mov     $384, %cx
+        repe cmpsw
+        pop     %ds
+        mov     $11, %bl
+        jne     fail
+        # INTR rising while the guest loops in RAM without exits (vector
+        # 0x28, 5 ms after the write to 0xf7)
+        movw    $isr, 0x28 * 4
+        movw    %cs, 0x28 * 4 + 2
+        movb    $0, 0x500
+        mov     $5, %al
+        out     %al, $0xf7
+        mov     $0xffffffff, %ecx
+        sti
+1:      cmpb    $1, 0x500
+        je      2f
+        dec     %ecx
+        jnz     1b
+2:      cli
+        mov     $12, %bl
+        test    %ecx, %ecx
+        jz      fail
+        # coalesced MMIO (the VGA window, sim scratch at 0xa0000): writes
+        # without exits, read back in order
+        mov     $0xa000, %ax
+        mov     %ax, %es
+        movl    $0x11223344, %es:0
+        movw    $0x5566, %es:6
+        movb    $0x77, %es:9
+        movl    $0x8899aabb, %es:0x0d
+        cmpl    $0x11223344, %es:0
+        mov     $13, %bl
+        jne     fail
+        cmpw    $0x5566, %es:6
+        jne     fail
+        cmpb    $0x77, %es:9
+        jne     fail
+        cmpl    $0x8899aabb, %es:0x0d
         jne     fail
         # 440BX shadow: 0xc0000 on the bus while PAM1 = 0 (sim: floats high)
         mov     $0xc000, %ax

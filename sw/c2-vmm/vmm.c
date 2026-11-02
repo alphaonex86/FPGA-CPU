@@ -4,17 +4,31 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/kvm.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <sys/time.h>
 #include <unistd.h>
 #include "bus.h"
 #include "shadow.h"
 
 static int verbose;
+static unsigned long long exits;
+
+// Writes that need no exit (KVM coalesced MMIO / PIO): the ATA data ports
+// (KVM exits once per element of a rep outs) and the VGA memory window.
+// Every exit flushes them to the bus first, so bus order is program order.
+static const struct kvm_coalesced_mmio_zone coalesced[] = {
+    { .addr = 0x1f0, .size = 4, .pio = 1 },
+    { .addr = 0x170, .size = 4, .pio = 1 },
+    { .addr = 0xa0000, .size = 0x20000 },
+};
+static struct kvm_coalesced_mmio_ring *ring;
+static uint32_t ring_max;
 
 __attribute__((noreturn, format(printf, 1, 2))) static void die(const char *fmt, ...)
 {
@@ -103,6 +117,28 @@ static void bus_access(struct bus *b, int space, uint32_t addr, uint8_t *data, i
     }
 }
 
+static void flush_coalesced(struct bus *b)
+{
+    uint32_t first = ring->first;
+    while (first != __atomic_load_n(&ring->last, __ATOMIC_ACQUIRE)) {
+        struct kvm_coalesced_mmio *m = &ring->coalesced_mmio[first];
+        if (m->pio) shadow_io_write((uint16_t)m->phys_addr, (int)m->len, *(uint32_t *)m->data);
+        bus_access(b, m->pio ? BUS_IO : BUS_MEM, (uint32_t)m->phys_addr, m->data, (int)m->len, 1);
+        first = (first + 1) % ring_max;
+        __atomic_store_n(&ring->first, first, __ATOMIC_RELEASE);
+    }
+}
+
+static void on_tick(int sig)
+{
+    (void)sig;
+}
+
+static void report(void)
+{
+    fprintf(stderr, "c2-vmm: %llu exits\n", exits);
+}
+
 int main(int argc, char **argv)
 {
     uint64_t ram_mb = 256, rom_kb = 256;
@@ -121,8 +157,11 @@ int main(int argc, char **argv)
                                                                        (unsigned long long)rom_kb);
     struct bus *b = !strcmp(argv[optind], "sim") ? bus_sim_open(argv[optind + 1])
                   : !strcmp(argv[optind], "fpga") ? bus_fpga_open(argv[optind + 1])
+#ifdef C2_RTL
+                  : !strcmp(argv[optind], "rtl") ? bus_rtl_open(argv[optind + 1])
+#endif
                   : NULL;
-    if (!b) die("backend %s: sim or fpga", argv[optind]);
+    if (!b) die("backend %s: sim or fpga (rtl in the test_rtl.sh build) failed to open", argv[optind]);
 
     int kvm = open("/dev/kvm", O_RDWR | O_CLOEXEC);
     if (kvm < 0) die("/dev/kvm: %s", strerror(errno));
@@ -153,6 +192,23 @@ int main(int argc, char **argv)
     int run_size = xioctl(kvm, KVM_GET_VCPU_MMAP_SIZE, 0, "KVM_GET_VCPU_MMAP_SIZE");
     struct kvm_run *run = mmap(NULL, run_size, PROT_READ | PROT_WRITE, MAP_SHARED, vcpu, 0);
     if (run == MAP_FAILED) die("mmap kvm_run: %s", strerror(errno));
+    int ring_page = ioctl(kvm, KVM_CHECK_EXTENSION, KVM_CAP_COALESCED_MMIO);
+    if (ring_page <= 0 || ioctl(kvm, KVM_CHECK_EXTENSION, KVM_CAP_COALESCED_PIO) <= 0)
+        die("KVM without coalesced MMIO / PIO");
+    long page = sysconf(_SC_PAGESIZE);
+    ring = (struct kvm_coalesced_mmio_ring *)((uint8_t *)run + ring_page * page);
+    ring_max = (uint32_t)((page - sizeof(*ring)) / sizeof(ring->coalesced_mmio[0]));
+    for (size_t i = 0; i < sizeof(coalesced) / sizeof(coalesced[0]); i++)
+        xioctl(vm, KVM_REGISTER_COALESCED_MMIO, (void *)&coalesced[i], "KVM_REGISTER_COALESCED_MMIO");
+
+    // an exit every 100 us even when the guest runs from RAM without I/O:
+    // INTR is polled, coalesced writes are flushed (SA_RESTART: KVM_RUN
+    // still returns EINTR)
+    struct sigaction sa = { .sa_handler = on_tick, .sa_flags = SA_RESTART };
+    if (sigaction(SIGALRM, &sa, NULL)) die("sigaction: %s", strerror(errno));
+    struct itimerval tick = { .it_interval = { 0, 100 }, .it_value = { 0, 100 } };
+    if (setitimer(ITIMER_REAL, &tick, NULL)) die("setitimer: %s", strerror(errno));
+    atexit(report);
 
     for (;;) {
         // INTR: acknowledged on the bus once the guest can take it
@@ -164,9 +220,12 @@ int main(int argc, char **argv)
             } else
                 run->request_interrupt_window = 1;
         }
-        if (ioctl(vcpu, KVM_RUN, 0) < 0) {
-            if (errno == EINTR) continue;
-            die("KVM_RUN: %s", strerror(errno));
+        int r = ioctl(vcpu, KVM_RUN, 0), run_errno = errno;
+        exits++;
+        flush_coalesced(b);   // older than the exit's own access
+        if (r < 0) {
+            if (run_errno == EINTR) continue;
+            die("KVM_RUN: %s", strerror(run_errno));
         }
         switch (run->exit_reason) {
         case KVM_EXIT_IO: {
