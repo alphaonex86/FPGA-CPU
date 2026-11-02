@@ -43,6 +43,7 @@ package x86_pkg;
         logic [3:0]  cond;       // K_BR: Jcc condition (opcode low nibble)
         logic        uncond;     // K_BR: JMP/CALL/RET
         logic        indirect;   // K_BR: target = s1 (RET)
+        logic        btbi;       // K_BR: CALL/JMP r/m, target from the BTB; imm2 = its EIP
         logic        pred_taken; // K_BR: frontend followed the target
         logic        ecxz;       // K_BR: taken when s1 is 0, else s1 - 1 written (REP)
         logic        loopc;      // K_BR: s1 - 1 written, taken when s1 != 1 (and cond if rflags)

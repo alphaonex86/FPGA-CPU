@@ -137,7 +137,9 @@ replicated per read port plus a live-value table.
    predicted), RET 159; head waits LD 32,929, ALU 28,284, MD 17,167, ST
    16,942; decode redirects 13,281 (taken not followed 8,358): BTB 128
    entries IPC 1.127 -> 1.138, 512 -> 1.149 (the BTB would move to M10K,
-   read with the next fetch address).
+   read with the next fetch address). Indirect CALL/JMP r/m: P keeps the
+   frontend's BTB target, a wrong one flushes at retire and writes the
+   actual target into the BTB: indirect flushes 424 -> 273.
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div

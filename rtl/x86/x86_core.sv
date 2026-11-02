@@ -59,13 +59,14 @@ module x86_core
     logic [2:0]           d_redirect;
     logic [2:0][31:0]     d_target;
     logic [2:0][31:0]     x_next;           // frontend next EIP
-    logic                 btb_we;
+    logic                 btb_we, fe_btb_set;
     logic [1:0]           btb_k;
+    logic [31:0]          fe_btb_pc, fe_btb_target;
     localparam int RAS_N = 8;
     logic [31:0]          ras [RAS_N];      // return stack, decode-time, may be wrong
     logic [$clog2(RAS_N)-1:0] ras_sp;       // top = ras[ras_sp - 1]
-    logic [2:0]           d_call, d_ret;
-    logic [2:0]           p_valid, p_redirect, p_call, p_ret, p_mis;
+    logic [2:0]           d_call, d_ret, d_ind;
+    logic [2:0]           p_valid, p_redirect, p_call, p_ret, p_ind, p_mis;
     uop_t [2:0][2:0]      p_uop, p_uop_ret;
     logic [2:0][1:0]      p_n;
     logic [2:0][31:0]     p_eip, p_seq, p_target, p_next, p_want;
@@ -89,14 +90,14 @@ module x86_core
     x86_frontend fe (.clk(clk), .rst(rst), .redirect(fe_redirect), .redirect_pc(fe_redirect_pc),
                      .take(dec_take), .fetch_addr(fetch_addr), .fetch_data(fetch_data),
                      .valid(x_valid), .bytes(x_bytes), .eip(x_eip), .len(x_len), .npfx(x_npfx), .fault(x_fault),
-                     .next(x_next), .btb_we(btb_we), .btb_set(p_dir[btb_k]),
-                     .btb_pc(p_eip[btb_k]), .btb_target(p_want[btb_k]));
+                     .next(x_next), .btb_we(btb_we), .btb_set(fe_btb_set),
+                     .btb_pc(fe_btb_pc), .btb_target(fe_btb_target));
 
     genvar gi;
     generate for (gi = 0; gi < 3; gi = gi + 1) begin : dec
         x86_decode d (.bytes(x_bytes[gi]), .eip(x_eip[gi]), .len(x_len[gi]), .npfx(x_npfx[gi]), .df(df),
                       .fault(x_fault[gi]),
-                      .call(d_call[gi]), .ret(d_ret[gi]),
+                      .call(d_call[gi]), .ret(d_ret[gi]), .ind(d_ind[gi]),
                       .uop(d_uop[gi]), .n(d_n[gi]), .uop_b(d_uop_b[gi]), .n_b(d_n_b[gi]),
                       .redirect(d_redirect[gi]), .target(d_target[gi]));
     end endgenerate
@@ -121,10 +122,16 @@ module x86_core
         for (int k = 0; k < 3; k++) begin
             // RET: the top before the group (a call / ret ends the group unless
             // mispredicted; later slots are then wrong path): parallel compares
-            p_dir[k] = p_jcc[k] ? tg_dir[k] : p_redirect[k];
-            p_want[k] = p_ret[k] ? ras[ras_sp - 1'b1]
+            // CALL/JMP r/m: whatever the frontend's BTB said (retire teaches it)
+            p_dir[k] = p_jcc[k] ? tg_dir[k] : p_ind[k] ? p_next[k] != p_seq[k] : p_redirect[k];
+            p_want[k] = p_ret[k] ? ras[ras_sp - 1'b1] : p_ind[k] ? p_next[k]
                       : !p_dir[k] ? p_seq[k] : p_jcc[k] ? p_uop[k][0].imm : p_target[k];
             p_uop_ret[k][2].imm = p_ret[k] ? p_want[k] : p_uop[k][2].imm;
+            for (int j = 0; j < 3; j++)
+                if (p_uop[k][j].btbi) begin
+                    p_uop_ret[k][j].imm = p_next[k];
+                    p_uop_ret[k][j].pred_taken = p_dir[k];
+                end
             if (p_jcc[k]) begin
                 p_uop_ret[k][0].pred_taken = p_dir[k];
                 p_uop_ret[k][0].imm2 = 32'h4000;   // bit 14: P-predicted
@@ -171,6 +178,7 @@ module x86_core
         logic        mispred;
         logic        fault;          // divide error: halts at retire (no exceptions yet)
         logic [31:0] redirect_pc;
+        logic        btbi;               // CALL/JMP r/m: value = its EIP
         logic        bp_jcc, bp_taken;   // branch predicted by P (x86_tage), predicted taken
     } rob_t;
 
@@ -252,6 +260,7 @@ module x86_core
             p_redirect <= d_redirect;
             p_call <= d_call;
             p_ret <= d_ret;
+            p_ind <= d_ind;
             p_eip <= x_eip;
             p_target <= d_target;
             p_next <= x_next;
@@ -287,6 +296,8 @@ module x86_core
     logic [31:0] r_flush_pc;
     logic        flush;           // r_flush one cycle later: clears the pipeline
     logic [31:0] flush_pc;
+    logic        r_btb, flush_btb;   // the flushing CALL/JMP r/m teaches the BTB its target
+    logic [31:0] flush_bpc;
     always_comb begin
         logic stop;
         r_n = 2'd0;
@@ -294,6 +305,7 @@ module x86_core
         r_halt = 1'b0;
         r_ill = 1'b0;
         r_dfw = 1'b0;
+        r_btb = 1'b0;
         r_store = 1'b0;
         r_flush_pc = 32'd0;
         stop = halted || flush;
@@ -310,6 +322,7 @@ module x86_core
                 if (e.kind == K_BR && e.mispred || e.kind == K_DF) begin
                     r_flush = 1'b1;
                     r_flush_pc = e.kind == K_DF ? e.next_eip : e.redirect_pc;
+                    r_btb = e.btbi;
                     r_dfw = e.kind == K_DF;
                     stop = 1'b1;
                 end
@@ -343,14 +356,20 @@ module x86_core
     always_comb begin
         fe_redirect = flush;
         fe_redirect_pc = flush_pc;
-        btb_we = 1'b0;
+        btb_we = flush && flush_btb;
         btb_k = 2'd0;
+        fe_btb_set = 1'b1;
+        fe_btb_pc = flush_bpc;
+        fe_btb_target = flush_pc;
         if (rst) fe_redirect_pc = reset_eip;
         else if (p_push && p_redir) begin
             fe_redirect = 1'b1;
             fe_redirect_pc = p_redir_pc;
             btb_we = p_btb;
             btb_k = p_btb_k;
+            fe_btb_set = p_dir[p_btb_k];
+            fe_btb_pc = p_eip[p_btb_k];
+            fe_btb_target = p_want[p_btb_k];
         end
     end
 
@@ -697,7 +716,8 @@ module x86_core
             logic [31:0] pc, pred;
             r = xr[p];
             ex_valid[p] = ix_valid[p];
-            ex_value[p] = r.u.aop == A_LEA ? agu(r)
+            ex_value[p] = r.u.btbi ? r.u.imm2   // the BTB update's PC
+                        : r.u.aop == A_LEA ? agu(r)
                         : r.u.ecxz && r.src[0].value == 32'd0 ? 32'd0   // REP exit: ECX stays 0
                         : merge(r.src[0].value, alu_y[p], r.u.osz, r.u.dhi);
             ex_flags[p] = r.u.wflags ? alu_f[p] : r.fsrc.value;
@@ -758,6 +778,8 @@ module x86_core
     always_ff @(posedge clk) begin
         flush <= r_flush && !rst;
         flush_pc <= r_flush_pc;
+        flush_btb <= r_btb;
+        flush_bpc <= rob[TAG_W'(rob_head + TAG_W'(r_n - 2'd1))].value;
         if (rst || flush) begin
             uq_head <= '0;
             uq_tail <= '0;
@@ -917,7 +939,8 @@ module x86_core
                         rob[rn[k].tag] <= '{done: !needs_rs(u.kind), kind: u.kind,
                             dst: u.dst, wdst: u.wdst, wflags: u.wflags, eop: u.eop, value: 32'd0,
                             flags: '0, next_eip: u.next_eip, mispred: 1'b0, fault: 1'b0, redirect_pc: 32'd0,
-                            bp_jcc: u.kind == K_BR && u.imm2[14], bp_taken: u.pred_taken};
+                            bp_jcc: u.kind == K_BR && !u.btbi && u.imm2[14], bp_taken: u.pred_taken,
+                            btbi: u.btbi};
                         if (u.kind == K_ST) sq[rn[k].sq_snap[SQ_W-1:0]].addr_valid <= 1'b0;
                         if (u.wdst) begin
                             rat_rob[u.dst] <= 1'b1;

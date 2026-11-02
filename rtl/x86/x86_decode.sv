@@ -26,6 +26,7 @@ module x86_decode
     input  logic            fault,      // predecode: #UD or > 15 bytes
     output logic            call,       // pushes next EIP on the return stack
     output logic            ret,        // pops it
+    output logic            ind,        // CALL/JMP r/m: the frontend's BTB target is the prediction
     output uop_t [2:0]      uop,
     output logic [1:0]      n,          // valid uops: uop[0 .. n-1]
     output uop_t [2:0]      uop_b,      // long instructions: uops 3 ..
@@ -166,6 +167,11 @@ module x86_decode
         uop_t x = u;
         x.kind = K_BR; x.uncond = 1'b1; x.indirect = 1'b1;
         x.s1 = s; x.us1 = 1'b1;
+        return x;
+    endfunction
+    function automatic uop_t jmp_btb(input logic [3:0] s);
+        uop_t x = jmp_ind(s);
+        x.btbi = 1'b1; x.imm2 = eip;
         return x;
     endfunction
     function automatic uop_t load_tmp(input logic [1:0] sz);
@@ -665,7 +671,7 @@ module x86_decode
                 3'd2: if (!mem && !p66) begin   // CALL r32
                     uop[0] = push_st(1'b0, 4'd0, next_eip);
                     uop[1] = esp_add(-32'd4); uop[1].eop = 1'b0;
-                    uop[2] = jmp_ind({1'b0, rm});
+                    uop[2] = jmp_btb({1'b0, rm});
                     n = 2'd3;
                 end else if (!p66) begin   // CALL m32: LD TMP first (ESP-relative)
                     uop_t [5:0] s;
@@ -673,14 +679,14 @@ module x86_decode
                     s[0] = load_tmp(SZ32);
                     s[1] = push_st(1'b0, 4'd0, next_eip);
                     s[2] = esp_add(-32'd4);
-                    s[3] = jmp_ind(R_TMP);
+                    s[3] = jmp_btb(R_TMP);
                     emit(s, 4, uop, n, uop_b, n_b);
                 end
                 3'd4: if (p66) ;
-                    else if (!mem) uop[0] = jmp_ind({1'b0, rm});
+                    else if (!mem) uop[0] = jmp_btb({1'b0, rm});
                     else begin
                         uop[0] = load_tmp(SZ32);
-                        uop[1] = jmp_ind(R_TMP);
+                        uop[1] = jmp_btb(R_TMP);
                         n = 2'd2;
                     end
                 3'd6: if (p66) ;
@@ -770,6 +776,7 @@ module x86_decode
         end else if (prepne || prep && op != 8'hC3) pbad = 1'b1;   // REP RET is RET
         call = !p66 && (op == 8'hE8 || op == 8'hFF && reg_f == 3'd2);
         ret = !p66 && (op == 8'hC3 || op == 8'hC2);
+        ind = !p66 && op == 8'hFF && (reg_f == 3'd2 || reg_f == 3'd4);
         if (fault || pbad) begin
             uop = '0;
             uop[0] = u;
