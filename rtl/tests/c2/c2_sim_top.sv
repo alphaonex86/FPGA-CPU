@@ -2,9 +2,13 @@
 // c2_req_sync -> c2_card (link clock) -> link -> c2_cart (the cartridge
 // clock: the link clock as the cartridge receives it) -> up link through
 // c2_afifo back into the link clock. The C++ testbench (bus_rtl.cpp) plays
-// the PCIe IP and the board.
+// the PCIe IP and the board; with C2_LOOP_TARGET defined the board is
+// c2_loop_target (RTL devices, the bring-up bitstream's).
 module c2_sim_top #(
-    parameter int LINK_DELAY = 3     // cartridge-side registers each way (I/O, cable)
+    parameter int    LINK_DELAY = 3,     // cartridge-side registers each way (I/O, cable)
+    /* verilator lint_off UNUSEDPARAM */   // used with C2_LOOP_TARGET only
+    parameter string ROM_HEX    = "test_rom.hex"
+    /* verilator lint_on UNUSEDPARAM */
 ) (
     input  logic        uclk,        // PCIe user clock
     input  logic        lclk,        // card link clock
@@ -32,7 +36,10 @@ module c2_sim_top #(
     input  logic        bus_done,
     input  logic [31:0] bus_rdata,
     input  logic        bus_err,
-    input  logic        intr
+    input  logic        intr,
+    output logic        serial_valid,
+    output logic [7:0]  serial_byte,
+    input  logic        serial_ready
 );
     logic        start, write, done, tlp_err;
     logic [12:0] addr;
@@ -73,10 +80,29 @@ module c2_sim_top #(
     end
     assign down_cart = down_pipe[LINK_DELAY - 1];
 
+`ifdef C2_LOOP_TARGET
+    logic        t_done, t_err, t_intr;
+    logic [31:0] t_rdata;
+    logic [7:0]  post;
+    c2_cart cart (
+        .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta,
+        .bus_addr, .bus_size, .bus_wdata, .bus_done(t_done), .bus_rdata(t_rdata), .bus_err(t_err), .intr(t_intr)
+    );
+    // simulated time advances only with BAR0 accesses: 1 "ms" of the 0xf7
+    // timer is 50 clocks here, so it fires while the guest loops
+    c2_loop_target #(.ROM_HEX(ROM_HEX), .CLOCKS_MS(50)) target (
+        .clk(cclk), .rst, .bus_req, .bus_space, .bus_write, .bus_inta, .bus_addr, .bus_size, .bus_wdata,
+        .bus_done(t_done), .bus_rdata(t_rdata), .bus_err(t_err), .intr(t_intr),
+        .serial_valid, .serial_byte, .serial_ready, .post
+    );
+`else
     c2_cart cart (
         .clk(cclk), .rst, .down(down_cart), .up(up_cart), .bus_req, .bus_space, .bus_write, .bus_inta,
         .bus_addr, .bus_size, .bus_wdata, .bus_done, .bus_rdata, .bus_err, .intr
     );
+    assign serial_valid = 0;
+    assign serial_byte  = '0;
+`endif
 
     // up bytes on the cartridge clock (as the card receives them with the
     // returned clock) into the link clock

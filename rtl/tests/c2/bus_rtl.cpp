@@ -41,8 +41,16 @@ static uint32_t bswap(uint32_t v)
 }
 
 // the board: one bus cycle at a time, BUS_LATENCY cartridge clocks each
+// (with C2_LOOP_TARGET the RTL target serves them: print its serial out)
 static void cclk_edge()
 {
+#ifdef C2_LOOP_TARGET
+    if (top->serial_valid) {
+        putchar(top->serial_byte);
+        fflush(stdout);
+    }
+    return;
+#endif
     if (top->bus_done) {
         top->bus_done = 0;
         bus_busy = false;
@@ -150,6 +158,7 @@ extern "C" struct bus *bus_rtl_open(const char *rom_path)
     top = new Vc2_sim_top;
     top->completer_id = COMPLETER;
     top->tx_tready = 1;
+    top->serial_ready = 1;
     top->rst = 1;
     for (int i = 0; i < 100; i++) step();
     top->rst = 0;

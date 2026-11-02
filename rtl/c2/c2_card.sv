@@ -5,7 +5,12 @@
 // time: a request that needs the cartridge holds req_ready low until the
 // cartridge's reply, so BAR0 requests run strictly in order. The up bytes
 // come through a clock-crossing FIFO: up_valid marks each one.
-module c2_card (
+module c2_card #(
+    // no reply within 2^TIMEOUT_LOG2 clocks (~10 ms at 50 MHz: below the
+    // host's PCIe completion timeout): the command is dropped, protocol
+    // error, a read returns all ones
+    parameter int TIMEOUT_LOG2 = 19
+) (
     input  logic        clk,
     input  logic        rst,
     // BAR0: writes are 64-bit; a read returns rsp_data once (rsp_valid)
@@ -43,6 +48,7 @@ module c2_card (
     // reply expected: payload length, into rdata or the window
     logic [12:0] rx_len, rx_i;
     logic        rx_window, rx_busy;
+    logic [TIMEOUT_LOG2:0] wait_clocks;
 
     // the 4 KB window, 512 x 64 with byte writes
     logic [63:0] window [512];
@@ -102,6 +108,7 @@ module c2_card (
                 tx_pay_i    <= '0;
                 tx_pay_len  <= '0;
                 tx_in_hdr   <= 1;
+                wait_clocks <= '0;
                 rx_window   <= 0;
                 rx_len      <= '0;
                 if (req_write) begin
@@ -164,7 +171,17 @@ module c2_card (
                     if (tx_pay_i == tx_pay_len - 13'd1) state <= WAIT;
                 end
             end
-            WAIT: ;
+            WAIT: begin
+                wait_clocks <= wait_clocks + 1'b1;
+                if (wait_clocks[TIMEOUT_LOG2]) begin
+                    err_proto   <= 1;
+                    rx_busy     <= 0;
+                    resp_window <= 0;
+                    resp        <= '1;
+                    rdata       <= '1;
+                    state       <= resp_vector ? RESP : IDLE;
+                end
+            end
             RESP: begin
                 resp_window <= 0;
                 state       <= IDLE;

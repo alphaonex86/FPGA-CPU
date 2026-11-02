@@ -1,6 +1,7 @@
 // Slot 1 C2 VMM (plan/slot1_c2.md): one KVM vCPU runs the board's BIOS and
 // OS; guest RAM is ours, every other access is a bus cycle on the board.
-// Usage: c2-vmm [-m MB] [-r ROM_KB] [-s signature] [-v] sim <rom.bin> | fpga <bar0>
+// Usage: c2-vmm [-m MB] [-r ROM_KB] [-s signature] [-e port] [-v] sim <rom.bin> | fpga <bar0>
+// -e: exit with the byte the guest writes to that I/O port (test ROMs)
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/kvm.h>
@@ -143,15 +144,16 @@ int main(int argc, char **argv)
 {
     uint64_t ram_mb = 256, rom_kb = 256;
     uint32_t signature = 0x683;   // Pentium III (Coppermine) cB0
-    int opt;
-    while ((opt = getopt(argc, argv, "m:r:s:v")) != -1) {
+    int opt, exit_port = -1;
+    while ((opt = getopt(argc, argv, "m:r:s:e:v")) != -1) {
         if (opt == 'm') ram_mb = strtoull(optarg, NULL, 0);
         else if (opt == 'r') rom_kb = strtoull(optarg, NULL, 0);
         else if (opt == 's') signature = strtoul(optarg, NULL, 0);
+        else if (opt == 'e') exit_port = (int)strtol(optarg, NULL, 0);
         else if (opt == 'v') verbose = 1;
-        else die("usage: c2-vmm [-m MB] [-r ROM_KB] [-s signature] [-v] sim <rom.bin> | fpga <bar0>");
+        else die("usage: c2-vmm [-m MB] [-r ROM_KB] [-s signature] [-e port] [-v] sim <rom.bin> | fpga <bar0>");
     }
-    if (argc - optind != 2) die("usage: c2-vmm [-m MB] [-r ROM_KB] [-s signature] [-v] sim <rom.bin> | fpga <bar0>");
+    if (argc - optind != 2) die("usage: c2-vmm [-m MB] [-r ROM_KB] [-s signature] [-e port] [-v] sim <rom.bin> | fpga <bar0>");
     if (ram_mb < 2 || ram_mb > 3072) die("RAM %llu MB: 2 .. 3072", (unsigned long long)ram_mb);
     if (rom_kb < 128 || rom_kb > 1024 || (rom_kb & (rom_kb - 1))) die("ROM %llu KB: a power of 2, 128 .. 1024",
                                                                        (unsigned long long)rom_kb);
@@ -247,6 +249,7 @@ int main(int argc, char **argv)
                     shadow_io_write(run->io.port, run->io.size, v);
                 }
                 bus_access(b, BUS_IO, run->io.port, p, run->io.size, out);
+                if (out && run->io.port == exit_port) exit(*p);
             }
             break;
         }

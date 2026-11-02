@@ -88,9 +88,38 @@ window is never refilled under a running REP.
 - Tested: the whole test ROM through the RTL (2.7 M bridge clocks, link
   delay 3 clocks each way, bus cycles 8 clocks); a byte-lane mutation of
   the cartridge reply fails step 11.
-- Not yet: the PCIe IP wrapper, link I/O cells and the clock-domain
-  crossing (card PCIe clock / link clock / cartridge FSB clock), a link
-  check (CRC), the P6 agent behind the bus port.
+- `xilinx/c2_tlp.sv`: 7 Series PCIe AXI4-Stream TLP engine (MWr 2 DW,
+  MRd 1-2 DW on BAR0, UR otherwise); `c2_req_sync.sv` (PCIe user clock to
+  link clock, toggle handshake), `c2_afifo.sv` (up link on the returned
+  clock). `test_rtl.sh` drives real TLPs through all three clocks.
+- Not yet: a link check (CRC), the P6 agent behind the bus port.
+
+## Card bitstream (`rtl/c2/xilinx`, AX7A035B)
+
+- `build.tcl <out> [rom.hex]`: PCIe IP (`pcie_ip.tcl`: x2 Gen2, 8 KB
+  BAR0, PIPE clock inside the core), synthesis, place and route, timing
+  check, `c2_card.bit` + `c2_card_flash.bin` (SPI x4, compressed: ~24 ms
+  to load, inside PCIe's 100 ms). Stops if a block was trimmed or timing
+  fails. 2026-11-02: 1025 LUTs, 1834 FFs, 9 BRAM tiles, WNS 0.70 ns.
+- With a ROM: LOOPBACK variant, `c2_cart` + `c2_loop_target` (the
+  `bus_sim` devices in RTL, same test ROM) inside the card, serial out on
+  the USB UART (L15, 115200 8N1): the whole PCIe + bridge path without
+  the cartridge (4320 LUTs, 6372 FFs, 26 BRAM tiles, WNS 0.71 ns).
+- `program.tcl <out>`: flash over JTAG (verify), boot from it.
+- PERST# is not on an FPGA pin in the manual: reset from power-up and
+  the RESET key; check the schematic on delivery.
+- Bring-up on arrival (N100 host, root for the sysfs resource):
+  1. `sw/c2-vmm/test_rtl.sh` (makes `build/rtl/test_rom.hex`), then
+     `rtl/tools/vivado.sh rtl/c2/xilinx/build.tcl <out>
+     sw/c2-vmm/build/rtl/test_rom.hex`, `program.tcl <out>`; reboot.
+  2. `lspci -d 10ee:7022 -vv`: x2 5 GT/s, BAR0 8 KB; LED 1 (link up)
+     and LED 3 (card idle) on; `echo 1 > .../enable`.
+  3. `c2-probe fpga /sys/bus/pci/devices/<bdf>/resource0`: STATUS read
+     (PCIe round trip), bus write / read cycle, REP MB/s (goal: cycle
+     < 2-3 us, D28).
+  4. `c2-vmm -e 0xf4 fpga /sys/bus/pci/devices/<bdf>/resource0`: the
+     test ROM on the loopback devices, exit 0; its serial on the UART.
+  5. Then the plain bitstream (no ROM) with the cartridge on J11.
 
 ## Shadow RAM (`shadow.c`)
 
@@ -157,6 +186,12 @@ filtering), AGP cards.
   docs sent after purchase). Details and seller questions:
   `FPGAlist/c2_cards/README.md`.
 - Down (card -> cartridge): clock (to M8) + 8 data; up: clock + 8 data.
+  J5 / J11 pin functions (straight ribbon, same numbers both ends; card
+  side in `rtl/c2/xilinx/ax7a035b.xdc`): 3, 5, ..., 17 down data 0-7;
+  19 up clock (card MRCC C18); 21 down clock (cartridge M8 = CLK0n);
+  23, 25, ..., 35 and 36 up data 0-7; even 4-34 ground; 1/37/38 ground,
+  2/39/40 open. Each side launches on its clock's rising edge and sends
+  that clock inverted (DDR output), so the receiver samples mid-bit.
   Bytes framed in-band (idle 0x00, a frame header byte with type and
   length); 50 MHz SDR first: 50 MB/s each way (DDR later if the cable
   allows).
@@ -179,12 +214,9 @@ filtering), AGP cards.
 1. Bridge protocol: burst write (framebuffer pages, coalesced runs) in
    bus.h; VMM LFB mirror (dirty logging). Done: string I/O as one REP
    command through a 4 KB BAR window; coalesced ATA data / VGA writes.
-2. FPGA bridge on the AX7A035B (before the board arrives ~2026-12-16):
-   PCIe 7 Series IP (x2 Gen2) wrapper onto the c2_card request port,
-   link I/O (ODDR clock out, MRCC clock in, CDC), Vivado build for
-   xc7a35tfgg484-2 with the J11 pins; first bring-up with a loopback bus
-   target on the card itself, then measure the host round trip per cycle
-   (goal < 2-3 us, D28).
+2. AX7A035B on arrival (~2026-12-16): bring-up steps of "Card
+   bitstream"; done before it: IP, top, J11 I/O, builds, flash script,
+   c2-probe.
 3. P6 bus agent: request/response phases, snoop stall (HIT# + HITM#), DMA
    mirror (slot1_variants common facts), A20M#, INIT#, SMI#, STPCLK#.
 4. VMM: MSI through VFIO instead of polling, SMM, microcode-update MSRs.
