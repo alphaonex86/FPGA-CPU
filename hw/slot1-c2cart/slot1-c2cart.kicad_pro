@@ -1,14 +1,4 @@
 {
-  "meta": {
-    "filename": "slot1-c2cart.kicad_pro",
-    "version": 3
-  },
-  "sheets": [
-    [
-      "26f32f86-c61f-4475-992d-90ffd6fa8b68",
-      "Root"
-    ]
-  ],
   "board": {
     "design_settings": {
       "defaults": {
@@ -226,6 +216,10 @@
       "zones_use_no_outline": true
     }
   },
+  "meta": {
+    "filename": "slot1-c2cart.kicad_pro",
+    "version": 3
+  },
   "net_settings": {
     "meta": {
       "version": 4
@@ -250,5 +244,11 @@
         "wire_width": 6
       }
     ]
-  }
+  },
+  "sheets": [
+    [
+      "9635888c-0d2d-4191-afbb-06722e15de41",
+      "Root"
+    ]
+  ]
 }

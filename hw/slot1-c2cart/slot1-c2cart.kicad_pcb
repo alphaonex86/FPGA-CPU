@@ -8866,7 +8866,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 65.580000 12.810000)
+		(at 65.580000 12.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R38" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -8892,7 +8892,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 65.580000 13.850000)
+		(at 65.580000 13.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R39" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -8918,7 +8918,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 65.580000 14.890000)
+		(at 65.580000 14.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R40" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -8944,7 +8944,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 65.580000 15.930000)
+		(at 65.580000 15.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R41" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -8970,7 +8970,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 65.580000 16.970000)
+		(at 65.580000 16.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R42" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -8996,7 +8996,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 65.580000 18.010000)
+		(at 65.580000 17.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R43" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9022,7 +9022,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 65.580000 19.050000)
+		(at 65.580000 18.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R44" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9048,7 +9048,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 65.560000 20.080000)
+		(at 65.560000 19.860000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C147" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9100,7 +9100,7 @@
 	)
 	(footprint "Pwr:C_0805_2012Metric"
 		(layer "B.Cu")
-		(at 17.900000 12.940000)
+		(at 17.900000 13.130000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C140" (at 0.0 1.780000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9126,7 +9126,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 17.110000 14.480000)
+		(at 17.110000 14.860000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C141" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9152,7 +9152,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 17.110000 15.500000)
+		(at 17.110000 15.860000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C142" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9178,7 +9178,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 17.110000 16.520000)
+		(at 17.110000 16.860000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C143" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9204,7 +9204,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 17.110000 17.540000)
+		(at 17.110000 17.860000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C144" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9230,7 +9230,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 17.110000 18.560000)
+		(at 17.110000 18.860000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C145" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9256,7 +9256,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 17.110000 19.580000)
+		(at 17.110000 19.860000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C146" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9282,7 +9282,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 17.130000 20.610000)
+		(at 17.130000 20.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R21" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9308,7 +9308,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 20.630000 10.370000)
+		(at 19.130000 14.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R22" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9334,7 +9334,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 20.630000 11.410000)
+		(at 19.130000 15.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R23" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9360,7 +9360,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 20.630000 12.450000)
+		(at 19.130000 16.870000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R24" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -9412,7 +9412,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 24.080000)
+		(at 76.510000 24.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C52" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9438,7 +9438,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 25.100000)
+		(at 76.510000 25.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C53" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9464,7 +9464,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 26.120000)
+		(at 76.510000 26.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C54" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9490,7 +9490,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 27.140000)
+		(at 76.510000 27.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C55" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9516,7 +9516,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 28.160000)
+		(at 76.510000 28.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C56" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9542,7 +9542,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 29.180000)
+		(at 76.510000 29.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C57" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9568,7 +9568,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 30.200000)
+		(at 76.510000 30.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C58" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9594,7 +9594,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 31.220000)
+		(at 76.510000 31.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C59" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9620,7 +9620,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 32.240000)
+		(at 76.510000 32.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C60" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9646,7 +9646,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 76.510000 33.260000)
+		(at 76.510000 33.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C61" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9672,7 +9672,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 23.060000)
+		(at 78.510000 23.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C62" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9698,7 +9698,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 24.080000)
+		(at 78.510000 24.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C63" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9724,7 +9724,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 25.100000)
+		(at 78.510000 25.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C64" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9750,7 +9750,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 26.120000)
+		(at 78.510000 26.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C65" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9776,7 +9776,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 27.140000)
+		(at 78.510000 27.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C66" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9802,7 +9802,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 28.160000)
+		(at 78.510000 28.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C67" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9828,7 +9828,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 29.180000)
+		(at 78.510000 29.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C68" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9854,7 +9854,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 30.200000)
+		(at 78.510000 30.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C69" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9880,7 +9880,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 31.220000)
+		(at 78.510000 31.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C70" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9906,7 +9906,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 32.240000)
+		(at 78.510000 32.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C71" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9932,7 +9932,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 78.430000 33.260000)
+		(at 78.510000 33.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C72" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9958,7 +9958,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 23.060000)
+		(at 80.510000 23.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C73" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -9984,7 +9984,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 24.080000)
+		(at 80.510000 24.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C74" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10010,7 +10010,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 25.100000)
+		(at 80.510000 25.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C75" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10036,7 +10036,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 26.120000)
+		(at 80.510000 26.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C76" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10062,7 +10062,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 27.140000)
+		(at 80.510000 27.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C77" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10088,7 +10088,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 28.160000)
+		(at 80.510000 28.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C78" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10114,7 +10114,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 29.180000)
+		(at 80.510000 29.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C79" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10140,7 +10140,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 30.200000)
+		(at 80.510000 30.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C80" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10166,7 +10166,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 31.220000)
+		(at 80.510000 31.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C81" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10192,7 +10192,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 32.240000)
+		(at 80.510000 32.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C92" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10218,7 +10218,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 80.350000 33.260000)
+		(at 80.510000 33.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C93" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10244,7 +10244,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 82.270000 23.060000)
+		(at 82.510000 23.060000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C94" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10270,7 +10270,7 @@
 	)
 	(footprint "Pwr:C_1210_3225Metric"
 		(layer "F.Cu")
-		(at 83.660000 25.220000)
+		(at 83.900000 25.200000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C99" (at 0.0 2.400000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10296,7 +10296,7 @@
 	)
 	(footprint "Pwr:C_1210_3225Metric"
 		(layer "F.Cu")
-		(at 83.660000 28.520000)
+		(at 83.900000 28.450000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C100" (at 0.0 2.400000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10322,7 +10322,7 @@
 	)
 	(footprint "Pwr:C_1210_3225Metric"
 		(layer "F.Cu")
-		(at 83.660000 31.820000)
+		(at 83.900000 31.700000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C101" (at 0.0 2.400000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10348,7 +10348,7 @@
 	)
 	(footprint "Pwr:C_0603_1608Metric"
 		(layer "F.Cu")
-		(at 87.540000 23.330000)
+		(at 87.830000 23.330000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C102" (at 0.0 1.530000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10374,7 +10374,7 @@
 	)
 	(footprint "Pwr:C_0805_2012Metric"
 		(layer "F.Cu")
-		(at 87.760000 25.140000)
+		(at 88.050000 25.330000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C103" (at 0.0 1.780000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10400,7 +10400,7 @@
 	)
 	(footprint "Pwr:C_0805_2012Metric"
 		(layer "F.Cu")
-		(at 87.760000 27.200000)
+		(at 88.050000 27.580000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C104" (at 0.0 1.780000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10426,7 +10426,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 86.990000 28.750000)
+		(at 87.280000 29.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R17" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10452,7 +10452,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 86.990000 29.790000)
+		(at 87.280000 30.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R18" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10478,7 +10478,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 86.990000 30.830000)
+		(at 87.280000 31.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R19" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10504,7 +10504,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 86.990000 31.870000)
+		(at 87.280000 32.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R20" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10530,7 +10530,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "F.Cu")
-		(at 86.970000 32.900000)
+		(at 87.260000 33.310000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C138" (at 0.0 1.260000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10556,7 +10556,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 23.070000)
+		(at 89.280000 29.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R25" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10582,7 +10582,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 24.110000)
+		(at 89.280000 30.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R26" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10608,7 +10608,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 25.150000)
+		(at 89.280000 31.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R27" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10634,7 +10634,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 26.190000)
+		(at 89.280000 32.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R28" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10660,7 +10660,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 27.230000)
+		(at 89.280000 33.320000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R29" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10686,7 +10686,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 28.270000)
+		(at 90.530000 23.070000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R30" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10712,7 +10712,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 29.310000)
+		(at 90.780000 24.070000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R31" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10738,7 +10738,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 30.350000)
+		(at 90.780000 25.070000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R32" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10764,7 +10764,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 31.390000)
+		(at 90.780000 26.070000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R33" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10790,7 +10790,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 32.430000)
+		(at 90.780000 27.070000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R34" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10816,7 +10816,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 90.490000 33.470000)
+		(at 90.780000 28.070000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R35" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10842,7 +10842,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "F.Cu")
-		(at 92.450000 23.070000)
+		(at 91.280000 29.070000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R36" (at 0.0 1.270000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10920,7 +10920,7 @@
 	)
 	(footprint "Pwr:TI_RHL0014A"
 		(layer "F.Cu")
-		(at 42.330000 49.250000)
+		(at 42.300000 49.250000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "PS1" (at 0.0 3.050000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10949,7 +10949,7 @@
 	)
 	(footprint "Pwr:C_1210_3225Metric"
 		(layer "F.Cu")
-		(at 42.380000 53.200000)
+		(at 42.350000 53.350000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C1" (at 0.0 2.400000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -10975,7 +10975,7 @@
 	)
 	(footprint "Pwr:C_1206_3216Metric"
 		(layer "F.Cu")
-		(at 42.380000 56.050000)
+		(at 42.350000 56.150000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C3" (at 0.0 1.950000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11001,7 +11001,7 @@
 	)
 	(footprint "Pwr:C_1206_3216Metric"
 		(layer "F.Cu")
-		(at 47.080000 48.150000)
+		(at 47.100000 48.150000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C4" (at 0.0 1.950000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11027,7 +11027,7 @@
 	)
 	(footprint "Pwr:C_0805_2012Metric"
 		(layer "F.Cu")
-		(at 46.480000 50.380000)
+		(at 46.500000 50.480000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C2" (at 0.0 1.780000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11053,7 +11053,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 33.890000 47.470000)
+		(at 29.230000 49.970000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R1" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11079,7 +11079,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 33.890000 48.510000)
+		(at 29.230000 50.970000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R2" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11105,7 +11105,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 33.890000 49.550000)
+		(at 29.230000 51.970000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R3" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11131,7 +11131,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 33.890000 50.590000)
+		(at 29.230000 52.970000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R4" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11157,7 +11157,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 33.890000 51.630000)
+		(at 29.230000 53.970000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R5" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11183,7 +11183,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 33.870000 52.660000)
+		(at 29.210000 54.960000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C5" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11209,7 +11209,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 33.870000 53.680000)
+		(at 29.210000 55.960000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C6" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11235,7 +11235,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 33.870000 54.700000)
+		(at 29.210000 56.960000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C7" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11261,7 +11261,7 @@
 	)
 	(footprint "Pwr:L_Coilcraft_MSS1048-XXX"
 		(layer "F.Cu")
-		(at 55.320000 52.250000)
+		(at 55.390000 52.250000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "L2" (at 0.0 6.050000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11287,7 +11287,7 @@
 	)
 	(footprint "Pwr:TI_RHL0014A"
 		(layer "F.Cu")
-		(at 63.510000 49.250000)
+		(at 63.550000 49.250000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "PS2" (at 0.0 3.050000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11316,7 +11316,7 @@
 	)
 	(footprint "Pwr:C_1210_3225Metric"
 		(layer "F.Cu")
-		(at 63.560000 53.200000)
+		(at 63.600000 53.350000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C8" (at 0.0 2.400000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11342,7 +11342,7 @@
 	)
 	(footprint "Pwr:C_1206_3216Metric"
 		(layer "F.Cu")
-		(at 63.560000 56.050000)
+		(at 63.600000 56.150000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C10" (at 0.0 1.950000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11368,7 +11368,7 @@
 	)
 	(footprint "Pwr:C_1206_3216Metric"
 		(layer "F.Cu")
-		(at 68.260000 48.150000)
+		(at 68.350000 48.150000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C11" (at 0.0 1.950000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11394,7 +11394,7 @@
 	)
 	(footprint "Pwr:C_1206_3216Metric"
 		(layer "F.Cu")
-		(at 68.260000 50.550000)
+		(at 68.350000 50.650000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C12" (at 0.0 1.950000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11420,7 +11420,7 @@
 	)
 	(footprint "Pwr:C_1206_3216Metric"
 		(layer "F.Cu")
-		(at 68.260000 52.950000)
+		(at 68.350000 53.150000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C13" (at 0.0 1.950000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11446,7 +11446,7 @@
 	)
 	(footprint "Pwr:C_0805_2012Metric"
 		(layer "F.Cu")
-		(at 67.660000 55.180000)
+		(at 67.750000 55.480000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C9" (at 0.0 1.780000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11472,7 +11472,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 50.410000 47.470000)
+		(at 45.730000 47.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R6" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11498,7 +11498,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 50.410000 48.510000)
+		(at 45.730000 48.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R7" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11524,7 +11524,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 50.410000 49.550000)
+		(at 45.730000 49.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R8" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11550,7 +11550,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 50.410000 50.590000)
+		(at 45.730000 50.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R9" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11576,7 +11576,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 50.410000 51.630000)
+		(at 45.730000 51.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R10" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11602,7 +11602,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 50.390000 52.660000)
+		(at 45.710000 52.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C14" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11628,7 +11628,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 50.390000 53.680000)
+		(at 45.710000 53.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C15" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11654,7 +11654,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 50.390000 54.700000)
+		(at 45.710000 54.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C16" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11680,7 +11680,7 @@
 	)
 	(footprint "Pwr:L_Coilcraft_XxL4020"
 		(layer "F.Cu")
-		(at 72.920000 49.260000)
+		(at 73.060000 49.260000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "L4" (at 0.0 3.060000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11706,7 +11706,7 @@
 	)
 	(footprint "Pwr:VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm"
 		(layer "F.Cu")
-		(at 72.790000 53.750000)
+		(at 72.930000 53.880000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "PS4" (at 0.0 2.930000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11823,7 +11823,7 @@
 	)
 	(footprint "Pwr:C_1210_3225Metric"
 		(layer "F.Cu")
-		(at 77.580000 48.600000)
+		(at 77.600000 53.350000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C21" (at 0.0 2.400000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11849,7 +11849,7 @@
 	)
 	(footprint "Pwr:C_0805_2012Metric"
 		(layer "F.Cu")
-		(at 76.980000 51.280000)
+		(at 77.000000 55.980000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C22" (at 0.0 1.780000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -11875,7 +11875,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 71.590000 47.470000)
+		(at 66.980000 47.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R13" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11901,7 +11901,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 71.590000 48.510000)
+		(at 66.980000 48.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R14" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11927,7 +11927,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 71.570000 49.540000)
+		(at 66.960000 49.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C23" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11953,7 +11953,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 71.570000 50.560000)
+		(at 66.960000 50.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C24" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -11979,7 +11979,7 @@
 	)
 	(footprint "Pwr:L_Coilcraft_XxL4020"
 		(layer "F.Cu")
-		(at 82.240000 49.260000)
+		(at 77.810000 49.260000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "L5" (at 0.0 3.060000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12005,7 +12005,7 @@
 	)
 	(footprint "Pwr:VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm"
 		(layer "F.Cu")
-		(at 82.110000 53.750000)
+		(at 82.180000 53.880000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "PS5" (at 0.0 2.930000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12122,7 +12122,7 @@
 	)
 	(footprint "Pwr:C_1210_3225Metric"
 		(layer "F.Cu")
-		(at 86.900000 48.600000)
+		(at 82.600000 48.600000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C25" (at 0.0 2.400000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12148,7 +12148,7 @@
 	)
 	(footprint "Pwr:C_0805_2012Metric"
 		(layer "F.Cu")
-		(at 86.300000 51.280000)
+		(at 86.250000 51.230000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C26" (at 0.0 1.780000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12174,7 +12174,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 80.910000 47.470000)
+		(at 76.230000 47.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R15" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -12200,7 +12200,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 80.910000 48.510000)
+		(at 76.230000 48.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R16" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -12226,7 +12226,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 80.890000 49.540000)
+		(at 76.210000 49.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C27" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -12252,7 +12252,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 80.890000 50.560000)
+		(at 76.210000 50.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C28" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -12278,7 +12278,7 @@
 	)
 	(footprint "Pwr:L_Coilcraft_XxL4020"
 		(layer "F.Cu")
-		(at 91.560000 49.260000)
+		(at 86.810000 54.760000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "L3" (at 0.0 3.060000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12304,7 +12304,7 @@
 	)
 	(footprint "Pwr:VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm"
 		(layer "F.Cu")
-		(at 91.430000 53.750000)
+		(at 90.180000 49.130000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "PS3" (at 0.0 2.930000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12421,7 +12421,7 @@
 	)
 	(footprint "Pwr:C_1210_3225Metric"
 		(layer "F.Cu")
-		(at 96.220000 48.600000)
+		(at 91.600000 53.100000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C17" (at 0.0 2.400000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12447,7 +12447,7 @@
 	)
 	(footprint "Pwr:C_0805_2012Metric"
 		(layer "F.Cu")
-		(at 95.620000 51.280000)
+		(at 91.000000 55.730000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C18" (at 0.0 1.780000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12473,7 +12473,7 @@
 	)
 	(footprint "Pwr:L_0603_1608Metric"
 		(layer "F.Cu")
-		(at 95.400000 53.090000)
+		(at 94.030000 47.730000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "FB1" (at 0.0 1.530000) (layer "F.Fab") (effects (font (size 1 1) (thickness 0.15))))
@@ -12499,7 +12499,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 90.230000 47.470000)
+		(at 85.480000 47.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R11" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -12525,7 +12525,7 @@
 	)
 	(footprint "Pwr:R_0402_1005Metric"
 		(layer "B.Cu")
-		(at 90.230000 48.510000)
+		(at 85.480000 48.470000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "R12" (at 0.0 1.270000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -12551,7 +12551,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 90.210000 49.540000)
+		(at 85.460000 49.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C19" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))
@@ -12577,7 +12577,7 @@
 	)
 	(footprint "Pwr:C_0402_1005Metric"
 		(layer "B.Cu")
-		(at 90.210000 50.560000)
+		(at 85.460000 50.460000)
 		(descr "S7 placement; nets assigned by S8")
 		(attr smd)
 		(fp_text reference "C20" (at 0.0 1.260000) (layer "B.Fab") (effects (font (size 1 1) (thickness 0.15)) (justify mirror)))

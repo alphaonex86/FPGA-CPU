@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Dedicated C2 cartridge (plan/slot1_c2.md D33/D35): FPGA ball map.
 
-Usage: python3 hw/tools/gen_c2cart_assign.py
-Output: hw/slot1-c2cart/pins.csv (signal, kind, ball, bank, chip, channel,
-contact). FPGA 5CEBA4F23C8 with A9 drop-in: only the F484 balls that are IO
-on both (FPGAlist/CycloneV_A9/pins/5ceba4.txt, 5ceba9.txt). Banks 3.3 V
-except 3A (RX, SSTL-18 with VREF).
+Usage: python3 hw/tools/gen_c2cart_assign.py [c2cart|c2pcie]   (default: both)
+Output: hw/slot1-<board>/pins.csv (signal, kind, ball, bank, chip, channel,
+contact). c2cart: FPGA 5CEBA4F23C8 with A9 drop-in: only the F484 balls that
+are IO on both (FPGAlist/CycloneV_A9/pins/5ceba4.txt, 5ceba9.txt); the J5
+link. c2pcie (D34): the same on the Cyclone V GX F484 set (C4/C5/C7/C9, GT
+D9: FPGAlist/CycloneV_GX/pins), no link; PCIe x4 on GXB Ch0-3 + REFCLK0L,
+PERST# on nPERSTL1 (R17) [ug_c5_pcie_avst Figure 4-38, pin_perst]. Banks
+3.3 V except 3A (RX, SSTL-18 with VREF).
 
 The bus nets pass 7 SN74GTL16612 (18 channels): ADDR0-1, DATA0-3 (FPGA
 direction pair per group, DATA B -> A clocked by BCLK through a CY2309
@@ -26,8 +29,15 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-PINS = ROOT / "FPGAlist/CycloneV_A9/pins"
-OUT = ROOT / "hw/slot1-c2cart"
+A9PINS = ROOT / "FPGAlist/CycloneV_A9/pins"
+GXPINS = ROOT / "FPGAlist/CycloneV_GX/pins"
+BOARDS = {
+    "c2cart": dict(tables=[A9PINS / "5ceba9.txt", A9PINS / "5ceba4.txt"], link=True, fixed={}),
+    "c2pcie": dict(tables=[GXPINS / f"{d}.txt" for d in ("5cgxfc5", "5cgxfc4", "5cgxfc7", "5cgxfc9", "5cgtfd9")],
+                   link=False, fixed={"PCIE_PERST#": "nPERSTL1"}),
+}
+PCIE = {**{f"PCIE_{d}{k}_{s.upper()}": f"GXB_{d}_L{k}{s}" for d in ("TX", "RX") for k in range(4) for s in "pn"},
+        "PCIE_REFCLK_P": "REFCLK0Lp", "PCIE_REFCLK_N": "REFCLK0Ln"}
 LETTERS = "A B C D E F G H J K L M N P R T U V W Y AA AB".split()
 
 ADDR = ["A[%d]#" % i for i in range(3, 32)] + ["REQ[%d]#" % i for i in range(5)]
@@ -56,7 +66,7 @@ def f484(path):
         if c[0] == "Bank Number":
             col = c.index("F484") if "F484" in c else None
         elif col is not None and len(c) > col and c[col].strip():
-            rows[c[col].strip()] = (c[0], c[2], c[3].strip('"'))
+            rows[c[col].strip()] = (c[0], c[2].strip('"'), c[3].strip('"'), c[4].strip('"') if len(c) > 4 else "")
     return rows
 
 
@@ -83,9 +93,20 @@ def chips(names, prefix, contact):
     return [(prefix + (str(i) if k > 1 else ""), nets[i * per:(i + 1) * per]) for i in range(k)]
 
 
-def main():
-    a9, a4 = f484(PINS / "5ceba9.txt"), f484(PINS / "5ceba4.txt")
-    common = {b for b in a9 if a9[b][1] == "IO" and a4.get(b, ("", "", ""))[1] == "IO"}
+def ball_of(table, func, col=1):
+    """the one ball whose function (col 1) or configuration function (col 3) is func"""
+    hits = [b for b, v in table.items() if v[col].split(",")[0] == func]
+    assert len(hits) == 1, (func, hits)
+    return hits[0]
+
+
+def main(board):
+    cfg = BOARDS[board]
+    out = ROOT / f"hw/slot1-{board}"
+    tables = [f484(p) for p in cfg["tables"]]
+    a9 = tables[0]
+    fixed = {s: ball_of(a9, f, 3) for s, f in cfg["fixed"].items()}
+    common = {b for b in a9 if all(t.get(b, ("", ""))[1] == "IO" for t in tables)} - set(fixed.values())
     contact = contacts()
     fails = []
 
@@ -124,26 +145,34 @@ def main():
     far = sorted((b for b in common if a9[b][0] not in EDGE_BANKS + [RX_BANK] and b not in CLOCKS.values()),
                  key=lambda b: ball_xy(b))
     cmos = [(n, "cmos", "CMOS%d" % (i // CB3T_CH), i % CB3T_CH + 1, contact[n]) for i, n in enumerate(CMOS)]
-    link = [(n, "link", "", "", "") for n in LINK]
+    link = [(n, "link", "", "", "") for n in LINK] if cfg["link"] else []
     assigned += [r + (b,) for r, b in zip(cmos + link, far)]
     if len(far) < len(cmos) + len(link):
         fails.append("far banks: %d balls for %d nets" % (len(far), len(cmos) + len(link)))
-    assigned += [(n, "clock", "", "", contact.get(n, ""), b) for n, b in CLOCKS.items()]
+    clocks = {n: b for n, b in CLOCKS.items() if cfg["link"] or n == "BCLK"}
+    assigned += [(n, "clock", "", "", contact.get(n, ""), b) for n, b in clocks.items()]
+    assigned += [(n, "pcie", "", "", "", b) for n, b in fixed.items()]
+    if not cfg["link"]:
+        pcie = {n: ball_of(a9, f) for n, f in PCIE.items()}
+        if any(t[b][1] != a9[b][1] for t in tables for b in pcie.values()):
+            fails.append("PCIe balls differ between the devices")
+        assigned += [(n, "pcie", "", "", "", b) for n, b in pcie.items()]
 
     balls = [r[5] for r in assigned]
     if len(set(balls)) != len(balls):
         fails.append("a ball used twice")
-    for n, b in CLOCKS.items():
-        if not (a9[b][2].startswith("CLK") and a4[b][2] == a9[b][2]):
-            fails.append("%s ball %s is no clock input on both devices" % (n, b))
-    if any(b not in common for b in balls):
-        fails.append("balls not IO on both: %s" % [b for b in balls if b not in common])
+    for n, b in clocks.items():
+        if not all(t[b][2].startswith("CLK") and t[b][2] == a9[b][2] for t in tables):
+            fails.append("%s ball %s is no clock input on every device" % (n, b))
+    io = [r[5] for r in assigned if r[1] != "pcie"]
+    if any(b not in common for b in io):
+        fails.append("balls not IO on every device: %s" % [b for b in io if b not in common])
     if fails:
         print("FAIL", *fails, sep="\n  ")
         sys.exit(1)
 
-    OUT.mkdir(exist_ok=True)
-    with open(OUT / "pins.csv", "w", newline="") as f:
+    out.mkdir(exist_ok=True)
+    with open(out / "pins.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["signal", "kind", "ball", "bank", "chip", "channel", "contact"])
         for n, kind, chip, ch, ct, b in assigned:
@@ -151,9 +180,10 @@ def main():
     used = {}
     for r in assigned:
         used[a9[r[5]][0]] = used.get(a9[r[5]][0], 0) + 1
-    print("pins.csv: %d nets, %d of %d common IO balls; per bank %s" % (
-        len(assigned), len(assigned), len(common), sorted(used.items())))
+    print("%s pins.csv: %d nets, %d of %d common IO balls; per bank %s" % (
+        board, len(assigned), len(io), len(common), sorted(used.items())))
 
 
 if __name__ == "__main__":
-    main()
+    for b in sys.argv[1:] or BOARDS:
+        main(b)

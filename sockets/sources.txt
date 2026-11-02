@@ -41,3 +41,5 @@ parts/ti_tlv6700.pdf https://www.ti.com/lit/ds/symlink/tlv6700.pdf
 parts/infineon_cy2305.pdf https://store.comet.bg/download-file.php?id=9870
 # SNIA SFF-9402 Rev 1.1 multi-protocol internal cable pinouts (D34 OCuLink SFF-8611 4i host link)
 parts/snia_sff9402_rev1.1.pdf https://members.snia.org/document/dl/27380
+# SNIA SFF-8612 Rev 1.0 OCuLink fixed receptacle (D34 connector footprint)
+parts/snia_sff8612_rev1.0.pdf https://members.snia.org/document/dl/51522

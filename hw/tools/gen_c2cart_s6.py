@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Dedicated C2 cartridge (plan/slot1_c2.md D33/D35/D37): label-wired
-schematic + netlist, the S6 step of hw/slot1-cyclonev for this board.
+"""Dedicated C2 cartridges (plan/slot1_c2.md D33/D35/D37, D34): label-wired
+schematic + netlist, the S6 step of hw/slot1-cyclonev for these boards.
 
-Usage: python3 hw/tools/gen_c2cart_s6.py
-Input: hw/slot1-c2cart/pins.csv (gen_c2cart_assign.py).
-Output in hw/slot1-c2cart/: slot1-c2cart.kicad_sch, .net, .erc.json,
+Usage: python3 hw/tools/gen_c2cart_s6.py [c2cart|c2pcie]   (default: both)
+Input: hw/slot1-<board>/pins.csv (gen_c2cart_assign.py).
+Output in hw/slot1-<board>/: slot1-<board>.kicad_sch, .net, .erc.json,
 pdn.csv (every passive + regulator, for the placement step), project.
 
-U1 5CEBA4/A9 F484 (A9 symbol; the A4's VCCIO2A/VCCPD1A2A balls, NC on
-the A9, on VCCIO33), U2 the SC242 contacts, U3-U9 SN74GTL16612 (pins.csv
+c2cart: U1 5CEBA4/A9 F484 (A9 symbol; the A4's VCCIO2A/VCCPD1A2A balls,
+NC on the A9, on VCCIO33), J5 the D32 link. c2pcie: U1 Cyclone V GX F484
+(C5 symbol), J6 OCuLink 4i endpoint (TX through 0.1 uF, REFCLK DC as HCSL
+allows, PERST# 10k to GND, CPRSNT# grounded), VCCE/VCCL_GXBL and
+VCCH_GXBL from VCC and VCC_AUX through beads [pcg-01014 GX Example 1].
+Both: U2 the SC242 contacts, U3-U9 SN74GTL16612 (pins.csv
 chip order), U10-U11 SN74CB3T3245, U12 CY2309 (BCLK -> each 16612's
 CLKAB = CLKBA through 22 R; CLKOUT loaded like one chip), U13 EPCQ128A
 (AS x1). Nets: bus A side = signal, B side = S_<signal> = contact; TX A
@@ -28,14 +32,12 @@ import pdn
 from pdn import C0402, C0603, C0805, C1210, CPAIR, R0402, Parts, buck54620, buck62130, farads, u1_pairs
 
 ROOT = t6.ROOT
-OUT = ROOT / "hw/slot1-c2cart"
-NAME = "slot1-c2cart"
 CPUSYM = ROOT / "sockets/kicad/CPU_SC242.kicad_sym"
-FSYM = ROOT / "hw/lib/FPGA_CycloneV_5CEFA9_F484_FPGA.kicad_sym"
 PARTS = ROOT / "hw/lib/Slot1_Parts.kicad_sym"
-FPGACSV = ROOT / "FPGAlist/CycloneV_A9/pins/5cefa9_f484.csv"
 
-VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5, "VCCIO33": 3.3, "VCCIO18": 1.8}
+VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5, "VCCIO33": 3.3, "VCCIO18": 1.8,
+         "VCC_GXB11": 1.1, "VCCH_GXB25": 2.5}
+GXB_BAND = {"VCCE_GXBL": (1.07, 1.13), "VCCL_GXBL": (1.07, 1.13), "VCCH_GXBL": (2.375, 2.625)}  # pcg: +-30 mV, +-5 %
 A4_POWER = {"D4": "VCCIO33", "J1": "VCCIO33", "R1": "VCCIO33", "Y4": "VCCIO33",   # VCCIO2A
             "E1": "VCCIO33", "J2": "VCCIO33", "R2": "VCCIO33",                   # VCCPD1A2A
             "W1": "GND"}                                                          # VREFB2AN0
@@ -62,12 +64,25 @@ U1_SMALL = {                            # slot1_pdn.py (devkit sheet 29) per rai
 }
 U1_BULK = [("VCC_1V1", "100uF/6.3V", C1210)] * 3 + [
     ("VCC_1V1", "4.7uF", C0603), ("VCCIO33", "10uF", C0805), ("VCCIO18", "10uF", C0805)]
+GXB_SMALL = {"VCC_GXB11": ["1uF", "100nF", "100nF", "10nF", "10nF"], "VCCH_GXB25": ["1uF", "100nF", "10nF"]}
+GXB_BULK = [("VCC_GXB11", "10uF", C0805), ("VCCH_GXB25", "10uF", C0805)]
+BOARDS = {
+    "c2cart": dict(title="Slot 1 C2 cartridge: 5CEBA4 + GTL+ transceivers", fixed=A4_POWER, pcie=False,
+                   fsym="FPGA_CycloneV_5CEFA9_F484_FPGA", csv="FPGAlist/CycloneV_A9/pins/5cefa9_f484.csv"),
+    "c2pcie": dict(title="Slot 1 C2 PCIe cartridge: Cyclone V GX + GTL+ transceivers", fixed={}, pcie=True,
+                   fsym="FPGA_CycloneV_5CGXFC5_F484_FPGA", csv="FPGAlist/CycloneV_GX/pins/5cgxfc5_f484.csv"),
+}
+# J6 OCuLink endpoint pin name -> net; TX after its series capacitor
+OCU = {**{f"PER{s}{k}": f"PCIE_RX{k}_{s.upper()}" for k in range(4) for s in "pn"},
+       **{f"PET{s}{k}": f"PCIE_TX{k}_{s.upper()}_C" for k in range(4) for s in "pn"},
+       "REFCLK+": "PCIE_REFCLK_P", "REFCLK-": "PCIE_REFCLK_N", "PERST#": "PCIE_PERST#",
+       "CPRSNT#": "GND", "GND": "GND", "SHIELD": "GND"}
 
 
-def fpga_net(ball, func):
+def fpga_net(ball, func, fixed):
     """net of an FPGA ball pins.csv does not assign"""
-    if ball in A4_POWER:
-        return A4_POWER[ball]
+    if ball in fixed:
+        return fixed[ball]
     if func in ("TCK", "TMS", "TDI", "TDO"):
         return "F_" + func
     if func in MSEL:
@@ -78,8 +93,14 @@ def fpga_net(ball, func):
         return "CFG_" + func
     if func.split(",")[0] in AS_PINS:
         return as_net(func.split(",")[0])
-    if func == "RREF_TL":
-        return "RREF_TL"                 # PLLs used: 2.0k 1 % to GND [pcg-01014]
+    if func in ("RREF_TL", "RREF"):
+        return "RREF_TL"                 # PLLs / transceivers used: 2.0k 1 % to GND [pcg-01014]
+    if func in ("VCCE_GXBL", "VCCL_GXBL"):
+        return "VCC_GXB11"
+    if func == "VCCH_GXBL":
+        return "VCCH_GXB25"
+    if func.startswith(("GXB_RX", "GXB_REFCLK", "REFCLK")):
+        return "GND"                     # unused receiver / reference clock [pcg-01014]
     if func == "GND":
         return func
     if func == "VCC":
@@ -133,7 +154,7 @@ def contact_net(row, used):
     return "NC_U2_" + row["pin"]
 
 
-def power(P, net_of_ball, gtl, cb3t, agtl):
+def power(P, net_of_ball, gtl, cb3t, agtl, pcie):
     """power tree (variant A's minus DDR3, plus VCCIO18) + decoupling, terminations,
     dividers, pull-ups; every passive of the board as pdn.py rows"""
     print("power tree values:")
@@ -148,9 +169,16 @@ def power(P, net_of_ball, gtl, cb3t, agtl):
           ["VCC_AUX25", "VCCA_FPLL25"], "stage", "PS3")
     buck62130(P, "PS4", "VCCIO33", 3.3, (3.135, 3.465), "PG_1V1", None)
     buck62130(P, "PS5", "VCCIO18", 1.8, (1.71, 1.89), "PG_1V1", None)
+    small, bulk = U1_SMALL, U1_BULK
+    if pcie:
+        # 220 R @ 100 MHz, 2 A, 0.05 R max [Murata BLM21PG221SN1 catalog]; GXB current per the EPE (open)
+        for src, rail in (("VCC_1V1", "VCC_GXB11"), ("VCC_AUX25", "VCCH_GXB25")):
+            P.add("FB", "Device:FerriteBead", "BLM21PG221SN1D", "Inductor_SMD:L_0805_2012Metric",
+                  [src, rail], "stage", "PS2" if src == "VCC_1V1" else "PS3")
+        small, bulk = {**U1_SMALL, **GXB_SMALL}, U1_BULK + GXB_BULK
 
-    pairs = u1_pairs(net_of_ball, U1_SMALL)
-    for rail, caps in U1_SMALL.items():
+    pairs = u1_pairs(net_of_ball, small)
+    for rail, caps in small.items():
         mine = pairs.get(rail, [])
         for k, v in enumerate(sorted(caps, key=farads)):
             if k < len(mine):
@@ -158,7 +186,7 @@ def power(P, net_of_ball, gtl, cb3t, agtl):
             else:
                 P.c(v, C0402, rail, "u1bulk")
         print(f"  U1 {rail}: {min(len(mine), len(caps))}/{len(caps)} on B.Cu via pairs")
-    for rail, v, f in U1_BULK:
+    for rail, v, f in bulk:
         P.c(v, f, rail, "u1bulk")
 
     for ref in gtl:                     # 0.1 uF per supply / VREF pin
@@ -201,31 +229,44 @@ def power(P, net_of_ball, gtl, cb3t, agtl):
         P.r("22R", f"ZCLK_{chip}", f"CLK_{chip}", "clk", "U12")
     P.r("22R", "ZCLK_FB", "CLK_FB", "clk", "U12")
     P.add("C", "Device:C", "10pF", C0402, ["CLK_FB", "GND"], "clk", "U12")   # ~ one chip's CLKAB + CLKBA
+    if pcie:
+        for k in range(4):              # transmitter AC coupling on the endpoint side
+            for s in "PN":
+                P.add("C", "Device:C", "100nF", C0402, [f"PCIE_TX{k}_{s}", f"PCIE_TX{k}_{s}_C"], "pcie", "J6")
+        P.r("10k", "PCIE_PERST#", "GND", "pcie", "J6")   # Hard IP held in reset with no cable
     return P.rows
 
 
-def main():
+def main(board):
+    cfg = BOARDS[board]
+    OUT, NAME = ROOT / f"hw/slot1-{board}", f"slot1-{board}"
+    FSYM = ROOT / f"hw/lib/{cfg['fsym']}.kicad_sym"
     sig_rows = list(csv.DictReader(open(ROOT / "hw/common/slot1_signals.csv")))
     contact_row = {r["pin"]: r for r in sig_rows}
     pinsrows = list(csv.DictReader(open(OUT / "pins.csv")))
-    func_by = {r["ball"]: r["function"] for r in csv.DictReader(open(FPGACSV))}
+    func_by = {r["ball"]: r["function"] for r in csv.DictReader(open(ROOT / cfg["csv"]))}
     ball_net = {}
     for r in pinsrows:
         ball_net[r["ball"]] = {"tx": "TX_", "rx": "S_"}.get(r["kind"], "") + r["signal"]
-    net_of = {b: ball_net.get(b) or fpga_net(b, f) for b, f in func_by.items()}
+    net_of = {b: ball_net.get(b) or fpga_net(b, f, cfg["fixed"]) for b, f in func_by.items()}
     errs = t6.cv_supply_errors(func_by, net_of, VOLTS)
+    errs += [f"{b} {f} on {net_of[b]}" for b, f in func_by.items()
+             if f in GXB_BAND and not GXB_BAND[f][0] <= VOLTS.get(net_of[b], 0) <= GXB_BAND[f][1]]
     if errs:
         print(f"SUPPLY ERRORS ({len(errs)}):", *errs, sep="\n   ")
         sys.exit(1)
     used = {r["signal"] for r in pinsrows if r["contact"]}
+    pin_of = {}
+    for r in sig_rows:
+        pin_of.setdefault(r["signal"], r["pin"])
     agtl = sorted({r["signal"] for r in sig_rows if r["standard"] == "AGTL+" and r["signal"] != "RESET#"},
-                  key=lambda s: int(next(r["pin"][1:] for r in sig_rows if r["signal"] == s)))
+                  key=lambda s: (int(pin_of[s][1:]), pin_of[s][0]))
 
     lib = {d[0]: d for d in t6.parse_lib(PARTS)}
     fsym, csym = t6.parse_lib(FSYM)[0], t6.parse_lib(CPUSYM)[0]
-    big = ["SN74GTL16612", "SN74CB3T3245", "CY2309", "EPCQ128A", "TPS54620", "TPS62130"]
+    big = ["SN74GTL16612", "SN74CB3T3245", "CY2309", "EPCQ128A", "TPS54620", "TPS62130", "OCuLink_4i_EP"]
     parts = t6.sheet_head(
-        "gen_c2cart_s6", "Slot 1 C2 cartridge: 5CEBA4 + GTL+ transceivers",
+        "gen_c2cart_s6", cfg["title"],
         [("hw_n:" + fsym[0], fsym[1]), ("cpu_n:" + csym[0], csym[1])]
         + t6.stock_defs([("Connector_Generic", ["Conn_02x05_Odd_Even", "Conn_02x20_Odd_Even"]),
                          ("Connector", ["Barrel_Jack"]),
@@ -297,11 +338,17 @@ def main():
     # D32 link (gen_qsf.py j5_function): 1/37/38 and even 4-34 GND, 2/39/40 open
     link = {**{3 + 2 * k: f"LINK_DOWN{k}" for k in range(8)}, 19: "LINK_UCLK", 21: "LINK_DCLK",
             **{23 + 2 * k: f"LINK_UP{k}" for k in range(7)}, 36: "LINK_UP7"}
-    j5 = ["GND" if n in (1, 37, 38) or (n % 2 == 0 and 4 <= n <= 34) else link.get(n, nc)
-          for n in range(1, 41)]
-    parts.append(t6.header("J5", "Connector_Generic:Conn_02x20_Odd_Even", j5, 760.0, 600.0, flagged))
+    if cfg["pcie"]:
+        ocu = {p["name"]: OCU.get(p["name"], nc) for p in sym_pins(lib["OCuLink_4i_EP"])}
+        parts.append(t6.syminst("hw_n:OCuLink_4i_EP", "J6", 760.0, 600.0, 1, sym_pins(lib["OCuLink_4i_EP"]),
+                                by_name(sym_pins(lib["OCuLink_4i_EP"]), ocu), footprint="Stock:OCuLink_4i_SFF-8612_RA"))
+    else:
+        j5 = ["GND" if n in (1, 37, 38) or (n % 2 == 0 and 4 <= n <= 34) else link.get(n, nc)
+              for n in range(1, 41)]
+        parts.append(t6.header("J5", "Connector_Generic:Conn_02x20_Odd_Even", j5, 760.0, 600.0, flagged))
 
-    rows = power(Parts("Slot1Parts"), net_of, list(GTL_REFS.values()), list(CB3T_REFS.values()), agtl)
+    rows = power(Parts("Slot1Parts"), net_of, list(GTL_REFS.values()), list(CB3T_REFS.values()), agtl,
+                 cfg["pcie"])
     parts += pdn.draw(rows, PARTS, "Slot1Parts", 30.0, 455.0, flagged)
     with open(OUT / "pdn.csv", "w", newline="") as f:
         w = csv.DictWriter(f, pdn.CSV_FIELDS)
@@ -332,18 +379,27 @@ def main():
             need("S_" + sig, ("U1", ball), ("U2", ct))
         elif kind == "link":
             need(sig, ("U1", ball), ("J5", str(next(n for n, s in link.items() if s == sig))))
+        elif kind == "pcie":
+            name = next(p for p, n in OCU.items() if n in (sig, sig + "_C"))
+            need(sig, ("U1", ball))
+            need(OCU[name], ("J6", pin_num["OCuLink_4i_EP"][name]))
+            if OCU[name] != sig and not any(
+                    ref[0] == "C" and (ref, "2") in nets.get(t6.esc(OCU[name]), ())
+                    for ref, pin in nets.get(t6.esc(sig), ()) if pin == "1"):
+                fails.append(f"{sig}: no series capacitor to {OCU[name]}")
         else:
             need(sig, ("U1", ball))
     need("BCLK", ("U1", "M9"), ("U2", next(p for p, r in contact_row.items() if r["signal"] == "BCLK")),
          ("U12", "1"))
-    need("LINK_DCLK", ("U1", "M8"), ("J5", "21"))
+    if not cfg["pcie"]:
+        need("LINK_DCLK", ("U1", "M8"), ("J5", "21"))
     for chip, ref in GTL_REFS.items():
         need(f"CLK_{chip}", (ref, "55"), (ref, "30"))
         need("VREF_GTL", (ref, "35"))
     for func, pin in AS_PINS.items():
         ball = next(b for b, f in func_by.items() if f.split(",")[0] == func)
         need(as_net(func), ("U1", ball), ("U13", pin))
-    need("VREF_3A", ("U1", "Y7"))
+    need("VREF_3A", ("U1", next(b for b, f in func_by.items() if f == "VREFB3AN0")))
     for s in agtl:
         if not any(ref.startswith("RN") for ref, _ in nets.get(t6.esc("S_" + s), ())):
             fails.append(f"S_{s}: no 56 R termination")
@@ -354,8 +410,9 @@ def main():
         ("Slot1Parts", "../lib/Slot1_Parts.kicad_sym", "C2 cartridge parts"),
         ("SocketFPGA", f"../../hw/lib/{fsym[0]}.kicad_sym", "FPGA"),
         ("SocketCPU", f"../../sockets/kicad/{csym[0]}.kicad_sym", "CPU")])
-    print("PASS  C2 cartridge S6 (netlist audit + ERC)")
+    print(f"PASS  {board} S6 (netlist audit + ERC)")
 
 
 if __name__ == "__main__":
-    main()
+    for b in sys.argv[1:] or BOARDS:
+        main(b)

@@ -177,7 +177,7 @@ def tps_syms():
 def c2cart_syms():
     """dedicated C2 cartridge (plan/slot1_c2.md D33/D35/D37); pin numbers:
     ti_sn74gtl16612 p.1 (DGG), ti_sn74cb3t3245 p.3 (PW), infineon_cy2305
-    Table 2 (CY2309, SOIC-16), cf52014 (EPCQ128A, SOIC-16)"""
+    Table 2 (CY2309, SOIC-16), cf52014 (EPCQ128A, SOIC-16), snia_sff9402 (OCuLink)"""
     a = [("3", "A1"), ("5", "A2"), ("6", "A3"), ("8", "A4"), ("9", "A5"), ("10", "A6"),
          ("12", "A7"), ("13", "A8"), ("14", "A9"), ("15", "A10"), ("16", "A11"), ("17", "A12"),
          ("19", "A13"), ("20", "A14"), ("21", "A15"), ("23", "A16"), ("24", "A17"), ("26", "A18")]
@@ -202,7 +202,15 @@ def c2cart_syms():
                    [("8", "DATA1")] + [(n, "NC") for n in ("4", "5", "6", "11", "12", "13", "14")],
                    [("1", "VCC"), ("2", "VCC"), ("9", "VCC"), ("10", "GND")],
                    "FPGAlist/CycloneV_A9/docs/cf52014_epcq-a_datasheet.pdf", ref="U")
-    return [gtl, cb3t, zdb, epcq]
+    # OCuLink 4i receptacle, endpoint side (snia_sff9402 Table 6-1, SFF-8621 column); SH = shell pads
+    ocu_a = ["P3V3_RX", "GND", "PERp0", "PERn0", "GND", "PERp1", "PERn1", "GND", "2W_CLK", "2W_DATA", "GND",
+             "PERST#", "CPRSNT#", "GND", "PERp2", "PERn2", "GND", "PERp3", "PERn3", "GND", "P5V_2"]
+    ocu_b = ["P5V_1", "GND", "PETp0", "PETn0", "GND", "PETp1", "PETn1", "GND", "BP_TYPE", "CWAKE#", "GND",
+             "REFCLK+", "REFCLK-", "GND", "PETp2", "PETn2", "GND", "PETp3", "PETn3", "GND", "P3V3_TX"]
+    ocu = reg_sym("OCuLink_4i_EP", [("A%d" % (k + 1), n) for k, n in enumerate(ocu_a)],
+                  [("B%d" % (k + 1), n) for k, n in enumerate(ocu_b)], [("SH", "SHIELD")],
+                  "sockets/parts/snia_sff9402_rev1.1.pdf", ref="J")
+    return [gtl, cb3t, zdb, epcq, ocu]
 
 
 def rect_sym(name, ref, pins, box, unit_name="",

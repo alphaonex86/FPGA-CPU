@@ -5,7 +5,7 @@ ball, bank, function, config, vref, clock, pair, user_io. Run after ../../fetch.
     python3 FPGAlist/tools/pins_to_csv.py
 
 The user I/O count is checked against the vendor's resource tables
-(Cyclone V overview Table 5: A9 F484 = 224 GPIO; Ti180 datasheet: G400 = 274).
+(Cyclone V overview Table 5: A9 F484 = 224 GPIO, GX C5 F484 = 240; Ti180 datasheet: G400 = 274).
 """
 import csv
 import os
@@ -95,6 +95,8 @@ def main():
     cv = os.path.join(ROOT, "CycloneV_A9", "pins")
     for dev in ("5ceba9", "5cefa9"):
         write(os.path.join(cv, dev + "_f484.csv"), cyclone_v(os.path.join(cv, dev + ".txt"), "F484"), 224)
+    gx = os.path.join(ROOT, "CycloneV_GX", "pins")     # D34; GX C5 F484 = 240 GPIO (pin table)
+    write(os.path.join(gx, "5cgxfc5_f484.csv"), cyclone_v(os.path.join(gx, "5cgxfc5.txt"), "F484"), 240)
     ti = os.path.join(ROOT, "Ti180_G400", "pins")
     write(os.path.join(ti, "ti180g400.csv"), ti180(os.path.join(ti, "ti180_pinout.xlsx"), "Ti180G400", "FBGA400"), 274)
 

@@ -25,6 +25,8 @@ PRETTY = LIB / "Interposer.pretty"
 VARIANTS = [
     ("FPGA_CycloneV_5CEFA9_F484", "FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv",
      22, 1.0, 0.30),
+    ("FPGA_CycloneV_5CGXFC5_F484", "FPGAlist/CycloneV_GX/pins/5cgxfc5_f484.csv",
+     22, 1.0, 0.30),
     ("FPGA_Ti180_TI180G400", "FPGAlist/Ti180_G400/pins/ti180g400.csv",
      20, 0.8, 0.28),
 ]

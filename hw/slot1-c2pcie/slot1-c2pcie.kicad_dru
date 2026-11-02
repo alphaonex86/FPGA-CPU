@@ -1,0 +1,6 @@
+(version 1)
+(rule "hole clearance"
+  (constraint hole_clearance (min 0.25)))
+(rule "J6 SFF-8612 locating holes"
+  (condition "A.memberOfFootprint('J6') && B.memberOfFootprint('J6')")
+  (constraint hole_clearance (min 0.05)))

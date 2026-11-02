@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Dedicated C2 cartridge (plan/slot1_c2.md D33): PCB placement + outline,
-the S7 step of hw/slot1-cyclonev for this board.
+"""Dedicated C2 cartridges (plan/slot1_c2.md D33, D34): PCB placement +
+outline, the S7 step of hw/slot1-cyclonev for these boards.
 
-Usage: python3 hw/tools/gen_c2cart_s7.py   (after gen_c2cart_s6.py)
-Output: hw/slot1-c2cart/slot1-c2cart.kicad_pcb (+ .drc.json, fp-lib-table,
+Usage: python3 hw/tools/gen_c2cart_s7.py [c2cart|c2pcie]   (after gen_c2cart_s6.py; default both)
+Output: hw/slot1-<board>/slot1-<board>.kicad_pcb (+ .drc.json, fp-lib-table,
 the board settings in .kicad_pro).
 
 Variant A's substrate, card edge, keep-outs and power strip
@@ -11,7 +11,10 @@ Variant A's substrate, card edge, keep-outs and power strip
 cavity band and U1, in the order of their FPGA balls (DATA0-3, CY2309,
 ADDR0-1, TX; pin 1 rows vertical), U1 centred under them, J5 + the
 CB3T3245s left of U1 (link and CMOS balls), EPCQ128A + J1 right (AS and
-JTAG balls), the small parts packed around them. B.Cu: the 56 R packs in
+JTAG balls), the small parts packed around them. c2pcie: J6 (OCuLink,
+land pattern from SFF-8612 Figure 5-8 / A-3) mouth on the top edge under
+U1's GXB balls, the power strip split around it, the TX capacitors on
+B.Cu under it. B.Cu: the 56 R packs in
 one row along the card edge, each at its four contacts' x; every chip's
 supply capacitors under its pins; the CY2309 series resistors under it;
 U1's via-pair capacitors; the regulator 0402 parts under the strip.
@@ -30,13 +33,15 @@ import sys
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import models3d
 from gen_t6_schematic import block
-from gen_slot1_s7 import (A1_X, H, KEY_C, KEY_D, KEY_W, CHAM, RET, STRIP, W, Packer, conn_pads, edge_pads,
+from gen_slot1_s7 import (A1_X, H, KEY_C, KEY_D, KEY_W, CHAM, RET, STRIP, W, conn_pads, edge_pads,
                           emit_lib, footprint_boxes, fp, keepout, keepout_no_tracks, module_pads, orient,
                           overlaps, pdn_footprint, stock_pads)
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-OUT = ROOT / "hw/slot1-c2cart"
-NAME = "slot1-c2cart"
+U1_FP = {"c2cart": "FPGA_CycloneV_5CEFA9_F484_BGA", "c2pcie": "FPGA_CycloneV_5CGXFC5_F484_BGA"}
+J6_AT = (69.0, H - 7.78)                 # shell front (locating pegs + C13 5.97) on the top edge
+STRIP_PCIE = [(28.3, 47.0, 60.2, 57.6, "+x"), (77.9, 47.0, 110.7, 57.6, "+x"), (37.3, 30.2, 51.4, 46.8, "+x"),
+              (75.6, 22.6, 110.7, 34.3, "+x")]
 U1_AT = (63.5, 34.3)                     # courtyard 22.55..46.05: under the chip band
 BAND_Y = 7.1                             # chip band top: the cavity band ends at 7.0
 BAND = ["U5", "U6", "U7", "U8", "U12", "U3", "U4", "U9"]   # DATA0-3, CY2309, ADDR0-1, TX
@@ -82,18 +87,37 @@ class Board:
         pads, cyd = orient(pads, cyd, d, side or row["side"])
         self.add(fp(name, row["ref"], x, y, pads, cyd, side=side or row["side"]))
 
-    def pack(self, rows, regions, side=None):
-        """column-pack rows into regions, skipping occupied spots"""
-        pk = Packer(regions)
+    def pack(self, rows, regions, side=None, filler=None):
+        """each row at the first free spot of the regions (or a running filler)"""
         for row in rows:
             sd = side or row["side"]
+            f = filler or Filler(self, regions, sd)
             cyd = pdn_footprint(row["footprint"])[1]
-            w, h = cyd[2] - cyd[0], cyd[3] - cyd[1]
-
-            def ok(at, d):
-                return self.free((at[0] - w / 2, at[1] - h / 2, at[0] + w / 2, at[1] + h / 2), sd)
-            (cx, cy), _ = pk.put(lambda d: (w, h), ok)
+            cx, cy = f.put(cyd[2] - cyd[0], cyd[3] - cyd[1])
             self.row(row, cx - (cyd[0] + cyd[2]) / 2, cy - (cyd[1] + cyd[3]) / 2, sd)
+            filler = filler or f
+
+
+class Filler:
+    """first free courtyard spot, column by column in 0.25 mm steps, from the last placement on"""
+    def __init__(self, board, regions, side):
+        self.bd, self.regions, self.side, self.ri, self.x = board, regions, side, 0, regions[0][0]
+
+    def put(self, w, h):
+        while self.ri < len(self.regions):
+            x0, y0, x1, y1, _ = self.regions[self.ri]
+            x = max(self.x, x0)
+            while x + w <= x1:
+                y = y0
+                while y + h <= y1:
+                    if self.bd.free((x, y, x + w, y + h), self.side):
+                        self.x = x
+                        return x + w / 2, y + h / 2
+                    y += 0.25
+                x += 0.25
+            self.ri += 1
+            self.x = self.regions[self.ri][0] if self.ri < len(self.regions) else 0
+        raise SystemExit("FAIL: no room left for a %.2f x %.2f part on %s.Cu" % (w, h, self.side))
 
 
 def pad_at(text, num):
@@ -118,7 +142,25 @@ def spread(targets, width, lo, hi, gap=0.15):
     return xs
 
 
-def main():
+def ocu_pads():
+    """SFF-8612 4X right-angle receptacle, origin = datums L x M, mating face +y
+    [snia_sff8612 Table 5-4 D02-D21, Table A-1 DD01-DD09]: rows B (y -D10/2, x from
+    -D03) and A (y +D10/2, x from -D04), 21 x 0.31 x 0.91 at 0.50; locating holes
+    D18 1.00 at (-D14, +D07), (+D15, +D07); shell pads 1.81 wide at +-DD06, small
+    (1.38) at -DD04, large (1.80) at +DD05; courtyard = the keep-out"""
+    pads = ['(pad "%s%d" smd rect (at %.3f %.3f) (size 0.31 0.91) (layers "F.Cu" "F.Paste" "F.Mask"))'
+            % (row, k + 1, x0 + 0.5 * k, y) for row, x0, y in (("B", -5.25, -1.095), ("A", -4.75, 1.095))
+            for k in range(21)]
+    pads += ['(pad "" np_thru_hole circle (at %.2f 1.81) (size 1.0 1.0) (drill 1.0) (layers "*.Cu" "*.Mask"))'
+             % x for x in (-5.41, 5.94)]
+    pads += ['(pad "SH" smd rect (at %.2f %.2f) (size 1.81 %.2f) (layers "F.Cu" "F.Paste" "F.Mask"))'
+             % (sx * 6.91, y, h) for sx in (-1, 1) for y, h in ((-0.71, 1.38), (4.01, 1.80))]
+    return pads, (-8.63, -1.64, 8.63, 8.78)
+
+
+def main(board):
+    OUT, NAME = ROOT / f"hw/slot1-{board}", f"slot1-{board}"
+    pcie = board == "c2pcie"
     rows = list(csv.DictReader(open(OUT / "pdn.csv")))
     net = (OUT / f"{NAME}.net").read_text()
     contact_x = {}                      # net -> contact x (contact number - 1 from A1)
@@ -130,8 +172,8 @@ def main():
 
     edge = edge_pads()
     bd.add(fp("Slot1:SC242_CardEdge_242", "U2", A1_X, 0.055, edge, (-2.0, -2.0, 123.0, 3.4)))
-    fq = module_pads(ROOT / "hw/lib/Interposer.pretty/FPGA_CycloneV_5CEFA9_F484_BGA.kicad_mod")
-    bd.add(fp("Interposer:FPGA_CycloneV_5CEFA9_F484_BGA", "U1", *U1_AT, fq, (-11.75, -11.75, 11.75, 11.75)))
+    fq = module_pads(ROOT / f"hw/lib/Interposer.pretty/{U1_FP[board]}.kicad_mod")
+    bd.add(fp(f"Interposer:{U1_FP[board]}", "U1", *U1_AT, fq, (-11.75, -11.75, 11.75, 11.75)))
     u1_local = {m.group(1): (float(m.group(2)), float(m.group(3))) for m in (
         re.match(r'\(pad "(\w+)" smd \w+ \(at (-?[\d.]+) (-?[\d.]+)\)', p) for p in fq)}
 
@@ -151,7 +193,8 @@ def main():
     j5b = footprint_boxes([fp("Conn:J5", "J5", 0.0, 0.0, j5p, (0, 0, 0, 0))])[1]["F"]
     j5c = (min(b[0] for b in j5b) - 0.5, min(b[1] for b in j5b) - 0.5,
            max(b[2] for b in j5b) + 0.5, max(b[3] for b in j5b) + 0.5)
-    conns = [fp(nc, "J5", 33.5, 22.0 - j5c[1], j5p, j5c),
+    conns = [fp("Stock:OCuLink_4i_SFF-8612_RA", "J6", *J6_AT, *ocu_pads()) if pcie else
+             fp(nc, "J5", 33.5, 22.0 - j5c[1], j5p, j5c),
              fp("Conn:Header_2x05", "J1", 100.0, 44.0, conn_pads(10, True), (-6.3, -1.6, 6.3, 1.6),
                 attr="through_hole"),
              fp("Conn:BarrelJack_CUI_PJ-063AH_Horizontal", "J3", 22.1, H - 12.0,
@@ -184,23 +227,21 @@ def main():
     bd.pack([r for r in rows if r["kind"] in ("strap",) or (r["kind"] == "term" and r["ref"][0] == "C")],
             B_ENDS, "B")
     bd.pack([r for r in rows if r["kind"] in ("u1bulk", "pullup", "vref")], F_SMALL, "F")
+    bd.pack([r for r in rows if r["kind"] == "pcie"],
+            [(J6_AT[0] - 8.5, J6_AT[1] - 1.5, J6_AT[0] + 8.5, H - 0.3, "+x")], "B")
 
     # regulator stages: power parts on F.Cu, their 0402 parts (and F1) on B.Cu below (variant A)
     def area(row):
         c = pdn_footprint(row["footprint"])[1]
         return -(c[2] - c[0]) * (c[3] - c[1])
-    strip, bstrip = Packer(STRIP), Packer(STRIP)
+    regions = STRIP_PCIE if pcie else STRIP
+    strip, bstrip = Filler(bd, regions, "F"), Filler(bd, regions, "B")
     for st in STAGES:
-        strip.newcol()
-        bstrip.newcol()
-        bstrip.x = max(bstrip.x, strip.x)
+        bstrip.x = max(bstrip.x, strip.x) if bstrip.ri == strip.ri else bstrip.x
         group = sorted((r for r in rows if r["kind"] == "stage" and r["a"] == st), key=area)
-        for row in group:
-            back = "0402" in row["footprint"] or st == "F1"
-            pk, sd = (bstrip, "B") if back else (strip, "F")
-            c = pdn_footprint(row["footprint"])[1]
-            (cx, cy), _ = pk.put(lambda d: (c[2] - c[0], c[3] - c[1]))
-            bd.row(row, cx - (c[0] + c[2]) / 2, cy - (c[1] + c[3]) / 2, sd)
+        back = [r for r in group if "0402" in r["footprint"] or st == "F1"]
+        bd.pack([r for r in group if r not in back], None, "F", strip)
+        bd.pack(back, None, "B", bstrip)
 
     o = [(0.0, 0.0), (KEY_C - KEY_W / 2, 0.0), (KEY_C - KEY_W / 2, KEY_D), (KEY_C + KEY_W / 2, KEY_D),
          (KEY_C + KEY_W / 2, 0.0), (W - CHAM, 0.0), (W, CHAM), (W, H), (CHAM, H), (0.0, H - CHAM)]
@@ -221,7 +262,7 @@ def main():
     path = OUT / f"{NAME}.kicad_pcb"
     models3d.copy_models()
     path.write_text(models3d.with_models(text, strict=True))
-    for t in bd.protos.values():          # Conn: variant A emits the same geometry
+    for t in list(bd.protos.values()) + [c for c in conns if "Stock:" in c]:   # Conn: variant A emits those
         emit_lib(t)
     (OUT / "fp-lib-table").write_text("(fp_lib_table\n  (version 7)\n" + "".join(
         '  (lib (name "%s")(type "KiCad")(uri "${KIPRJMOD}/../lib/%s.pretty")(options "")'
@@ -239,6 +280,14 @@ def main():
     default = next(c for c in tmpl["net_settings"]["classes"] if c["name"] == "Default")
     pro["net_settings"] = {"meta": tmpl["net_settings"]["meta"],
                            "classes": [dict(default, clearance=0.15, track_width=0.2)]}
+    if pcie:                             # SFF-8612 Table 5-4 puts the pegs 0.07 mm from A1 / A21
+        hole = rules["min_hole_clearance"]
+        rules["min_hole_clearance"] = 0.05   # board floor; the .kicad_dru keeps the template value elsewhere
+        (OUT / f"{NAME}.kicad_dru").write_text(
+            f'(version 1)\n(rule "hole clearance"\n  (constraint hole_clearance (min {hole})))\n'
+            '(rule "J6 SFF-8612 locating holes"\n'
+            '  (condition "A.memberOfFootprint(\'J6\') && B.memberOfFootprint(\'J6\')")\n'
+            '  (constraint hole_clearance (min 0.05)))\n')
     pro_path.write_text(json.dumps(pro, indent=2))
 
     fails = []
@@ -266,8 +315,9 @@ def main():
             print("  ", v.get("type"), str(v.get("description"))[:100],
                   [str(i.get("description"))[:60] for i in v.get("items", [])[:2]])
         sys.exit(1)
-    print(f"PASS  C2 cartridge S7: {len(refs)} footprints placed, DRC 0 errors")
+    print(f"PASS  {board} S7: {len(refs)} footprints placed, DRC 0 errors")
 
 
 if __name__ == "__main__":
-    main()
+    for b in sys.argv[1:] or ("c2cart", "c2pcie"):
+        main(b)
