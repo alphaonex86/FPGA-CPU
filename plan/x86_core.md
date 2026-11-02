@@ -191,7 +191,20 @@ replicated per read port plus a live-value table.
    BTB 512 entries in RAM, read with pc_f's next value (no reset, a clear
    does not check the tag: one port): 3.957 CoreMark/MHz (252,702 cycles).
    Third ALU (port 5, result bus 3; rename rotates over the 3 ALUs): 4.101
-   CoreMark/MHz (243,864 cycles, IPC 1.392); its synthesis cost decides.
+   CoreMark/MHz (243,864 cycles, IPC 1.392); perf build 56.87 MHz, 65,898
+   ALMs (+6.5K, same worst path as without it): taken.
+   Bus 2 known a cycle ahead (a load's A check done and the bus free, or
+   mul/div done next cycle: its pipeline is fixed): their dependents wake
+   then (load-to-use 3 -> 2, mul 3 -> 2, nothing speculative): 4.510
+   CoreMark/MHz (221,724 cycles, IPC 1.531).
+   Perf builds: load check in A 58.2 MHz (61,462 ALMs), + BTB RAM 55.23
+   MHz (59,392 ALMs; same worst path, placement spread ~5 %): S, sq_head ->
+   count of known store addresses -> load request -> grant -> pick ->
+   bypass tag compare. Registering that position (a cycle late) costs 3.957
+   -> 3.776 CoreMark/MHz; instead each load keeps the mask of its older
+   stores' queue entries (set in D, a retiring store clears its bit in
+   every RS entry): request = no masked entry with an unknown address, same
+   cycles.
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div

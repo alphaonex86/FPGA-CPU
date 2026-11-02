@@ -6,7 +6,7 @@
 //   The 6 arithmetic flags rename like a register (C2).
 // - One unified reservation station capturing operands. Pipeline S (select,
 //   age matrix, oldest ready first per port) -> X (execute) -> wb1 (result
-//   register: ROB, capture) -> wb2 (bypass only). Ports: 2 ALU/branch, each
+//   register: ROB, capture) -> wb2 (bypass only). Ports: 3 ALU/branch, each
 //   ALU uop bound to one at dispatch; 1 load port S -> A (AGU) -> M; 1
 //   store port, S -> X (AGU: store queue entry, done; no result bus).
 // - An ALU grant wakes its dependents at once (back to back issue); their
@@ -43,8 +43,15 @@ module x86_core
     output logic                  illegal       // halted on an unsupported instruction
 );
     localparam int UQ_N = 16;
-    localparam int NP = 5;   // issue ports: 0, 1 ALU; 2 load; 3 mul/div; 4 store
-    localparam int NW = 3;   // result buses: 0, 1 ALU; 2 memory or mul/div (mul/div first)
+    localparam int NP = 6;   // issue ports: 0, 1 ALU; 2 load; 3 mul/div; 4 store; 5 ALU
+    localparam int NW = 4;   // result buses: 0, 1 ALU; 2 memory or mul/div (mul/div first); 3 ALU
+    localparam int NA = 3;   // ALUs: a on port aport(a), bus abus(a)
+    function automatic int aport(input int a);
+        return a == 2 ? 5 : a;
+    endfunction
+    function automatic int abus(input int a);
+        return a == 2 ? 3 : a;
+    endfunction
 
     // ---------------- frontend + decode ----------------
     logic                 fe_redirect;
@@ -204,12 +211,13 @@ module x86_core
     typedef struct packed {
         logic             valid;
         logic             issued;    // memory uops stay until M completes
-        logic             port;      // ALU uops: ALU port
+        logic [1:0]       port;      // ALU uops: ALU (0 .. NA - 1)
         uop_t             u;
         logic [TAG_W-1:0] tag;
         src_t [2:0]       src;       // s1, s2, s3
         fsrc_t            fsrc;
         logic [SQ_W:0]    sq_snap;   // loads: store queue tail at dispatch
+        logic [SQ_N-1:0]  sq_older;  // loads: entries of the older stores still queued
         logic [SQ_W-1:0]  sq_idx;    // stores: own store queue entry
     } rs_t;
 
@@ -224,7 +232,7 @@ module x86_core
     logic [TAG_W:0]   rob_count;
     rs_t              rs [RS_N];
     logic [RS_N-1:0]  older [RS_N];   // older[e][f]: entry f is older than e
-    logic             alu_port;       // port of the next dispatched ALU uop
+    logic [1:0]       alu_port;       // ALU of the next dispatched ALU uop
     sq_t              sq [SQ_N];
     logic [SQ_W:0]    sq_head, sq_tail;      // with wrap bit
     logic [31:0]      arch [NREG];
@@ -244,8 +252,8 @@ module x86_core
     logic [NW-1:0]             wb_mispred, wb_fault;
     logic [NW-1:0][31:0]       wb_redirect_pc;   // branches: the actual next EIP
     logic [NW-1:0]             wb_br;
-    logic [2:0]                ew_valid;   // early wakeup (ready, value on a bypass later):
-    logic [2:0][TAG_W-1:0]     ew_tag;     // ALU grants, result bus 2 in its X / M cycle
+    logic [NW-1:0]             ew_valid;   // early wakeup (ready, value on a bypass later):
+    logic [NW-1:0][TAG_W-1:0]  ew_tag;     // ALU grants, result bus 2 in its X / M cycle
     logic [NW-1:0]             wb2_valid;
     logic [NW-1:0][TAG_W-1:0]  wb2_tag;
     logic [NW-1:0][31:0]       wb2_value;
@@ -413,7 +421,7 @@ module x86_core
     typedef struct packed {
         uop_t                  u;
         logic [TAG_W-1:0]      tag;
-        logic                  port;
+        logic [1:0]            port;
         logic [SQ_W:0]         sq_snap;
         logic [3:0]            in_rob;   // s1, s2, s3, flags
         logic [3:0][TAG_W-1:0] stag;
@@ -434,21 +442,22 @@ module x86_core
     always_comb begin
         logic [TAG_W:0] rob_free;
         logic [SQ_W:0]  sqt;
-        logic           stop, par;
+        logic           stop;
+        logic [1:0]     nxt;
         logic [3:0]     sr;
         uop_t           u;
         rob_free = (TAG_W + 1)'(ROB_N) - rob_count;
         sqt = sq_tail;
         rn_n = 2'd0;
-        par = 1'b0;
+        nxt = alu_port;
         stop = halted || !d_ok;
         for (int k = 0; k < 3; k++) begin
             u = uq[4'(uq_head + 4'(k))];
             rn[k] = '0;
             rn[k].u = u;
             rn[k].tag = TAG_W'(rob_tail + TAG_W'(k));
-            rn[k].port = alu_port ^ par;
-            par = par ^ is_alu(u.kind);
+            rn[k].port = nxt;
+            if (is_alu(u.kind)) nxt = nxt == 2'd2 ? 2'd0 : nxt + 2'd1;
             rn[k].sq_snap = sqt;
             for (int i = 0; i < 3; i++) begin
                 sr = i == 0 ? u.s1 : i == 1 ? u.s2 : u.s3;
@@ -527,6 +536,9 @@ module x86_core
             ds_rs[k].u = u;
             ds_rs[k].tag = dq[k].tag;
             ds_rs[k].sq_snap = dq[k].sq_snap;
+            for (int q = 0; q < SQ_N; q++)
+                ds_rs[k].sq_older[q] = (SQ_W + 1)'(SQ_W'(SQ_W'(q) - sq_head[SQ_W-1:0])) < dq[k].sq_snap - sq_head
+                                       && !(r_store && SQ_W'(q) == sq_head[SQ_W-1:0]);
             ds_rs[k].sq_idx = dq[k].sq_snap[SQ_W-1:0];
             sr[0] = u.s1; su[0] = u.us1;
             sr[1] = u.s2; su[1] = u.us2;
@@ -535,7 +547,7 @@ module x86_core
                 ds_rs[k].src[i] = read_src(sr[i], dq[k].in_rob[i], dq[k].stag[i]);
                 if (!su[i]) ds_rs[k].src[i].ready = 1'b1;
                 ds_rs[k].src[i].captured = ds_rs[k].src[i].ready;
-                for (int p = 0; p < 3; p++)
+                for (int p = 0; p < NW; p++)
                     if (dq[k].in_rob[i] && ew_valid[p] && ew_tag[p] == dq[k].stag[i])
                         ds_rs[k].src[i].ready = 1'b1;
             end
@@ -549,7 +561,7 @@ module x86_core
                     ds_rs[k].fsrc.value = wb_flags[p];
                 end
             ds_rs[k].fsrc.captured = ds_rs[k].fsrc.ready;
-            for (int p = 0; p < 3; p++)
+            for (int p = 0; p < NW; p++)
                 if (dq[k].in_rob[3] && ew_valid[p] && ew_tag[p] == t) ds_rs[k].fsrc.ready = 1'b1;
             ds_to_rs[k] = d_ok && dq_valid[k] && needs_rs(u.kind);
             ds_slot[k] = fs[nrs];
@@ -567,7 +579,7 @@ module x86_core
     // (the tags compared in S, off the X operand path)
     logic [NP-1:0][3:0][NW-1:0] ix_on1, ix_on2, on1_n, on2_n;
     logic [RS_N-1:0]         md_wait;   // K_MD uops not issued yet
-    logic [1:0][TAG_W-1:0] gtag;        // ALU grants: wake dependents now
+    logic [NA-1:0][TAG_W-1:0] gtag;        // ALU grants: wake dependents now
 
     function automatic rs_t pick(input logic [RS_N-1:0] g);
         logic [$bits(rs_t)-1:0] v = '0;
@@ -582,23 +594,16 @@ module x86_core
     endfunction
 
     always_comb begin
-        logic [SQ_W:0] known;   // older store addresses known, from sq_head
-        logic          stop;
-        known = '0;
-        stop = 1'b0;
-        for (int k = 0; k < SQ_N; k++)
-            if (!stop && (SQ_W + 1)'(k) < sq_tail - sq_head
-                && sq[SQ_W'(sq_head[SQ_W-1:0] + SQ_W'(k))].addr_valid) known = known + 1'b1;
-            else stop = 1'b1;
+        logic [SQ_N-1:0] sq_unknown;
+        for (int q = 0; q < SQ_N; q++) sq_unknown[q] = !sq[q].addr_valid;
         for (int e = 0; e < RS_N; e++)
             md_wait[e] = rs[e].valid && !rs[e].issued && rs[e].u.kind == K_MD;
         for (int e = 0; e < RS_N; e++) begin
             logic srcs;
             srcs = rs[e].valid && !rs[e].issued && rs[e].src[0].ready && rs[e].src[1].ready
                    && rs[e].src[2].ready && rs[e].fsrc.ready;
-            req[0][e] = srcs && is_alu(rs[e].u.kind) && !rs[e].port;
-            req[1][e] = srcs && is_alu(rs[e].u.kind) && rs[e].port;
-            req[2][e] = srcs && rs[e].u.kind == K_LD && rs[e].sq_snap - sq_head <= known;
+            for (int a = 0; a < NA; a++) req[aport(a)][e] = srcs && is_alu(rs[e].u.kind) && rs[e].port == 2'(a);
+            req[2][e] = srcs && rs[e].u.kind == K_LD && (rs[e].sq_older & sq_unknown) == '0;
             req[4][e] = srcs && rs[e].u.kind == K_ST;
             // in order (MULH/DIVR read the unit's last result); nothing while
             // a division runs or is in X (it starts there)
@@ -609,7 +614,7 @@ module x86_core
             for (int e = 0; e < RS_N; e++)
                 grant[p][e] = req[p][e] && (req[p] & older[e]) == '0 && !halted;
         for (int p = 0; p < NP; p++) ixn[p] = pick(grant[p]);
-        for (int p = 0; p < 2; p++) gtag[p] = ixn[p].tag;
+        for (int a = 0; a < NA; a++) gtag[a] = ixn[aport(a)].tag;
     end
 
     // ---------------- X / A: execute, address ----------------
@@ -645,8 +650,8 @@ module x86_core
     endfunction
 
     rs_t [NP-1:0]     xr;    // issue registers with resolved operands
-    logic [1:0][31:0] alu_y;
-    flags_t [1:0]     alu_f;
+    logic [NA-1:0][31:0] alu_y;
+    flags_t [NA-1:0]     alu_f;
     always_comb for (int p = 0; p < NP; p++) xr[p] = resolve(ix[p], ix_on1[p], ix_on2[p]);
 
     // a source value, AH..BH moved down
@@ -654,12 +659,13 @@ module x86_core
         return hi ? v >> 8 : v;
     endfunction
 
-    generate for (gi = 0; gi < 2; gi = gi + 1) begin : alu
-        x86_alu u_alu (.op(xr[gi].u.aop), .sz(xr[gi].u.osz), .cond(xr[gi].u.cond),
-                       .a(byte_hi(xr[gi].src[0].value, xr[gi].u.hi1)),
-                       .b(xr[gi].u.us2 ? byte_hi(xr[gi].src[1].value, xr[gi].u.hi2) : xr[gi].u.imm),
-                       .c(xr[gi].src[2].value),
-                       .fin(xr[gi].fsrc.value), .y(alu_y[gi]), .f(alu_f[gi]));
+    generate for (gi = 0; gi < NA; gi = gi + 1) begin : alu
+        localparam int P = aport(gi);
+        x86_alu u_alu (.op(xr[P].u.aop), .sz(xr[P].u.osz), .cond(xr[P].u.cond),
+                       .a(byte_hi(xr[P].src[0].value, xr[P].u.hi1)),
+                       .b(xr[P].u.us2 ? byte_hi(xr[P].src[1].value, xr[P].u.hi2) : xr[P].u.imm),
+                       .c(xr[P].src[2].value),
+                       .fin(xr[P].fsrc.value), .y(alu_y[gi]), .f(alu_f[gi]));
     end endgenerate
 
 `ifndef SYNTHESIS
@@ -761,17 +767,19 @@ module x86_core
     flags_t [NW-1:0]        ex_flags;
     logic [NW-1:0]          ex_mispred, ex_br, ex_fault;
     always_comb begin
-        for (int p = 0; p < 2; p++) begin
+        for (int a = 0; a < NA; a++) begin
             rs_t r;
             logic taken;
             logic [31:0] pc, pred;
-            r = xr[p];
-            ex_valid[p] = ix_valid[p];
+            int p;
+            p = abus(a);
+            r = xr[aport(a)];
+            ex_valid[p] = ix_valid[aport(a)];
             ex_value[p] = r.u.btbi ? r.u.imm2   // the BTB update's PC
                         : r.u.aop == A_LEA ? agu(r)
                         : r.u.ecxz && r.src[0].value == 32'd0 ? 32'd0   // REP exit: ECX stays 0
-                        : merge(r.src[0].value, alu_y[p], r.u.osz, r.u.dhi);
-            ex_flags[p] = r.u.wflags ? alu_f[p] : r.fsrc.value;
+                        : merge(r.src[0].value, alu_y[a], r.u.osz, r.u.dhi);
+            ex_flags[p] = r.u.wflags ? alu_f[a] : r.fsrc.value;
             taken = r.u.ecxz ? r.src[0].value == 32'd0
                   : r.u.loopc ? r.src[0].value != 32'd1 && (!r.u.rflags || cond_taken(r.u.cond, r.fsrc.value))
                   : r.u.uncond || cond_taken(r.u.cond, r.fsrc.value);
@@ -801,8 +809,7 @@ module x86_core
     // their X cycle, wb1 on wb2
     always_comb begin
         logic [NW-1:0][TAG_W-1:0] ex_tag;
-        ex_tag[0] = ix[0].tag;
-        ex_tag[1] = ix[1].tag;
+        for (int a = 0; a < NA; a++) ex_tag[abus(a)] = ix[aport(a)].tag;
         ex_tag[2] = md_done ? md_tag : am_tag;
         for (int p = 0; p < NP; p++)
             for (int i = 0; i < 4; i++) begin
@@ -817,9 +824,9 @@ module x86_core
             end
     end
     always_comb begin
-        for (int p = 0; p < 2; p++) begin
-            ew_valid[p] = grant[p] != '0;
-            ew_tag[p] = gtag[p];
+        for (int a = 0; a < NA; a++) begin
+            ew_valid[abus(a)] = grant[aport(a)] != '0;
+            ew_tag[abus(a)] = gtag[a];
         end
         ew_valid[2] = ex_valid[2];
         ew_tag[2] = md_done ? md_tag : am_tag;
@@ -834,7 +841,7 @@ module x86_core
         wb_redirect_pc <= ex_redirect_pc;
         wb_br <= ex_br;
         wb_fault <= ex_fault;
-        for (int p = 0; p < 2; p++) wb_tag[p] <= ix[p].tag;
+        for (int a = 0; a < NA; a++) wb_tag[abus(a)] <= ix[aport(a)].tag;
         wb_tag[2] <= md_done ? md_tag : am_tag;
         wb2_tag <= wb_tag;
         wb2_value <= wb_value;
@@ -885,7 +892,7 @@ module x86_core
             halted <= 1'b0;
             illegal <= 1'b0;
             df <= 1'b0;
-            alu_port <= 1'b0;
+            alu_port <= 2'd0;
             for (int r = 0; r < NREG; r++) arch[r] <= 32'd0;
             arch[R_ESP] <= 32'h0010_0000;
             arch_flags <= '0;
@@ -949,7 +956,7 @@ module x86_core
                 // wakeup: early (ready), wb1 (ready + capture)
                 for (int e = 0; e < RS_N; e++) begin
                     for (int i = 0; i < 3; i++) begin
-                        for (int p = 0; p < 3; p++)
+                        for (int p = 0; p < NW; p++)
                             if (ew_valid[p] && rs[e].src[i].tag == ew_tag[p]) rs[e].src[i].ready <= 1'b1;
                         for (int p = 0; p < NW; p++)
                             if (wb_valid[p] && !rs[e].src[i].captured && rs[e].src[i].tag == wb_tag[p]) begin
@@ -958,7 +965,7 @@ module x86_core
                                 rs[e].src[i].value <= wb_value[p];
                             end
                     end
-                    for (int p = 0; p < 3; p++)
+                    for (int p = 0; p < NW; p++)
                         if (ew_valid[p] && rs[e].fsrc.tag == ew_tag[p]) rs[e].fsrc.ready <= 1'b1;
                     for (int p = 0; p < NW; p++)
                         if (wb_valid[p] && !rs[e].fsrc.captured && rs[e].fsrc.tag == wb_tag[p]) begin
@@ -986,6 +993,10 @@ module x86_core
                             row = row | ds_slot[k];
                         end
                 end
+                // a retiring store leaves the loads' older sets (its entry
+                // is reused by a younger store)
+                if (r_store)
+                    for (int e = 0; e < RS_N; e++) rs[e].sq_older[sq_head[SQ_W-1:0]] <= 1'b0;
                 // R: ROB, RAT, store queue entry -> D
                 for (int k = 0; k < 3; k++) begin
                     if (d_ok) begin
@@ -1009,7 +1020,7 @@ module x86_core
                             frat_rob <= 1'b1;
                             frat_tag <= rn[k].tag;
                         end
-                        if (is_alu(u.kind)) alu_port <= !rn[k].port;
+                        if (is_alu(u.kind)) alu_port <= rn[k].port == 2'd2 ? 2'd0 : rn[k].port + 2'd1;
                     end
                 end
                 rob_tail <= rob_tail + TAG_W'(rn_n);
