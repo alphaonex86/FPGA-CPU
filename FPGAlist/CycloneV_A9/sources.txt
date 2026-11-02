@@ -11,6 +11,7 @@ docs/product_brief.pdf https://docs.altera.com/api/khub/documents/eeyg~_B8H2n8Yc
 pins/5ceba9.txt https://docs.altera.com/api/khub/documents/z2GaL3jXZJvAsrlIs20GCQ/content
 pins/5ceba9.xls https://docs.altera.com/api/khub/documents/Nukl4XbhsN5asb1PlyUGrw/content
 pins/5ceba9.pdf https://docs.altera.com/api/khub/documents/E0z7ThxeNm3cTNcSZfScsQ/content
+pins/5ceba4.txt https://docs.altera.com/api/khub/documents/dPEs8B9W5ug3X87RWCnxOQ/content
 pins/5cefa9.txt https://docs.altera.com/api/khub/documents/nfJoRZPJi1kEizqb7Z22IQ/content
 pins/5cefa9.xls https://docs.altera.com/api/khub/documents/c9UvN3vkPNgM_ct_9uVyNg/content
 pins/5cefa9.pdf https://docs.altera.com/api/khub/documents/Y~YG7dY6WCHWeuoIdUgykw/content

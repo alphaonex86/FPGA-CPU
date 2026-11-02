@@ -5,7 +5,9 @@
 // the PCIe IP and the board; with C2_LOOP_TARGET defined the board is
 // c2_loop_target (RTL devices, the bring-up bitstream's); with C2_P6 the
 // bus port crosses to BCLK (c2_bus_sync) and runs c2_p6_agent on a P6 bus
-// whose chipset is FPGAcommon's p6_bif, the testbench serves its host port.
+// whose chipset is FPGAcommon's p6_bif, the testbench serves its host port;
+// C2_GTL adds the D35 GTL+ transceivers' direction (p6_err[9]: a drive
+// without OEAB or an OEAB/dir order that makes LVTTL contention).
 // board_rst: the board's reset (into the cartridge, or p6_bif's reset);
 // cpu_pins: the chipset's CMOS outputs {SMI#, INIT#, NMI, STPCLK#, A20M#},
 // asserted (into the cartridge, with C2_P6 through c2_bus_sync).
@@ -74,7 +76,7 @@ module c2_sim_top #(
     input  logic [7:0]  inta_vector,
     output logic        spc_stb,
     output logic [2:0]  spc_type,
-    output logic [8:0]  p6_err,
+    output logic [9:0]  p6_err,
     output logic        p6_cpu_ready
 `endif
 );
@@ -165,22 +167,47 @@ module c2_sim_top #(
     logic        ads_cpu, ads_cs, drdy_cpu, drdy_cs, dbsy_cs, trdy_cs, hit_cs, hitm_cs, bnr_cs, bpri_cs,
                  br0_cpu, br0_cs, reset_cs, defer_cs, binit_cs, cpu_reset;
     logic [12:5] straps;
+    logic        addr_dir, addr_oeab, data_dir, data_oeab;
+`ifdef C2_GTL
+    // the agent's A#/REQ#/D# reach the bus only through OEAB; with dir its
+    // LVTTL side carries its own levels instead of the bus
+    wire [35:3] a_n   = ~((addr_oeab ? a_cpu : '0) | a_cs);
+    wire [4:0]  req_n = ~((addr_oeab ? req_cpu : '0) | req_cs);
+    wire [63:0] d_n   = ~((data_oeab ? d_cpu : '0) | d_cs);
+    wire [12:5] a_agent = addr_dir ? ~a_cpu[12:5] : a_n[12:5];
+    wire [63:0] d_agent = data_dir ? ~d_cpu : d_n;
+    logic       addr_dir_q, addr_oeab_q, data_dir_q, data_oeab_q, gtl_err;
+    always_ff @(posedge bclk) begin
+        {addr_dir_q, addr_oeab_q, data_dir_q, data_oeab_q} <= {addr_dir, addr_oeab, data_dir, data_oeab};
+        if (rst) gtl_err <= 0;
+        else if ((|a_cpu || |req_cpu) && !addr_oeab || |d_cpu && !data_oeab ||
+                 addr_oeab && !(addr_dir && addr_dir_q) || addr_dir_q && !addr_dir && addr_oeab_q ||
+                 data_oeab && !(data_dir && data_dir_q) || data_dir_q && !data_dir && data_oeab_q)
+            gtl_err <= 1;
+    end
+`else
     wire [35:3] a_n   = ~(a_cpu | a_cs);
+    wire [4:0]  req_n = ~(req_cpu | req_cs);
     wire [63:0] d_n   = ~(d_cpu | d_cs);
+    wire [12:5] a_agent = a_n[12:5];
+    wire [63:0] d_agent = d_n;
+    wire        gtl_err = 0;
+`endif
+    assign p6_err[9] = gtl_err;
     wire        ads_n = ~(ads_cpu | ads_cs), drdy_n = ~(drdy_cpu | drdy_cs);
     c2_p6_agent agent (
         .clk(bclk), .rst, .bus_req(s_req), .bus_space, .bus_write, .bus_inta, .bus_special, .bus_addr, .bus_size,
         .bus_wdata,
         .bus_done(s_done), .bus_rdata(s_rdata), .bus_err(s_err),
-        .reset_n(!reset_cs), .a_n(a_n[12:5]), .ads_n, .bnr_n(!bnr_cs), .bpri_n(!bpri_cs), .trdy_n(!trdy_cs),
-        .dbsy_n(!dbsy_cs), .drdy_n, .rs_n(~rs_cs), .d_n,
+        .reset_n(!reset_cs), .a_n(a_agent), .ads_n, .bnr_n(!bnr_cs), .bpri_n(!bpri_cs), .trdy_n(!trdy_cs),
+        .dbsy_n(!dbsy_cs), .drdy_n, .rs_n(~rs_cs), .d_n(d_agent),
         .a_drv(a_cpu), .req_drv(req_cpu), .ads_drv(ads_cpu), .br0_drv(br0_cpu), .drdy_drv(drdy_cpu),
-        .d_drv(d_cpu), .cpu_reset, .straps
+        .d_drv(d_cpu), .addr_dir, .addr_oeab, .data_dir, .data_oeab, .cpu_reset, .straps
     );
     // board bus decode: every memory address is PCI (no DRAM model), every
     // I/O port goes to the host port
     p6_bif #(.RESET_CLKS(24)) chipset (
-        .clk(bclk), .rst_n(!rst && !board_rst), .a_n, .req_n(~(req_cpu | req_cs)), .ads_n, .d_n, .drdy_n,
+        .clk(bclk), .rst_n(!rst && !board_rst), .a_n, .req_n, .ads_n, .d_n, .drdy_n,
         .dbsy_n(!dbsy_cs), .hit_n(!hit_cs), .hitm_n(!hitm_cs), .bnr_n(!bnr_cs), .lock_n(1'b1),
         .binit_n(!binit_cs),
         .a_drv(a_cs), .req_drv(req_cs), .ads_drv(ads_cs), .d_drv(d_cs), .rs_drv(rs_cs), .trdy_drv(trdy_cs),
@@ -192,7 +219,7 @@ module c2_sim_top #(
         .host_lock(), .host_smmem(), .host_ready, .host_rdata, .host_rvalid, .host_err(1'b0),
         .spc_stb, .spc_type, .inta_stb(), .inta_vector,
         .snoop_stall(1'b0), .dma_req(1'b0), .dma_gnt(), .snp_line('0), .snp_inv(1'b0), .snp_ok(),
-        .cpu_ready(p6_cpu_ready), .err(p6_err)
+        .cpu_ready(p6_cpu_ready), .err(p6_err[8:0])
     );
 `else
     c2_cart cart (

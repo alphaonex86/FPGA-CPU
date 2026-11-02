@@ -225,6 +225,44 @@ window is never refilled under a running REP.
 - The board must run 66 MHz: 100/66# low on the cartridge (a tie on the
   next PCB revision) or the board's FSB jumper.
 
+## Dedicated cartridge PCB (D33) with GTL+ transceivers (D35)
+
+`hw/slot1-c2cart/`, independent of the variant A routing.
+
+- FPGA 5CEBA4F23C8 (or A2; an A9 drops in): pins only on the 208 F484 IO
+  balls that are IO on both A4 and A9 (16 bank-7A balls are A9-only, 16
+  A4-only); the board powers the A4's VCCIO2A/VCCPD1A2A balls (NC on the
+  A9). All banks 3.3 V: no DDR3, no 1.35 V bank.
+- AGTL+ through 8 x SN74GTL16612DGG (18-bit LVTTL <-> GTL+ transceiver,
+  B port 40 mA at VOL 0.4 V = ~0.4 V into the double-terminated 28 ohm
+  line vs VIL 0.82 V; VREF comparator on receive), transparent mode
+  (LEAB/LEBA high, CEAB/CEBA high, CLKAB/CLKBA low), timing A->B
+  4.5 ns, B->A 6.9 ns, OE 7.4 ns max [ti_sn74gtl16612]:
+  | group | chips | lines | direction |
+  |---|---|---|---|
+  | ADDR | 2 | A[31:3]#, REQ[4:0]# | FPGA OEAB#/OEBA# pair |
+  | DATA | 4 | D[63:0]# | FPGA OEAB#/OEBA# pair |
+  | RX | 1 | ADS#, BNR#, BPRI#, TRDY#, DBSY#, DRDY#, RS[2:0]#, RESET#, DEFER#, LOCK#, HIT#, HITM#, BR0# | B -> A only (OEBA# tied low) |
+  | TX | 1 | ADS#, DRDY#, DBSY#, BR0#, BNR#, HIT#, HITM# | A -> B only (OEAB# tied low) |
+  TX lines also land on an RX channel (two FPGA balls each: drive and
+  observe): the agent counts its own ADS# and every DRDY#/DBSY#, also
+  while it drives. Direction change, contention-free on the LVTTL side:
+  OEBA# off and the FPGA drives high (released) one BCLK before OEAB# on;
+  back the same way. ADDR goes out one BCLK before ADS# (the agent
+  rechecks BPRI#/BNR# then); DATA goes out when our write heads the
+  in-order queue and the data bus is quiet, and DRDY# waits for OEAB#
+  (a late DRDY# is a legal wait state after TRDY#).
+- A[35:32]#, AP[1:0]#, DEP[7:0]#, RP#, AERR#, BERR#, BINIT#, IERR#,
+  BP/BPM#: terminated, not connected (C2 uses no parity, 32-bit addresses).
+- Every AGTL+ net keeps its 56 ohm processor-end termination to the slot
+  VTT; VREF 1.0 V = 2/3 VTT divider from the slot VTT, one per board,
+  0.1 uF at each 16612. CMOS pins (2.5 V) through CB3T3245 pass-gates.
+- Power: 12 V barrel (D13); 5 V for the 16612 (ICC5 120 mA max each,
+  0.96 A) and the FPGA rails from TPS62130 bucks; 100/66# tied low
+  (66 MHz).
+- Variant A also gets D35 later: its 1.35 V banks cannot take the 16612's
+  3.3 V A-port outputs (receive-only nets there, NM45 option 1).
+
 ## Shadow RAM (`shadow.c`)
 
 440BX PAM0-PAM6 (config 0:0:0 0x59-0x5f, datasheet 290633-001 sec.

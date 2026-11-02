@@ -2,10 +2,11 @@
 # Usage: sw/c2-vmm/test_rtl.sh
 # Runs the test ROM through the bridge RTL (rtl/c2: PCIe TLP engine, card,
 # link, cartridge; Verilator) on the c2-vmm "rtl" backend (needs /dev/kvm),
-# three times: the cartridge's bus cycles served by the bus_sim devices
+# four times: the cartridge's bus cycles served by the bus_sim devices
 # (C++), by c2_loop_target (the bring-up bitstream's RTL devices), and as P6
 # bus transactions (c2_p6_agent) answered by FPGAcommon's p6_bif chipset
-# front end, whose host port the bus_sim devices serve.
+# front end, whose host port the bus_sim devices serve; p6gtl adds the GTL+
+# transceiver direction model (C2_GTL, plan/slot1_c2.md D35).
 # rtl/tests/c2/p6_bif.v: copy of FPGAcommon/rtl/cpu_p6/p6_bif.v at cdd16c2
 # (the FPGAmotherboard chipset front end, same operator); refresh by copying.
 set -eu
@@ -42,9 +43,10 @@ build() {
 build devices
 build target C2_LOOP_TARGET
 build p6 C2_P6
+build p6gtl C2_P6 C2_GTL
 
 rc=0
-for name in devices target p6; do
+for name in devices target p6 p6gtl; do
     echo "== $name"
     if timeout 600 "$out/$name/c2-vmm-rtl" -e 0xf4 rtl "$out/test_rom.bin"; then
         echo "PASS"

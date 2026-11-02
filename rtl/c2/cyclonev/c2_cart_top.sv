@@ -92,7 +92,8 @@ module c2_cart_top (
         .clk(pclk), .rst(brst), .bus_req(s_req), .bus_space, .bus_write, .bus_inta, .bus_special, .bus_addr,
         .bus_size, .bus_wdata, .bus_done(s_done), .bus_rdata(s_rdata), .bus_err(s_err),
         .reset_n, .a_n(a_n[12:5]), .ads_n, .bnr_n, .bpri_n, .trdy_n, .dbsy_n, .drdy_n, .rs_n, .d_n,
-        .a_drv, .req_drv, .ads_drv, .br0_drv, .drdy_drv, .d_drv, .cpu_reset, .straps
+        .a_drv, .req_drv, .ads_drv, .br0_drv, .drdy_drv, .d_drv, .addr_dir(), .addr_oeab(), .data_dir(),
+        .data_oeab(), .cpu_reset, .straps
     );
 
     // open drain: a_drv[35:32] is always 0 (32-bit addresses), those balls are the link

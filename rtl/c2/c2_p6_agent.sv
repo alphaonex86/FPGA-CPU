@@ -11,6 +11,12 @@
 // for A# and D#), *_drv = 1 pulls the open-drain line low. Inputs are
 // registered first, so a signal driven in clock T is "observed in T+1" and
 // an output decided then is driven in T+2, as the [PPRO1] figures count.
+// GTL+ transceivers (plan/slot1_c2.md D35): the address group (A#, REQ#)
+// and the data group (D#) each have a direction; *_dir = 1: the FPGA
+// drives the transceiver's LVTTL side (its B -> A path off), *_oeab = 1:
+// the transceiver drives the bus. OEAB comes one clock after dir and goes
+// one clock before it (no LVTTL contention), so ADS# waits one clock (PREP)
+// and a write's data group turns at its clock B. Pass-gate boards ignore them.
 module c2_p6_agent (
     input  logic        clk,          // BCLK
     input  logic        rst,          // FPGA reset
@@ -43,6 +49,10 @@ module c2_p6_agent (
     output logic        br0_drv,
     output logic        drdy_drv,
     output logic [63:0] d_drv,
+    output logic        addr_dir,
+    output logic        addr_oeab,
+    output logic        data_dir,
+    output logic        data_oeab,
     // board state for the bridge
     output logic        cpu_reset,    // RESET# asserted
     output logic [12:5] straps        // A[12:5]# sampled at the end of RESET# [HWDM] 5.1
@@ -105,11 +115,11 @@ module c2_p6_agent (
     logic       alt, throttle_used;
     logic [2:0] ads_hist;              // ads_q of the last 3 clocks
     wire        bnr_point = stall == FREE ? ads_hist[2] : alt && arb != '0;
-    logic       issue;                 // ADS# goes out next clock
+    logic       go;                    // ADS# goes out next clock
     always_ff @(posedge clk) begin
         ads_hist <= {ads_hist[1:0], ads_q};
         alt      <= !alt;
-        if (issue) throttle_used <= 1;
+        if (go) throttle_used <= 1;
         if (rst || reset_q) begin
             stall         <= STALLED;
             alt           <= 1;        // first sample point 2 clocks after RESET#
@@ -132,13 +142,14 @@ module c2_p6_agent (
     end
 
     // ---- the transaction
-    typedef enum logic [2:0] { IDLE, REQ_A, REQ_B, WAIT, DATA, DONE } state_t;
-    state_t state;
+    typedef enum logic [2:0] { IDLE, PREP, REQ_A, REQ_B, WAIT, DATA, DONE } state_t;
+    state_t state, next;
     logic   wrote;                     // write data sent
     wire    head      = ahead == '0;
     wire    may_issue = owner && !bpri_q && !ads_q && !ads_drv &&
                         (stall == FREE || (stall == THROTTLED && !throttle_used));
-    assign issue    = state == IDLE && bus_req && may_issue;
+    // PREP: the address group turns to the bus; drive if still allowed
+    assign go       = state == PREP && may_issue;
     assign bus_done = state == DONE;
 
     // read data: every DRDY# while waiting; the last one before DONE is ours
@@ -165,12 +176,16 @@ module c2_p6_agent (
             IDLE: begin
                 bus_err <= 0;
                 wrote   <= 0;
-                if (issue) begin
+                if (bus_req && may_issue) state <= PREP;
+            end
+            PREP: begin
+                if (go) begin
                     a_drv   <= addr_a;
                     req_drv <= reqa;
                     ads_drv <= 1;
                     state   <= REQ_A;
-                end
+                end else
+                    state <= IDLE;
             end
             REQ_A: begin               // ADS# on the pins; clock B next
                 a_drv   <= addr_b;
@@ -186,7 +201,7 @@ module c2_p6_agent (
                 // request-initiated write data: TRDY# observed with DBSY#
                 // inactive -> DRDY# + data next clock, one chunk, no DBSY#
                 // [PPRO1] 4.6.2.1
-                if (head && writes && !wrote && trdy_q && !dbsy_q) begin
+                if (head && writes && !wrote && trdy_q && !dbsy_q && data_oeab) begin
                     drdy_drv <= 1;
                     d_drv    <= {32'd0, bus_wdata} << (8 * lane);
                     wrote    <= 1;
@@ -206,5 +221,28 @@ module c2_p6_agent (
             DONE: state <= IDLE;
             default: state <= IDLE;
         endcase
+    end
+
+    // ---- transceiver directions, from the state of the next clock
+    always_comb begin
+        next = state;
+        if (rst || reset_q) next = IDLE;
+        else case (state)
+            IDLE:  if (bus_req && may_issue) next = PREP;
+            PREP:  next = go ? REQ_A : IDLE;
+            REQ_A: next = REQ_B;
+            REQ_B: next = WAIT;
+            default: next = state == DONE ? IDLE : state;   // WAIT/DATA: any change is a bus-in state
+        endcase
+    end
+    // the address group drives in REQ_A / REQ_B; a write's data group from
+    // clock B until the clock its data is on the bus
+    wire addr_want = next == PREP || next == REQ_A || next == REQ_B;
+    wire data_want = writes && !wrote && (next == REQ_B || next == WAIT);
+    always_ff @(posedge clk) begin
+        addr_dir  <= !rst && (addr_want || addr_oeab);
+        addr_oeab <= !rst && addr_want && addr_dir;
+        data_dir  <= !rst && (data_want || data_oeab);
+        data_oeab <= !rst && data_want && data_dir;
     end
 endmodule
