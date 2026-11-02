@@ -143,6 +143,26 @@ replicated per read port plus a live-value table.
    RET after a flush: the return stack is restored from a copy kept at
    retire (CALL push store / RET jump): RET flushes 171 -> 1, 3.501
    CoreMark/MHz (285,643 cycles per iteration, IPC 1.189).
+   Multiply: the operand extension moved into the product stage (latency
+   4 -> 3): 3.548 CoreMark/MHz (281,882 cycles). Issue contention on the
+   1-iteration run (309,990 cycles, `+stats`): >= 3 ALU uops ready with
+   both ports busy 46,691 cycles, >= 2 memory uops ready (one port, loads
+   and stores) 32,154, one ALU port idle while the other has >= 2 ready
+   18,359 (ports alternate at rename), loads replayed for the mul/div bus
+   1,953. Tried: an ALU uop takes the port of its unfinished ALU producer:
+   3.375 CoreMark/MHz (one port idle 50,509: consumers of one producer, a
+   counter or ESP, pile up on its port); rejected. ALU port chosen at
+   issue (port 0 the oldest ready, port 1 another one, both from the age
+   matrix in parallel): the youngest 3.552, the second oldest 3.474, with
+   Jcc flushes 2,244 -> 2,712 from retire timing alone: only the first Jcc
+   retired in a cycle trained TAGE (1,447 of them skipped per iteration).
+   Training decoupled from retire (outcomes noted at retire, the queue
+   trains in order, one per cycle; its metadata in 4 RAM banks, the 32 x
+   155-bit register queue did not route): Jcc flushes 2,244 -> 1,607, 3.735
+   CoreMark/MHz (267,753 cycles, IPC 1.268); IPC c1 1.300, c2 1.168, c4
+   1.110. On top of it the issue choice gives: youngest 3.709, second
+   oldest 3.747 (+0.3 %, more logic in S, the critical stage): ports keep
+   alternating at rename.
    Cycle breakdown (`core_tb +stats`): cycles that retire nothing are
    mostly an unfinished ROB head (c1: 9,950 of 29,647; ALU 4,501, LD
    3,757, MD 484), not an empty ROB (5,775): latency, so loads and mul/div

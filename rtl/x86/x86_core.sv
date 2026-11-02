@@ -140,7 +140,7 @@ module x86_core
                 p_uop_ret[k][0].imm2 = 32'h4000;   // bit 14: P-predicted
             end
             // mismatches precomputed at the load: dir only selects (timing)
-            p_mis[k] = p_ret[k] ? p_want[k] != p_next[k] : !p_ind[k] && (p_dir[k] ? p_mis_t[k] : p_mis_nt[k]);
+            p_mis[k] = p_ret[k] ? ras[ras_sp - 1'b1] != p_next[k] : !p_ind[k] && (p_dir[k] ? p_mis_t[k] : p_mis_nt[k]);
             p_take[k] = p_valid[k] && !stop && !(k != 0 && p_lk[k]);
             if (p_valid[k] && !stop && k != 0 && p_lk[k]) begin
                 p_redir = 1'b1;

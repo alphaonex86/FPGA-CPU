@@ -5,9 +5,11 @@
 // mispredicts against the 4K gshare). One read port per decode slot (a table
 // copy each), read as the group enters P with the history up to the group
 // before the previous one (the same whether or not P was busy). The entries
-// read go into a queue in program order (P push) and come back at retire:
-// the first retired branch of a cycle updates its provider, or the base, and
-// allocates in a longer table when mispredicted; a flush drops the rest.
+// read go into a queue in program order (P push; 4 RAM banks by position, so
+// a group's 3 Jcc hit different banks); retire notes their outcomes and the
+// retired ones train in order, one per cycle (the head read, the cycle
+// after its provider, or the base, updated, and a longer table allocated
+// when mispredicted); a flush drops the unretired rest.
 module x86_tage
     import x86_pkg::*;
 (
@@ -74,8 +76,11 @@ module x86_tage
     te_t  [2:0][NT-1:0]          q_e;
     logic [2:0][1:0]             q_b;
     meta_t [2:0]                 m;
-    meta_t                       bmq [QN];
-    logic [QW:0]                 qh, qt;
+    meta_t [3:0]                 q_head;    // each bank's row at the head
+    logic [1:0]                  q_hbank;
+    logic [QW:0]                 qh, qr, qt;   // trained / retired / pushed
+    logic [QN-1:0]               q_taken;      // retired outcomes
+    logic [2:0][QW:0]            q_pos;     // queue position of slot k
 
     assign lh = p_busy ? gh : gh_prev;
     always_comb
@@ -152,29 +157,69 @@ module x86_tage
 
     assign room = 6'(QN) - 6'(qt - qh) >= 6'd3;
 
-    // retire: the first retired branch trains its provider (u when it
-    // differed from alt) or the base; a mispredict allocates in the first
-    // longer table with u = 0, decrementing the u of those it passes
+    always_comb begin
+        logic [QW:0] t;
+        t = qt;
+        for (int k = 0; k < 3; k++) begin
+            q_pos[k] = t;
+            if (jcc[k]) t = t + 1'b1;
+        end
+    end
+
+    genvar gb;
+    generate for (gb = 0; gb < 4; gb = gb + 1) begin : qbank
+        (* ramstyle = "no_rw_check" *) meta_t mem [QN / 4];
+        logic            we;
+        logic [QW-3:0]   wa;
+        meta_t           wd;
+        always_comb begin
+            we = 1'b0;
+            wa = '0;
+            wd = m[0];
+            for (int k = 0; k < 3; k++)
+                if (p_push && !flush && jcc[k] && q_pos[k][1:0] == 2'(gb)) begin
+                    we = 1'b1;
+                    wa = q_pos[k][QW-1:2];
+                    wd = m[k];
+                end
+        end
+        always_ff @(posedge clk) begin
+            if (we) mem[wa] <= wd;
+            q_head[gb] <= mem[qh[QW-1:2]];
+        end
+    end endgenerate
+
+    // training: the provider (u when it differed from alt) or the base; a
+    // mispredict allocates in the first longer table with u = 0,
+    // decrementing the u of those it passes
     logic              r_bwe;
     logic [1:0]        r_bctr;
     logic [NT-1:0]     r_we;
     te_t  [NT-1:0]     r_e;
     meta_t             r_m;
-    logic              r_t, r_any;
+    logic              r_t, r_any;      // the head read the cycle before
+    always_ff @(posedge clk) begin
+        logic [QW:0] t;
+        r_any <= !rst && qh != qr;
+        r_t <= q_taken[qh[QW-1:0]];
+        q_hbank <= qh[1:0];
+        t = qr;
+        for (int k = 0; k < 3; k++)
+            if (ret[k]) begin
+                q_taken[t[QW-1:0]] <= ret_taken[k];
+                t = t + 1'b1;
+            end
+    end
+    always_comb begin
+        rgh_n = rgh;
+        for (int k = 0; k < 3; k++)
+            if (ret[k]) rgh_n = {rgh_n[GH-2:0], ret_taken[k]};
+    end
     always_comb begin
         logic stop;
         te_t  e;
         stop = 1'b0;
-        r_any = 1'b0;
-        r_t = 1'b0;
-        rgh_n = rgh;
-        for (int k = 0; k < 3; k++)
-            if (ret[k]) begin
-                if (!r_any) r_t = ret_taken[k];
-                r_any = 1'b1;
-                rgh_n = {rgh_n[GH-2:0], ret_taken[k]};
-            end
-        r_m = bmq[qh[QW-1:0]];
+        r_m = q_head[q_hbank];
         r_bwe = r_any && !r_m.pv;
         r_bctr = sat2(r_m.bctr, r_t);
         r_we = '0;
@@ -207,7 +252,8 @@ module x86_tage
         w_idx <= r_m.idx;
         w_e <= r_e;
         rgh <= rst ? '0 : rgh_n;
-        qh <= rst ? '0 : qh + (QW + 1)'(ret[0]) + (QW + 1)'(ret[1]) + (QW + 1)'(ret[2]);
+        qh <= rst ? '0 : qh + (QW + 1)'(qh != qr);
+        qr <= rst ? '0 : qr + (QW + 1)'(ret[0]) + (QW + 1)'(ret[1]) + (QW + 1)'(ret[2]);
         if (rst) begin
             gh <= '0;
             gh_prev <= '0;
@@ -215,20 +261,14 @@ module x86_tage
         end else if (flush) begin
             gh <= rgh;   // the flushing branch included
             gh_prev <= rgh;
-            qt <= qh;
+            qt <= qr;
         end else if (p_push) begin
             // entries at positions fixed by jcc, only the count by push (timing)
-            logic [QW:0] t;
             logic [2:0]  p;   // predictions of the Jcc slots, in order
             logic [1:0]  n;
-            t = qt;
             p = '0;
             for (int k = 0; k < 3; k++)
-                if (jcc[k]) begin
-                    bmq[t[QW-1:0]] <= m[k];
-                    p[2'(t - qt)] = m[k].pred;
-                    t = t + 1'b1;
-                end
+                if (jcc[k]) p[2'(q_pos[k] - qt)] = m[k].pred;
             n = 2'(push[0]) + 2'(push[1]) + 2'(push[2]);
             gh_prev <= gh;
             case (n)

@@ -3,8 +3,8 @@
 // - A_MUL / A_IMUL: low half of a * b (a = eAX; SZ8 gives AX), the high
 //   half kept; A_MULH / A_IMULH: that kept high half (the uop depends on
 //   the MUL's result and the MUL on the previous EDX, so the pair stays in
-//   order); A_IMUL2: 2/3-operand IMUL, low half. 3-stage pipeline (DSP),
-//   one per cycle.
+//   order); A_IMUL2: 2/3-operand IMUL, low half. input register + 2
+//   stages (DSP), one per cycle.
 // - A_DIV / A_IDIV: quotient of {c, a} / b (SZ8: AX / b, result {rem,
 //   quot}); iterative, 1 quotient bit per cycle, busy meanwhile. A_DIVR /
 //   A_IDIVR: the remainder of the last division (the uop depends on that
@@ -79,6 +79,20 @@ module x86_muldiv
 
     assign busy = s_v && is_div(s_op) || d_run || d_fin;
 
+    // stage 1 (with the product): operands extended to 33 bits
+    always_comb begin
+        logic [31:0] ea, eb;
+        m1_v = s_v && !kill && !is_div(s_op);
+        m1_op = s_op;
+        m1_sz = s_sz;
+        m1_tag = s_tag;
+        m1_old = old_of(s_op, s_a, s_c);
+        ea = extend(s_a, s_sz, is_signed(s_op));
+        eb = extend(s_b, s_sz, is_signed(s_op));
+        m1_a = {is_signed(s_op) & ea[31], ea};
+        m1_b = {is_signed(s_op) & eb[31], eb};
+    end
+
     always_ff @(posedge clk) begin
         s_v <= start && !kill;
         s_op <= op;
@@ -87,19 +101,6 @@ module x86_muldiv
         s_b <= b;
         s_c <= c;
         s_tag <= tag;
-        // stage 1: operands extended to 33 bits
-        m1_v <= s_v && !kill && !is_div(s_op);
-        m1_op <= s_op;
-        m1_sz <= s_sz;
-        m1_tag <= s_tag;
-        m1_old <= old_of(s_op, s_a, s_c);
-        begin
-            logic [31:0] ea, eb;
-            ea = extend(s_a, s_sz, is_signed(s_op));
-            eb = extend(s_b, s_sz, is_signed(s_op));
-            m1_a <= {is_signed(s_op) & ea[31], ea};
-            m1_b <= {is_signed(s_op) & eb[31], eb};
-        end
         // stage 2: product
         m2_v <= m1_v && !kill;
         m2_op <= m1_op;

@@ -34,6 +34,7 @@ module core_top (
     logic [31:0] st_dr [4];          // decode redirects: not followed, falsely taken, target, cut
     logic [31:0] st_mp_wait, st_refill;   // flushing branch: result -> retire; flush -> next retire
     logic [31:0] st_fl [5];               // flushes: P-predicted Jcc, indirect, RET, other branch, K_DF
+    logic [31:0] st_skew, st_alu3, st_mem2, st_replay, st_replay_md;   // issue contention
     logic [31:0] mp_cycle [ROB_N];
     logic        ind [ROB_N];       // the ROB entry is an indirect branch (RET: predicted taken)
     logic        refill;
@@ -78,6 +79,7 @@ module core_top (
             cycles <= 32'd0;
             insns <= 32'd0;
             {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush, st_mp_wait, st_refill} <= '0;
+            {st_skew, st_alu3, st_mem2, st_replay, st_replay_md} <= '0;
             refill <= 1'b0;
             for (int i = 0; i < 5; i++) st_fl[i] <= 32'd0;
             for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
@@ -107,6 +109,19 @@ module core_top (
                 st_dr[c] <= st_dr[c] + 32'd1;
             end
             if (core.flush) st_flush <= st_flush + 32'd1;
+            begin
+                int n0, n1, n2;
+                n0 = $countones(core.req[0]);
+                n1 = $countones(core.req[1]);
+                n2 = $countones(core.req[2]);
+                if (n0 >= 2 && n1 == 0 || n1 >= 2 && n0 == 0) st_skew <= st_skew + 32'd1;
+                if (n0 + n1 >= 3 && n0 > 0 && n1 > 0) st_alu3 <= st_alu3 + 32'd1;
+                if (n2 >= 2) st_mem2 <= st_mem2 + 32'd1;
+            end
+            if (core.am_valid && !core.m_ok) begin
+                st_replay <= st_replay + 32'd1;
+                if (core.md_done) st_replay_md <= st_replay_md + 32'd1;
+            end
             if (!core.flush)
                 for (int k = 0; k < 3; k++)
                     if (2'(k) < core.rn_n) ind[core.rn[k].tag] <= core.rn[k].u.kind == K_BR && core.rn[k].u.indirect;
@@ -173,6 +188,9 @@ module core_top (
         if (stats)
             $display("stats: flushing branch result -> retire %0d cycles, flush -> next retire %0d cycles",
                      st_mp_wait, st_refill);
+        if (stats)
+            $display("stats: issue: ALU ready on one port only (>= 2) %0d, >= 3 ALU ready on both %0d, >= 2 memory ready %0d; memory replays %0d (mul/div bus %0d)",
+                     st_skew, st_alu3, st_mem2, st_replay, st_replay_md);
         if (stats)
             $display("stats: flushes: Jcc %0d, indirect %0d, RET %0d, other branch %0d, DF %0d",
                      st_fl[0], st_fl[1], st_fl[2], st_fl[3], st_fl[4]);
