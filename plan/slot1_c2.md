@@ -17,10 +17,12 @@ too. Nothing is bought before the viability verdict below.
 
 | part | where | status |
 |---|---|---|
-| VMM (KVM, one vCPU, bus backends) | `sw/c2-vmm/` | v0 + 440BX shadow RAM: test ROM passes on the sim backend |
+| VMM (KVM, one vCPU, bus backends) | `sw/c2-vmm/` | v0 + 440BX shadow RAM + coalesced writes + 100 us tick: test ROM passes on the sim and rtl backends |
 | BAR0 bus protocol | `sw/c2-vmm/bus.h` | v0 defined |
-| PCIe card: endpoint + BAR0 block -> cable link | `rtl/c2/` (vendor-neutral, PCIe IP wrapper) | to do |
-| Cable link protocol (card <-> cartridge) | `rtl/c2/`; 22 cartridge balls (D32: 17 at 3.3 V, 2 at 1.35 V, 3 free) | to do |
+| PCIe card: BAR0 block -> cable link | `rtl/c2/c2_card.sv` | v0, simulated end to end (`test_rtl.sh`) |
+| PCIe card: 7 Series PCIe IP wrapper (TLP <-> BAR0 request port) | `rtl/c2/` | to do |
+| Cable link protocol (card <-> cartridge) | `rtl/c2/`; 22 cartridge balls (D32: 17 at 3.3 V, 2 at 1.35 V, 3 free) | v0 messages simulated (one clock domain, no I/O cells yet) |
+| Cartridge: link -> command executor on a generic bus port | `rtl/c2/c2_cart.sv` | v0, simulated |
 | Cartridge PCB: link header + 19 selection 0-ohms (D32) | `hw/slot1-cyclonev` generators | to do |
 | Cartridge: link + P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | `rtl/c2/` on the A cartridge | to do |
 | Bench: host <-> PCIe card round trip | hardware | after the verdict |
@@ -32,22 +34,63 @@ too. Nothing is bought before the viability verdict below.
 - BIOS ROM read once over the bus (`-r`, default 256 KB) into read-only
   memslots at the top of 4 GB and (its last 128 KB) at 0xe0000: KVM cannot
   execute from MMIO; ROM writes exit to the bus.
-- I/O and MMIO exits: split into aligned 1/2/4-byte bus cycles.
+- I/O and MMIO exits: split into aligned 1/2/4-byte bus cycles (a dword
+  at port 0xf6 is two word cycles, as the chipset splits it).
 - INTR polled at every exit, injected with the INTA cycle's vector once the
   guest takes interrupts (no in-kernel irqchip); HLT waits for INTR (HLT
-  with IF = 0 is an error).
+  with IF = 0 is an error). A 100 us SIGALRM tick forces an exit, so INTR
+  also reaches a guest looping in RAM without I/O (a BIOS delay loop on the
+  tick count; v0 without it hung there).
+- Coalesced writes (KVM coalesced MMIO / PIO ring): the ATA data ports
+  0x1f0/0x170 and the VGA window 0xa0000-0xbffff; every exit flushes the
+  ring to the bus first, so the bus sees program order. KVM exits to
+  user space once per element of a `rep outs` (`em_out`, count 1; only
+  `rep ins` is batched, up to 1 KB) and once per MMIO write: coalescing
+  keeps the exit in the kernel. Measured (7950X3D, sim backend): a VGA
+  dword write 2.0 us coalesced vs 6.4 us trapped.
+- KVM's private pages (VMX TSS, EPT identity map) sit just below the ROM
+  window (the defaults fall inside a 512 KB+ ROM on Intel hosts).
 - CPUID: max leaf 2, signature `-s` (default 0x683, P-III cB0), features
   masked to a P-III (no APIC).
 - Backends: `sim` (test devices, `bus_sim.c`), `fpga` (BAR0 through a
   sysfs PCI resource file; write cycles posted, a bus error reported at the
-  next status read).
+  next status read), `rtl` (`test_rtl.sh` build: the same BAR0 protocol
+  code on the Verilator model of card + link + cartridge, the cartridge's
+  bus cycles served by the `sim` devices).
 
 ## BAR0 protocol (bus.h)
 
 One 64-bit posted write per cycle, the command in the offset, so a bus
 write costs one PCIe TLP and a read one TLP + one read completion (the
-FPGA delays the completion until the bus cycle ends). STATUS carries INTR
-and a sticky bus error; INTA runs the acknowledge cycle.
+FPGA delays the completion until the bus cycle ends). STATUS carries INTR,
+a sticky bus error and a sticky protocol error; INTA runs the acknowledge
+cycle. The bridge takes requests strictly in order, one at a time (a
+command holds later TLPs by flow control until its reply), so the REP
+window is never refilled under a running REP.
+
+## Bridge RTL v0 (`rtl/c2`, `sw/c2-vmm/test_rtl.sh`)
+
+- `c2_card.sv`: BAR0 block on a vendor-neutral request port (req valid /
+  ready, 64-bit writes, read response), 4 KB window (512 x 64), link out.
+- `c2_cart.sv`: link in, one command at a time onto a generic board bus
+  port (req / done, space, write, INTA, address, log2 size, data in the
+  low bytes, error, INTR in), 4 KB REP buffer, reply.
+- Link messages, one byte per clock, 0x00 between messages; one command
+  in flight, every command answered:
+  - down: CYCLE `{0x80 | space << 3 | write << 2 | log2 size, addr[4],
+    data[4]}`; INTA `{0x40}`; REP `{0x20 | write << 2 | log2 size,
+    port[2], count[2]}` + a write's data.
+  - up: reply `{0x80}` + payload (read: 4 bytes, INTA: 1, REP read:
+    count x size); status `{0x40 | error << 1 | INTR}` on an INTR change or
+    a failed cycle, always before the reply.
+- REP data is buffered whole on the receiving side (a 4 KB REP costs
+  ~80 us of link time next to ~600 us of PCI I/O cycles).
+- Tested: the whole test ROM through the RTL (2.7 M bridge clocks, link
+  delay 3 clocks each way, bus cycles 8 clocks); a byte-lane mutation of
+  the cartridge reply fails step 11.
+- Not yet: the PCIe IP wrapper, link I/O cells and the clock-domain
+  crossing (card PCIe clock / link clock / cartridge FSB clock), a link
+  check (CRC), the P6 agent behind the bus port.
 
 ## Shadow RAM (`shadow.c`)
 
@@ -75,15 +118,19 @@ in ~0.3 us, an ISA one in ~1 us.
 |---|---|---|
 | CPU + RAM (BIOS code after shadowing, DOS, Windows, Linux) | none | native N100 speed: the C2 goal |
 | PIC / PIT / keyboard / CMOS / serial | a few per interrupt | fine (1-2 kHz timers: ~1-2 % of a core) |
-| IDE PIO | `rep insw/outsw`, one exit per sector | fine if the bridge runs a repeated I/O cycle in one request (to add: count + FIFO window) |
+| IDE PIO read | `rep insw`: one exit per sector (KVM batches up to 1 KB), one REP command | fine |
+| IDE PIO write | `rep outsw`: KVM exits once per word; coalesced (kernel exit only, ~2 us) and flushed as posted cycles | ~0.5 ms per sector, ~1 MB/s: slow but usable; DMA mode avoids it |
 | IDE / PCI bus-master DMA | snoops on the board bus | DMA mirror into guest RAM by PCIe bus mastering (VFIO / IOMMU), snoop stalls ~1-2 us per line: board tolerance to test |
 | VGA text, BIOS video calls | few writes | fine |
-| framebuffer graphics (mode 13h, VESA LFB) | one exit per write, ~100K/s | too slow trapped (a 64 KB frame ~0.2-0.6 s); needs the framebuffer as guest RAM with KVM dirty logging, the VMM copying dirty pages to the card in bursts (~60 Hz) |
-| planar VGA (mode 12h, Mode X), 2D-accelerated drivers | reads of card state / VRAM written by the card | stay trapped (slow) or use a non-accelerated driver |
+| VGA window graphics (mode 13h, planar 12h / Mode X) | writes coalesced (~2 us each measured + ~0.4 us bridge), reads exit | a 320x200 frame of dword writes ~40 ms (~25 fps), byte writes ~4x slower: DOS games playable at low frame rates |
+| VESA LFB (PCI BAR above RAM) | trapped per write today | to do: the LFB as guest RAM with KVM dirty logging, dirty pages copied to the card by burst writes (~60 Hz); or coalesced like the VGA window once its BAR address is tracked |
+| 2D-accelerated drivers | reads of card state / VRAM written by the card | stay trapped (slow) or use a non-accelerated driver |
+| guest loops in RAM waiting for a timer tick | no exits | the 100 us tick injects INTR (~1-2 % of a core at 10 kHz) |
 
 Verdict so far: viable for BIOS, DOS text programs, and Windows / Linux
 desktop work with a VESA or LFB display, at ~10x a P-III in CPU work;
-graphics-heavy DOS games and accelerated video drivers are the weak spot.
+VGA-window DOS graphics run at low frame rates, accelerated video drivers
+and PIO disk writes are the weak spots.
 Risks only hardware can close: the real PCIe read latency of the N100 to
 the FPGA, the board's tolerance of long snoop stalls (440BX; VIA snoop
 filtering), AGP cards.
@@ -129,13 +176,15 @@ filtering), AGP cards.
 
 0. Cartridge PCB (D32): S6 netlist (TA_ nets, 17 0-ohm RL01-RL17, J5),
    S7 placement, S8 re-route; J5 in the ALINX J11 order.
-1. Bridge protocol: burst write (framebuffer pages) in bus.h; VMM
-   framebuffer mirror (dirty logging). Done: string I/O as one REP
-   command through a 4 KB BAR window (a sector: ~64 8-byte window reads
-   instead of 256 read round trips; DMA into host memory later).
-2. FPGA bridge v0 on the AX7A035B: PCIe 7 Series IP (x2 Gen2) + BAR0
-   block + a loopback bus target (scratch RAM, POST port), then measure
-   the N100 round trip per cycle (goal < 2-3 us, D28).
+1. Bridge protocol: burst write (framebuffer pages, coalesced runs) in
+   bus.h; VMM LFB mirror (dirty logging). Done: string I/O as one REP
+   command through a 4 KB BAR window; coalesced ATA data / VGA writes.
+2. FPGA bridge on the AX7A035B (before the board arrives ~2026-12-16):
+   PCIe 7 Series IP (x2 Gen2) wrapper onto the c2_card request port,
+   link I/O (ODDR clock out, MRCC clock in, CDC), Vivado build for
+   xc7a35tfgg484-2 with the J11 pins; first bring-up with a loopback bus
+   target on the card itself, then measure the host round trip per cycle
+   (goal < 2-3 us, D28).
 3. P6 bus agent: request/response phases, snoop stall (HIT# + HITM#), DMA
    mirror (slot1_variants common facts), A20M#, INIT#, SMI#, STPCLK#.
 4. VMM: MSI through VFIO instead of polling, SMM, microcode-update MSRs.
