@@ -51,6 +51,30 @@ start:  cli
         cmpb    $1, 0x500
         mov     $5, %bl
         jne     fail
+        # string I/O (one batch): rep outsb to the serial port, rep insw
+        # from a floating port into RAM
+        push    %ds
+        push    %cs
+        pop     %ds
+        mov     $rep_msg, %si
+        mov     $(rep_end - rep_msg), %cx
+        mov     $0x3f8, %dx
+        cld
+        rep outsb
+        pop     %ds
+        xor     %ax, %ax
+        mov     %ax, %es
+        mov     $0x2000, %di
+        movl    $0, 0x2000
+        movl    $0, 0x2004
+        mov     $4, %cx
+        mov     $0x1f0, %dx
+        rep insw
+        cmpl    $0xffffffff, 0x2000
+        mov     $10, %bl
+        jne     fail
+        cmpl    $0xffffffff, 0x2004
+        jne     fail
         # 440BX shadow: 0xc0000 on the bus while PAM1 = 0 (sim: floats high)
         mov     $0xc000, %ax
         mov     %ax, %es
@@ -107,6 +131,8 @@ isr:    movb    $1, 0x500
         iret
 
 msg:    .asciz  "c2-vmm: serial ok\n"
+rep_msg: .ascii "c2-vmm: string I/O ok\n"
+rep_end:
 
         .org    0xfff0
         ljmp    $0xf000, $start

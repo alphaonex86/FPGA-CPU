@@ -167,6 +167,15 @@ int main(int argc, char **argv)
         case KVM_EXIT_IO: {
             uint8_t *p = (uint8_t *)run + run->io.data_offset;
             int out = run->io.direction == KVM_EXIT_IO_OUT;
+            if (run->io.count > 1) {   // string I/O: one batch
+                for (uint32_t i = 0; out && i < run->io.count; i++) {
+                    uint32_t v = 0;
+                    memcpy(&v, p + i * run->io.size, run->io.size);
+                    shadow_io_write(run->io.port, run->io.size, v);
+                }
+                b->io_rep(b, run->io.port, run->io.size, run->io.count, p, out);
+                break;
+            }
             for (uint32_t i = 0; i < run->io.count; i++, p += run->io.size) {
                 if (out) {
                     uint32_t v = 0;

@@ -120,8 +120,10 @@ filtering), AGP cards.
 0. Cartridge PCB (D32): S6 netlist (TA_ nets, 17 0-ohm RL01-RL17, J5),
    S7 placement, S8 re-route; J5 pin order once the card header pinout
    is known.
-1. Bridge protocol: a repeated I/O cycle (string I/O) and a burst write
-   (framebuffer pages) in bus.h; VMM framebuffer mirror (dirty logging).
+1. Bridge protocol: burst write (framebuffer pages) in bus.h; VMM
+   framebuffer mirror (dirty logging). Done: string I/O as one REP
+   command through a 4 KB BAR window (a sector: ~64 8-byte window reads
+   instead of 256 read round trips; DMA into host memory later).
 2. FPGA bridge v0 on the Puzhi board: PCIe 7 Series IP (x2 Gen2) + BAR0
    block + a loopback bus target (scratch RAM, POST port), then measure
    the N100 round trip per cycle (goal < 2-3 us, D28).

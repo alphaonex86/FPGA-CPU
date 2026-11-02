@@ -55,6 +55,20 @@ static void sim_write(struct bus *b, int space, uint32_t addr, int size, uint32_
     }
 }
 
+static void sim_io_rep(struct bus *b, uint16_t port, int size, uint32_t count, uint8_t *buf, int write)
+{
+    for (uint32_t i = 0; i < count; i++, buf += size) {
+        uint32_t v = 0;
+        if (write) {
+            memcpy(&v, buf, (size_t)size);
+            sim_write(b, BUS_IO, port, size, v);
+        } else {
+            v = sim_read(b, BUS_IO, port, size);
+            memcpy(buf, &v, (size_t)size);
+        }
+    }
+}
+
 static int sim_intr(struct bus *b)
 {
     return ((struct sim *)b->priv)->intr_on;
@@ -90,6 +104,6 @@ struct bus *bus_sim_open(const char *rom_path)
     }
     s->rom_base = (uint32_t)(0x100000000ull - (uint64_t)n);
     fclose(f);
-    s->bus = (struct bus){ sim_read, sim_write, sim_intr, sim_inta, s };
+    s->bus = (struct bus){ sim_read, sim_write, sim_io_rep, sim_intr, sim_inta, s };
     return &s->bus;
 }
