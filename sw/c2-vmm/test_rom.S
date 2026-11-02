@@ -51,6 +51,53 @@ start:  cli
         cmpb    $1, 0x500
         mov     $5, %bl
         jne     fail
+        # 440BX shadow: 0xc0000 on the bus while PAM1 = 0 (sim: floats high)
+        mov     $0xc000, %ax
+        mov     %ax, %es
+        cmpb    $0xff, %es:0
+        mov     $6, %bl
+        jne     fail
+        # copy the BIOS segment onto itself (PAM0 write-only), running from it
+        mov     $0x80000058, %eax       # config 0:0:0, dword 0x58 (PAM0 = byte 0x59)
+        mov     $0xcf8, %dx
+        out     %eax, %dx
+        mov     $0x20, %al
+        mov     $0xcfd, %dx
+        out     %al, %dx
+        push    %ds
+        mov     $0xf000, %ax
+        mov     %ax, %ds
+        mov     %ax, %es
+        xor     %si, %si
+        xor     %di, %di
+        mov     $0x8000, %cx
+        cld
+        rep movsw
+        pop     %ds
+        # read-only: a write goes to the bus, the shadow keeps the copy
+        mov     $0x10, %al
+        out     %al, %dx
+        movb    $0x55, %es:0xfffe
+        cmpb    $0, %es:0xfffe
+        mov     $7, %bl
+        jne     fail
+        # read/write: the shadow RAM takes it
+        mov     $0x30, %al
+        out     %al, %dx
+        movb    $0x55, %es:0xfffe
+        cmpb    $0x55, %es:0xfffe
+        mov     $8, %bl
+        jne     fail
+        # 0xc0000 read/write (PAM1[3:0] = 3, byte 0x5a)
+        mov     $0x03, %al
+        mov     $0xcfe, %dx
+        out     %al, %dx
+        mov     $0xc000, %ax
+        mov     %ax, %es
+        movl    $0x600dc0de, %es:0x10
+        cmpl    $0x600dc0de, %es:0x10
+        mov     $9, %bl
+        jne     fail
         xor     %bl, %bl
 fail:   mov     %bl, %al
         out     %al, $0xf4

@@ -11,7 +11,7 @@ PZ-A7200T-KFB (XC7A200T, PCIe 2.0 x2, Vivado verified).
 
 | part | where | status |
 |---|---|---|
-| VMM (KVM, one vCPU, bus backends) | `sw/c2-vmm/` | v0 done: real-mode test ROM passes on the sim backend |
+| VMM (KVM, one vCPU, bus backends) | `sw/c2-vmm/` | v0 + 440BX shadow RAM: test ROM passes on the sim backend |
 | BAR0 bus protocol | `sw/c2-vmm/bus.h` | v0 defined |
 | FPGA bridge: PCIe endpoint + BAR0 block | `rtl/c2/` (Puzhi, Vivado) | to do |
 | P6 bus agent (AGTL+ cycles, snoop stall, DMA mirror) | cartridge FPGA or the bridge over a link | to do |
@@ -41,13 +41,49 @@ write costs one PCIe TLP and a read one TLP + one read completion (the
 FPGA delays the completion until the bus cycle ends). STATUS carries INTR
 and a sticky bus error; INTA runs the acknowledge cycle.
 
+## Shadow RAM (`shadow.c`)
+
+440BX PAM0-PAM6 (config 0:0:0 0x59-0x5f, datasheet 290633-001 sec.
+3.3.17 Tables 3-2/3-3), tracked from the guest's 0xcf8/0xcfc writes (also
+forwarded to the board): per segment (16 KB 0xc0000-0xeffff, 64 KB
+0xf0000) a memslot over the shadow RAM if RE (read-only without WE), over
+the ROM copy for RE = 0 at 0xe0000 and up (code keeps running from it),
+none below; an exiting write lands in the shadow RAM if WE, else on the
+bus. Tested: the BIOS copying its own segment while running from it,
+read-only / read-write behaviour, an option-ROM segment. The VIA
+VT82C694X uses other registers: a second map when that board comes.
+
+## Viability (no hardware yet; operator 2026-11-02: design first)
+
+Measured on this host (Ryzen 9 7950X3D, KVM, `c2-vmm` sim backend): a
+guest I/O exit to the VMM and back 4.7 us, an MMIO exit 5.8 us; a `rep
+insw` of 256 words is one exit (256,000 words in 0.05 s). The N100 is
+slower per core (*estimate* 1.5-2x per exit) and a bus read adds the PCIe
+round trip (*estimate* ~1 us, Gen2, plus the board bus cycle), so a board
+access costs ~8-12 us, i.e. ~100K accesses/s; a P-III does a PCI I/O read
+in ~0.3 us, an ISA one in ~1 us.
+
+| load | access pattern | verdict |
+|---|---|---|
+| CPU + RAM (BIOS code after shadowing, DOS, Windows, Linux) | none | native N100 speed: the C2 goal |
+| PIC / PIT / keyboard / CMOS / serial | a few per interrupt | fine (1-2 kHz timers: ~1-2 % of a core) |
+| IDE PIO | `rep insw/outsw`, one exit per sector | fine if the bridge runs a repeated I/O cycle in one request (to add: count + FIFO window) |
+| IDE / PCI bus-master DMA | snoops on the board bus | DMA mirror into guest RAM by PCIe bus mastering (VFIO / IOMMU), snoop stalls ~1-2 us per line: board tolerance to test |
+| VGA text, BIOS video calls | few writes | fine |
+| framebuffer graphics (mode 13h, VESA LFB) | one exit per write, ~100K/s | too slow trapped (a 64 KB frame ~0.2-0.6 s); needs the framebuffer as guest RAM with KVM dirty logging, the VMM copying dirty pages to the card in bursts (~60 Hz) |
+| planar VGA (mode 12h, Mode X), 2D-accelerated drivers | reads of card state / VRAM written by the card | stay trapped (slow) or use a non-accelerated driver |
+
+Verdict so far: viable for BIOS, DOS text programs, and Windows / Linux
+desktop work with a VESA or LFB display, at ~10x a P-III in CPU work;
+graphics-heavy DOS games and accelerated video drivers are the weak spot.
+Risks only hardware can close: the real PCIe read latency of the N100 to
+the FPGA, the board's tolerance of long snoop stalls (440BX; VIA snoop
+filtering), AGP cards.
+
 ## Next
 
-1. VMM: shadow RAM. The 440BX PAM registers (device 0:0 config 0x59-0x5f,
-   seen as 0xcf8/0xcfc writes) select ROM or RAM per 16 KB of
-   0xc0000-0xfffff: remap the memslots (RAM copy, read-only ROM, or bus).
-   Option ROMs (VGA BIOS at 0xc0000) are fetched into a memslot when the
-   BIOS shadows them.
+1. Bridge protocol: a repeated I/O cycle (string I/O) and a burst write
+   (framebuffer pages) in bus.h; VMM framebuffer mirror (dirty logging).
 2. FPGA bridge v0 on the Puzhi board: PCIe 7 Series IP (x2 Gen2) + BAR0
    block + a loopback bus target (scratch RAM, POST port), then measure
    the N100 round trip per cycle (goal < 2-3 us, D28).

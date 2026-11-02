@@ -5,7 +5,7 @@ set -eu
 cd "$(dirname "$0")"
 out=build
 mkdir -p "$out"
-gcc -O2 -Wall -Wextra -Werror -o "$out/c2-vmm" vmm.c bus_sim.c bus_fpga.c
+gcc -O2 -Wall -Wextra -Werror -o "$out/c2-vmm" vmm.c shadow.c bus_sim.c bus_fpga.c
 as --32 -o "$out/test_rom.o" test_rom.S
 objcopy -O binary -j .text "$out/test_rom.o" "$out/test_rom.bin"
 if "$out/c2-vmm" sim "$out/test_rom.bin"; then

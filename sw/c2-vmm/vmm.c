@@ -12,6 +12,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include "bus.h"
+#include "shadow.h"
 
 static int verbose;
 
@@ -129,18 +130,18 @@ int main(int argc, char **argv)
     int vm = xioctl(kvm, KVM_CREATE_VM, 0, "KVM_CREATE_VM");
     xioctl(vm, KVM_SET_TSS_ADDR, (void *)0xfffbd000ul, "KVM_SET_TSS_ADDR");
 
-    // RAM below the VGA hole and above 1 MB; 0xa0000-0xbffff and
-    // 0xc0000-0xdffff (option ROMs) are the board's
+    // RAM below the VGA hole and above 1 MB; 0xa0000-0xbffff is the
+    // board's, 0xc0000-0xfffff follows the chipset's shadow map (shadow.c)
     uint64_t ram_size = ram_mb << 20, rom_size = rom_kb << 10;
     uint8_t *ram = alloc_mem(ram_size);
     add_slot(vm, 0, 0, 0xa0000, ram, 0);
     add_slot(vm, 1, 0x100000, ram_size - 0x100000, ram + 0x100000, 0);
-    // the BIOS ROM, read once from the board: at the top of 4 GB and its
-    // last 128 KB at 0xe0000 (read-only: writes exit to the bus)
+    // the BIOS ROM, read once from the board, at the top of 4 GB
+    // (read-only: writes exit to the bus)
     uint8_t *rom = alloc_mem(rom_size);
     bus_access(b, BUS_MEM, (uint32_t)(0x100000000ull - rom_size), rom, (int)rom_size, 0);
     add_slot(vm, 2, 0x100000000ull - rom_size, rom_size, rom, 1);
-    add_slot(vm, 3, 0xe0000, 0x20000, rom + rom_size - 0x20000, 1);
+    shadow_init(vm, ram, rom, rom_size);
 
     int vcpu = xioctl(vm, KVM_CREATE_VCPU, 0, "KVM_CREATE_VCPU");
     set_cpuid(kvm, vcpu, signature);
@@ -165,14 +166,23 @@ int main(int argc, char **argv)
         switch (run->exit_reason) {
         case KVM_EXIT_IO: {
             uint8_t *p = (uint8_t *)run + run->io.data_offset;
-            for (uint32_t i = 0; i < run->io.count; i++, p += run->io.size)
-                bus_access(b, BUS_IO, run->io.port, p, run->io.size, run->io.direction == KVM_EXIT_IO_OUT);
+            int out = run->io.direction == KVM_EXIT_IO_OUT;
+            for (uint32_t i = 0; i < run->io.count; i++, p += run->io.size) {
+                if (out) {
+                    uint32_t v = 0;
+                    memcpy(&v, p, run->io.size);
+                    shadow_io_write(run->io.port, run->io.size, v);
+                }
+                bus_access(b, BUS_IO, run->io.port, p, run->io.size, out);
+            }
             break;
         }
         case KVM_EXIT_MMIO:
             if (run->mmio.phys_addr >> 32) die("MMIO above 4 GB: %llx", (unsigned long long)run->mmio.phys_addr);
-            bus_access(b, BUS_MEM, (uint32_t)run->mmio.phys_addr, run->mmio.data, (int)run->mmio.len,
-                       run->mmio.is_write);
+            if (!run->mmio.is_write
+                || !shadow_mmio_write((uint32_t)run->mmio.phys_addr, run->mmio.data, (int)run->mmio.len))
+                bus_access(b, BUS_MEM, (uint32_t)run->mmio.phys_addr, run->mmio.data, (int)run->mmio.len,
+                           run->mmio.is_write);
             break;
         case KVM_EXIT_IRQ_WINDOW_OPEN:
         case KVM_EXIT_INTR:
