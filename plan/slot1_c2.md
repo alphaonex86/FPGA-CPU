@@ -389,7 +389,7 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
 - Power: 12 V input (Mu VIN + the FPGA / 16612 rails); budget ~30 W
   (N305 > 15 W + 50 % margin, fan, FPGA; viability.md), allowed by the CLAUDE.md external-supply rule for
   the C2 gain.
-- Viability (2026-11-04): `sockets/slot1/lattepanda_mu/viability.md`: viable; the PCB grows to ~75 mm high (Mu courtyard 65.4 mm), LOTES 9.2H socket (LCSC), FPGA under the module.
+- Viability (2026-11-04): `sockets/slot1/lattepanda_mu/viability.md`: viable; operator: ~75 mm PCB accepted, buy N305 16 GB + FIT0981 + Lite carrier (bring-up); the PCB grows to ~75 mm high (Mu courtyard 65.4 mm), LOTES 9.2H socket (LCSC), FPGA under the module.
 - Open: Mu placement over the cartridge parts with the H8.0 connector
   (8 mm under the module: TSSOPs, BGA, small passives only) and the
   cartridge thickness in the Slot 1 (module + heatsink); power-on of

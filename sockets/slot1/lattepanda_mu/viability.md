@@ -107,3 +107,10 @@ DFRobot takes PayPal; shipping to Bolivia is to be confirmed at checkout.
 The Lite carrier is optional. It is not an external PC (it carries the same
 Mu, only during bring-up). With it, Linux and the VMM can be installed on the
 eMMC and KVM and the BIOS clock settings checked before the cartridge PCB exists.
+
+## Operator decisions (2026-11-04)
+
+- Cartridge PCB ~75 mm high accepted (deviation from Intel's 57.8 mm).
+- Module: N305, 16 GB, 64 GB eMMC (DFR1149), with the FIT0981 active
+  cooler.
+- Lite carrier DFR1142 in the same order, for bring-up only.
