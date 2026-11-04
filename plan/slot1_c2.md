@@ -386,8 +386,8 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   GTP RX, GTP TX -> Mu RX); REFCLK2 AC-coupled into MGTREFCLK1 (F10/E10);
   PLT_RST# into a 3.3 V FPGA IO as PERST#. The link trains at Gen2
   (GTP limit).
-- Power: 12 V input (Mu VIN + the FPGA / 16612 rails); budget ~20 W
-  (N305 up to ~15 W), allowed by the CLAUDE.md external-supply rule for
+- Power: 12 V input (Mu VIN + the FPGA / 16612 rails); budget ~30 W
+  (N305 > 15 W + 50 % margin, fan, FPGA; viability.md), allowed by the CLAUDE.md external-supply rule for
   the C2 gain.
 - Viability (2026-11-04): `sockets/slot1/lattepanda_mu/viability.md`: viable; the PCB grows to ~75 mm high (Mu courtyard 65.4 mm), LOTES 9.2H socket (LCSC), FPGA under the module.
 - Open: Mu placement over the cartridge parts with the H8.0 connector
