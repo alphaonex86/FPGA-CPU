@@ -60,3 +60,15 @@ slot1/lattepanda_mu/lite_carrier_v2_schematic.pdf https://raw.githubusercontent.
 slot1/lattepanda_mu/mini_carrier_schematic.pdf https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Electricals/Examples/%5BDFR1293%5DMini%20Carrier%20for%20LattePanda%20Mu%20and%20Mu%20Ultra/DFR1293%20Mini%20Carrier%20Board%20Schematic.pdf
 slot1/lattepanda_mu/bios_README.md https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Softwares/BIOS/README.md
 slot1/lattepanda_mu/bios_dflt_README.md https://raw.githubusercontent.com/LattePandaTeam/LattePanda-Mu/deefecd863043d760f85b760c17769a66820ccc9/Softwares/BIOS/DFLT/README.md
+slot1/lattepanda_mu/design_guide_foreword.html https://docs.lattepanda.com/content/mu_edition/design_guide_foreword/
+slot1/lattepanda_mu/design_guide_edge_connector.html https://docs.lattepanda.com/content/mu_edition/design_guide_edge_connector/
+slot1/lattepanda_mu/design_guide_power.html https://docs.lattepanda.com/content/mu_edition/design_guide_power/
+slot1/lattepanda_mu/design_guide_pwctl_stat.html https://docs.lattepanda.com/content/mu_edition/design_guide_pwctl_stat/
+slot1/lattepanda_mu/design_guide_auto_power_on.html https://docs.lattepanda.com/content/mu_edition/design_guide_auto_power_on/
+slot1/lattepanda_mu/auto_power_on_circuit.png https://docs.lattepanda.com/assets/images/mu_edition/auto_power_on_circuit.png
+slot1/lattepanda_mu/design_guide_pcie.html https://docs.lattepanda.com/content/mu_edition/design_guide_pcie/
+slot1/lattepanda_mu/hsio_multiplexing.html https://docs.lattepanda.com/content/mu_edition/hsio_multiplexing/
+slot1/lattepanda_mu/design_guide_usb_20.html https://docs.lattepanda.com/content/mu_edition/design_guide_usb_20/
+slot1/lattepanda_mu/design_guide_hdmi.html https://docs.lattepanda.com/content/mu_edition/design_guide_hdmi/
+slot1/lattepanda_mu/design_guide_fan.html https://docs.lattepanda.com/content/mu_edition/design_guide_fan/
+slot1/lattepanda_mu/lotes_addr0110_sodimm_9.2h.pdf https://datasheet.lcsc.com/datasheet/pdf/7fa669a101539415ce08198f560a9bd7.pdf
