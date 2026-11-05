@@ -428,6 +428,12 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   228 uF of ceramic beats the UG483 network's impedance from 100 kHz up,
   which UG483 p.13 accepts. `pdn.Parts.done()` refuses a TPS62130 rail
   over 400 uF.
+- DMA mirror (slot1_variants common facts; RTL + VMM only, after the
+  purchase): the board already carries what it needs (checked
+  2026-11-05 in pins.csv / gen_c2mu_s6.py): the chipset's request phase
+  reaches the FPGA (ADS#, REQ#, A# through the ADDR 16612s held
+  transparent, LEBA high), HIT# / HITM# / DRDY# / DBSY# have TX channels
+  for the stall and the implicit writeback, D[63:0]# is bidirectional.
 - Open: JLCPCB's placement preview (its rotations differ from KiCad's for
   some packages); GTL16612 purchase route.
 
