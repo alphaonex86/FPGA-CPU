@@ -321,7 +321,7 @@ def allow_via_in_pad(dsn):
     dsn.write_text("\n".join(lines))
 
 
-def freerouting(board, path, jobs):
+def freerouting(board, path, jobs, passes=PASSES):
     """the jobs (routers()) of PASSES passes at the same time; the session leaving the fewest
     connections open is imported into the board"""
     route, name = path.parent / "route", path.stem
@@ -356,7 +356,7 @@ def freerouting(board, path, jobs):
         shutil.copy(base, dsn)
         ses.unlink(missing_ok=True)
         cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, "-Xmx8g", "-Djava.awt.headless=true", "-jar",
-               str(jar), "-de", str(dsn), "-do", str(ses), "-mp", str(PASSES), "-mt", "1", "-da",
+               str(jar), "-de", str(dsn), "-do", str(ses), "-mp", str(passes), "-mt", "1", "-da",
                "--gui.enabled=false"]
         out = open(log, "a")
         runs.append((label, ses, log, out, subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT,
