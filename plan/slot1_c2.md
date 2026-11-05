@@ -392,8 +392,9 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
 - Viability (2026-11-04): `sockets/slot1/lattepanda_mu/viability.md`: viable; operator: ~75 mm PCB accepted, buy N305 16 GB + FIT0981 + Lite carrier (bring-up); the PCB grows to ~75 mm high (Mu courtyard 65.4 mm), LOTES 9.2H socket (LCSC), FPGA under the module.
 - Flow (each step a script, PASS/FAIL): `gen_mu_lib.py` (Mu symbol from
   the vendor xlsx, LOTES 9.2H socket and M2 standoff footprints),
-  `gen_c2mu_assign.py` (pins.csv), `build_c2mu.tcl` (bitstream x4 Gen1,
-  2026-11-04: WNS +0.265 / WHS +0.052 ns, 1.0 W), `gen_c2mu_s6.py`
+  `gen_c2mu_assign.py` (pins.csv: least-total-length matching of each
+  net to its other end, so no two bus lines cross), `build_c2mu.tcl`
+  (bitstream x4 Gen1, 2026-11-05: WNS +0.090 / WHS +0.052 ns, 1.0 W), `gen_c2mu_s6.py`
   (schematic, ERC 0), `_s7.py` (placement: FPGA and the transceiver band
   under the module, parts <= 4 mm there; connectors, PS1 coil and C1 in
   the free column; DRC 0), `_s8.py` (planes, via in every U1 ball, plane

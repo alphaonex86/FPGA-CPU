@@ -56,7 +56,8 @@ NO_MODEL = {"U2"}                        # card edge
 TALL = {"J1", "J3", "J5", "J6", "J7", "J8", "SW1", "D1"}
 TALL_FP = ("L_Changjiang_FXL1040", "CP_Elec_")         # > 4 mm, never under the Mu
 RES = 0.1                                # occupancy grid (mm)
-NET_CLASSES = {"PWR": ["VCC_*", "V5", "VTT15", "USB_VBUS", "FT_VPHY", "FT_VCORE", "FT_VCCA", "PS*_SW"],
+NET_CLASSES = {"PWR": ["VCC_3V3", "V5", "VTT15", "USB_VBUS", "FT_VPHY", "FT_VCORE", "FT_VCCA", "PS*_SW"],
+               "CORE": ["VCC_1V0", "VCC_1V8", "VCC_MGT*"],
                "VIN": ["V12", "V12_IN"],
                "PCIE": ["MU_TX*", "MU_RX*", "PCIE_TX*", "PCIE_RX*", "MU_REFCLK_*", "PCIE_REFCLK_*"]}
 
@@ -163,8 +164,10 @@ class Placer:
         f.SetPosition(mm(x, y))
         f.SetOrientationDegrees(rot)
         if mark:
-            b = self.box(f, side)
+            f.BuildCourtyardCaches()
             for s in self.sides(f, side):
+                own = f.GetCourtyard(pcbnew.F_CrtYd if s == "F" else pcbnew.B_CrtYd).OutlineCount()
+                b = self.box(f, s if own else side)
                 self.grid[s][self.cells(b)] |= self.shape(f, side, b) if ref == "J4" else True
         self.where[ref] = (x, y, side)
         return f
@@ -411,9 +414,12 @@ def write_rules():
     pro["net_settings"] = {"meta": tmpl["net_settings"]["meta"], "classes": [
         dict(default, clearance=0.1, track_width=0.1, **via),
         dict(default, name="PWR", clearance=0.15, track_width=0.4, **via),
+        # FPGA rails (<= 0.25 A each, rtl/build/c2mu/power.rpt): fits between U1's via-in-pads (0.55 mm)
+        dict(default, name="CORE", clearance=0.1, track_width=0.25, **via),
         dict(default, name="VIN", clearance=0.2, track_width=1.0, **via),     # Mu ~2 A at 12 V
         # 0.2 mm on F.Cu over In1 (0.1 mm 3313 prepreg, er 4.1): ~44 ohm, ~88 ohm loosely coupled
-        dict(default, name="PCIE", clearance=0.2, track_width=0.2, **via)],
+        # clearance 0.15: the pair escapes between U1's via-in-pads (0.2 + 2 x 0.15 <= 0.55 mm)
+        dict(default, name="PCIE", clearance=0.15, track_width=0.2, **via)],
         "netclass_patterns": [{"netclass": c, "pattern": "/" + p} for c, ps in NET_CLASSES.items() for p in ps]}
     pro_path.write_text(json.dumps(pro, indent=2))
 
