@@ -342,7 +342,7 @@ A pins facing U1; the strips between the columns and the board edge and beside
 the ring stay free for the socket legs; U4 flash in the window at its AS
 balls; jack, regulators and JTAG in the north band. Board 51.4 x 101.8 mm
 (D6: 0.5 mm inside the ZIF body west/south/east), 4 layers, DRC 0 errors,
-1390/1390 netlist pins on pads. 3D view with the ZIF model: open.
+1390/1390 netlist pins on pads. 3D view (kicad-cli render): J3 plug opening faces the north edge (front 1.1 mm inside it), FPGA, translator columns and the flash in the window as placed, nothing on the lever band.
 
 **T8 Routing**: layers per D5; Socket 370 per AP-906 (AGTL+, 133 MHz), Socket 7 at
 66 MHz with matched lengths per byte lane. Check: DRC 0 errors, 0 unconnected.
