@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Close the open connections freerouting leaves: a windowed A* over the signal layers with the
-net-class clearances, the hole rules and the keepouts; KiCad DRC stays the judge (gen_c2mu_s8.py).
+net-class clearances, the hole rules and the keepouts; KiCad DRC stays the judge (autoroute.py).
     close_route.py <board.kicad_pcb> <drc.json> <out.kicad_pcb>"""
 import heapq
 import json
@@ -15,14 +15,20 @@ from scipy import ndimage
 G = 0.05                                 # grid (mm)
 WINDOW = 5.0                             # around the two ends
 MAX_SPAN = 40.0
-LAYERS = (pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.In5_Cu, pcbnew.B_Cu)
-LAYER_COST = (1.3, 1.0, 1.0, 1.3)
+LAYERS, LAYER_COST = (), ()             # the board's signal layers, outer ones dearer: set by close()
+OUTER_COST = 1.3
 VIA_D, VIA_DRILL, VIA_COST = 0.45, 0.25, 30          # via cost in grid steps
 HOLE_CLR, HOLE_TO_HOLE, EDGE, MARGIN = 0.2, 0.25, 0.3, G     # MARGIN: raster offset and staircase
 MAX_EXPAND = 1500000
 MM = 1e6
 STEPS = [(1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0),
          (1, 1, math.sqrt(2)), (1, -1, math.sqrt(2)), (-1, 1, math.sqrt(2)), (-1, -1, math.sqrt(2))]
+
+
+def copper_layers(board):
+    """the copper layers in stack order"""
+    n = board.GetCopperLayerCount()
+    return (pcbnew.F_Cu, *(getattr(pcbnew, f"In{k}_Cu") for k in range(1, n - 1)), pcbnew.B_Cu)
 
 
 class Window:
@@ -195,6 +201,9 @@ def commit(board, win, path, net, width):
 def close(board, report):
     """route each open pair of the DRC report, shortest first (a PCIe pair as two nets: the skew
     is gen_c2mu_s8.py's check): (routed, tried)"""
+    global LAYERS, LAYER_COST
+    LAYERS = tuple(L for L in copper_layers(board) if board.GetLayerType(L) != pcbnew.LT_POWER)
+    LAYER_COST = tuple(OUTER_COST if L in (pcbnew.F_Cu, pcbnew.B_Cu) else 1.0 for L in LAYERS)
     ns = board.GetDesignSettings().m_NetSettings
     planes = {z.GetNetname() for z in board.Zones() if not z.GetIsRuleArea()}
     byid = {p.m_Uuid.AsString(): p for f in board.GetFootprints() for p in f.Pads()}
