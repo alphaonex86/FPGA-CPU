@@ -8,10 +8,11 @@ contact), the same columns as gen_c2cart_assign.py.
 Banks (D39): 15 at 1.8 V takes the 15 observed control lines straight from
 the contacts (SSTL18_I, internal VREF 0.90 V) and VTT_SENSE (slot VTT 1.5 V:
 board powered); 14, 16, 13 at 3.3 V take the 111 transceiver A-side nets
-(the 16612 groups of gen_c2cart_assign, balls nearest the card edge, in
-contact x order), the 11 CMOS pins (2.5 V signals, VIH 2.0 V: no
+(the 16612 groups of gen_c2cart_assign), the 11 CMOS pins (2.5 V signals, VIH 2.0 V: no
 pass-gate), BCLK and the 50 MHz oscillator on MRCC balls, the SPI x4 flash
-pins of bank 14, the Mu control lines and a LED. 34/35 unused. PCIe x4 to
+pins of bank 14, the Mu control lines and a LED. 34/35 unused. Each bank's
+nets take the balls of least total length to where their other end sits
+(match(): no two ratsnest lines from the BGA cross, few deep balls). PCIe x4 to
 the Mu (HSIO8-11): Mu lane k = GTP channel 3-k (pcie_7x x4 places lane k on
 GTPE2_CHANNEL_X0Y(7-k), checked in Vivado), refclk MGTREFCLK1.
 Checks (exit 1): every ball used once, user IO in its planned bank,
@@ -21,8 +22,16 @@ import csv
 import pathlib
 import sys
 
+import numpy as np
+import pcbnew
+from scipy.optimize import linear_sum_assignment
+
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import gen_t6_schematic as t6
 from gen_c2cart_assign import ADDR, CHIP_CH, CMOS, CTRL, DATA, RX, TX, ball_xy, chips, contacts
+from gen_c2cart_s6 import FP, GTL_REFS, PARTS, sym_pins
+from gen_c2mu_s7 import MU_AT, U1_AT, band_centres
+from gen_slot1_s7 import A1_X
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 TABLE = ROOT / "FPGAlist/c2_cards/xilinx/xc7a100t_fgg484.csv"
@@ -40,6 +49,30 @@ for k in range(4):
 PCIE.update({"PCIE_REFCLK_P": "MGTREFCLK1P_216", "PCIE_REFCLK_N": "MGTREFCLK1N_216"})
 # Mu: PLT_RST# in, power / reset buttons out (each through an NMOS), PSON in
 MU = ["PCIE_PERST#", "MU_PWR_ON", "MU_RST", "MU_PSON", "LED"]
+
+
+def gtl_pin_xy():
+    """(chip ref, symbol pin name) -> board point: the s7 band layout + the stock TSSOP-56 pads"""
+    lib, name = FP["SN74GTL16612"].split(":")
+    fp = pcbnew.FootprintLoad(f"/usr/share/kicad/footprints/{lib}.pretty", name)
+    if fp is None:
+        sys.exit(f"FAIL: footprint {FP['SN74GTL16612']} missing")
+    pad = {p.GetNumber(): (pcbnew.ToMM(p.GetPosition().x), pcbnew.ToMM(p.GetPosition().y)) for p in fp.Pads()}
+    sym = next(d for d in t6.parse_lib(PARTS) if d[0] == "SN74GTL16612")
+    num = {p["name"]: p["num"] for p in sym_pins(sym)}
+    return {(ref, pin): (cx + pad[n][0], cy + pad[n][1])
+            for ref, (cx, cy) in band_centres().items() if ref in GTL_REFS.values() for pin, n in num.items()}
+
+
+def match(nets, balls):
+    """net -> ball of least total length (target to ball): a least length matching has no crossing
+    pair, so the fanout from the balls stays planar"""
+    def at(b):
+        x, y = ball_xy(b)
+        return U1_AT[0] + x, U1_AT[1] + y
+    cost = np.array([[np.hypot(at(b)[0] - tx, at(b)[1] - ty) for b in balls] for _, (tx, ty) in nets])
+    rows, cols = linear_sum_assignment(cost)
+    return {nets[r][0]: balls[c] for r, c in zip(rows, cols)}
 
 
 def main():
@@ -71,23 +104,31 @@ def main():
     # PUDC_B is tied high on the board (no pull-ups while configuring)
     free = [r["ball"] for r in rows if r["user_io"] == "1" and r["bank"] in IO_BANKS
             and r["ball"] not in fixed.values() and "PUDC_B" not in r["function"]]
-    # the bus takes the balls nearest the card edge, then left to right in
-    # contact x; the direction pairs sit where ADDR and DATA meet
-    edge = sorted(sorted(free, key=lambda b: ball_xy(b)[1])[:len(bus) + len(CTRL)], key=ball_xy)
+    # every net matched to a ball by where its other end sits on the board: the transceiver's A pin,
+    # the chips its control line drives, the slot contact, the Mu socket
+    pin_xy = gtl_pin_xy()
+    finger = lambda c: (A1_X + int(c[1:]) - 1, 0.0)
+    ctrl_chips = {"ADDR": ["ADDR0", "ADDR1"], "DATA": ["DATA0", "DATA1", "DATA2", "DATA3"], "TX": ["TX"],
+                  "AB": list(GTL_REFS)}
+    rows_33 = [(n, kind, chip, ch, ct) for n, kind, chip, ch, ct in bus] + \
+        [(n, "ctrl", "", "", "") for n in CTRL] + [(n, "cmos", "", "", contact[n]) for n in CMOS] + \
+        [(n, "mu", "", "", "") for n in MU]
 
-    chip_x = {c: sum(int(contact[n][1:]) for n in nets) / len(nets) for c, nets in groups}
-    bus.sort(key=lambda r: (chip_x[r[2]], r[3]))
-    split = next(i for i, r in enumerate(bus) if r[2].startswith("ADDR"))
-    ordered = bus[:split] + [(n, "ctrl", "", "", "") for n in CTRL] + bus[split:]
-    assigned = [r + (b,) for r, b in zip(ordered, edge)]
-    rest = sorted((b for b in free if b not in edge), key=ball_xy)
-    other = [(n, "cmos", "", "", contact[n]) for n in CMOS] + [(n, "mu", "", "", "") for n in MU]
-    if len(rest) < len(other):
-        fails.append(f"3.3 V banks: {len(rest)} balls left for {len(other)} nets")
-    assigned += [r + (b,) for r, b in zip(other, rest)]
-    rx_balls = sorted((r["ball"] for r in rows if r["user_io"] == "1" and r["bank"] == RX_BANK), key=ball_xy)
-    rx = sorted(RX, key=lambda n: int(contact[n][1:])) + ["VTT_SENSE"]
-    assigned += [(n, "rx", "", "", contact.get(n, "") if n != "VTT_SENSE" else "", b) for n, b in zip(rx, rx_balls)]
+    def target(n, kind, chip, ch, ct):
+        if kind in ("addr", "data", "tx"):
+            return pin_xy[(GTL_REFS[chip], f"A{ch}")]
+        if kind == "ctrl":
+            cs = [band_centres()[GTL_REFS[c]] for c in ctrl_chips[n.split("_")[0]]]
+            return sum(x for x, _ in cs) / len(cs), sum(y for _, y in cs) / len(cs)
+        return finger(ct) if kind == "cmos" else MU_AT
+    if len(free) < len(rows_33):
+        fails.append(f"3.3 V banks: {len(free)} balls for {len(rows_33)} nets")
+    got = match([(r, target(*r)) for r in rows_33], free)
+    assigned = [r + (b,) for r, b in got.items()]
+    rx_balls = [r["ball"] for r in rows if r["user_io"] == "1" and r["bank"] == RX_BANK]
+    rx = [(n, contact[n]) for n in RX] + [("VTT_SENSE", "")]
+    got = match([((n, ct), finger(ct) if ct else (A1_X, 0.0)) for n, ct in rx], rx_balls)
+    assigned += [(n, "rx", "", "", ct, b) for (n, ct), b in got.items()]
     for n, b in fixed.items():
         kind = "clock" if n in CLOCKS else "spi" if n in SPI else "pcie"
         assigned.append((n, kind, "", "", contact.get(n, "") if n == "BCLK" else "", b))

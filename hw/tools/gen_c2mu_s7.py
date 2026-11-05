@@ -235,6 +235,26 @@ def outline(board):
         board.Add(z)
 
 
+def band_centres():
+    """the transceivers and U10, pin 1 rows vertical (stock orientation): {ref: centre}; DATA0 left
+    of H1, the rest spread between the Mu standoffs, TX right of U1 (gen_c2mu_assign.py: ball targets)"""
+    tw, sw = 9.49, 7.49                  # TSSOP-56 / SOIC-16 courtyard widths
+    h1, h2 = (MU_AT[0] - lx for lx, _ in MU_HOLES)
+    at = {GTL_REFS["DATA0"]: (h1 - STANDOFF_R - tw / 2, BAND_Y + 14.59 / 2)}
+    mid = [GTL_REFS[c] for c in ("DATA1", "DATA2", "DATA3")] + ["U10"] + [GTL_REFS[c] for c in ("ADDR0", "ADDR1")]
+    widths = [sw if r == "U10" else tw for r in mid]
+    lo, hi = h1 + STANDOFF_R, h2 - STANDOFF_R
+    gap = (hi - lo - sum(widths)) / (len(mid) + 1)
+    if gap < 0.1:
+        sys.exit("FAIL: band does not fit between the Mu standoffs")
+    x = lo + gap
+    for r, w in zip(mid, widths):
+        at[r] = (x + w / 2, BAND_Y + (10.49 if r == "U10" else 14.59) / 2)
+        x += w + gap
+    at[GTL_REFS["TX"]] = (U1_AT[0] + 11.35 + 0.4 + tw / 2, U1_AT[1])
+    return at
+
+
 def main():
     comps, nets, full = netlist()
     rows = {r["ref"]: r for r in csv.DictReader(open(OUT / "pdn.csv"))}
@@ -271,21 +291,8 @@ def main():
         P.put(ref, MU_AT[0] - lx, MU_AT[1] - ly)
     P.put("U1", *U1_AT)
 
-    # transceiver band, pin 1 rows vertical (stock orientation)
-    tw, sw = 9.49, 7.49                  # TSSOP-56 / SOIC-16 courtyard widths
-    h1, h2 = P.where["H1"][0], P.where["H2"][0]
-    P.put(GTL_REFS["DATA0"], h1 - STANDOFF_R - tw / 2, BAND_Y + 14.59 / 2)
-    mid = [GTL_REFS[c] for c in ("DATA1", "DATA2", "DATA3")] + ["U10"] + [GTL_REFS[c] for c in ("ADDR0", "ADDR1")]
-    widths = [sw if r == "U10" else tw for r in mid]
-    lo, hi = h1 + STANDOFF_R, h2 - STANDOFF_R
-    gap = (hi - lo - sum(widths)) / (len(mid) + 1)
-    if gap < 0.1:
-        sys.exit("FAIL: band does not fit between the Mu standoffs")
-    x = lo + gap
-    for r, w in zip(mid, widths):
-        P.put(r, x + w / 2, BAND_Y + (10.49 if r == "U10" else 14.59) / 2)
-        x += w + gap
-    P.put(GTL_REFS["TX"], U1_AT[0] + 11.35 + 0.4 + tw / 2, U1_AT[1])
+    for ref, at in band_centres().items():
+        P.put(ref, *at)
 
     # free column: power entry on the top edge, then the tall parts
     P.put("J3", 22.1, H - 12.0)

@@ -9,11 +9,12 @@ freerouting DSN / SES / log in hw/slot1-c2mu/route/.
 Stack (JLCPCB 6-layer, JLC06161H-3313): F.Cu signal, In1 GND, In2 signal,
 In3 VCC_3V3 plane with a VTT15 strip along the fingers (the GTL termination
 arrays: routed as a track it walled the band in), In4 GND, B.Cu signal.
-Every netted U1 ball gets a filled via in its pad (0.45 / 0.25, JLCPCB POFV, free on 6 layers; not the unused IO
-balls); every other SMD
-pad of a plane net a via in / at the pad, a track to a near same-net via or a
-dogbone (plane_vias: freerouting is slow at plane fanout); DRC 0 errors is
-checked on this generated copper before routing. The rest is
+Every netted U1 ball gets a filled via in its pad (0.45 / 0.25, JLCPCB POFV,
+free on 6 layers; not the unused IO balls); every other SMD pad of a plane
+net a via in / at the pad, a track to a near same-net via or a dogbone
+(plane_vias: freerouting is slow at plane fanout); every transceiver signal
+pad a via under the chip body (chip_fanout); DRC 0 errors is checked on this
+generated copper before routing. The rest is
 routed by freerouting with the net classes of gen_c2mu_s7.py: the FPGAcommon
 fork (freerouting-2.3.0-fpga.jar: serial, same routes as upstream, ~3x faster;
 FPGAcommon/tools/freerouting/README-fpga-jar.md) on Java 25, headless (no
@@ -24,6 +25,7 @@ imported and saved, until nothing is unrouted or an iteration gains nothing.
 Checks (exit 1): every connection routed, kicad-cli DRC 0 errors; PCIe
 intra-pair length mismatch printed.
 """
+import collections
 import json
 import math
 import os
@@ -45,6 +47,8 @@ PLANES = [("GND", pcbnew.In1_Cu, (None, None)), ("VCC_3V3", pcbnew.In3_Cu, (Y_VT
           ("VTT15", pcbnew.In3_Cu, (None, Y_VTT)), ("GND", pcbnew.In4_Cu, (None, None))]   # y top, bottom
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
 FANOUT = ["V5"]                          # no plane, pins in the dense band: a via at each pin too
+FAN_PARTS = ("SN74GTL16612",)            # chip_fanout
+STAGGER = (0.35, 0.95)                   # its via columns past the pad's inner end
 VIA = (0.45, 0.25)
 TRACK = 0.25                             # pad -> plane via
 CLEARANCE = pcbnew.FromMM(0.1)           # Default net class (the board minimum is 0)
@@ -112,7 +116,7 @@ class Copper:
     LAYERS = (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.In4_Cu, pcbnew.B_Cu)
 
     def __init__(self, board):
-        self.cells = {}
+        self.board, self.cells = board, {}
         for f in board.GetFootprints():
             for p in f.Pads():
                 self.add(p)
@@ -155,6 +159,27 @@ class Copper:
         return self.clear_of(copper, pt, self.LAYERS, code, hole, rules) and \
             not any(k.Contains(pt) or k.Collide(copper) for k in self.keepouts) and \
             not any(e.Collide(copper, pcbnew.FromMM(0.3)) for e in self.edges)
+
+    def via(self, pt, net):
+        v = pcbnew.PCB_VIA(self.board)
+        v.SetPosition(pt)
+        v.SetWidth(pcbnew.FromMM(VIA[0]))
+        v.SetDrill(pcbnew.FromMM(VIA[1]))
+        v.SetNet(net)
+        v.SetLocked(True)
+        self.board.Add(v)
+        self.add(v)
+
+    def track(self, a, b, layer, net, width=pcbnew.FromMM(TRACK)):
+        t = pcbnew.PCB_TRACK(self.board)
+        t.SetStart(a)
+        t.SetEnd(b)
+        t.SetWidth(width)
+        t.SetLayer(layer)
+        t.SetNet(net)
+        t.SetLocked(True)
+        self.board.Add(t)
+        self.add(t)
 
     def track_fits(self, a, b, layer, code):
         seg = pcbnew.SHAPE_SEGMENT(a, b, pcbnew.FromMM(TRACK))
@@ -230,27 +255,6 @@ def plane_vias(board):
     row_anchor = {}                      # (footprint, net) -> the via and pads already joined of an array's common row
     fits = lambda pt, code: on_plane(pt, spans[code]) and cu.via_fits(pt, code, rules)
 
-    def add_via(pt, n):
-        v = pcbnew.PCB_VIA(board)
-        v.SetPosition(pt)
-        v.SetWidth(pcbnew.FromMM(VIA[0]))
-        v.SetDrill(pcbnew.FromMM(VIA[1]))
-        v.SetNet(n)
-        v.SetLocked(True)
-        board.Add(v)
-        cu.add(v)
-
-    def add_track(a, b, layer, n):
-        t = pcbnew.PCB_TRACK(board)
-        t.SetStart(a)
-        t.SetEnd(b)
-        t.SetWidth(pcbnew.FromMM(TRACK))
-        t.SetLayer(layer)
-        t.SetNet(n)
-        t.SetLocked(True)
-        board.Add(t)
-        cu.add(t)
-
     for f in board.GetFootprints():
         for p in f.Pads():
             code, pos = p.GetNetCode(), p.GetPosition()
@@ -264,7 +268,7 @@ def plane_vias(board):
                 anchors = sorted(row_anchor.get(key, []), key=lambda a: (a - pos).EuclideanNorm())
                 a = next((a for a in anchors if cu.track_fits(pos, a, layer, code)), None)
                 if a is not None:
-                    add_track(pos, a, layer, p.GetNet())
+                    cu.track(pos, a, layer, p.GetNet())
                     row_anchor[key].append(pos)
                     ntrack += 1
                     continue
@@ -275,7 +279,7 @@ def plane_vias(board):
                 for group in via_spots(p, f.GetPosition()):
                     pt = next((pt for pt in group if fits(pt, code)), None)
                     if pt is not None:
-                        add_via(pt, p.GetNet())
+                        cu.via(pt, p.GetNet())
                         placed += 1
                 nvia += placed
                 if placed:
@@ -285,19 +289,49 @@ def plane_vias(board):
                               key=lambda v: (v.GetPosition() - pos).EuclideanNorm())
                 v = next((v for v in near if cu.track_fits(pos, v.GetPosition(), layer, code)), None)
                 if v is not None:
-                    add_track(pos, v.GetPosition(), layer, p.GetNet())
+                    cu.track(pos, v.GetPosition(), layer, p.GetNet())
                     ntrack += 1
                     continue
             pt = next((pt for pt in spots if fits(pt, code) and cu.track_fits(pos, pt, layer, code)), None)
             if pt is None:
                 left.append(f"{f.GetReference()}.{p.GetNumber()}")
                 continue
-            add_via(pt, p.GetNet())
-            add_track(pos, pt, layer, p.GetNet())
+            cu.via(pt, p.GetNet())
+            cu.track(pos, pt, layer, p.GetNet())
             nvia, ntrack = nvia + 1, ntrack + 1
             if key:
                 row_anchor[key] = [pt, pos]
     print(f"plane connections: {nvia} vias, {ntrack} tracks; pads left to the router: {len(left)} {' '.join(left)}")
+
+
+def chip_fanout(board):
+    """every signal pad of the band transceivers: a via just inside the pad row, staggered on two
+    columns (0.5 mm pitch), so the pins reach In2 / B.Cu under the body: the rows of neighbouring
+    chips are only 0.85 mm apart"""
+    count = collections.Counter(p.GetNetCode() for f in board.GetFootprints() for p in f.Pads())
+    planes = {net(board, n).GetNetCode() for n, _, _ in PLANES}
+    classes = board.GetDesignSettings().m_NetSettings
+    rules, cu = board.GetDesignSettings(), Copper(board)
+    placed, left = 0, 0
+    for f in (f for f in board.GetFootprints() if f.GetValue() in FAN_PARTS):
+        cx = f.GetPosition().x
+        for k, p in enumerate(sorted(f.Pads(), key=lambda p: (p.GetPosition().x, p.GetPosition().y))):
+            code, pos = p.GetNetCode(), p.GetPosition()
+            if code <= 0 or code in planes or count[code] < 2:
+                continue
+            inward = 1 if pos.x < cx else -1
+            inner = pos.x + inward * p.GetSize().x // 2
+            spots = [pcbnew.VECTOR2I(inner + inward * pcbnew.FromMM(d), pos.y)
+                     for d in (STAGGER[k % 2], STAGGER[1 - k % 2])]
+            pt = next((pt for pt in spots if cu.via_fits(pt, code, rules)
+                       and cu.track_fits(pos, pt, pcbnew.F_Cu, code)), None)
+            if pt is None:
+                left += 1
+                continue
+            cu.via(pt, p.GetNet())
+            cu.track(pos, pt, pcbnew.F_Cu, p.GetNet(), classes.GetEffectiveNetClass(p.GetNetname()).GetTrackWidth())
+            placed += 1
+    print(f"chip fanout: {placed} vias, pads left to the router: {left}")
 
 
 def unrouted(board):
@@ -388,6 +422,7 @@ def main():
     planes(board)
     via_in_pad(board)
     plane_vias(board)
+    chip_fanout(board)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(path), board)
     if drc(path)[0]:
