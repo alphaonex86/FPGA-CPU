@@ -393,8 +393,11 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
 - Flow (each step a script, PASS/FAIL): `gen_mu_lib.py` (Mu symbol from
   the vendor xlsx, LOTES 9.2H socket and M2 standoff footprints),
   `gen_c2mu_assign.py` (pins.csv: least-total-length matching of each
-  net to its other end, so no two bus lines cross), `build_c2mu.tcl`
-  (bitstream x4 Gen1, 2026-11-05: WNS +0.245 / WHS +0.052 ns, 1.0 W), `gen_c2mu_s6.py`
+  transceiver channel to its finger and of each net to its ball, so no
+  two lines of a chip cross; left: the 7 TX lines past ADDR1 and the 11
+  RX lines between the ADDR fingers, Slot 1 pinout geometry, a layer
+  change each), `build_c2mu.tcl`
+  (bitstream x4 Gen1, 2026-11-05: WNS +0.150 / WHS +0.052 ns, 1.0 W), `gen_c2mu_s6.py`
   (schematic, ERC 0), `_s7.py` (placement: FPGA and the transceiver band
   under the module, parts <= 4 mm there; connectors, PS1 coil and C1 in
   the free column; DRC 0), `_s8.py` (planes, via in every U1 ball, plane

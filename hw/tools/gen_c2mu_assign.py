@@ -8,7 +8,8 @@ contact), the same columns as gen_c2cart_assign.py.
 Banks (D39): 15 at 1.8 V takes the 15 observed control lines straight from
 the contacts (SSTL18_I, internal VREF 0.90 V) and VTT_SENSE (slot VTT 1.5 V:
 board powered); 14, 16, 13 at 3.3 V take the 111 transceiver A-side nets
-(the 16612 groups of gen_c2cart_assign), the 11 CMOS pins (2.5 V signals, VIH 2.0 V: no
+(the 16612 groups of gen_c2cart_assign; each channel by least total finger
+to B pin length, no crossing in a chip), the 11 CMOS pins (2.5 V signals, VIH 2.0 V: no
 pass-gate), BCLK and the 50 MHz oscillator on MRCC balls, the SPI x4 flash
 pins of bank 14, the Mu control lines and a LED; 34/35 at 3.3 V give spare
 balls so the nets take the outer rings. Each net takes the ball of least
@@ -67,17 +68,18 @@ def gtl_pin_xy():
             for ref, (cx, cy) in band_centres().items() if ref in GTL_REFS.values() for pin, n in num.items()}
 
 
-def match(nets, balls):
-    """net -> ball of least total length (target to ball) plus the ring depth: a least length matching
-    has no crossing pair (the depth term is per ball, a swap keeps it), so the fanout stays planar"""
-    def at(b):
-        x, y = ball_xy(b)
-        return U1_AT[0] + x, U1_AT[1] + y
-    depth = lambda b: 10.5 - max(abs(v) for v in ball_xy(b))
-    cost = np.array([[np.hypot(at(b)[0] - tx, at(b)[1] - ty) + DEPTH_MM * depth(b) for b in balls]
-                     for _, (tx, ty) in nets])
+def least_length(nets, spots, extra=lambda spot: 0.0):
+    """[(net, target xy)], [(spot, xy)] -> {net: spot} of least total length (+ extra per spot): a
+    least length matching has no crossing pair (a per spot term survives the swap argument)"""
+    cost = np.array([[np.hypot(x - tx, y - ty) + extra(sp) for sp, (x, y) in spots] for _, (tx, ty) in nets])
     rows, cols = linear_sum_assignment(cost)
-    return {nets[r][0]: balls[c] for r, c in zip(rows, cols)}
+    return {nets[r][0]: spots[c][0] for r, c in zip(rows, cols)}
+
+
+def match(nets, balls):
+    """net -> ball, DEPTH_MM per ring from the BGA edge on top of the length"""
+    at = [(b, (U1_AT[0] + ball_xy(b)[0], U1_AT[1] + ball_xy(b)[1])) for b in balls]
+    return least_length(nets, at, lambda b: DEPTH_MM * (10.5 - max(abs(v) for v in ball_xy(b))))
 
 
 def main():
@@ -96,12 +98,17 @@ def main():
     contact = contacts()
     groups = chips(ADDR, "ADDR", contact) + chips(DATA, "DATA", contact) + \
         [("TX", sorted(TX, key=lambda n: int(contact[n][1:])))]
+    pin_xy = gtl_pin_xy()
+    finger = lambda c: (A1_X + int(c[1:]) - 1, 0.0)
     bus = []                                    # signal, kind, chip, channel, contact
     for chip, nets in groups:
         if len(nets) > CHIP_CH:
             fails.append(f"{chip}: {len(nets)} channels")
         kind = chip.rstrip("0123456789").lower()
-        bus += [(n, kind, chip, ch + 1, contact[n]) for ch, n in enumerate(nets)]
+        # channel of least total finger to B pin length: no two finger lines of a chip cross
+        b_pins = [(f"B{ch}", pin_xy[(GTL_REFS[chip], f"B{ch}")]) for ch in range(1, CHIP_CH + 1)]
+        got = least_length([(n, finger(contact[n])) for n in nets], b_pins)
+        bus += [(n, kind, chip, int(got[n][1:]), contact[n]) for n in nets]
 
     fixed = {n: by_func[f]["ball"] for n, f in CLOCKS.items()}
     fixed |= {n: ball(f) for n, f in SPI.items()}
@@ -111,8 +118,6 @@ def main():
             and r["ball"] not in fixed.values() and "PUDC_B" not in r["function"]]
     # every net matched to a ball by where its other end sits on the board: the transceiver's A pin,
     # the chips its control line drives, the slot contact, the Mu socket
-    pin_xy = gtl_pin_xy()
-    finger = lambda c: (A1_X + int(c[1:]) - 1, 0.0)
     ctrl_chips = {"ADDR": ["ADDR0", "ADDR1"], "DATA": ["DATA0", "DATA1", "DATA2", "DATA3"], "TX": ["TX"],
                   "AB": list(GTL_REFS)}
     rows_33 = [(n, kind, chip, ch, ct) for n, kind, chip, ch, ct in bus] + \

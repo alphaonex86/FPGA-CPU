@@ -83,6 +83,8 @@ chipset, same sockets; source of `sockets/kicad/`).
   hardware-specific links die fast (operator, 2026-11-02).
 - Slot 1 / Socket 370 FSB may run at 66 MHz when that gives a large benefit
   (board RAM only for DMA) (operator, 2026-11-01).
+- PCB routing is the last step: pins (in a crossing-free order), placement and everything
+  else final and verified first; routing never changes the pins (operator, 2026-11-05).
 - CPU goal is maximum performance inside the selected Cyclone V: large rewrites,
   a from-scratch x86 core and a separate RISC-V core are all fine; licence is no
   selection criterion (GitHub code counts as usable; copyrighted parts, avoided
