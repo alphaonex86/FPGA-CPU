@@ -36,7 +36,7 @@ def build(net_of_ball, translators, taken):
     # Vout rising, tps62130 p.5) enables group 2 (PS3, PS4) together.
     # PS1 = the Slot 1 PS1 design (same rail, larger load there)
     buck54620(P, "PS1", ("V12", 12.0), "V5", 5.0, 3.0,
-              (2, "22uF/10V", 22e-6), None, "PG_5V", 6.8e-6, "MSS1048-682", 0.25)
+              (2, "22uF/10V", 22e-6), None, "PG_5V", 6.8e-6, "FXL1040-6R8", 0.25)   # LCSC-stocked (C167231)
     buck62130(P, "PS2", "VCC_1V1", 1.1, (1.07, 1.13), "PG_5V", "PG_1V1")
     buck62130(P, "PS3", "VCC_AUX25", 2.5, (2.375, 2.625), "PG_1V1", None)
     # 600 R +-25 % @ 100 MHz, 500 mA, 0.38 R max [Murata BLM18AG601SN1]

@@ -1,7 +1,7 @@
 ref,sym,value,footprint,nets,side,kind,a,b
 F1,Device:Fuse,2A,Fuse:Fuse_1206_3216Metric,V12_IN|V12,F,stage,F1,
 PS1,SocketParts:TPS54620,TPS54620RHL,Pwr:TI_RHL0014A,PS1_RT|GND|GND|V12|V12|V12|PS1_FB|PS1_COMP|PS1_SS|NC_PS1_10|PS1_SW|PS1_SW|PS1_BOOT|PG_5V|GND,F,stage,PS1,
-L1,Device:L,6.8uH MSS1048-682,Inductor_SMD:L_Coilcraft_MSS1048-XXX,PS1_SW|V5,F,stage,PS1,
+L1,Device:L,6.8uH FXL1040-6R8,Inductor_SMD:L_Changjiang_FXL1040,PS1_SW|V5,F,stage,PS1,
 C1,Device:C,10uF/25V,Capacitor_SMD:C_1210_3225Metric,V12|GND,F,stage,PS1,
 C2,Device:C,4.7uF/25V,Capacitor_SMD:C_0805_2012Metric,V12|GND,F,stage,PS1,
 C3,Device:C,22uF/10V,Capacitor_SMD:C_1206_3216Metric,V5|GND,F,stage,PS1,
