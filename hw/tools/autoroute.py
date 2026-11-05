@@ -403,14 +403,16 @@ def settle(board, path):
     (the generated copper is locked), the connection open again: (unrouted, dropped)"""
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(path), board)
-    bad = {i["uuid"] for v in drc_report(path).get("violations", []) for i in v["items"]}
+    rep = drc_report(path)
+    bad = {i["uuid"] for v in rep.get("violations", []) for i in v["items"]}
     drop = [t for t in board.GetTracks() if not t.IsLocked() and t.m_Uuid.AsString() in bad]
     for t in drop:
         board.Delete(t)
     if drop:
         pcbnew.ZONE_FILLER(board).Fill(board.Zones())
         pcbnew.SaveBoard(str(path), board)
-    return unrouted(board), len(drop)
+        rep = drc_report(path)
+    return len(rep.get("unconnected_items", [])), len(drop)     # the board's connectivity in memory lags
 
 def drc_report(path):
     out = path.with_suffix(".drc.json")
