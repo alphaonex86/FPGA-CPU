@@ -6,6 +6,7 @@ Usage: python3 hw/tools/gen_c2mu_s9.py [boards]   (after gen_c2mu_s8.py; default
 Output: hw/slot1-c2mu/fab/: slot1-c2mu-gerbers.zip (Gerbers + Excellon drill),
 slot1-c2mu-bom.csv (Comment, Designator, Footprint, LCSC Part #) and
 slot1-c2mu-cpl.csv (Designator, Mid X, Mid Y, Layer, Rotation).
+Order options: ORDER (printed).
 Checks (exit 1): kicad-cli DRC 0 errors and 0 unrouted; every board part
 (U2 = the card edge itself, no part) has an LCSC number and every number is
 used; live JLCPCB stock >= quantity x boards, except CONSIGNED parts (not
@@ -31,6 +32,8 @@ OUT, NAME = ROOT / "hw/slot1-c2mu", "slot1-c2mu"
 FAB = OUT / "fab"
 JLC_SEARCH = "https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList"
 NO_PART = {"U2"}                          # gold fingers of the PCB
+ORDER = ("JLCPCB order: 6 layers, 1.6 mm, stack JLC06161H-3313, ENIG, gold fingers with 45 deg bevel "
+         "(Slot 1 edge), via-in-pad (POFV: U1 and the plane vias), PCBA both sides incl. BGA")
 CONSIGNED = {"C2876885": "ti.com (SN74GTL16612DGGR ACTIVE, in stock 2026-11-04)"}
 
 # (value, footprint) -> LCSC number; chosen 2026-11-04 on JLCPCB stock (basic parts first)
@@ -232,6 +235,7 @@ def main():
         sys.exit(1)
     print(f"PASS  c2mu S9: {sum(map(len, groups.values()))} parts in {len(groups)} BOM lines, fab files in "
           f"{FAB.relative_to(ROOT)}")
+    print(ORDER)
 
 
 if __name__ == "__main__":

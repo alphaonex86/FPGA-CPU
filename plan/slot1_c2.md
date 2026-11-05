@@ -368,7 +368,7 @@ N100 host plugs an OCuLink cable (or a slot / M.2 -> OCuLink adapter).
 
 ## Mu cartridge (D40)
 
-`hw/slot1-c2mu/` (to do): the D39 Artix cartridge with a LattePanda Mu on
+`hw/slot1-c2mu/`: the D39 Artix cartridge with a LattePanda Mu on
 a DDR4 SO-DIMM 260 socket on the board instead of the OCuLink; no
 external PC (operator: never). Docs offline in
 `sockets/slot1/lattepanda_mu/` (LattePandaTeam/LattePanda-Mu): edge
@@ -390,11 +390,30 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   (N305 > 15 W + 50 % margin, fan, FPGA; viability.md), allowed by the CLAUDE.md external-supply rule for
   the C2 gain.
 - Viability (2026-11-04): `sockets/slot1/lattepanda_mu/viability.md`: viable; operator: ~75 mm PCB accepted, buy N305 16 GB + FIT0981 + Lite carrier (bring-up); the PCB grows to ~75 mm high (Mu courtyard 65.4 mm), LOTES 9.2H socket (LCSC), FPGA under the module.
-- Open: Mu placement over the cartridge parts with the H8.0 connector
-  (8 mm under the module: TSSOPs, BGA, small passives only) and the
-  cartridge thickness in the Slot 1 (module + heatsink); power-on of
-  the Mu with the board (PWR_SW#, PSON); a USB 2.0 port / UART header
-  for installing the VMM on the eMMC.
+- Flow (each step a script, PASS/FAIL): `gen_mu_lib.py` (Mu symbol from
+  the vendor xlsx, LOTES 9.2H socket and M2 standoff footprints),
+  `gen_c2mu_assign.py` (pins.csv), `build_c2mu.tcl` (bitstream x4 Gen1,
+  2026-11-04: WNS +0.265 / WHS +0.052 ns, 1.0 W), `gen_c2mu_s6.py`
+  (schematic, ERC 0), `_s7.py` (placement: FPGA and the transceiver band
+  under the module, parts <= 4 mm there; connectors, PS1 coil and C1 in
+  the free column; DRC 0), `_s8.py` (planes, via in every U1 ball, plane
+  fanout, pre-route DRC 0, freerouting), `_s9.py` (DRC gate, JLC BOM with
+  LCSC numbers and live stock, CPL, Gerbers).
+- Mu power-on: SW1 + Q1 (FPGA MU_PWR_ON) on PWR_SW#, Q2 on RST_SW#; USB
+  2.0 x2 header (J6) and UART header (J7) for installing the VMM on the
+  eMMC; FT232H on Mu USB port 2 as the FPGA's JTAG (ADBUS0-3 = TCK, TDI,
+  TDO, TMS: the MPSSE JTAG pins). Flash from the Mu itself:
+  `openFPGALoader -c ft232 --fpga-part xc7a100tfgg484 -f c2mu.bit` (its
+  SPI-over-JTAG bridge). W25Q128JVSIQ: QE fixed at 1 by the factory, so
+  the SPI x4 boot needs no setup [winbond_w25q128jv 7.1.4].
+- Parts (2026-11-04, JLCPCB stock for 2 boards: all but one): swapped to
+  stocked equivalents W25Q128JVSIQ, SX2M 50 MHz, FXL1040-6R8, YC124 56R,
+  TS-1187A, T520D 330 uF/6.3 V; standoffs Sinhoo SMTSO2066CTJ (M2, 6.6 mm,
+  reflowed). SN74GTL16612DGGR: not at LCSC/JLCPCB; TI lists it ACTIVE and
+  in stock (~US$5.9): JLCPCB Global Sourcing or consigned. Parts at JLCPCB
+  list prices ~US$463 for 2 boards (2 x XC7A100T-2FGG484I ~US$66).
+- Open: JLCPCB's placement preview (its rotations differ from KiCad's for
+  some packages); GTL16612 purchase route.
 
 ## Artix cartridge (D39)
 

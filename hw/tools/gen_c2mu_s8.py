@@ -8,7 +8,8 @@ freerouting DSN / SES / log in hw/slot1-c2mu/route/.
 
 Stack (JLCPCB 6-layer, JLC06161H-3313): F.Cu signal, In1 GND, In2 signal,
 In3 VCC_3V3 plane, In4 GND, B.Cu signal. Every netted U1 ball gets a filled
-via in its pad (0.45 / 0.25, JLCPCB POFV, free on 6 layers); every other SMD
+via in its pad (0.45 / 0.25, JLCPCB POFV, free on 6 layers; not the unused IO
+balls); every other SMD
 pad of a plane net a via in / at the pad, a track to a near same-net via or a
 dogbone (plane_vias: freerouting is slow at plane fanout); DRC 0 errors is
 checked on this generated copper before routing. The rest is
@@ -37,7 +38,7 @@ OUT, NAME = ROOT / "hw/slot1-c2mu", "slot1-c2mu"
 ROUTE = OUT / "route"
 FREEROUTING = ROOT.parent / "FPGAcommon/tools/freerouting/freerouting-2.3.0-fpga.jar"
 JAVA = "/opt/openjdk-bin-25/bin/java"     # the fork is built for Java 25
-PASSES, ITERATIONS = 4, 12
+PASSES, ITERATIONS = 2, 20
 PLANES = [("GND", pcbnew.In1_Cu), ("VCC_3V3", pcbnew.In3_Cu), ("GND", pcbnew.In4_Cu)]
 VIA = (0.45, 0.25)
 TRACK = 0.25                             # pad -> plane via
@@ -80,10 +81,14 @@ def planes(board):
 
 def via_in_pad(board):
     u1 = board.FindFootprintByReference("U1")
+    pads = {}
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            pads[p.GetNetCode()] = pads.get(p.GetNetCode(), 0) + 1
     n = 0
     for p in u1.Pads():
-        if p.GetNetCode() <= 0:
-            continue
+        if p.GetNetCode() <= 0 or (pads[p.GetNetCode()] == 1 and not p.GetNetname().endswith(("GND", "VCC_3V3"))):
+            continue                     # an unused IO: a via there only blocks escape channels
         v = pcbnew.PCB_VIA(board)
         v.SetPosition(p.GetPosition())
         v.SetWidth(pcbnew.FromMM(VIA[0]))
@@ -269,7 +274,16 @@ def freeroute(board, path):
     best = unrouted(board)
     print(f"unrouted before routing: {best}", flush=True)
     for it in range(1, ITERATIONS + 1):
-        if not pcbnew.ExportSpecctraDSN(board, str(dsn)):
+        # footprint-only rule areas (cavity, retention bands) leave copper free, but the DSN
+        # export makes every rule area a copper keepout: out of the board for the export only
+        parts_only = [z for z in board.Zones() if z.GetIsRuleArea() and not z.GetDoNotAllowTracks()
+                      and not z.GetDoNotAllowVias()]
+        for z in parts_only:
+            board.Remove(z)
+        exported = pcbnew.ExportSpecctraDSN(board, str(dsn))
+        for z in parts_only:
+            board.Add(z)
+        if not exported:
             sys.exit("FAIL: DSN export")
         ses.unlink(missing_ok=True)
         with open(log, "a") as f:
