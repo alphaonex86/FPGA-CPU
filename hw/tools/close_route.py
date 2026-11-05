@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Close the open connections freerouting leaves: a windowed A* over F.Cu / In2.Cu / B.Cu with the
+"""Close the open connections freerouting leaves: a windowed A* over the signal layers with the
 net-class clearances, the hole rules and the keepouts; KiCad DRC stays the judge (gen_c2mu_s8.py).
     close_route.py <board.kicad_pcb> <drc.json> <out.kicad_pcb>"""
 import heapq
@@ -15,8 +15,8 @@ from scipy import ndimage
 G = 0.05                                 # grid (mm)
 WINDOW = 5.0                             # around the two ends
 MAX_SPAN = 40.0
-LAYERS = (pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.B_Cu)
-LAYER_COST = (1.3, 1.0, 1.3)
+LAYERS = (pcbnew.F_Cu, pcbnew.In2_Cu, pcbnew.In5_Cu, pcbnew.B_Cu)
+LAYER_COST = (1.3, 1.0, 1.0, 1.3)
 VIA_D, VIA_DRILL, VIA_COST = 0.45, 0.25, 30          # via cost in grid steps
 HOLE_CLR, HOLE_TO_HOLE, EDGE, MARGIN = 0.2, 0.25, 0.3, G     # MARGIN: raster offset and staircase
 MAX_EXPAND = 1500000

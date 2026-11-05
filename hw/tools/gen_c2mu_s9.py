@@ -32,7 +32,7 @@ OUT, NAME = ROOT / "hw/slot1-c2mu", "slot1-c2mu"
 FAB = OUT / "fab"
 JLC_SEARCH = "https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList"
 NO_PART = {"U2"}                          # gold fingers of the PCB
-ORDER = ("JLCPCB order: 6 layers, 1.6 mm, stack JLC06161H-3313, ENIG, gold fingers with 45 deg bevel "
+ORDER = ("JLCPCB order: 8 layers, 1.6 mm, stack JLC08161H-2116, ENIG, gold fingers with 45 deg bevel "
          "(Slot 1 edge), via-in-pad (POFV: U1 and the plane vias), PCBA both sides incl. BGA")
 CONSIGNED = {"C2876885": "ti.com (SN74GTL16612DGGR ACTIVE, in stock 2026-11-04)"}
 
@@ -199,7 +199,7 @@ def write_gerbers(pcb):
     tmp = FAB / "gerbers"
     tmp.mkdir(exist_ok=True)
     for cmd in (["gerbers", "--no-protel-ext", "--subtract-soldermask", "--layers",
-                 "F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"],
+                 "F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,In5.Cu,In6.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"],
                 ["drill", "--format", "excellon", "--excellon-separate-th", "--generate-map", "--map-format", "gerberx2"]):
         r = subprocess.run(["nice", "-n", "19", "kicad-cli", "pcb", "export", *cmd, "-o", f"{tmp}/", str(pcb)],
                            capture_output=True, text=True)

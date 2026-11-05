@@ -401,8 +401,14 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   (schematic, ERC 0), `_s7.py` (placement: FPGA and the transceiver band
   under the module, parts <= 4 mm there; connectors, PS1 coil and C1 in
   the free column; DRC 0), `_s8.py` (planes, via in every U1 ball, plane
-  fanout, pre-route DRC 0, freerouting), `_s9.py` (DRC gate, JLC BOM with
-  LCSC numbers and live stock, CPL, Gerbers).
+  fanout, transceiver and termination fanout vias, pre-route DRC 0,
+  freerouting alternating with `close_route.py`), `_s9.py` (DRC gate, JLC
+  BOM with LCSC numbers and live stock, CPL, Gerbers). Routing is the last
+  step, on final pins (operator 2026-11-05).
+- Stack: 8 layers, JLCPCB JLC08161H-2116 (`sockets/parts/jlcpcb_JLC08161H-2116.json`;
+  operator 2026-11-05, 6 layers left ~90 connections open): F sig, In1
+  GND, In2 sig, In3 VCC_3V3 + VTT15 strip, In4 GND + V5 strip, In5 sig,
+  In6 GND, B sig; PCIe 0.2 mm on F over 0.116 mm 2116 ~47 ohm.
 - Mu power-on: SW1 + Q1 (FPGA MU_PWR_ON) on PWR_SW#, Q2 on RST_SW#; USB
   2.0 x2 header (J6) and UART header (J7) for installing the VMM on the
   eMMC; FT232H on Mu USB port 2 as the FPGA's JTAG (ADBUS0-3 = TCK, TDI,

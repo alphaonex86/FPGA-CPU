@@ -6,13 +6,14 @@ Usage: python3 hw/tools/gen_c2mu_s8.py   (after gen_c2mu_s7.py; long: freeroutin
 Output: hw/slot1-c2mu/slot1-c2mu.kicad_pcb routed, .drc.json; the
 freerouting DSN / SES / log in hw/slot1-c2mu/route/.
 
-Stack (JLCPCB 6-layer, JLC06161H-3313): F.Cu signal, In1 GND, In2 signal,
-In3 VCC_3V3 plane with a VTT15 strip along the fingers (the GTL termination
-arrays: routed as a track it walled the band in), In4 GND with a V5 strip
-under the band (the transceivers' 5 V pins; as a track it walled it too),
-B.Cu signal.
+Stack (JLCPCB 8-layer, JLC08161H-2116; operator 2026-11-05: 3 signal layers
+did not route): F.Cu signal, In1 GND, In2 signal, In3 VCC_3V3 plane with a
+VTT15 strip along the fingers (the GTL termination arrays: routed as a track
+it walled the band in), In4 GND with a V5 strip under the band (the
+transceivers' 5 V pins; as a track it walled it too), In5 signal, In6 GND,
+B.Cu signal: each signal layer next to a plane.
 Every netted U1 ball gets a filled via in its pad (0.45 / 0.25, JLCPCB POFV,
-free on 6 layers; not the unused IO balls); every other SMD pad of a plane
+free from 6 layers; not the unused IO balls); every other SMD pad of a plane
 net a via in / at the pad, a track to a near same-net via or a dogbone
 (plane_vias: freerouting is slow at plane fanout); every transceiver signal
 pad a via under the chip body (chip_fanout); DRC 0 errors is checked on this
@@ -52,7 +53,8 @@ Y_VTT = 10.0                             # VTT15 strip / VCC_3V3 split: below th
 V5_BAND = (7.0, 12.5)                    # V5 strip on In4 under every transceiver's VCC (5 V) pin 50 (y 10.6)
 PLANES = [("GND", pcbnew.In1_Cu, (None, None)), ("VCC_3V3", pcbnew.In3_Cu, (Y_VTT, None)),
           ("VTT15", pcbnew.In3_Cu, (None, Y_VTT)), ("GND", pcbnew.In4_Cu, (None, V5_BAND[0])),
-          ("V5", pcbnew.In4_Cu, V5_BAND), ("GND", pcbnew.In4_Cu, (V5_BAND[1], None))]   # y top, bottom
+          ("V5", pcbnew.In4_Cu, V5_BAND), ("GND", pcbnew.In4_Cu, (V5_BAND[1], None)),
+          ("GND", pcbnew.In6_Cu, (None, None))]                                         # y top, bottom
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
 FAN_PARTS = ("SN74GTL16612",)            # chip_fanout
 TERM_FP = "R_Array_Convex_4x0402"         # chip_fanout too: vias outward, VTT pads on the plane
@@ -123,7 +125,8 @@ def via_in_pad(board):
 class Copper:
     """pads and vias in 2 mm cells, for the clearance test of a new via"""
     CELL = pcbnew.FromMM(2.0)
-    LAYERS = (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.In4_Cu, pcbnew.B_Cu)
+    LAYERS = (pcbnew.F_Cu, pcbnew.In1_Cu, pcbnew.In2_Cu, pcbnew.In3_Cu, pcbnew.In4_Cu, pcbnew.In5_Cu,
+              pcbnew.In6_Cu, pcbnew.B_Cu)
 
     def __init__(self, board):
         self.board, self.cells = board, {}

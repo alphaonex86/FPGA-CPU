@@ -6,7 +6,7 @@ Usage: python3 hw/tools/gen_c2mu_s7.py   (after gen_c2mu_s6.py)
 Output: hw/slot1-c2mu/slot1-c2mu.kicad_pcb, .drc.json, fp-lib-table, the
 board rules in .kicad_pro; stock 3D models copied to hw/lib/3dmodels.
 
-Board 127 x 75 mm, 6 layers, the SC242 card edge of gen_slot1_s7.py (no
+Board 127 x 75 mm, 8 layers, the SC242 card edge of gen_slot1_s7.py (no
 paste on the fingers). J4 (Mu socket) on the top edge, turned 180 deg: the
 module covers x 33.3..110.7, y 9.3..74.7 (viability.md); under it only
 parts <= 4 mm (Mu bottom parts 2.0 mm, 6.6 mm standoff): the tall parts
@@ -266,7 +266,7 @@ def main():
     comps, nets, full = netlist()
     rows = {r["ref"]: r for r in csv.DictReader(open(OUT / "pdn.csv"))}
     board = pcbnew.BOARD()
-    board.SetCopperLayerCount(6)
+    board.SetCopperLayerCount(8)
     P = Placer(board, comps, nets, full)
 
     # card edge: stations 73/74 stepped (key notch, gen_slot1_s7.edge_pads), no paste on the fingers
@@ -405,7 +405,7 @@ def main():
 
 
 def write_rules():
-    """JLCPCB 6-layer class rules: 0.09 mm track / space floor, kept at 0.1; vias 0.45 / 0.25"""
+    """JLCPCB 6 / 8-layer class rules: 0.09 mm track / space floor, kept at 0.1; vias 0.45 / 0.25"""
     pro_path = OUT / f"{NAME}.kicad_pro"
     pro = json.loads(pro_path.read_text())
     tmpl = json.loads(pathlib.Path("/usr/share/kicad/template/Edgeberry_Cartridge/"
@@ -422,7 +422,7 @@ def write_rules():
         # FPGA rails (<= 0.25 A each, rtl/build/c2mu/power.rpt): fits between U1's via-in-pads (0.55 mm)
         dict(default, name="CORE", clearance=0.1, track_width=0.25, **via),
         dict(default, name="VIN", clearance=0.2, track_width=1.0, **via),     # Mu ~2 A at 12 V
-        # 0.2 mm on F.Cu over In1 (0.1 mm 3313 prepreg, er 4.1): ~44 ohm, ~88 ohm loosely coupled
+        # 0.2 mm on F.Cu over In1 (0.116 mm 2116 prepreg, er 4.16): ~47 ohm, ~90 ohm loosely coupled
         # clearance 0.15: the pair escapes between U1's via-in-pads (0.2 + 2 x 0.15 <= 0.55 mm)
         dict(default, name="PCIE", clearance=0.15, track_width=0.2, **via)],
         "netclass_patterns": [{"netclass": c, "pattern": "/" + p} for c, ps in NET_CLASSES.items() for p in ps]}
