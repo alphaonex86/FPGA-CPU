@@ -13,7 +13,8 @@ LOTES ADDR0110 SO-DIMM 260 9.2H socket. Mu HSIO8-11 = PCIe lanes 0-3, 0.22 uF
 in both directions (an on-board endpoint), REFCLK2 AC-coupled into
 MGTREFCLK1 (the GTP input wants it), PLT_RST# -> PCIE_PERST#; PWRBTN# /
 RSTBTN# pulled by NMOS from the FPGA (and SW1); PSON (S0) to the FPGA; CPU fan
-J5 as on the Lite carrier; RTC cell 1k into VBAT; USB2 port 1 on J6 (USB-A),
+J5 as on the Lite carrier; cabled CR2032 on J8, 1k into VBAT; USB2 ports 1 and 3 on
+J6 (the 9-pin motherboard USB header: a bracket cable gives two USB-A),
 port 2 to U16 FT232H (MPSSE JTAG: the Mu programs the FPGA and its flash
 itself), UART0 on J7. U11 SPI x4 flash (master SPI, M[2:0] 001), U12 50 MHz
 oscillator (link clock). Power: 12 V jack -> fuse -> Mu VIN and PS1 5 V
@@ -42,7 +43,7 @@ NAME = "slot1-c2mu"
 OUT = ROOT / "hw" / NAME
 FSYM = ROOT / "hw/lib/FPGA_Artix7_XC7A100T_FGG484_FPGA.kicad_sym"
 FCSV = ROOT / "FPGAlist/c2_cards/xilinx/xc7a100t_fgg484.csv"
-MUSYM = ROOT / "hw/lib/LattePanda_Mu_SODIMM260.kicad_sym"     # gen_mu_sym.py
+MUSYM = ROOT / "hw/lib/LattePanda_Mu_SODIMM260.kicad_sym"     # gen_mu_lib.py
 pdn.U1_FP = ROOT / "hw/lib/Interposer.pretty/FPGA_Artix7_XC7A100T_FGG484_BGA.kicad_mod"
 
 VOLTS = {"VCC_1V0": 1.0, "VCC_1V8": 1.8, "VCC_3V3": 3.3, "VCC_MGT10": 1.0, "VCC_MGT12": 1.2}
@@ -68,12 +69,12 @@ BULK = ([("VCC_1V0", "330uF/2.5V", "Capacitor_Tantalum_SMD:CP_EIA-7343-31_Kemet-
         + [("VCC_3V3", "47uF/6.3V", C1210)] * 4 + [("VCC_3V3", "4.7uF", C0603)] * 8
         + [("VCC_MGT10", "4.7uF", C0603), ("VCC_MGT12", "4.7uF", C0603)])
 MU_FP = "Slot1:LattePanda_Mu_LOTES_ADDR0110_9.2H"
-MU_FPS = {"TPS74801": "Package_SON:VSON-10-1EP_3x3mm_P0.5mm_EP1.65x2.4mm_ThermalVias"}
-STOCK_SYMS = [("Connector_Generic", ["Conn_02x07_Odd_Even", "Conn_01x03", "Conn_01x04"]),
-              ("Connector", ["Barrel_Jack", "USB_A"]),
-              ("Device", ["C", "R", "R_Pack04", "L", "Fuse", "FerriteBead", "Polyfuse", "LED", "Battery_Cell",
+MU_FPS = {"TPS74801": "Package_SON:VSON-10-1EP_3x3mm_P0.5mm_EP1.65x2.4mm"}
+STOCK_SYMS = [("Connector_Generic", ["Conn_02x05_Odd_Even", "Conn_02x07_Odd_Even", "Conn_01x02", "Conn_01x03", "Conn_01x04"]),
+              ("Connector", ["Barrel_Jack"]),
+              ("Device", ["C", "R", "R_Pack04", "L", "Fuse", "FerriteBead", "Polyfuse", "LED", 
                           "Crystal_GND24", "D_Schottky"]),
-              ("Transistor_FET", ["Q_NMOS_GSD"]), ("Switch", ["SW_Push"]),
+              ("Transistor_FET", ["Q_NMOS_GSD"]), ("Mechanical", ["MountingHole_Pad"]), ("Switch", ["SW_Push"]),
               ("Memory_Flash", ["W25Q32JVSS"]), ("Oscillator", ["ASE-xxxMHz"]),
               ("Power_Protection", ["USBLC6-2P6"]),
               ("Interface_USB", ["FT232H"])]
@@ -94,6 +95,7 @@ def mu_nets():
             "PLT_RST#": "PCIE_PERST#", "PWR_SW#": "MU_PWRBTN#", "RST_SW#": "MU_RSTBTN#", "PSON": "MU_PSON",
             "FAN2_CTL": "MU_FAN_PWM", "FAN2_TAC": "MU_FAN_TAC", "VBAT": "MU_VBAT",
             "USB2_P1_N": "USB1_N", "USB2_P1_P": "USB1_P", "USB2_P2_N": "USB2_N", "USB2_P2_P": "USB2_P",
+            "USB2_P3_N": "USB3_N", "USB2_P3_P": "USB3_P",
             "UART0_RXD": "MU_UART_RX", "UART0_TXD": "MU_UART_TX"}
     for k in range(4):                   # HSIO 8+k = lane k
         nets |= {f"HSIO{8 + k}_{d}_{s}": f"MU_{d}{k}_{s}" for d in ("TX", "RX") for s in "PN"}
@@ -116,8 +118,7 @@ def power(P, net_of_ball, agtl):
     # 5 V: 7 x 16612 ICC5 120 mA [ti_sn74gtl16612 p.6], fan 0.35 A, USB 0.5 A, the 1.0/1.8/3.3 V stages
     buck54620(P, "PS1", ("V12", 12.0), "V5", 5.0, 3.0,
               (2, "22uF/10V", 22e-6), None, "PG_5V", 6.8e-6, "MSS1048-682", 0.25)
-    buck54620(P, "PS2", ("V5", 5.0), "VCC_1V0", 1.0, 4.0,
-              (4, "47uF/6.3V", 150e-6), "PG_5V", "PG_1V0", 1.5e-6, "MSS1048-152", 0.03)
+    buck62130(P, "PS2", "VCC_1V0", 1.0, (0.97, 1.03), "PG_5V", "PG_1V0")    # VCCINT 0.15 A [Vivado power]
     buck62130(P, "PS3", "VCC_1V8", 1.8, (1.71, 1.89), "PG_1V0", "PG_1V8")
     buck62130(P, "PS4", "VCC_3V3", 3.3, (3.135, 3.465), "PG_1V8", None)
     pairs = u1_pairs(net_of_ball, SMALL)
@@ -207,7 +208,7 @@ def power(P, net_of_ball, agtl):
     P.r("21.5k", "FAN_TAC", "MU_FAN_TAC", "mu", "J5")
     P.r("4.7k", "FAN_TAC", "V5", "mu", "J5")
     P.c("100nF", C0402, "V5", "mu", "J5")
-    P.r("1k", "RTC_CELL", "MU_VBAT", "mu", "BT1")        # [Lite carrier: BT1 -> R1 1k -> VBAT]
+    P.r("1k", "RTC_CELL", "MU_VBAT", "mu", "J8")         # cabled CR2032 [Lite carrier: BT1 -> R1 1k -> VBAT]
     P.r("330R", "LED_A", "LED", "mu", "D1")
     P.c("10uF", C0805, "USB_VBUS", "mu", "J6")
     # FT232H [ds_ft232h]: REF 12k 1 %, 12 MHz crystal 2 x 27 pF, RESET# up, EEPROM absent
@@ -312,14 +313,15 @@ def main():
         "DI/IO_{0}": "SPI_D0", "CLK": "SPI_CLK", "~{HOLD}/~{RESET}/IO_{3}": "SPI_D3", "VCC": "VCC_3V3"},
         parts, flagged, "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm", "MX25L12835FM2I-10G")
     stock_ic("Oscillator", "ASE-xxxMHz", "U12", X0 + 40, Y0, {"EN": "VCC_3V3", "GND": "GND", "OUT": "OSC50",
-             "Vdd": "VCC_3V3"}, parts, flagged, "Oscillator:Oscillator_SMD_Abracon_ASE-4Pin_3.2x2.5mm", "50MHz")
+             "Vdd": "VCC_3V3"}, parts, flagged, "Oscillator:Oscillator_SMD_SeikoEpson_SG210-4Pin_2.5x2.0mm", "50MHz")
     for ref, out in (("U13", "VCC_MGT10"), ("U14", "VCC_MGT12")):
         ic("TPS74801", ref, X0 + (80 if ref == "U13" else 120), Y0, {
             "IN": "VCC_1V8", "BIAS": "V5", "EN": "VCC_1V8", "SS": f"{ref}_SS", "OUT": out, "FB": f"{ref}_FB",
             "PG": nc, "GND": "GND", "PAD": "GND"})
-    stock_ic("Power_Protection", "USBLC6-2P6", "U15", X0 + 160, Y0, {
-        "1": "USB1_P", "6": "USB1_P", "2": "GND", "3": "USB1_N", "4": "USB1_N", "5": "USB_VBUS"},
-        parts, flagged, "Package_TO_SOT_SMD:SOT-23-6", "USBLC6-2SC6")
+    for ref, port in (("U15", 1), ("U17", 3)):
+        stock_ic("Power_Protection", "USBLC6-2P6", ref, X0 + 160, Y0 + (port - 1) * 10, {
+            "1": f"USB{port}_P", "6": f"USB{port}_P", "2": "GND", "3": f"USB{port}_N", "4": f"USB{port}_N",
+            "5": "USB_VBUS"}, parts, flagged, "Package_TO_SOT_SMD:SOT-23-6", "USBLC6-2SC6")
     ft = {"XCSI": "FT_XI", "XCSO": "FT_XO", "VPHY": "FT_VPHY", "AGND": "GND", "REF": "FT_REF", "DM": "USB2_N",
           "DP": "USB2_P", "VPLL": "FT_VPHY", "GND": "GND", "VCCIO": "VCC_3V3", "ADBUS0": "FT_TCK",
           "ADBUS1": "FT_TDI", "ADBUS2": "FT_TDO", "ADBUS3": "FT_TMS", "~{RESET}": "FT_RESET#",
@@ -334,27 +336,32 @@ def main():
         stock_ic("Transistor_FET", "Q_NMOS_GSD", ref, X0 + (260 if ref == "Q1" else 280), Y0,
                  {"G": gate, "S": "GND", "D": drain}, parts, flagged, "Package_TO_SOT_SMD:SOT-23", "2N7002")
     stock_ic("Switch", "SW_Push", "SW1", X0, Y0 + 40, {"1": "MU_PWRBTN#", "2": "GND"}, parts, flagged,
-             "Button_Switch_SMD:SW_SPST_PTS645", "PWR")
+             "Button_Switch_SMD:SW_SPST_TL3342", "PWR")
     stock_ic("Device", "LED", "D1", X0 + 20, Y0 + 40, {"K": "GND", "A": "LED_A"}, parts, flagged,
              "LED_SMD:LED_0603_1608Metric", "green")
     stock_ic("Device", "D_Schottky", "D2", X0 + 40, Y0 + 40, {"K": "V5", "A": "FAN_TAC"}, parts, flagged,
              "Diode_SMD:D_SOD-323", "B5819WS")
-    stock_ic("Device", "Battery_Cell", "BT1", X0 + 60, Y0 + 40, {"+": "RTC_CELL", "-": "GND"}, parts, flagged,
-             "Battery:BatteryHolder_Keystone_3000_1x12mm", "CR1220")
+    stock_ic("Connector_Generic", "Conn_01x02", "J8", X0 + 60, Y0 + 40, {"1": "RTC_CELL", "2": "GND"}, parts,
+             flagged, "Connector_Molex:Molex_PicoBlade_53261-0271_1x02-1MP_P1.25mm_Horizontal", "CMOS cell")
     stock_ic("Device", "Polyfuse", "F2", X0 + 80, Y0 + 40, {"1": "V5", "2": "USB_VBUS"}, parts, flagged,
-             "Fuse:Fuse_1206_3216Metric", "0.5A")
+             "Fuse:Fuse_1206_3216Metric", "1.1A")
     jtag = ["GND", "VCC_3V3", "GND", "F_TMS", "GND", "F_TCK", "GND", "F_TDO", "GND", "F_TDI", "GND", nc, "GND", nc]
     for ref, slib, name, X, nets, fp in (     # Xilinx 2 mm 14-pin; 4-pin fan GND, +5 V, tach, PWM [Lite carrier]
             ("J1", "Connector_Generic", "Conn_02x07_Odd_Even", X0, jtag,
              "Connector_PinHeader_2.00mm:PinHeader_2x07_P2.00mm_Vertical"),
-            ("J3", "Connector", "Barrel_Jack", X0 + 40, ["V12_IN", "GND"], "Connector_BarrelJack:BarrelJack_Horizontal"),
+            ("J3", "Connector", "Barrel_Jack", X0 + 40, ["V12_IN", "GND"], "Connector_BarrelJack:BarrelJack_CUI_PJ-063AH_Horizontal"),
             ("J5", "Connector_Generic", "Conn_01x04", X0 + 80, ["GND", "V5", "FAN_TAC", "FAN_PWM"],
              "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical"),
             ("J7", "Connector_Generic", "Conn_01x03", X0 + 160, ["GND", "MU_UART_TX", "MU_UART_RX"],
              "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical")):
         stock_ic(slib, name, ref, X, Y0 + 80, {str(k + 1): n for k, n in enumerate(nets)}, parts, flagged, fp)
-    stock_ic("Connector", "USB_A", "J6", X0 + 120, Y0 + 80, {"VBUS": "USB_VBUS", "D-": "USB1_N", "D+": "USB1_P",
-             "GND": "GND", "Shield": "GND"}, parts, flagged, "Connector_USB:USB_A_CNCTech_1001-011-01101_Horizontal")
+    usb = ["USB_VBUS", "USB_VBUS", "USB1_N", "USB3_N", "USB1_P", "USB3_P", "GND", "GND", nc, nc]   # Intel 9-pin
+    stock_ic("Connector_Generic", "Conn_02x05_Odd_Even", "J6", X0 + 120, Y0 + 80,
+             {str(k + 1): n for k, n in enumerate(usb)}, parts, flagged,
+             "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical", "USB 2.0 x2 header")
+    for k, ref in enumerate(("H1", "H2")):     # the Mu's M2 holes: 6.6 mm standoffs [design_guide_edge_connector]
+        stock_ic("Mechanical", "MountingHole_Pad", ref, X0 + 200 + 20 * k, Y0 + 80, {"1": "GND"}, parts, flagged,
+                 "MountingHole:MountingHole_2.2mm_M2_Pad")
     mnets = mu_nets()
     for uid, mpins in sorted(musym[2].items()):
         mlab = {p["num"]: mnets.get(p["name"], nc) for p in mpins}
@@ -424,7 +431,7 @@ def main():
         ("Slot1Parts", "../lib/Slot1_Parts.kicad_sym", "C2 cartridge parts"),
         ("SocketFPGA", f"../../hw/lib/{fsym[0]}.kicad_sym", "FPGA"),
         ("SocketCPU", f"../../sockets/kicad/{csym[0]}.kicad_sym", "CPU"),
-        ("LattePanda", "../lib/LattePanda_Mu_SODIMM260.kicad_sym", "LattePanda Mu edge (gen_mu_sym.py)")])
+        ("LattePanda", "../lib/LattePanda_Mu_SODIMM260.kicad_sym", "LattePanda Mu edge (gen_mu_lib.py)")])
     print("PASS  c2mu S6 (netlist audit + ERC)")
 
 

@@ -33,6 +33,8 @@ MODELS = {
     "L_0805_2012Metric": ("Inductor_SMD.3dshapes/L_0805_2012Metric.step", 0, (0, 0)),
     "L_0603_1608Metric": ("Inductor_SMD.3dshapes/L_0603_1608Metric.step", 0, (0, 0)),
     "Fuse_1206_3216Metric": ("Fuse.3dshapes/Fuse_1206_3216Metric.step", 0, (0, 0)),
+    # no stock 1812 fuse body: the 1812 chip of the same size
+    "Fuse_1812_4532Metric": ("Capacitor_SMD.3dshapes/C_1812_4532Metric.step", 0, (0, 0)),
     "L_Coilcraft_MSS1048-XXX": ("Inductor_SMD.3dshapes/L_Coilcraft_MSS1048-XXX.step", 0, (0, 0)),
     # XxL4020 = XAL/XEL4020, one body
     "L_Coilcraft_XxL4020": ("Inductor_SMD.3dshapes/L_Coilcraft_XAL4020-XXX.step", 0, (0, 0)),

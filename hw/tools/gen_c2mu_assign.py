@@ -73,7 +73,7 @@ def main():
             and r["ball"] not in fixed.values() and "PUDC_B" not in r["function"]]
     # the bus takes the balls nearest the card edge, then left to right in
     # contact x; the direction pairs sit where ADDR and DATA meet
-    edge = sorted(sorted(free, key=lambda b: -ball_xy(b)[1])[:len(bus) + len(CTRL)], key=ball_xy)
+    edge = sorted(sorted(free, key=lambda b: ball_xy(b)[1])[:len(bus) + len(CTRL)], key=ball_xy)
 
     chip_x = {c: sum(int(contact[n][1:]) for n in nets) / len(nets) for c, nets in groups}
     bus.sort(key=lambda r: (chip_x[r[2]], r[3]))
