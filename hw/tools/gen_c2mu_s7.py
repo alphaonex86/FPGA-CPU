@@ -17,7 +17,7 @@ balls. U1 under the band, GTP quad towards the socket's HSIO8-11 pins.
 B.Cu: 0402 class parts only (terminations along the edge at their
 contacts, U1 via-pair capacitors, chip decoupling under the chips).
 Checks (exit 1): every netlist part placed with its nets, every footprint
-with a 3D model file (U2, H1, H2 exempt), kicad-cli DRC 0 errors apart
+with a 3D model file (U2 exempt), kicad-cli DRC 0 errors apart
 from the unrouted nets.
 """
 import csv
@@ -35,6 +35,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import gen_t6_schematic as t6
 import models3d
 from gen_c2cart_s6 import GTL_REFS
+from gen_mu_lib import STANDOFF_R
 from gen_slot1_s7 import A1_X, CHAM, KEY_C, KEY_D, KEY_W, RET, W
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -50,9 +51,13 @@ U1_AT = (58.0, 34.0)
 PCIE_CORRIDOR = (45.5, 45.5, 64.5, 64.0)  # GTP corner of U1 -> HSIO8-11 / REFCLK2 pins: AC caps only
 BAND_Y = 7.1                             # chip band top (the cavity band ends at 7.0)
 FIXED_FP = {"U1": "Interposer:FPGA_Artix7_XC7A100T_FGG484_BGA", "U2": "Slot1:SC242_CardEdge_242"}
-NO_MODEL = {"U2", "H1", "H2"}            # card edge; standoffs are hand-fitted hardware
-TALL = {"J1", "J3", "J5", "J6", "J7", "J8", "SW1", "D1"}   # + MSS1048 inductors (by footprint)
+NO_MODEL = {"U2"}                        # card edge
+TALL = {"J1", "J3", "J5", "J6", "J7", "J8", "SW1", "D1"}
+TALL_FP = ("L_Changjiang_FXL1040", "CP_Elec_")         # > 4 mm, never under the Mu
 RES = 0.1                                # occupancy grid (mm)
+NET_CLASSES = {"PWR": ["VCC_*", "V5", "VTT15", "USB_VBUS", "FT_VPHY", "FT_VCORE", "FT_VCCA", "PS*_SW"],
+               "VIN": ["V12", "V12_IN"],
+               "PCIE": ["MU_TX*", "MU_RX*", "PCIE_TX*", "PCIE_RX*", "MU_REFCLK_*", "PCIE_REFCLK_*"]}
 
 
 def mm(x, y):
@@ -173,7 +178,7 @@ class Placer:
     def near(self, ref, tx, ty, side="F", region=None, rots=(0.0, 90.0), reach=40.0):
         """nearest free spot to (tx, ty), square spiral in 0.25 mm steps"""
         f = self.fp.get(ref) or self.make(ref)
-        tall = ref in TALL or "MSS1048" in self.comps[ref][1]
+        tall = ref in TALL or any(k in self.comps[ref][1] for k in TALL_FP)
         region = region or (RET + 0.2, BAND_Y, W - RET - 0.2, H - 0.2)
         local = {}
         for rot in rots:
@@ -192,7 +197,9 @@ class Placer:
                     if self.ok(b, f, side, tall, region):
                         return self.put(ref, x, y, rot, side)
             k += 1
-        sys.exit(f"FAIL: no room for {ref} within {reach} mm of ({tx:.1f}, {ty:.1f}) on {side}.Cu")
+        around = sorted(r for r, (x, y, sd) in self.where.items() if abs(x - tx) < reach and abs(y - ty) < reach)
+        sys.exit(f"FAIL: no room for {ref} within {reach} mm of ({tx:.1f}, {ty:.1f}) on {side}.Cu; placed there: "
+                 + " ".join(f"{r}@({self.where[r][0]:.1f},{self.where[r][1]:.1f})" for r in around))
 
     def pad_xy(self, ref, num):
         p = next(p for p in self.fp[ref].Pads() if p.GetNumber() == num)
@@ -266,10 +273,10 @@ def main():
     # transceiver band, pin 1 rows vertical (stock orientation)
     tw, sw = 9.49, 7.49                  # TSSOP-56 / SOIC-16 courtyard widths
     h1, h2 = P.where["H1"][0], P.where["H2"][0]
-    P.put(GTL_REFS["DATA0"], h1 - 2.6 - tw / 2, BAND_Y + 14.59 / 2)
+    P.put(GTL_REFS["DATA0"], h1 - STANDOFF_R - tw / 2, BAND_Y + 14.59 / 2)
     mid = [GTL_REFS[c] for c in ("DATA1", "DATA2", "DATA3")] + ["U10"] + [GTL_REFS[c] for c in ("ADDR0", "ADDR1")]
     widths = [sw if r == "U10" else tw for r in mid]
-    lo, hi = h1 + 2.6, h2 - 2.6
+    lo, hi = h1 + STANDOFF_R, h2 - STANDOFF_R
     gap = (hi - lo - sum(widths)) / (len(mid) + 1)
     if gap < 0.1:
         sys.exit("FAIL: band does not fit between the Mu standoffs")
@@ -281,11 +288,15 @@ def main():
 
     # free column: power entry on the top edge, then the tall parts
     P.put("J3", 22.1, H - 12.0)
-    l_ps1 = next(r for r, v in rows.items() if v["a"] == "PS1" and "MSS1048" in v["footprint"])
-    for ref, tx, ty in ((l_ps1, 22.2, 55.8), ("F1", 30.6, 58.0), ("J7", 30.8, 68.0), ("PS1", 30.6, 51.5),
-                        ("J1", 18.9, 42.0), ("J6", 24.4, 43.0), ("J5", 30.1, 43.5), ("J8", 21.1, 31.0),
-                        ("SW1", 29.4, 31.0), ("D1", 31.0, 26.0)):
-        P.near(ref, tx, ty, region=COLUMN, rots=(0.0, 90.0, 180.0, 270.0), reach=15.0)
+    l_ps1 = next(r for r, v in rows.items() if v["a"] == "PS1" and "FXL1040" in v["footprint"])
+    # (column 17 mm: L1 standing under J3, then J1 | J6 | J5 side by side, then J8 | SW1;
+    # targets are footprint origins, pin 1 on the headers)
+    any_rot = (0.0, 90.0, 180.0, 270.0)
+    for ref, tx, ty, rots in (("J7", 30.8, 68.0, any_rot), ("F1", 30.6, 61.0, (90.0,)), (l_ps1, 21.6, 54.2, (90.0,)),
+                              ("PS1", 30.6, 51.5, any_rot), ("J1", 17.75, 33.5, (0.0,)), ("J6", 23.2, 35.0, (0.0,)),
+                              ("J5", 29.85, 44.5, (90.0,)), ("J8", 19.95, 26.8, (90.0,)),
+                              ("SW1", 26.4, 27.8, any_rot), ("D1", 31.0, 27.0, any_rot)):
+        P.near(ref, tx, ty, region=COLUMN, rots=rots, reach=15.0)
 
     # terminations: one B.Cu row along the edge, each pack at the mean x of its contacts
     contact_x = {}
@@ -309,6 +320,7 @@ def main():
                 break
         else:
             sys.exit(f"FAIL: {r['ref']} pads do not land on {r['a']} / {r['b']}")
+    P.grid["B"][P.cells(P.box(P.fp["U1"], "F"))] = True    # every ball gets a via in pad (gen_c2mu_s8.py)
 
     # PCIe AC capacitors at the receiver ends (< 8 mm [design_guide_pcie]), along the lanes; then the
     # corridor between the GTP corner and the socket stays free of other F.Cu parts
@@ -382,9 +394,14 @@ def write_rules():
     rules.update(min_copper_edge_clearance=0.001, min_clearance=0.1, min_track_width=0.1, min_via_diameter=0.45,
                  min_through_hole_diameter=0.25, min_via_annular_width=0.1, min_hole_clearance=0.2)
     default = next(c for c in tmpl["net_settings"]["classes"] if c["name"] == "Default")
-    pro["net_settings"] = {"meta": tmpl["net_settings"]["meta"],
-                           "classes": [dict(default, clearance=0.1, track_width=0.1, via_diameter=0.45,
-                                            via_drill=0.25)]}
+    via = dict(via_diameter=0.45, via_drill=0.25)
+    pro["net_settings"] = {"meta": tmpl["net_settings"]["meta"], "classes": [
+        dict(default, clearance=0.1, track_width=0.1, **via),
+        dict(default, name="PWR", clearance=0.15, track_width=0.4, **via),
+        dict(default, name="VIN", clearance=0.2, track_width=1.0, **via),     # Mu ~2 A at 12 V
+        # 0.2 mm on F.Cu over In1 (0.1 mm 3313 prepreg, er 4.1): ~44 ohm, ~88 ohm loosely coupled
+        dict(default, name="PCIE", clearance=0.2, track_width=0.2, **via)],
+        "netclass_patterns": [{"netclass": c, "pattern": "/" + p} for c, ps in NET_CLASSES.items() for p in ps]}
     pro_path.write_text(json.dumps(pro, indent=2))
 
 

@@ -1,9 +1,9 @@
 ref,sym,value,footprint,nets,side,kind,a,b
 F1,Device:Fuse,5A,Fuse:Fuse_1812_4532Metric,V12_IN|V12,F,stage,F1,
-C1,Device:C,100uF/25V,Capacitor_SMD:C_1210_3225Metric,V12|GND,F,stage,J4,
+C1,Device:C_Polarized,100uF/25V,Capacitor_SMD:CP_Elec_6.3x5.4,V12|GND,F,stage,J3,
 C2,Device:C,10uF/25V,Capacitor_SMD:C_1210_3225Metric,V12|GND,F,stage,J4,
 PS1,Slot1Parts:TPS54620,TPS54620RHL,Pwr:TI_RHL0014A,PS1_RT|GND|GND|V12|V12|V12|PS1_FB|PS1_COMP|PS1_SS|NC_PS1_10|PS1_SW|PS1_SW|PS1_BOOT|PG_5V|GND,F,stage,PS1,
-L1,Device:L,6.8uH MSS1048-682,Inductor_SMD:L_Coilcraft_MSS1048-XXX,PS1_SW|V5,F,stage,PS1,
+L1,Device:L,6.8uH FXL1040-6R8,Inductor_SMD:L_Changjiang_FXL1040,PS1_SW|V5,F,stage,PS1,
 C3,Device:C,10uF/25V,Capacitor_SMD:C_1210_3225Metric,V12|GND,F,stage,PS1,
 C4,Device:C,4.7uF/25V,Capacitor_SMD:C_0805_2012Metric,V12|GND,F,stage,PS1,
 C5,Device:C,22uF/10V,Capacitor_SMD:C_1206_3216Metric,V5|GND,F,stage,PS1,
@@ -84,7 +84,7 @@ C60,Device:C,100nF,Pwr:C_0402_P1.00,VCC_MGT12|GND,B,u1pair,B7,A7
 C61,Device:C,100nF,Pwr:C_0402_P1.00,VCC_MGT12|GND,B,u1pair,B9,A9
 C62,Device:C,100nF,Pwr:C_0402_P1.00,VCC_MGT12|GND,B,u1pair,C4,D4
 C63,Device:C,100nF,Pwr:C_0402_P1.00,VCC_MGT12|GND,B,u1pair,C8,D8
-C64,Device:C,330uF/2.5V,Capacitor_Tantalum_SMD:CP_EIA-7343-31_Kemet-D,VCC_1V0|GND,F,u1bulk,,
+C64,Device:C,330uF/6.3V,Capacitor_Tantalum_SMD:CP_EIA-7343-31_Kemet-D,VCC_1V0|GND,F,u1bulk,,
 C65,Device:C,100uF/6.3V,Capacitor_SMD:C_1210_3225Metric,VCC_1V0|GND,F,u1bulk,,
 C66,Device:C,4.7uF,Capacitor_SMD:C_0603_1608Metric,VCC_1V0|GND,F,u1bulk,,
 C67,Device:C,4.7uF,Capacitor_SMD:C_0603_1608Metric,VCC_1V0|GND,F,u1bulk,,

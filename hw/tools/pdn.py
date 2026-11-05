@@ -33,14 +33,16 @@ R0402 = "Resistor_SMD:R_0402_1005Metric"
 CPAIR = "Pwr:C_0402_P1.00"              # 0402 on two 1.0 mm via-in-pads (S7)
 QFN14 = "Pwr:TI_RHL0014A"               # tps54620 p.45 land pattern (S7)
 QFN16 = "Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm"
-L_BIG = "Inductor_SMD:L_Coilcraft_MSS1048-XXX"   # tps54620 p.25 example family
+L_BIG = {"MSS1048": "Inductor_SMD:L_Coilcraft_MSS1048-XXX",   # tps54620 p.25 example family
+         "FXL1040": "Inductor_SMD:L_Changjiang_FXL1040"}      # LCSC-stocked 10 x 11.5 mm
 L_SMALL = "Inductor_SMD:L_Coilcraft_XxL4020"     # tps62130 Table 9-1 p.13
 
 FARAD = {"p": 1e-12, "n": 1e-9, "u": 1e-6}
 # inductor (Isat at 20 % drop, Irms at 20 C rise) [Coilcraft Doc 462-1
-# rev 10/15/08 MSS1048; Doc 745-1 rev 02/10/11 XFL4020]
+# rev 10/15/08 MSS1048; Doc 745-1 rev 02/10/11 XFL4020; changjiang_fxl1040
+# max columns]
 L_RATING = {"MSS1048-682": (5.00, 4.52), "MSS1048-152": (7.80, 7.41),
-            "XFL4020-222": (3.5, 6.0)}
+            "XFL4020-222": (3.5, 6.0), "FXL1040-6R8": (9.6, 7.0)}
 
 
 def l_check(name, part, iout, ripple):
@@ -149,7 +151,7 @@ def buck54620(P, p, vin, vout_net, vout, iout, cout, en, pg, l_nom, lpart,
             "13": f"{p}_BOOT", "14": pg, "15": "GND"}
     P.add("PS", f"{P.lib}:TPS54620", "TPS54620RHL", QFN14,
           [nets[str(k)] for k in range(1, 16)], *st)
-    P.add("L", "Device:L", f"{l_nom * 1e6:.2g}uH {lpart}", L_BIG,
+    P.add("L", "Device:L", f"{l_nom * 1e6:.2g}uH {lpart}", L_BIG[lpart[:7]],
           [f"{p}_SW", vout_net], *st)
     P.c("10uF/25V", C1210, vin[0], *st)                   # PVIN, p.27
     P.c("4.7uF/25V", C0805, vin[0], *st)                  # VIN, p.27

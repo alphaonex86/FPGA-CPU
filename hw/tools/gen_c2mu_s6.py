@@ -63,7 +63,7 @@ SMALL = {                               # UG483 Table 2-2, XC7A100T FGG484: 0.47
     "VCC_1V0": ["470nF"] * 10, "VCC_1V8": ["470nF"] * 9, "VCC_3V3": ["470nF"] * 12,
     "VCC_MGT10": ["100nF"] * 5, "VCC_MGT12": ["100nF"] * 6,
 }
-BULK = ([("VCC_1V0", "330uF/2.5V", "Capacitor_Tantalum_SMD:CP_EIA-7343-31_Kemet-D"),
+BULK = ([("VCC_1V0", "330uF/6.3V", "Capacitor_Tantalum_SMD:CP_EIA-7343-31_Kemet-D"),
          ("VCC_1V0", "100uF/6.3V", C1210)] + [("VCC_1V0", "4.7uF", C0603)] * 6
         + [("VCC_1V8", "47uF/6.3V", C1210)] * 2 + [("VCC_1V8", "4.7uF", C0603)] * 5
         + [("VCC_3V3", "47uF/6.3V", C1210)] * 4 + [("VCC_3V3", "4.7uF", C0603)] * 8
@@ -73,7 +73,7 @@ MU_FPS = {"TPS74801": "Package_SON:VSON-10-1EP_3x3mm_P0.5mm_EP1.65x2.4mm"}
 STOCK_SYMS = [("Connector_Generic", ["Conn_02x05_Odd_Even", "Conn_02x07_Odd_Even", "Conn_01x02", "Conn_01x03", "Conn_01x04"]),
               ("Connector", ["Barrel_Jack"]),
               ("Device", ["C", "R", "R_Pack04", "L", "Fuse", "FerriteBead", "Polyfuse", "LED", 
-                          "Crystal_GND24", "D_Schottky"]),
+                          "Crystal_GND24", "D_Schottky", "C_Polarized"]),
               ("Transistor_FET", ["Q_NMOS_GSD"]), ("Mechanical", ["MountingHole_Pad"]), ("Switch", ["SW_Push"]),
               ("Memory_Flash", ["W25Q32JVSS"]), ("Oscillator", ["ASE-xxxMHz"]),
               ("Power_Protection", ["USBLC6-2P6"]),
@@ -113,11 +113,12 @@ def stock_ic(lib, name, ref, X, Y, names, parts, flagged, footprint, value=None)
 def power(P, net_of_ball, agtl):
     """power tree, decoupling, terminations, PCIe caps, pull-ups: pdn.py rows"""
     P.add("F", "Device:Fuse", "5A", "Fuse:Fuse_1812_4532Metric", ["V12_IN", "V12"], "stage", "F1")
-    P.c("100uF/25V", "Capacitor_SMD:C_1210_3225Metric", "V12", "stage", "J4")   # Mu VIN bulk
+    # hot-plug damping on the jack (ceramics alone ring past the TPS54620 17 V max) + Mu VIN bulk
+    P.add("C", "Device:C_Polarized", "100uF/25V", "Capacitor_SMD:CP_Elec_6.3x5.4", ["V12", "GND"], "stage", "J3")
     P.c("10uF/25V", C1210, "V12", "stage", "J4")
     # 5 V: 7 x 16612 ICC5 120 mA [ti_sn74gtl16612 p.6], fan 0.35 A, USB 0.5 A, the 1.0/1.8/3.3 V stages
     buck54620(P, "PS1", ("V12", 12.0), "V5", 5.0, 3.0,
-              (2, "22uF/10V", 22e-6), None, "PG_5V", 6.8e-6, "MSS1048-682", 0.25)
+              (2, "22uF/10V", 22e-6), None, "PG_5V", 6.8e-6, "FXL1040-6R8", 0.25)
     buck62130(P, "PS2", "VCC_1V0", 1.0, (0.97, 1.03), "PG_5V", "PG_1V0")    # VCCINT 0.15 A [Vivado power]
     buck62130(P, "PS3", "VCC_1V8", 1.8, (1.71, 1.89), "PG_1V0", "PG_1V8")
     buck62130(P, "PS4", "VCC_3V3", 3.3, (3.135, 3.465), "PG_1V8", None)
@@ -311,7 +312,7 @@ def main():
     stock_ic("Memory_Flash", "W25Q32JVSS", "U11", X0, Y0, {
         "~{CS}": "SPI_CS#", "DO/IO_{1}": "SPI_D1", "~{WP}/IO_{2}": "SPI_D2", "GND": "GND",
         "DI/IO_{0}": "SPI_D0", "CLK": "SPI_CLK", "~{HOLD}/~{RESET}/IO_{3}": "SPI_D3", "VCC": "VCC_3V3"},
-        parts, flagged, "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm", "MX25L12835FM2I-10G")
+        parts, flagged, "Package_SO:SOIC-8_5.3x5.3mm_P1.27mm", "W25Q128JVSIQ")
     stock_ic("Oscillator", "ASE-xxxMHz", "U12", X0 + 40, Y0, {"EN": "VCC_3V3", "GND": "GND", "OUT": "OSC50",
              "Vdd": "VCC_3V3"}, parts, flagged, "Oscillator:Oscillator_SMD_SeikoEpson_SG210-4Pin_2.5x2.0mm", "50MHz")
     for ref, out in (("U13", "VCC_MGT10"), ("U14", "VCC_MGT12")):
@@ -336,7 +337,7 @@ def main():
         stock_ic("Transistor_FET", "Q_NMOS_GSD", ref, X0 + (260 if ref == "Q1" else 280), Y0,
                  {"G": gate, "S": "GND", "D": drain}, parts, flagged, "Package_TO_SOT_SMD:SOT-23", "2N7002")
     stock_ic("Switch", "SW_Push", "SW1", X0, Y0 + 40, {"1": "MU_PWRBTN#", "2": "GND"}, parts, flagged,
-             "Button_Switch_SMD:SW_SPST_TL3342", "PWR")
+             "Button_Switch_SMD:SW_Push_1P1T_XKB_TS-1187A", "PWR")
     stock_ic("Device", "LED", "D1", X0 + 20, Y0 + 40, {"K": "GND", "A": "LED_A"}, parts, flagged,
              "LED_SMD:LED_0603_1608Metric", "green")
     stock_ic("Device", "D_Schottky", "D2", X0 + 40, Y0 + 40, {"K": "V5", "A": "FAN_TAC"}, parts, flagged,
@@ -361,7 +362,7 @@ def main():
              "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical", "USB 2.0 x2 header")
     for k, ref in enumerate(("H1", "H2")):     # the Mu's M2 holes: 6.6 mm standoffs [design_guide_edge_connector]
         stock_ic("Mechanical", "MountingHole_Pad", ref, X0 + 200 + 20 * k, Y0 + 80, {"1": "GND"}, parts, flagged,
-                 "MountingHole:MountingHole_2.2mm_M2_Pad")
+                 "Slot1:Standoff_SMT_M2_D5.56_H6.6")
     mnets = mu_nets()
     for uid, mpins in sorted(musym[2].items()):
         mlab = {p["num"]: mnets.get(p["name"], nc) for p in mpins}

@@ -76,3 +76,10 @@ slot1/lattepanda_mu/lotes_addr0110_sodimm_9.2h.pdf https://datasheet.lcsc.com/da
 # parts/ftdi_ft232h.pdf https://jlcpcb.com/partdetail/FTDI-FT232HLREEL/C51997
 parts/ti_tlv757p.pdf https://www.ti.com/lit/ds/symlink/tlv757p.pdf
 parts/ti_tps74801.pdf https://www.ti.com/lit/ds/symlink/tps74801.pdf
+# C2 Mu cartridge parts swapped for LCSC/JLC stock (2026-11-04); LCSC datasheet copies
+parts/xhyj_smtso2066ctj.pdf https://datasheet.lcsc.com/datasheet/pdf/1a89a85debb4a67fba80349f3380ec35.pdf
+parts/xkb_ts1187a.pdf https://datasheet.lcsc.com/datasheet/pdf/56c8799ae5193945a16a1ffbe378246a.pdf
+parts/changjiang_fxl1040.pdf https://datasheet.lcsc.com/datasheet/pdf/40dfb6cb4606b2ccaa4e89438a42f563.pdf
+parts/yageo_yc124.pdf https://datasheet.lcsc.com/datasheet/pdf/63385612cd4755da2330a030269c8f6e.pdf
+parts/sctf_sx2m_50m.pdf https://datasheet.lcsc.com/datasheet/pdf/b2ab9bc57b3cb3682e9a86a5a5fb3e86.pdf
+parts/winbond_w25q128jv.pdf https://datasheet.lcsc.com/datasheet/pdf/d009d960f1daec6149edaa35b7dae856.pdf

@@ -25,3 +25,4 @@ rtl/build/
 sw/*/build/
 .Xil/
 clockInfo.txt
+hw/slot1-c2mu/route/

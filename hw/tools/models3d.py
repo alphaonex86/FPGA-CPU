@@ -35,6 +35,7 @@ MODELS = {
     "Fuse_1206_3216Metric": ("Fuse.3dshapes/Fuse_1206_3216Metric.step", 0, (0, 0)),
     # no stock 1812 fuse body: the 1812 chip of the same size
     "Fuse_1812_4532Metric": ("Capacitor_SMD.3dshapes/C_1812_4532Metric.step", 0, (0, 0)),
+    "SW_Push_1P1T_XKB_TS-1187A": ("Button_Switch_SMD.3dshapes/SW_SPST_TL3342.step", 0, (0, 0)),   # no stock model; same 5 mm tact body
     "L_Coilcraft_MSS1048-XXX": ("Inductor_SMD.3dshapes/L_Coilcraft_MSS1048-XXX.step", 0, (0, 0)),
     # XxL4020 = XAL/XEL4020, one body
     "L_Coilcraft_XxL4020": ("Inductor_SMD.3dshapes/L_Coilcraft_XAL4020-XXX.step", 0, (0, 0)),
