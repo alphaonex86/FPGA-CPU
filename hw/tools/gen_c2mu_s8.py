@@ -23,7 +23,9 @@ FPGAcommon/tools/freerouting/README-fpga-jar.md) on Java 25, headless (no
 window, no display), without network (unshare -rn; analytics off), with the
 board's hole clearance (freerouting's default is 0), optimizer off, plane
 layers typed power (not routed). Iterations of PASSES passes, each session
-imported and saved, until nothing is unrouted or an iteration gains nothing.
+imported and saved, router copper in DRC errors dropped; when an iteration
+gains nothing, close_route.py (windowed A*) closes what it can; until nothing
+is unrouted or neither gains.
 Checks (exit 1): every connection routed, kicad-cli DRC 0 errors; PCIe
 intra-pair length mismatch printed.
 """
@@ -38,6 +40,8 @@ import sys
 
 import pcbnew
 
+import close_route
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT, NAME = ROOT / "hw/slot1-c2mu", "slot1-c2mu"
 ROUTE = OUT / "route"
@@ -51,6 +55,8 @@ PLANES = [("GND", pcbnew.In1_Cu, (None, None)), ("VCC_3V3", pcbnew.In3_Cu, (Y_VT
           ("V5", pcbnew.In4_Cu, V5_BAND), ("GND", pcbnew.In4_Cu, (V5_BAND[1], None))]   # y top, bottom
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
 FAN_PARTS = ("SN74GTL16612",)            # chip_fanout
+TERM_FP = "R_Array_Convex_4x0402"         # chip_fanout too: vias outward, VTT pads on the plane
+TERM_ROW = 1.55                          # a third via row: the chip pins on F.Cu often take the first
 STAGGER = (0.35, 0.95)                   # its via columns past the pad's inner end
 CENTRE = (0.35, 1.05)                    # else via columns this far from the body centre line
 VIA = (0.45, 0.25)
@@ -313,34 +319,42 @@ def plane_vias(board):
 def chip_fanout(board):
     """every signal pad of the band transceivers: a via just inside the pad row, staggered on two
     columns (0.5 mm pitch), so the pins reach In2 / B.Cu under the body: the rows of neighbouring
-    chips are only 0.85 mm apart; a pad without room there gets an L to a via near the centre line"""
+    chips are only 0.85 mm apart; a pad without room there gets an L to a via near the centre line.
+    The termination arrays likewise, their vias outward (above the row: s7 turns them): a pad between
+    two array pads and the VTT row has one free side, which the router alone left boxed in"""
     count = collections.Counter(p.GetNetCode() for f in board.GetFootprints() for p in f.Pads())
     planes = {net(board, n).GetNetCode() for n, _, _ in PLANES}
     classes = board.GetDesignSettings().m_NetSettings
     rules, cu = board.GetDesignSettings(), Copper(board)
     placed, left = 0, 0
-    for f in (f for f in board.GetFootprints() if f.GetValue() in FAN_PARTS):
-        cx = f.GetPosition().x
+    for f in (f for f in board.GetFootprints()
+              if f.GetValue() in FAN_PARTS or f.GetFPID().GetLibItemName() == TERM_FP):
+        term = f.GetFPID().GetLibItemName() == TERM_FP
+        ax = 1 if term and f.GetOrientationDegrees() % 180 else 0    # via columns along x, rows along y
+        cx = (f.GetPosition().x, f.GetPosition().y)[ax]
+        layer = pcbnew.B_Cu if f.IsFlipped() else pcbnew.F_Cu
         for k, p in enumerate(sorted(f.Pads(), key=lambda p: (p.GetPosition().x, p.GetPosition().y))):
             code, pos = p.GetNetCode(), p.GetPosition()
             if code <= 0 or code in planes or count[code] < 2:
                 continue
-            inward = 1 if pos.x < cx else -1
-            inner = pos.x + inward * p.GetSize().x // 2
-            paths = [[pos, pcbnew.VECTOR2I(inner + inward * pcbnew.FromMM(d), pos.y)]
-                     for d in (STAGGER[k % 2], STAGGER[1 - k % 2])]
-            # (a pad whose column spot is taken, e.g. by the terminations on B.Cu: an L to the centre)
-            paths += [[pos, pcbnew.VECTOR2I(x, pos.y), pcbnew.VECTOR2I(x, pos.y + pcbnew.FromMM(0.65 * j))]
-                      for j in sorted(range(-12, 13), key=abs) if j
-                      for x in (cx - inward * pcbnew.FromMM(d) for d in CENTRE)]
+            at = (pos.x, pos.y)[ax]
+            inward = (1 if at < cx else -1) * (-1 if term else 1)
+            inner = at + inward * p.GetSize().x // 2
+            paths = [[pos, pcbnew.VECTOR2I(inner + inward * pcbnew.FromMM(d), pos.y) if ax == 0 else
+                      pcbnew.VECTOR2I(pos.x, inner + inward * pcbnew.FromMM(d))]
+                     for d in (STAGGER[k % 2], STAGGER[1 - k % 2]) + ((TERM_ROW,) if term else ())]
+            if not term:                    # column spot taken (B.Cu parts): an L to the centre line
+                paths += [[pos, pcbnew.VECTOR2I(x, pos.y), pcbnew.VECTOR2I(x, pos.y + pcbnew.FromMM(0.65 * j))]
+                          for j in sorted(range(-12, 13), key=abs) if j
+                          for x in (cx - inward * pcbnew.FromMM(d) for d in CENTRE)]
             path = next((path for path in paths if cu.via_fits(path[-1], code, rules)
-                         and all(cu.track_fits(a, b, pcbnew.F_Cu, code) for a, b in zip(path, path[1:]))), None)
+                         and all(cu.track_fits(a, b, layer, code) for a, b in zip(path, path[1:]))), None)
             if path is None:
                 left += 1
                 continue
             cu.via(path[-1], p.GetNet())
             for a, b in zip(path, path[1:]):
-                cu.track(a, b, pcbnew.F_Cu, p.GetNet(), classes.GetEffectiveNetClass(p.GetNetname()).GetTrackWidth())
+                cu.track(a, b, layer, p.GetNet(), classes.GetEffectiveNetClass(p.GetNetname()).GetTrackWidth())
             placed += 1
     print(f"chip fanout: {placed} vias, pads left to the router: {left}")
 
@@ -402,22 +416,30 @@ def freeroute(board, path):
             sys.exit(f"FAIL: freerouting exit {r.returncode}, see {log}")
         if not pcbnew.ImportSpecctraSES(board, str(ses)):
             sys.exit("FAIL: SES import")
-        pcbnew.ZONE_FILLER(board).Fill(board.Zones())     # plane connectivity and the saved board
-        pcbnew.SaveBoard(str(path), board)
-        # the router can leave a short or a clearance error: its copper there is dropped (the
-        # generated copper is locked), the connection is open again for the next iteration
-        bad = {i["uuid"] for v in drc_report(path).get("violations", []) for i in v["items"]}
-        drop = [t for t in board.GetTracks() if not t.IsLocked() and t.m_Uuid.AsString() in bad]
-        for t in drop:
-            board.Delete(t)
-        if drop:
-            pcbnew.ZONE_FILLER(board).Fill(board.Zones())
-            pcbnew.SaveBoard(str(path), board)
-        n = unrouted(board)
-        print(f"iteration {it}: {n} unrouted, {len(drop)} router items in DRC errors dropped", flush=True)
+        n, dropped = settle(board, path)
+        print(f"iteration {it}: {n} unrouted, {dropped} router items in DRC errors dropped", flush=True)
+        if 0 < n >= best:                                 # freerouting stalled: the windowed router
+            routed, tried = close_route.close(board, drc_report(path))
+            n, dropped = settle(board, path)
+            print(f"  close_route: {routed} of {tried} routed; {n} unrouted, {dropped} dropped", flush=True)
         if n == 0 or n >= best:
             break
         best = n
+
+
+def settle(board, path):
+    """fill, save; the routers can leave a short or a clearance error: their copper there is dropped
+    (the generated copper is locked), the connection open again: (unrouted, dropped)"""
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    pcbnew.SaveBoard(str(path), board)
+    bad = {i["uuid"] for v in drc_report(path).get("violations", []) for i in v["items"]}
+    drop = [t for t in board.GetTracks() if not t.IsLocked() and t.m_Uuid.AsString() in bad]
+    for t in drop:
+        board.Delete(t)
+    if drop:
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+        pcbnew.SaveBoard(str(path), board)
+    return unrouted(board), len(drop)
 
 
 def pcie_skew(board):

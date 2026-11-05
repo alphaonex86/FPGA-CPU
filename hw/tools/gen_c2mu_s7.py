@@ -179,8 +179,9 @@ class Placer:
             return False
         return not any(self.grid[s][self.cells(b)].any() for s in self.sides(f, side))
 
-    def near(self, ref, tx, ty, side="F", region=None, rots=(0.0, 90.0), reach=40.0):
-        """nearest free spot to (tx, ty), square spiral in 0.25 mm steps"""
+    def near(self, ref, tx, ty, side="F", region=None, rots=(0.0, 90.0), reach=40.0, top=0.0):
+        """nearest free spot to (tx, ty), square spiral in 0.25 mm steps; top: a strip that deep above
+        the part kept free too (its fanout vias; the region may exclude it, vias may go there)"""
         f = self.fp.get(ref) or self.make(ref)
         tall = ref in TALL or any(k in self.comps[ref][1] for k in TALL_FP)
         region = region or (RET + 0.2, BAND_Y, W - RET - 0.2, H - 0.2)
@@ -198,7 +199,10 @@ class Placer:
                 for rot, lb in local.items():
                     x, y = tx + dx, ty + dy
                     b = (lb[0] + x, lb[1] + y, lb[2] + x, lb[3] + y)
-                    if self.ok(b, f, side, tall, region):
+                    strip = self.cells((b[0], b[1] - top, b[2], b[1]))
+                    if self.ok(b, f, side, tall, region) and not (top and self.grid[side][strip].any()):
+                        if top:
+                            self.grid[side][strip] = True
                         return self.put(ref, x, y, rot, side)
             k += 1
         around = sorted(r for r, (x, y, sd) in self.where.items() if abs(x - tx) < reach and abs(y - ty) < reach)
@@ -318,7 +322,8 @@ def main():
     for r in sorted((r for r in rows.values() if r["ref"].startswith("RN")),
                     key=lambda r: sum(contact_x.get(n, 0) for n in r["nets"].split("|")[:4])):
         xs = [contact_x[n] for n in r["nets"].split("|")[:4] if n in contact_x]
-        P.near(r["ref"], sum(xs) / len(xs), BAND_Y + 1.4, "B", rots=(0.0,))
+        # 270: the signal pads face the fingers, their fanout vias (gen_c2mu_s8) above the row
+        P.near(r["ref"], sum(xs) / len(xs), BAND_Y + 1.4, "B", rots=(270.0,), top=1.9)
 
     # U1 via-pair capacitors: pad 1 (rail) on the supply ball, pad 2 on the GND ball
     for r in (r for r in rows.values() if r["kind"] == "u1pair"):
