@@ -19,8 +19,9 @@ import jlcfab
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 NO_PART = {"U2"}
 CONSIGNED = {"C1550735": "Digi-Key / Mouser (5CEBA9F23C8N or 5CEFA9F23C8N; JLCPCB stock 0 on 2026-11-05)"}
-ORDER = ("JLCPCB order: 6 layers, 1.6 mm, stack JLC06161H-2116, ENIG, via-in-pad (POFV: U1), PCBA both "
-         "sides incl. BGA; U2: Mill-Max PGA header (551 socket 3 / 550 socket 7), soldered afterwards")
+STACK = {"socket3": "6 layers, stack JLC06161H-2116", "socket7": "8 layers, stack JLC08161H-2116"}
+ORDER = ("JLCPCB order: {}, 1.6 mm, ENIG, via-in-pad (POFV: U1), PCBA both sides incl. BGA; U2: Mill-Max "
+         "PGA header (551 socket 3 / 550 socket 7), soldered afterwards")
 # (value, footprint) -> LCSC number, checked on JLCPCB 2026-11-05 (basic parts first): parts of both boards
 COMMON = {
     ("100k", "R_0402_1005Metric"): "C25741",
@@ -94,7 +95,8 @@ def main():
     socket = sys.argv[1]
     boards = int(sys.argv[2]) if len(sys.argv) > 2 else 2
     name = f"{socket}-cyclonev"
-    jlcfab.fab(ROOT / "hw" / name / f"{name}.kicad_pcb", COMMON | EXTRA[socket], NO_PART, CONSIGNED, boards, ORDER)
+    jlcfab.fab(ROOT / "hw" / name / f"{name}.kicad_pcb", COMMON | EXTRA[socket], NO_PART, CONSIGNED, boards,
+               ORDER.format(STACK[socket]))
 
 
 if __name__ == "__main__":

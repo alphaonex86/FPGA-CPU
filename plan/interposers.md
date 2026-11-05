@@ -78,6 +78,10 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   GND, B sig): on 4 layers the core current reached U1 through a split-plane
   corridor (~30 mV drop against a ~14 mV margin); via-in-pad under U1 is free
   from 6 layers, charged on 4 (`sockets/parts/jlcpcb_free_pofv_6-20_layers.html`).
+  Socket 7 (operator 2026-11-05): 8 layers, JLC08161H-2116 as the C2 Mu (F,
+  In2, In5, B signal; In3 VCC_1V1, In4 split rails): its 166 signals need U1
+  rings 5-7 (the F484 has 125 user I/O in rings 0-4), which 2 signal layers
+  cannot escape (61 connections left). Socket 3 (114 signals, rings 0-4) stays at 6.
 - **D1** (decided 2026-10-31 by the operator) Socket 3: external 12 V supply
   on the interposer (barrel jack, FPGAmotherboard power tree); the socket VCC
   pins stay unused (board LDO PQ30RV21: 2 A abs max, `hw/common/socket3_notes.md` R2).
@@ -371,7 +375,7 @@ the cam housing, 3.99 mm above the socket top (M1). DRC 0 errors.
 66 MHz with matched lengths per byte lane. Check: DRC 0 errors, 0 unconnected.
 Status (2026-11-05): `hw/tools/gen_socket7_t8.py` and `gen_socket3_t8.py` on the shared
 `autoroute.py` (planes, via in every netted U1 ball, plane fanout, freerouting + close_route);
-pre-route copper DRC 0 errors on both (socket 7: 220 connections left to the router, socket 3: 344).
+pre-route copper DRC 0 errors on both (socket 3: 342 connections left to the router).
 Routing runs queued after the C2 Mu run.
 
 **T9 Verification**: audit script: every base pad's net is the T1 signal and
