@@ -1,0 +1,6 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "Interposer")(type "KiCad")(uri "${KIPRJMOD}/../lib/Interposer.pretty")(options "")(descr "socket3 footprint set"))
+  (lib (name "Pwr")(type "KiCad")(uri "${KIPRJMOD}/../lib/Pwr.pretty")(options "")(descr "socket3 footprint set"))
+  (lib (name "SocketBase")(type "KiCad")(uri "${KIPRJMOD}/../../sockets/kicad/Interposer.pretty")(options "")(descr "socket3 footprint set"))
+)

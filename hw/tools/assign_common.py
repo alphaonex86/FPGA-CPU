@@ -1,8 +1,8 @@
 """Shared T5 (plan/interposers.md) pin assignment for the Cyclone V F484
 variants that land every socket signal on 3.3 V banks: plan-driven bank
 fill, checks, pins.csv + assignment_quartus.qsf. Used by
-gen_socket7_assign.py (direct landing) and gen_socket3_assign.py (through
-8-channel translators).
+gen_socket7_assign.py (direct landing); gen_socket3_assign.py takes
+write_outputs() only.
 
 Checks (exit 1 on failure): every ball a user I/O (VREFB pins are supply
 pins [cvpcg p.19]); no ball used twice; every T1 signal with
@@ -27,11 +27,33 @@ def ball_key(b):
     return (len(m.group(1)), m.group(1), int(m.group(2)))
 
 
+def write_outputs(out, rows, pullup, qsf=()):
+    """pins.csv and assignment_quartus.qsf; rows: [signal, ball, bank, vccio,
+    io_standard, translator, distance_mm, socket_pin, source]; pullup: signals
+    given the FPGA weak pull-up; qsf: extra global .qsf lines"""
+    out.mkdir(parents=True, exist_ok=True)
+    with (out / "pins.csv").open("w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["signal", "ball", "bank", "vccio", "io_standard",
+                    "translator", "distance_mm", "socket_pin", "source"])
+        w.writerows(rows)
+    q = ['set_global_assignment -name FAMILY "Cyclone V"', *qsf]
+    for r in rows:
+        q.append(f'set_location_assignment PIN_{r[1]} -to "{r[0]}"')
+        q.append(f'set_instance_assignment -name IO_STANDARD "{r[4]}"'
+                 f' -to "{r[0]}"')
+    for name in pullup:
+        if name not in {r[0] for r in rows}:
+            sys.exit(f"pull-up on unassigned signal {name}")
+        q.append(f'set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON'
+                 f' -to "{name}"')
+    (out / "assignment_quartus.qsf").write_text("\n".join(q) + "\n")
+
+
 def assign(root, t1_path, out, plan, vccio, clock, translated, local=(),
-           pullup=(), qsf=()):
+           pullup=()):
     """local: (signal, bank) board-only FPGA inputs, no socket pin or
-    translator; pullup: signals given the FPGA weak pull-up in the .qsf;
-    qsf: extra global .qsf lines"""
+    translator; pullup: signals given the FPGA weak pull-up in the .qsf"""
     rows = list(csv.reader(open(root / ROOT_FPGACSV)))[1:]
     ncols, nrows = SIZE
     cols = sorted({re.match(r"^([A-Za-z]+)([0-9]+)$", r[0]).group(1)
@@ -132,23 +154,7 @@ def assign(root, t1_path, out, plan, vccio, clock, translated, local=(),
         out_rows.append([name, ball, bank, vccio[bank], "3.3-V LVTTL", "",
                          f"{dist(ball):.1f}", "", "board-local"])
 
-    out.mkdir(parents=True, exist_ok=True)
-    with (out / "pins.csv").open("w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["signal", "ball", "bank", "vccio", "io_standard",
-                    "translator", "distance_mm", "socket_pin", "source"])
-        w.writerows(out_rows)
-    q = ['set_global_assignment -name FAMILY "Cyclone V"', *qsf]
-    for r in out_rows:
-        q.append(f'set_location_assignment PIN_{r[1]} -to "{r[0]}"')
-        q.append(f'set_instance_assignment -name IO_STANDARD "{r[4]}"'
-                 f' -to "{r[0]}"')
-    for name in pullup:
-        if name not in used.values():
-            sys.exit(f"pull-up on unassigned signal {name}")
-        q.append(f'set_instance_assignment -name WEAK_PULL_UP_RESISTOR ON'
-                 f' -to "{name}"')
-    (out / "assignment_quartus.qsf").write_text("\n".join(q) + "\n")
+    write_outputs(out, out_rows, pullup)
 
     freeio = sum(len([b for b in pool if b not in used and b not in reserved])
                  for pool in banked.values())

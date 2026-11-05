@@ -53,7 +53,7 @@ FLASH = {"S#": "AS_nCS", "C": "AS_DCLK", "DQ0": "AS_DATA0", "DQ1": "AS_DATA1",
          "DQ2": "AS_DATA2", "DQ3": "AS_DATA3", "RESET#": "V3V3", "VCC": "V3V3",
          "GND": "GND"}                     # RESET# unused: to VCC [cf52014 Table 8]
 FP = {"U1": "Interposer:FPGA_CycloneV_5CEFA9_F484_BGA",
-      "U2": "Interposer:Socket3_Base_PGA168",
+      "U2": "SocketBase:Socket3_Base_PGA168",          # sockets/kicad/Interposer.pretty
       "TR": "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm",
       "U4": "Package_SO:SOIC-16W_7.5x10.3mm_P1.27mm",
       "J1": "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical",

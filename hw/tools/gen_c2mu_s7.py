@@ -22,28 +22,22 @@ with a 3D model file (U2 exempt), kicad-cli DRC 0 errors apart
 from the unrouted nets.
 """
 import csv
-import json
 import pathlib
 import re
-import shutil
-import subprocess
 import sys
 
-import numpy as np
 import pcbnew
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
-import gen_t6_schematic as t6
-import models3d
+import placer
 from gen_c2cart_s6 import GTL_REFS
+from placer import Placer, mm
 from gen_mu_lib import STANDOFF_R
 from gen_slot1_s7 import A1_X, CHAM, KEY_C, KEY_D, KEY_W, RET, W
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT, NAME = ROOT / "hw/slot1-c2mu", "slot1-c2mu"
 H = 75.0
-LIB = ROOT / "hw/lib"
-STOCK_FP, STOCK_3D = pathlib.Path("/usr/share/kicad/footprints"), pathlib.Path("/usr/share/kicad/3dmodels")
 MU_AT = (72.0, 69.5)                     # J4 origin (contact centre line), 180 deg
 MU_HOLES = [(31.8, 57.0), (-31.8, 57.0)]  # Mu M2 holes, J4 local [vendor footprint F.Fab]
 MU_AREA = (33.26, 9.26, 110.74, H)       # module shadow: parts <= 4 mm
@@ -55,163 +49,16 @@ FIXED_FP = {"U1": "Interposer:FPGA_Artix7_XC7A100T_FGG484_BGA", "U2": "Slot1:SC2
 NO_MODEL = {"U2"}                        # card edge
 TALL = {"J1", "J3", "J5", "J6", "J7", "J8", "SW1", "D1"}
 TALL_FP = ("L_Changjiang_FXL1040", "CP_Elec_")         # > 4 mm, never under the Mu
-RES = 0.1                                # occupancy grid (mm)
 NET_CLASSES = {"PWR": ["VCC_3V3", "V5", "VTT15", "USB_VBUS", "FT_VPHY", "FT_VCORE", "FT_VCCA", "PS*_SW"],
                "CORE": ["VCC_1V0", "VCC_1V8", "VCC_MGT*"],
                "VIN": ["V12", "V12_IN"],
                "PCIE": ["MU_TX*", "MU_RX*", "PCIE_TX*", "PCIE_RX*", "MU_REFCLK_*", "PCIE_REFCLK_*"]}
 
 
-def mm(x, y):
-    return pcbnew.VECTOR2I_MM(x, y)
-
-
-def netlist():
-    t = (OUT / f"{NAME}.net").read_text()
-    comps = {}
-    for m in re.finditer(r'\(comp\s*\(ref "([^"]+)"\)\s*\(value "([^"]*)"\)(?:\s*\(footprint "([^"]*)"\))?', t):
-        comps[m.group(1)] = (m.group(2), m.group(3) or FIXED_FP.get(m.group(1), ""))
-    nets, full = {}, {}                 # plain name (as in pdn.csv) -> nodes / netlist name
-    for m in re.finditer(r'\(net\s*\(code "[^"]+"\)\s*\(name "([^"]*)"\)', t):
-        plain = m.group(1).lstrip("/").replace("{slash}", "/")
-        nets[plain] = re.findall(r'\(ref "([^"]*)"\)\s*\(pin "([^"]*)"\)', t[m.end():t6.block(t, m.start())])
-        full[plain] = m.group(1)
-    return comps, nets, full
-
-
-def load(fpid):
-    lib, name = fpid.split(":")
-    own = LIB / f"{lib}.pretty"
-    f = pcbnew.FootprintLoad(str(own if (own / f"{name}.kicad_mod").exists() else STOCK_FP / f"{lib}.pretty"), name)
-    if f is None:
-        sys.exit(f"FAIL: footprint {fpid} not found")
-    return f
-
-
-def localize_models(f, fails):
-    """stock model -> hw/lib/3dmodels copy, path relative to the project"""
-    ref = f.GetReference()
-    models = list(f.Models())
-    if not models and ref not in NO_MODEL:
-        fails.append(f"{ref}: no 3D model")
-    for m in models:
-        name = m.m_Filename
-        if name.startswith("${KIPRJMOD}"):
-            path = OUT / name.replace("${KIPRJMOD}/", "")
-        else:
-            src = STOCK_3D / re.sub(r"^\$\{KICAD\d*_3DMODEL_DIR\}/", "", name)
-            if not src.exists() and f.GetFPID().GetLibItemName().wx_str() in models3d.MODELS:
-                src = STOCK_3D / models3d.MODELS[f.GetFPID().GetLibItemName().wx_str()][0]
-            path = LIB / "3dmodels" / src.name
-            if src.exists() and not path.exists():
-                shutil.copy(src, path)
-            m.m_Filename = "${KIPRJMOD}/../lib/3dmodels/" + src.name
-        if not path.resolve().exists():
-            fails.append(f"{ref}: 3D model file missing {path}")
-
-
-class Placer:
-    """footprints on the board, courtyard occupancy per side"""
-    def __init__(self, board, comps, nets, full):
-        self.board, self.comps = board, comps
-        self.grid = {s: np.zeros((int(W / RES) + 1, int(H / RES) + 1), bool) for s in "FB"}
-        self.netinfo, self.pin_net = {}, {}
-        for n, nodes in nets.items():
-            ni = pcbnew.NETINFO_ITEM(board, full[n])
-            board.Add(ni)
-            self.netinfo[n] = ni
-            for ref, pin in nodes:
-                self.pin_net[(ref, pin)] = n
-        self.fp, self.where = {}, {}
-
-    def make(self, ref):
-        value, fpid = self.comps[ref]
-        f = load(fpid)
-        f.SetReference(ref)
-        f.SetValue(value)
-        self.board.Add(f)
-        for p in f.Pads():
-            n = self.pin_net.get((ref, p.GetNumber()))
-            if n:
-                p.SetNet(self.netinfo[n])
-        self.fp[ref] = f
-        return f
-
-    def box(self, f, side):
-        f.BuildCourtyardCaches()
-        poly = f.GetCourtyard(pcbnew.F_CrtYd if side == "F" else pcbnew.B_CrtYd)
-        b = poly.BBox() if poly.OutlineCount() else f.GetBoundingBox(False)
-        return b.GetX() / 1e6, b.GetY() / 1e6, b.GetRight() / 1e6, b.GetBottom() / 1e6
-
-    def shape(self, f, side, b):
-        """courtyard polygon rasterised over its bbox cells (J4: socket body and latches only)"""
-        poly = f.GetCourtyard(pcbnew.F_CrtYd if side == "F" else pcbnew.B_CrtYd)
-        xs, ys = self.cells(b)
-        return np.array([[poly.Contains(mm(i * RES, j * RES), -1, pcbnew.FromMM(RES))
-                          for j in range(ys.start, ys.stop)] for i in range(xs.start, xs.stop)])
-
-    def sides(self, f, side):
-        return "FB" if f.GetAttributes() & pcbnew.FP_THROUGH_HOLE else side
-
-    def cells(self, b):
-        return (slice(max(0, int(b[0] / RES)), int(np.ceil(b[2] / RES)) + 1),
-                slice(max(0, int(b[1] / RES)), int(np.ceil(b[3] / RES)) + 1))
-
-    def put(self, ref, x, y, rot=0.0, side="F", mark=True):
-        f = self.fp.get(ref) or self.make(ref)
-        if side == "B" and not f.IsFlipped():
-            f.Flip(f.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
-        f.SetPosition(mm(x, y))
-        f.SetOrientationDegrees(rot)
-        if mark:
-            f.BuildCourtyardCaches()
-            for s in self.sides(f, side):
-                own = f.GetCourtyard(pcbnew.F_CrtYd if s == "F" else pcbnew.B_CrtYd).OutlineCount()
-                b = self.box(f, s if own else side)
-                self.grid[s][self.cells(b)] |= self.shape(f, side, b) if ref == "J4" else True
-        self.where[ref] = (x, y, side)
-        return f
-
-    def ok(self, b, f, side, tall, region):
-        if b[0] < region[0] or b[1] < region[1] or b[2] > region[2] or b[3] > region[3]:
-            return False
-        if tall and b[2] > MU_AREA[0] and b[3] > MU_AREA[1]:
-            return False
-        return not any(self.grid[s][self.cells(b)].any() for s in self.sides(f, side))
-
-    def near(self, ref, tx, ty, side="F", region=None, rots=(0.0, 90.0), reach=40.0, top=0.0):
-        """nearest free spot to (tx, ty), square spiral in 0.25 mm steps; top: a strip that deep above
-        the part kept free too (its fanout vias; the region may exclude it, vias may go there)"""
-        f = self.fp.get(ref) or self.make(ref)
-        tall = ref in TALL or any(k in self.comps[ref][1] for k in TALL_FP)
-        region = region or (RET + 0.2, BAND_Y, W - RET - 0.2, H - 0.2)
-        local = {}
-        for rot in rots:
-            self.put(ref, 0.0, 0.0, rot, side, mark=False)
-            local[rot] = self.box(f, side)
-        step, k = 0.25, 0
-        while k * step <= reach:
-            d = k * step
-            ring = [(0.0, 0.0)] if k == 0 else \
-                [(-d + i * step, -d) for i in range(2 * k)] + [(d, -d + i * step) for i in range(2 * k)] + \
-                [(d - i * step, d) for i in range(2 * k)] + [(-d, d - i * step) for i in range(2 * k)]
-            for dx, dy in sorted(ring, key=lambda p: p[0] ** 2 + p[1] ** 2):
-                for rot, lb in local.items():
-                    x, y = tx + dx, ty + dy
-                    b = (lb[0] + x, lb[1] + y, lb[2] + x, lb[3] + y)
-                    strip = self.cells((b[0], b[1] - top, b[2], b[1]))
-                    if self.ok(b, f, side, tall, region) and not (top and self.grid[side][strip].any()):
-                        if top:
-                            self.grid[side][strip] = True
-                        return self.put(ref, x, y, rot, side)
-            k += 1
-        around = sorted(r for r, (x, y, sd) in self.where.items() if abs(x - tx) < reach and abs(y - ty) < reach)
-        sys.exit(f"FAIL: no room for {ref} within {reach} mm of ({tx:.1f}, {ty:.1f}) on {side}.Cu; placed there: "
-                 + " ".join(f"{r}@({self.where[r][0]:.1f},{self.where[r][1]:.1f})" for r in around))
-
-    def pad_xy(self, ref, num):
-        p = next(p for p in self.fp[ref].Pads() if p.GetNumber() == num)
-        return p.GetPosition().x / 1e6, p.GetPosition().y / 1e6
+def tall_under_mu(comps):
+    """forbid(): a part over 4 mm in the module's shadow"""
+    return lambda ref, b: (ref in TALL or any(k in comps[ref][1] for k in TALL_FP)) and \
+        b[2] > MU_AREA[0] and b[3] > MU_AREA[1]
 
 
 def outline(board):
@@ -263,11 +110,12 @@ def band_centres():
 
 
 def main():
-    comps, nets, full = netlist()
+    comps, nets, full = placer.netlist(OUT / f"{NAME}.net", FIXED_FP)
     rows = {r["ref"]: r for r in csv.DictReader(open(OUT / "pdn.csv"))}
     board = pcbnew.BOARD()
     board.SetCopperLayerCount(8)
-    P = Placer(board, comps, nets, full)
+    P = Placer(board, comps, nets, full, (W, H), (RET + 0.2, BAND_Y, W - RET - 0.2, H - 0.2), shaped=("J4",),
+               forbid=tall_under_mu(comps))
 
     # card edge: stations 73/74 stepped (key notch, gen_slot1_s7.edge_pads), no paste on the fingers
     edge = P.make("U2")
@@ -340,10 +188,12 @@ def main():
 
     # PCIe AC capacitors at the receiver ends (< 8 mm [design_guide_pcie]), along the lanes; then the
     # corridor between the GTP corner and the socket stays free of other F.Cu parts
+    # pad 2 (the anchor's net) faces it: J4 below (+y, 270 deg), U1 east (+x, 0 deg); else the other pad
+    # and the J4 ground dogbones wall the short side in
     for r in sorted((r for r in rows.values() if r["kind"] == "pcie"), key=lambda r: r["ref"]):
         a = r["a"]
         P.near(r["ref"], *P.pad_xy(a, next(p for ref, p in nets[r["nets"].split("|")[1]] if ref == a)),
-               rots=(90.0,))
+               rots=(270.0,) if a == "J4" else (0.0,))
     P.grid["F"][P.cells(PCIE_CORRIDOR)] = True
 
     # ICs near the balls / pins they serve
@@ -388,8 +238,10 @@ def main():
     missing = sorted(set(comps) - set(P.fp))
     if missing:
         fails.append(f"not placed: {missing}")
+    if P.unmatched(nets):
+        fails.append(f"netlist pins without a pad: {P.unmatched(nets)}")
     for f in board.GetFootprints():
-        localize_models(f, fails)
+        placer.localize_models(f, fails, OUT, NO_MODEL)
     outline(board)
     path = OUT / f"{NAME}.kicad_pcb"
     pcbnew.SaveBoard(str(path), board)
@@ -400,49 +252,19 @@ def main():
     if fails:
         print("FAIL", *fails, sep="\n  ")
         sys.exit(1)
-    drc(path)
+    placer.drc(path, OUT / f"{NAME}.drc.json")
     print(f"PASS  c2mu S7: {len(P.fp)} footprints placed, DRC 0 errors")
 
 
 def write_rules():
-    """JLCPCB 6 / 8-layer class rules: 0.09 mm track / space floor, kept at 0.1; vias 0.45 / 0.25"""
-    pro_path = OUT / f"{NAME}.kicad_pro"
-    pro = json.loads(pro_path.read_text())
-    tmpl = json.loads(pathlib.Path("/usr/share/kicad/template/Edgeberry_Cartridge/"
-                                   "Edgeberry_cartridge_template.kicad_pro").read_text())
-    pro["board"] = {"design_settings": tmpl["board"]["design_settings"]}
-    rules = pro["board"]["design_settings"]["rules"]
-    rules.update(min_copper_edge_clearance=0.001, min_clearance=0.1, min_track_width=0.1, min_via_diameter=0.45,
-                 min_through_hole_diameter=0.25, min_via_annular_width=0.1, min_hole_clearance=0.2)
-    default = next(c for c in tmpl["net_settings"]["classes"] if c["name"] == "Default")
-    via = dict(via_diameter=0.45, via_drill=0.25)
-    pro["net_settings"] = {"meta": tmpl["net_settings"]["meta"], "classes": [
-        dict(default, clearance=0.1, track_width=0.1, **via),
-        dict(default, name="PWR", clearance=0.15, track_width=0.4, **via),
-        # FPGA rails (<= 0.25 A each, rtl/build/c2mu/power.rpt): fits between U1's via-in-pads (0.55 mm)
-        dict(default, name="CORE", clearance=0.1, track_width=0.25, **via),
-        dict(default, name="VIN", clearance=0.2, track_width=1.0, **via),     # Mu ~2 A at 12 V
+    """JLCPCB 6 / 8-layer class rules: 0.09 mm track / space floor, kept at 0.1"""
+    placer.write_rules(OUT / f"{NAME}.kicad_pro", [
+        ("PWR", 0.15, 0.4),
+        ("CORE", 0.1, 0.25),     # FPGA rails (<= 0.25 A each, rtl/build/c2mu/power.rpt): between U1's via-in-pads
+        ("VIN", 0.2, 1.0),       # Mu ~2 A at 12 V
         # 0.2 mm on F.Cu over In1 (0.116 mm 2116 prepreg, er 4.16): ~47 ohm, ~90 ohm loosely coupled
         # clearance 0.15: the pair escapes between U1's via-in-pads (0.2 + 2 x 0.15 <= 0.55 mm)
-        dict(default, name="PCIE", clearance=0.15, track_width=0.2, **via)],
-        "netclass_patterns": [{"netclass": c, "pattern": "/" + p} for c, ps in NET_CLASSES.items() for p in ps]}
-    pro_path.write_text(json.dumps(pro, indent=2))
-
-
-def drc(path):
-    out = OUT / f"{NAME}.drc.json"
-    r = subprocess.run(["nice", "-n", "19", "kicad-cli", "pcb", "drc", "--severity-error", "--format", "json",
-                        "-o", str(out), str(path)], capture_output=True, text=True)
-    if not out.exists():
-        sys.exit(f"FAIL: kicad-cli drc: {r.stderr[-400:]}")
-    rep = json.load(open(out))
-    viol = rep.get("violations", [])
-    print(f"DRC: {len(viol)} errors, {len(rep.get('unconnected_items', []))} unrouted connections")
-    if viol:
-        for v in viol[:25]:
-            print("  ", v.get("type"), str(v.get("description"))[:80],
-                  [str(i.get("description"))[:50] for i in v.get("items", [])[:2]])
-        sys.exit(1)
+        ("PCIE", 0.15, 0.2)], NET_CLASSES)
 
 
 if __name__ == "__main__":

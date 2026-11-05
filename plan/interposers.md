@@ -250,6 +250,15 @@ signal assigned; per-bank VCCIO consistent; report of used/free I/O.
 (supply pins, cvpcg p.19) carrying a bank name were assigned (socket3: 4,
 socket7: 6 signals). Socket 7 plan rebalanced (BE4#/BE5#/SCYC -> 5B,
 VCC2DET# -> 3B); banks 4A/5B/7A/8A are now full, ~19 I/O free.
+socket3-cyclonev (2026-11-05, `gen_socket3_assign.py`): placement first, the
+map from it (operator 2026-11-05: pins in a crossing-free order before
+routing). Two least total length matchings on the T7 layout: socket pin ->
+translator channel (all 16 chips), then A pin -> ball (+6 mm per ring in from
+the BGA edge); a least length matching has no crossing lines. CLK tries every
+CLKnp input and takes the fewest crossings with same-face A legs; U1 the
+rotation of the fewest, then the least length: 270 deg, 0 crossings, 5559 ->
+5854 mm. Every bank is 3.3 V, so the old bank plan (byte per bank) is gone;
+`layout.csv` hands U1 and the chip spots to T7.
 
 **T6 Schematic and netlist** generated from T3-T5. Check: ERC 0 errors.
 Every Cyclone V generator first checks each supply ball against its band
@@ -324,6 +333,16 @@ B-pin (BCLK/PICCLK direct). Netlist audit 167/167 required signals; ERC
 **T7 Placement**: FPGA in the free centre on top (or beside it), header under it,
 regulators and flash around; outline inside D6; nothing over the ZIF lever bar or
 its swing; heights inside D6. Check: courtyard DRC clean, 3D view with the ZIF model.
+Status socket3-cyclonev (`hw/tools/gen_socket3_t7.py`, 2026-11-05): U1 north
+of the pin ring (operator 2026-11-05: with U1 in the centre the translators go
+north and every net crosses the north ring twice, ~226 tracks for ~136 gaps on
+2 signal layers); 16 SN74CB3T3245PW (JLC C15298, the DGS VSSOP is smaller but
+not stocked) in four columns of 4 beside U1, F.Cu and B.Cu at the same spots,
+A pins facing U1; the strips between the columns and the board edge and beside
+the ring stay free for the socket legs; U4 flash in the window at its AS
+balls; jack, regulators and JTAG in the north band. Board 51.4 x 101.8 mm
+(D6: 0.5 mm inside the ZIF body west/south/east), 4 layers, DRC 0 errors,
+1390/1390 netlist pins on pads. 3D view with the ZIF model: open.
 
 **T8 Routing**: layers per D5; Socket 370 per AP-906 (AGTL+, 133 MHz), Socket 7 at
 66 MHz with matched lengths per byte lane. Check: DRC 0 errors, 0 unconnected.
@@ -339,7 +358,7 @@ with `kicad-cli` (gerbers, drill, positions, BOM).
 
 | Variant | T0 | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| socket3-cyclonev | done | done | done | done | done | done | done | | | | |
+| socket3-cyclonev | done | done | done | done | done | done | done | done | | | |
 | socket7-cyclonev | done | done | done | done | done | done | done | | | | |
 | socket370-cyclonev | done | done | done | done | done | done | done | | | | |
 | ~~socket370-ti180~~ | dropped (D10) after T6 | | | | | | | | | | |

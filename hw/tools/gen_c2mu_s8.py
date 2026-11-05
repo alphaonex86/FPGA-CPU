@@ -9,9 +9,11 @@ freerouting DSN / SES / log in hw/slot1-c2mu/route/.
 Stack (JLCPCB 8-layer, JLC08161H-2116; operator 2026-11-05: 3 signal layers
 did not route): F.Cu signal, In1 GND, In2 signal, In3 VCC_3V3 plane with a
 VTT15 strip along the fingers (the GTL termination arrays: routed as a track
-it walled the band in), In4 GND with a V5 strip under the band (the
-transceivers' 5 V pins; as a track it walled it too), In5 signal, In6 GND,
-B.Cu signal: each signal layer next to a plane.
+it walled the band in), In4 GND with V5 areas: a strip under the band (the
+transceivers' 5 V pins; as a track it walled it too), the free column (PS1,
+the column loads, U13/U14), a spur to U9 and the PS2-PS4 row (routed as
+tracks, 8 V5 connections stayed open), In5 signal, In6 GND, B.Cu signal:
+each signal layer next to a plane.
 Every netted U1 ball gets a filled via in its pad (0.45 / 0.25, JLCPCB POFV,
 free from 6 layers; not the unused IO balls); every other SMD pad of a plane
 net a via in / at the pad, a track to a near same-net via or a dogbone
@@ -23,8 +25,9 @@ fork (freerouting-2.3.0-fpga.jar: serial, same routes as upstream, ~3x faster;
 FPGAcommon/tools/freerouting/README-fpga-jar.md) on Java 25, headless (no
 window, no display), without network (unshare -rn; analytics off), with the
 board's hole clearance (freerouting's default is 0), optimizer off, plane
-layers typed power (not routed). Iterations of PASSES passes, each session
-imported and saved, router copper in DRC errors dropped; when an iteration
+layers typed power (not routed). Iterations of the ROUTERS runs of PASSES
+passes at the same time (serial and parallel fork, layer cost variants), the
+session leaving the fewest connections open imported and saved, router copper in DRC errors dropped; when an iteration
 gains nothing, close_route.py (windowed A*) closes what it can; until nothing
 is unrouted or neither gains.
 Checks (exit 1): every connection routed, kicad-cli DRC 0 errors; PCIe
@@ -35,6 +38,7 @@ import json
 import math
 import os
 import pathlib
+import shutil
 import re
 import subprocess
 import sys
@@ -47,15 +51,31 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT, NAME = ROOT / "hw/slot1-c2mu", "slot1-c2mu"
 ROUTE = OUT / "route"
 FREEROUTING = ROOT.parent / "FPGAcommon/tools/freerouting/freerouting-2.3.0-fpga.jar"
+FREEROUTING_PAR = FREEROUTING.with_name("freerouting-2.3.0-fpga-parallel.jar")
 JAVA = "/opt/openjdk-bin-25/bin/java"     # the fork is built for Java 25
 PASSES, ITERATIONS = 2, 20
+# freerouting runs per iteration, at the same time, the best kept: the serial fork (deterministic), and
+# the parallel fork (each run differs: thread timing decides which speculative routes it keeps; ~4x
+# faster) plain, with the outer or the inner signal layers dearer (DSN layer index: stack order). The
+# net order of the DSN changes nothing (measured: 6 shuffled orders, 6 identical sessions)
+PARALLEL = {"FREEROUTING__ROUTER__PARALLEL_THREADS": "4"}
+ROUTERS = [("serial", FREEROUTING, {}), ("parallel", FREEROUTING_PAR, PARALLEL),
+           ("outer x2", FREEROUTING_PAR, dict(PARALLEL, FREEROUTING__ROUTER__LAYER_COST_MULTIPLIERS="0:2,7:2")),
+           ("inner x2", FREEROUTING_PAR, dict(PARALLEL, FREEROUTING__ROUTER__LAYER_COST_MULTIPLIERS="2:2,5:2"))]
 Y_VTT = 10.0                             # VTT15 strip / VCC_3V3 split: below the RN row, above the band chips
-V5_BAND = (7.0, 12.5)                    # V5 strip on In4 under every transceiver's VCC (5 V) pin 50 (y 10.6)
-PLANES = [("GND", pcbnew.In1_Cu, (None, None)), ("VCC_3V3", pcbnew.In3_Cu, (Y_VTT, None)),
-          ("VTT15", pcbnew.In3_Cu, (None, Y_VTT)), ("GND", pcbnew.In4_Cu, (None, V5_BAND[0])),
-          ("V5", pcbnew.In4_Cu, V5_BAND), ("GND", pcbnew.In4_Cu, (V5_BAND[1], None)),
-          ("GND", pcbnew.In6_Cu, (None, None))]                                         # y top, bottom
+# (net, layer, (x0, y0, x1, y1): None = board edge, priority): a higher priority area is cut out of a lower one
+V5 = [(None, 7.0, None, 12.5),           # under every transceiver's VCC (5 V) pin 50 (y 10.6)
+      (16.2, 7.0, 44.0, 61.0),           # free column: PS1's L1, F2, J5, D2, the column parts, U13 / U14
+      (76.0, 12.5, 80.0, 46.5),          # spur: U9 pin 50 (y 30.3), on to the regulator row
+      (64.5, 46.5, 110.8, 57.0)]         # PS2-PS4 inputs; east of the PCIe corridor
+PLANES = [("GND", pcbnew.In1_Cu, (None, None, None, None), 0),
+          ("VCC_3V3", pcbnew.In3_Cu, (None, Y_VTT, None, None), 0),
+          ("VTT15", pcbnew.In3_Cu, (None, None, None, Y_VTT), 0),
+          ("GND", pcbnew.In4_Cu, (None, None, None, None), 0)] + \
+         [("V5", pcbnew.In4_Cu, r, 1 + k) for k, r in enumerate(V5)] + \
+         [("GND", pcbnew.In6_Cu, (None, None, None, None), 0)]     # V5: overlapping, so distinct priorities
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
+PCIE = r"/(MU_TX|MU_RX|PCIE_TX|PCIE_RX|MU_REFCLK|PCIE_REFCLK)(\d*)_"
 FAN_PARTS = ("SN74GTL16612",)            # chip_fanout
 TERM_FP = "R_Array_Convex_4x0402"         # chip_fanout too: vias outward, VTT pads on the plane
 TERM_ROW = 1.55                          # a third via row: the chip pins on F.Cu often take the first
@@ -78,16 +98,22 @@ def net(board, name):
     return n
 
 
-def planes(board):
-    for _, layer, _ in PLANES:
-        board.SetLayerType(layer, pcbnew.LT_POWER)
+def plane_rect(board, rect):
+    """None -> the board edge pulled back by INSET"""
     box = board.GetBoardEdgesBoundingBox()
-    x0, x1 = box.GetX() / 1e6 + INSET, box.GetRight() / 1e6 - INSET
-    for name, layer, (top, bottom) in PLANES:
-        y0 = box.GetY() / 1e6 + INSET if top is None else top
-        y1 = box.GetBottom() / 1e6 - INSET if bottom is None else bottom
+    edge = (box.GetX() / 1e6 + INSET, box.GetY() / 1e6 + INSET, box.GetRight() / 1e6 - INSET,
+            box.GetBottom() / 1e6 - INSET)
+    return tuple(e if v is None else v for v, e in zip(rect, edge))
+
+
+def planes(board):
+    for _, layer, _, _ in PLANES:
+        board.SetLayerType(layer, pcbnew.LT_POWER)
+    for name, layer, rect, priority in PLANES:
+        x0, y0, x1, y1 = plane_rect(board, rect)
         z = pcbnew.ZONE(board)
         z.SetLayer(layer)
+        z.SetAssignedPriority(priority)
         z.SetNet(net(board, name))
         z.SetLocalClearance(pcbnew.FromMM(0.2))
         z.SetMinThickness(pcbnew.FromMM(0.15))
@@ -208,11 +234,11 @@ def pad_frame(pad):
                                                    -lx * math.sin(rot) + ly * math.cos(rot))
 
 
-def on_plane(pt, spans):
-    """a via at pt lands inside one of its net's plane spans (y top, bottom; None: board edge)"""
-    y = pt.y / 1e6
-    return any((top is None or y >= top + PLANE_MARGIN) and (bottom is None or y <= bottom - PLANE_MARGIN)
-               for top, bottom in spans)
+def on_plane(pt, rects):
+    """a via at pt lands inside one of its net's plane rectangles, PLANE_MARGIN from their edges"""
+    x, y = pt.x / 1e6, pt.y / 1e6
+    return any(x0 + PLANE_MARGIN <= x <= x1 - PLANE_MARGIN and y0 + PLANE_MARGIN <= y <= y1 - PLANE_MARGIN
+               for x0, y0, x1, y1 in rects)
 
 
 def row_ends(pad, fp):
@@ -263,8 +289,8 @@ def plane_vias(board):
     the pad, else a track to a same-net via within 1.5 mm, else a dogbone; an array's common row one via
     past a row end; every via inside its net's plane span; the rest is the router's"""
     spans = {}
-    for n, _, span in PLANES:
-        spans.setdefault(net(board, n).GetNetCode(), []).append(span)
+    for n, _, rect, _ in PLANES:
+        spans.setdefault(net(board, n).GetNetCode(), []).append(plane_rect(board, rect))
     rules, cu = board.GetDesignSettings(), Copper(board)
     nvia, ntrack, left = 0, 0, []
     row_anchor = {}                      # (footprint, net) -> the via and pads already joined of an array's common row
@@ -326,7 +352,7 @@ def chip_fanout(board):
     The termination arrays likewise, their vias outward (above the row: s7 turns them): a pad between
     two array pads and the VTT row has one free side, which the router alone left boxed in"""
     count = collections.Counter(p.GetNetCode() for f in board.GetFootprints() for p in f.Pads())
-    planes = {net(board, n).GetNetCode() for n, _, _ in PLANES}
+    planes = {net(board, n).GetNetCode() for n, _, _, _ in PLANES}
     classes = board.GetDesignSettings().m_NetSettings
     rules, cu = board.GetDesignSettings(), Copper(board)
     placed, left = 0, 0
@@ -383,11 +409,13 @@ def allow_via_in_pad(dsn):
     dsn.write_text("\n".join(lines))
 
 
-def freeroute(board, path):
-    if not FREEROUTING.exists():
-        sys.exit(f"FAIL: {FREEROUTING} missing (built from FPGAcommon/tools/freerouting, README-fpga-jar.md)")
+def freerouting(board, path):
+    """the ROUTERS runs of PASSES passes at the same time; the session leaving the fewest connections
+    open is imported into the board"""
+    for _, jar, _ in ROUTERS:
+        if not jar.exists():
+            sys.exit(f"FAIL: {jar} missing (built from FPGAcommon/tools/freerouting, README-fpga-jar.md)")
     ROUTE.mkdir(exist_ok=True)
-    dsn, ses, log = ROUTE / f"{NAME}.dsn", ROUTE / f"{NAME}.ses", ROUTE / "freerouting.log"
     env = {k: v for k, v in os.environ.items() if k not in ("DISPLAY", "WAYLAND_DISPLAY")}
     env.update({"FREEROUTING__USAGE_AND_DIAGNOSTIC_DATA__DISABLE_ANALYTICS": "true",
                 "FREEROUTING__ROUTER__HOLE_CLEARANCE_UM": str(round(
@@ -395,30 +423,56 @@ def freeroute(board, path):
                 "FREEROUTING__ROUTER__AUTOMATIC_NECKDOWN": "true",     # PWR (0.4) out of 0.25 QFN pads
                 "FREEROUTING__ROUTER__OPTIMIZER__ENABLED": "false",
                 "FREEROUTING__ROUTER__JOB_TIMEOUT": "12:00:00"})
-    cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, "-Xmx16g", "-Djava.awt.headless=true", "-jar",
-           str(FREEROUTING), "-de", str(dsn), "-do", str(ses), "-mp", str(PASSES), "-mt", "1", "-da", "--gui.enabled=false"]
+    # footprint-only rule areas (cavity, retention bands) leave copper free, but the DSN
+    # export makes every rule area a copper keepout: out of the board for the export only
+    parts_only = [z for z in board.Zones() if z.GetIsRuleArea() and not z.GetDoNotAllowTracks()
+                  and not z.GetDoNotAllowVias()]
+    for z in parts_only:
+        board.Remove(z)
+    base = ROUTE / f"{NAME}.dsn"
+    exported = pcbnew.ExportSpecctraDSN(board, str(base))
+    for z in parts_only:
+        board.Add(z)
+    if not exported:
+        sys.exit("FAIL: DSN export")
+    allow_via_in_pad(base)
+    pcbnew.SaveBoard(str(path), board)
+    runs = []
+    for k, (label, jar, extra) in enumerate(ROUTERS):
+        dsn, ses, log = (ROUTE / f"{NAME}-{k}{ext}" for ext in (".dsn", ".ses", ".log"))
+        shutil.copy(base, dsn)
+        ses.unlink(missing_ok=True)
+        cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, "-Xmx8g", "-Djava.awt.headless=true", "-jar",
+               str(jar), "-de", str(dsn), "-do", str(ses), "-mp", str(PASSES), "-mt", "1", "-da",
+               "--gui.enabled=false"]
+        out = open(log, "a")
+        runs.append((label, ses, log, out, subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT,
+                                                            env=dict(env, **extra), cwd=ROUTE)))
+    best = None
+    for label, ses, log, out, proc in runs:
+        proc.wait()
+        out.close()
+        if proc.returncode != 0 or not ses.exists():
+            print(f"  router {label}: freerouting exit {proc.returncode}, see {log}", flush=True)
+            continue
+        trial = pcbnew.LoadBoard(str(path))
+        if not pcbnew.ImportSpecctraSES(trial, str(ses)):
+            sys.exit(f"FAIL: SES import {ses}")
+        n = unrouted(trial)
+        print(f"  router {label}: {n} unrouted", flush=True)
+        if best is None or n < best[0]:
+            best = (n, ses)
+    if best is None:
+        sys.exit("FAIL: every freerouting run failed")
+    if not pcbnew.ImportSpecctraSES(board, str(best[1])):
+        sys.exit("FAIL: SES import")
+
+
+def freeroute(board, path):
     best = unrouted(board)
     print(f"unrouted before routing: {best}", flush=True)
     for it in range(1, ITERATIONS + 1):
-        # footprint-only rule areas (cavity, retention bands) leave copper free, but the DSN
-        # export makes every rule area a copper keepout: out of the board for the export only
-        parts_only = [z for z in board.Zones() if z.GetIsRuleArea() and not z.GetDoNotAllowTracks()
-                      and not z.GetDoNotAllowVias()]
-        for z in parts_only:
-            board.Remove(z)
-        exported = pcbnew.ExportSpecctraDSN(board, str(dsn))
-        for z in parts_only:
-            board.Add(z)
-        if not exported:
-            sys.exit("FAIL: DSN export")
-        allow_via_in_pad(dsn)
-        ses.unlink(missing_ok=True)
-        with open(log, "a") as f:
-            r = subprocess.run(cmd, stdout=f, stderr=subprocess.STDOUT, env=env, cwd=ROUTE)
-        if r.returncode != 0 or not ses.exists():
-            sys.exit(f"FAIL: freerouting exit {r.returncode}, see {log}")
-        if not pcbnew.ImportSpecctraSES(board, str(ses)):
-            sys.exit("FAIL: SES import")
+        freerouting(board, path)
         n, dropped = settle(board, path)
         print(f"iteration {it}: {n} unrouted, {dropped} router items in DRC errors dropped", flush=True)
         if n:                         # the windowed router closes ~30 % per round; freerouting rips up the rest
@@ -452,7 +506,7 @@ def pcie_skew(board):
             length[t.GetNetname()] = length.get(t.GetNetname(), 0.0) + t.GetLength() / 1e6
     worst = 0.0
     for n in sorted(length):
-        m = re.fullmatch(r"/(MU_TX|MU_RX|PCIE_TX|PCIE_RX|MU_REFCLK|PCIE_REFCLK)(\d*)_P", n)
+        m = re.fullmatch(PCIE + "P", n)
         if m:
             d = abs(length[n] - length.get(n[:-1] + "N", 0.0))
             worst = max(worst, d)
