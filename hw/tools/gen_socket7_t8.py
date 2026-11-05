@@ -12,7 +12,7 @@ reached U1 through a split-plane corridor, ~30 mV drop against a ~14 mV margin; 
 the ~40 signals on U1 rings 5-7 cannot leave the ball field, the F484 has 125 user I/O in rings 0-4
 for 166 signals): F.Cu signal, In1 GND, In2 signal, In3 VCC_1V1 whole, In4 split, In5 signal, In6
 GND, B.Cu signal. In4: the
-socket rails over the pin ring, S_VCC2 west of the 2 / 3 boundary of the north and south pin rows
+socket rails over the pin ring, S_VCC2 west of the 2 / 3 boundary of the pin rows (x 31.25 south, 28.73 north)
 (and the band west: PS1's input), S_VCC3 east of it; VCCIO33 in the window inside the ring and in
 the south band east (U3's output, the flash, the pulls; the router joins the two). VCC_AUX25 and
 VCCA_FPLL25 (low current) are routed. Vias and socket pins keep no pad on a layer they do not
@@ -30,14 +30,16 @@ import autoroute as ar
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT, NAME = ROOT / "hw/socket7-cyclonev", "socket7-cyclonev"
 ROUTERS = ar.routers({"outer x2": "0:2,7:2", "inner x2": "2:2,5:2"})    # outer / inner signal layers dearer
-SPLIT_X = 31.25                          # south / north rows: last VCC2 pin x 30.0, first VCC3 pin x 32.5
+SPLIT_S = 31.25                          # south pin row: last VCC2 pin x 30.0, first VCC3 pin x 32.54
+SPLIT_N = 28.73                          # north pin row: last VCC2 pin x 27.46, first VCC3 pin x 30.0
 WINDOW = (14.0, 14.0, 46.0, 46.0)        # inside the pin ring (inner rows x / y 12.2 and 47.8)
 BAND = (24.5, 54.4)                      # south band east of PS1's parts, past the last pin row (y 52.86)
 # (net, layer, (x0, y0, x1, y1): None = board edge, priority): a higher priority area is cut out of a lower one
 PLANES = [("GND", pcbnew.In1_Cu, (None, None, None, None), 0),
           ("VCC_1V1", pcbnew.In3_Cu, (None, None, None, None), 0),
-          ("S_VCC2", pcbnew.In4_Cu, (None, None, SPLIT_X, None), 0),
-          ("S_VCC3", pcbnew.In4_Cu, (SPLIT_X, None, None, None), 0),
+          ("S_VCC2", pcbnew.In4_Cu, (None, None, SPLIT_S, None), 0),
+          ("S_VCC3", pcbnew.In4_Cu, (SPLIT_S, None, None, None), 0),
+          ("S_VCC3", pcbnew.In4_Cu, (SPLIT_N, None, SPLIT_S, WINDOW[1]), 1),
           ("VCCIO33", pcbnew.In4_Cu, WINDOW, 1),
           ("VCCIO33", pcbnew.In4_Cu, (*BAND, None, None), 1),
           ("GND", pcbnew.In6_Cu, (None, None, None, None), 0)]
