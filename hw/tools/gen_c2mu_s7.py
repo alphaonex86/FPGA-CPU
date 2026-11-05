@@ -15,7 +15,8 @@ and everything the user touches stay in the free column x 16..33.3. H1/H2
 H1, DATA1-3 / CY2309 / ADDR0-1 between, TX (7 channels) right of U1 at its
 balls. U1 under the band, GTP quad towards the socket's HSIO8-11 pins.
 B.Cu: 0402 class parts only (terminations along the edge at their
-contacts, U1 via-pair capacitors, chip decoupling under the chips).
+contacts, their VTT decoupling (0805 too) at the row's left end, U1 via-pair
+capacitors, chip decoupling under the chips).
 Checks (exit 1): every netlist part placed with its nets, every footprint
 with a 3D model file (U2 exempt), kicad-cli DRC 0 errors apart
 from the unrouted nets.
@@ -216,7 +217,7 @@ def outline(board):
         s.SetLayer(pcbnew.Edge_Cuts)
         s.SetWidth(pcbnew.FromMM(0.1))
         board.Add(s)
-    # cavity band and retention bands: no parts; key notch: no copper
+    # cavity band and retention bands: no parts (copper and planes allowed); key notch: no copper
     for x0, y0, x1, y1, parts_only in ((0.0, 3.5, W, 7.0, True), (0.0, 7.0, RET, H, True),
                                        (W - RET, 7.0, W, H, True), (KEY_C - 1.0, 0.0, KEY_C + 1.0, KEY_D, False)):
         z = pcbnew.ZONE(board)
@@ -226,7 +227,7 @@ def outline(board):
         z.SetDoNotAllowTracks(not parts_only)
         z.SetDoNotAllowVias(not parts_only)
         z.SetDoNotAllowPads(False)
-        z.SetDoNotAllowZoneFills(True)
+        z.SetDoNotAllowZoneFills(not parts_only)
         ol = z.Outline()
         ol.NewOutline()
         for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
@@ -344,13 +345,18 @@ def main():
     for k, ps in enumerate(("PS2", "PS3", "PS4")):
         P.near(ps, 80.0 + 10.0 * k, 52.0)
 
-    # the remaining passives near what they serve
+    # the remaining passives near what they serve; VTT decoupling at the left end of the termination row
+    term_end = (min(P.where[ref][0] for ref in P.where if ref.startswith("RN")) - 4.0, BAND_Y + 1.4)
+
     def anchor(r):
         a, b = r["a"], r["b"]
+        if r["kind"] == "term" and not a:
+            return term_end
         if a == "J4" and r["kind"] == "stage":           # Mu VIN bulk
             return P.pad_xy("J4", "255")
-        if a in P.fp and b:
-            return P.pad_xy(a, b)
+        pin = b or next((p for n in r["nets"].split("|") for ref, p in nets.get(n, []) if ref == a), None)
+        if a in P.fp and pin:                            # the given pin, else the one on a shared net
+            return P.pad_xy(a, pin)
         if a in P.where:
             return P.where[a][:2]
         return U1_AT
@@ -360,7 +366,7 @@ def main():
     for r in order:
         x, y = anchor(r)
         small = "0402" in r["footprint"] or "R_Array" in r["footprint"]
-        side = "B" if small and r["kind"] in ("pin", "term", "u1bulk") else "F"
+        side = "B" if (small and r["kind"] in ("pin", "u1bulk")) or r["kind"] == "term" else "F"
         P.near(r["ref"], x, y, side, reach=60.0)
 
     fails = []

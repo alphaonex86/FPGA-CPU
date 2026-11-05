@@ -20,7 +20,8 @@ becomes the socket body (rows, latches), so parts may sit under the module
 (gzip, hw/lib/3dmodels), raised 1.1 mm for the 6.6 mm standoff of the 9.2H;
 hw/lib/Slot1.pretty/Standoff_SMT_M2_D5.56_H6.6.kicad_mod: the Mu's M2 standoffs,
 Sinhoo SMTSO2066CTJ (LCSC C2916353, reflowed by JLCPCB; spigot 3.60 x 1.53 in
-a plated 3.70 hole, body 5.56) [xhyj_smtso2066ctj]; 3D model: the stock Wuerth
+a plated 3.70 hole, body 5.56) [xhyj_smtso2066ctj]; the 6.3 land on F.Cu only,
+a 4.3 ring on the inner layers and B.Cu; 3D model: the stock Wuerth
 M2 SMT spacer stretched from 6.0 to 6.6 mm.
 Checks (exit 1): pins 1..260 each once; 260 + 2 pads, 2 holes.
 """
@@ -43,7 +44,8 @@ OUT_FP = ROOT / f"hw/lib/Slot1.pretty/{FP_NAME}.kicad_mod"
 MODEL = "LattePanda_Mu_H8.0_Horizontal.stpZ"
 MOUNT_Z = 1.1                            # 9.2H standoff 6.6 mm - 8.0H 5.5 mm
 STANDOFF = "Standoff_SMT_M2_D5.56_H6.6"
-STANDOFF_R = 3.4                         # courtyard radius: pad 6.3 + 0.25 each side
+STANDOFF_R = 3.4                         # F courtyard radius: pad 6.3 + 0.25 each side
+STANDOFF_RING = 4.3                      # inner / B.Cu ring: 0.3 mm annulus, routing room around the hole
 STANDOFF_MODEL = "Mounting_Wuerth.3dshapes/Mounting_Wuerth_WA-SMSI-M2_H6mm_9774060243.step"
 FIELDS = ["pin", "signal", "direction", "io_level", "description", "notes"]
 
@@ -108,8 +110,11 @@ def write_standoff():
 	(attr through_hole)
 	(fp_circle (center 0 0) (end 2.78 0) (stroke (width 0.1) (type solid)) (fill no) (layer "F.Fab"))
 	(fp_circle (center 0 0) (end {STANDOFF_R} 0) (stroke (width 0.05) (type solid)) (fill no) (layer "F.CrtYd"))
-	(fp_circle (center 0 0) (end {STANDOFF_R} 0) (stroke (width 0.05) (type solid)) (fill no) (layer "B.CrtYd"))
-	(pad "1" thru_hole circle (at 0 0) (size 6.3 6.3) (drill 3.7) (layers "*.Cu" "*.Mask" "F.Paste"))
+	(fp_circle (center 0 0) (end {STANDOFF_RING / 2 + 0.25} 0) (stroke (width 0.05) (type solid)) (fill no) (layer "B.CrtYd"))
+	(pad "1" thru_hole circle (at 0 0) (size 6.3 6.3) (drill 3.7) (layers "*.Cu" "*.Mask" "F.Paste")
+		(padstack (mode front_inner_back)
+			(layer "Inner" (shape circle) (size {STANDOFF_RING} {STANDOFF_RING}))
+			(layer "B.Cu" (shape circle) (size {STANDOFF_RING} {STANDOFF_RING}))))
 	(model "${{KIPRJMOD}}/../lib/3dmodels/{model.name}" (offset (xyz 0 0 0)) (scale (xyz 1 1 1.1)) (rotate (xyz 0 0 0)))
 )
 ''')
