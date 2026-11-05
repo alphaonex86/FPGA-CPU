@@ -1,0 +1,7 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "Slot1Parts")(type "KiCad")(uri "${KIPRJMOD}/../lib/Slot1_Parts.kicad_sym")(options "")(descr "C2 cartridge parts"))
+  (lib (name "SocketFPGA")(type "KiCad")(uri "${KIPRJMOD}/../../hw/lib/FPGA_Artix7_XC7A100T_FGG484.kicad_sym")(options "")(descr "FPGA"))
+  (lib (name "SocketCPU")(type "KiCad")(uri "${KIPRJMOD}/../../sockets/kicad/Intel_SC242_CardEdge.kicad_sym")(options "")(descr "CPU"))
+  (lib (name "LattePanda")(type "KiCad")(uri "${KIPRJMOD}/../lib/LattePanda_Mu_SODIMM260.kicad_sym")(options "")(descr "LattePanda Mu edge (gen_mu_sym.py)"))
+)

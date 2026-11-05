@@ -17,9 +17,9 @@ source $here/pcie_ip.tcl
 synth_ip [get_ips c2_pcie]
 
 read_verilog -sv [list $c2/c2_afifo.sv $c2/c2_req_sync.sv $c2/c2_card.sv $c2/c2_cart.sv $c2/c2_loop_target.sv \
-    $c2/c2_uart_tx.sv $here/c2_tlp.sv $here/ax7a035b_top.sv]
+    $c2/c2_uart_tx.sv $here/c2_tlp.sv $here/c2_pcie_bridge.sv $here/ax7a035b_top.sv]
 read_xdc $here/ax7a035b.xdc
-set blocks {tlp sync card pcie}
+set blocks {bridge/tlp bridge/sync card bridge/pcie}
 if {$rom eq ""} {
     synth_design -top ax7a035b_top
 } else {

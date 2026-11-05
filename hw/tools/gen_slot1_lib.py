@@ -210,7 +210,11 @@ def c2cart_syms():
     ocu = reg_sym("OCuLink_4i_EP", [("A%d" % (k + 1), n) for k, n in enumerate(ocu_a)],
                   [("B%d" % (k + 1), n) for k, n in enumerate(ocu_b)], [("SH", "SHIELD")],
                   "sockets/parts/snia_sff9402_rev1.1.pdf", ref="J")
-    return [gtl, cb3t, zdb, epcq, ocu]
+    # bias-rail LDO for the GTP rails, VSON-10 (ti_tps74801 Table 4-1; 11 = thermal pad)
+    ldo = reg_sym("TPS74801", [("1", "IN"), ("2", "IN"), ("4", "BIAS"), ("5", "EN"), ("7", "SS")],
+                  [("9", "OUT"), ("10", "OUT"), ("8", "FB"), ("3", "PG")], [("6", "GND"), ("11", "PAD")],
+                  "sockets/parts/ti_tps74801.pdf", ref="U")
+    return [gtl, cb3t, zdb, epcq, ocu, ldo]
 
 
 def rect_sym(name, ref, pins, box, unit_name="",

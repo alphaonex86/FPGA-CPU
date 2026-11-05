@@ -68,23 +68,29 @@ module c2_p6_agent #(
     // RS[2:0]# [PPRO1] 4.5.3.4; any other response to ours is an error
     localparam logic [2:0] RS_RETRY = 3'b001, RS_NODATA = 3'b101, RS_NORMAL = 3'b111;
 
-    // ---- inputs, registered once, positive logic
-    logic        reset_q, ads_q, bnr_q, bpri_q, trdy_q, dbsy_q, drdy_q;
-    logic [2:0]  rs_q;
-    logic [63:0] d_q;
-    logic [12:5] a_q;
+    // ---- inputs, registered once as pin levels (an I/O cell register has
+    // no inverter), then positive logic
+    logic        reset_p, ads_p, bnr_p, bpri_p, trdy_p, dbsy_p, drdy_p;
+    logic [2:0]  rs_p;
+    logic [63:0] d_p;
+    logic [12:5] a_p;
     always_ff @(posedge clk_in) begin
-        reset_q <= !reset_n;
-        ads_q   <= !ads_n;
-        bnr_q   <= !bnr_n;
-        bpri_q  <= !bpri_n;
-        trdy_q  <= !trdy_n;
-        dbsy_q  <= !dbsy_n;
-        drdy_q  <= !drdy_n;
-        rs_q    <= ~rs_n;
-        d_q     <= ~d_n;
-        a_q     <= ~a_n;
+        reset_p <= reset_n;
+        ads_p   <= ads_n;
+        bnr_p   <= bnr_n;
+        bpri_p  <= bpri_n;
+        trdy_p  <= trdy_n;
+        dbsy_p  <= dbsy_n;
+        drdy_p  <= drdy_n;
+        rs_p    <= rs_n;
+        d_p     <= d_n;
+        a_p     <= a_n;
     end
+    wire        reset_q = !reset_p, ads_q = !ads_p, bnr_q = !bnr_p, bpri_q = !bpri_p, trdy_q = !trdy_p;
+    wire        dbsy_q = !dbsy_p, drdy_q = !drdy_p;
+    wire [2:0]  rs_q = ~rs_p;
+    wire [63:0] d_q = ~d_p;
+    wire [12:5] a_q = ~a_p;
     assign cpu_reset = reset_q;
     wire rs_seen = rs_q != 3'b000;
     logic drdy_late;

@@ -14,3 +14,4 @@ xilinx/ug477_7Series_IntBlock_PCIe.pdf https://docs.amd.com/api/khub/documents/y
 xilinx/pg054-7series-pcie.pdf https://www.xilinx.com/content/dam/xilinx/support/documents/ip_documentation/pcie_7x/v3_3/pg054-7series-pcie.pdf
 alinx/panasonic_p5k_catalog.pdf https://www.tti.com/content/dam/tti-commons/supplier/panasonic/ecom/panasonic-p5k-series-datasheet.pdf
 xilinx/xc7a100tfgg484pkg.txt https://www.xilinx.com/content/dam/xilinx/support/packagefiles/a7packages/xc7a100tfgg484pkg.txt
+xilinx/ug483_7Series_PCB.pdf https://docs.amd.com/api/khub/documents/6L8DUUei7ZCE78qwQafC3A/content

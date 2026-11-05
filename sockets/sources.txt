@@ -72,3 +72,7 @@ slot1/lattepanda_mu/design_guide_usb_20.html https://docs.lattepanda.com/content
 slot1/lattepanda_mu/design_guide_hdmi.html https://docs.lattepanda.com/content/mu_edition/design_guide_hdmi/
 slot1/lattepanda_mu/design_guide_fan.html https://docs.lattepanda.com/content/mu_edition/design_guide_fan/
 slot1/lattepanda_mu/lotes_addr0110_sodimm_9.2h.pdf https://datasheet.lcsc.com/datasheet/pdf/7fa669a101539415ce08198f560a9bd7.pdf
+# FTDI DS_FT232H v1.81 (ftdichip.com answers 403 to scripts; the JLCPCB part page C51997 serves a signed copy)
+# parts/ftdi_ft232h.pdf https://jlcpcb.com/partdetail/FTDI-FT232HLREEL/C51997
+parts/ti_tlv757p.pdf https://www.ti.com/lit/ds/symlink/tlv757p.pdf
+parts/ti_tps74801.pdf https://www.ti.com/lit/ds/symlink/tps74801.pdf

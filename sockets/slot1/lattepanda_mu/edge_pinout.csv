@@ -1,0 +1,261 @@
+pin,signal,direction,io_level,description,notes
+1,PWR_SW#,I,3.3V,System Power Switch,Active LOW; Internally 10K Pulled Up
+2,FAN2_CTL,O,3.3V,CPU Fan PWM,Internally 4.7K Pulled Up
+3,RST_SW#,I,3.3V,System Reset Switch,Active LOW; Internally 10K Pulled Up
+4,FAN2_TAC,I,5V,CPU Fan Tacho,
+5,PSON,O,3.3V,System Power Supply Status,Output HIGH only when S0(Working); 10K Pull-up to 3.3V (Weak Drive of HIGH output)
+6,FAN3_CTL,O,3.3V,SYS Fan PWM,Internally 4.7K Pulled Up
+7,SLP_S4,O,3.3V,System Status,Output HIGH only when S0(Working) and S3(Sleeping)
+8,FAN3_TAC,I,5V,SYS Fan Tacho,
+9,TSENSE,I,3.3V,NTC Temperature Sensor,
+10,SIO_UART_TX,O,3.3V,SuperIO UART TX,
+11,GND,PWR,0V,Ground,
+12,SIO_UART_RX,I,3.3V,SuperIO UART RX,
+13,HSIO0_TX_P,O,0.8V,HSIO0 TX Differential Pair,External AC Coupling Capacitor Required
+14,GND,PWR,0V,Ground,
+15,HSIO0_TX_N,O,0.8V,HSIO0 TX Differential Pair,External AC Coupling Capacitor Required
+16,HSIO0_RX_P,I,0.8V,HSIO0 RX Differential Pair,External AC Coupling Capacitor Required
+17,GND,PWR,0V,Ground,
+18,HSIO0_RX_N,I,0.8V,HSIO0 RX Differential Pair,External AC Coupling Capacitor Required
+19,HSIO1_TX_P,O,0.8V,HSIO1 TX Differential Pair,External AC Coupling Capacitor Required
+20,GND,PWR,0V,Ground,
+21,HSIO1_TX_N,O,0.8V,HSIO1 TX Differential Pair,External AC Coupling Capacitor Required
+22,HSIO1_RX_P,I,0.8V,HSIO1 RX Differential Pair,External AC Coupling Capacitor Required
+23,GND,PWR,0V,Ground,
+24,HSIO1_RX_N,I,0.8V,HSIO1 RX Differential Pair,External AC Coupling Capacitor Required
+25,HSIO2_TX_P,O,0.8V,HSIO2 TX Differential Pair,External AC Coupling Capacitor Required
+26,GND,PWR,0V,Ground,
+27,HSIO2_TX_N,O,0.8V,HSIO2 TX Differential Pair,External AC Coupling Capacitor Required
+28,HSIO2_RX_P,I,0.8V,HSIO2 RX Differential Pair,External AC Coupling Capacitor Required
+29,GND,PWR,0V,Ground,
+30,HSIO2_RX_N,I,0.8V,HSIO2 RX Differential Pair,External AC Coupling Capacitor Required
+31,HSIO3_TX_P,O,0.8V,HSIO3 TX Differential Pair,External AC Coupling Capacitor Required
+32,GND,PWR,0V,Ground,
+33,HSIO3_TX_N,O,0.8V,HSIO3 TX Differential Pair,External AC Coupling Capacitor Required
+34,HSIO3_RX_P,I,0.8V,HSIO3 RX Differential Pair,External AC Coupling Capacitor Required
+35,GND,PWR,0V,Ground,
+36,HSIO3_RX_N,I,0.8V,HSIO3 RX Differential Pair,External AC Coupling Capacitor Required
+37,HSIO8_TX_P,O,0.8V,HSIO8 TX Differential Pair,External AC Coupling Capacitor Required
+38,GND,PWR,0V,Ground,
+39,HSIO8_TX_N,O,0.8V,HSIO8 TX Differential Pair,External AC Coupling Capacitor Required
+40,HSIO8_RX_P,I,0.8V,HSIO8 RX Differential Pair,External AC Coupling Capacitor Required
+41,GND,PWR,0V,Ground,
+42,HSIO8_RX_N,I,0.8V,HSIO8 RX Differential Pair,External AC Coupling Capacitor Required
+43,HSIO9_TX_P,O,0.8V,HSIO9 TX Differential Pair,External AC Coupling Capacitor Required
+44,GND,PWR,0V,Ground,
+45,HSIO9_TX_N,O,0.8V,HSIO9 TX Differential Pair,External AC Coupling Capacitor Required
+46,HSIO9_RX_P,I,0.8V,HSIO9 RX Differential Pair,External AC Coupling Capacitor Required
+47,GND,PWR,0V,Ground,
+48,HSIO9_RX_N,I,0.8V,HSIO9 RX Differential Pair,External AC Coupling Capacitor Required
+49,HSIO10_TX_P,O,0.8V,HSIO10 TX Differential Pair,External AC Coupling Capacitor Required
+50,GND,PWR,0V,Ground,
+51,HSIO10_TX_N,O,0.8V,HSIO10 TX Differential Pair,External AC Coupling Capacitor Required
+52,HSIO10_RX_P,I,0.8V,HSIO10 RX Differential Pair,External AC Coupling Capacitor Required
+53,GND,PWR,0V,Ground,
+54,HSIO10_RX_N,I,0.8V,HSIO10 RX Differential Pair,External AC Coupling Capacitor Required
+55,HSIO11_TX_P,O,0.8V,HSIO11 TX Differential Pair,External AC Coupling Capacitor Required
+56,GND,PWR,0V,Ground,
+57,HSIO11_TX_N,O,0.8V,HSIO11 TX Differential Pair,External AC Coupling Capacitor Required
+58,HSIO11_RX_P,I,0.8V,HSIO11 RX Differential Pair,External AC Coupling Capacitor Required
+59,GND,PWR,0V,Ground,
+60,HSIO11_RX_N,I,0.8V,HSIO11 RX Differential Pair,External AC Coupling Capacitor Required
+61,HSIO6_TX_P,O,0.8V,HSIO6 TX Differential Pair,External AC Coupling Capacitor Required
+62,GND,PWR,0V,Ground,
+63,HSIO6_TX_N,O,0.8V,HSIO6 TX Differential Pair,External AC Coupling Capacitor Required
+64,HSIO6_RX_P,I,0.8V,HSIO6 RX Differential Pair,External AC Coupling Capacitor Required
+65,GND,PWR,0V,Ground,
+66,HSIO6_RX_N,I,0.8V,HSIO6 RX Differential Pair,External AC Coupling Capacitor Required
+67,USB2_P1_N,I/O,3.3V,USB 2.0 Port 1 Differential Pair,
+68,GND,PWR,0V,Ground,
+69,USB2_P1_P,I/O,3.3V,USB 2.0 Port 1 Differential Pair,
+70,USB2_P4_P,I/O,3.3V,USB 2.0 Port 4 Differential Pair,
+71,GND,PWR,0V,Ground,
+72,USB2_P4_N,I/O,3.3V,USB 2.0 Port 4 Differential Pair,
+73,USB2_P2_N,I/O,3.3V,USB 2.0 Port 2 Differential Pair,
+74,GND,PWR,0V,Ground,
+75,USB2_P2_P,I/O,3.3V,USB 2.0 Port 2 Differential Pair,
+76,USB2_P7_P,I/O,3.3V,USB 2.0 Port 7 Differential Pair,
+77,GND,PWR,0V,Ground,
+78,USB2_P7_N,I/O,3.3V,USB 2.0 Port 7 Differential Pair,
+79,USB2_P3_N,I/O,3.3V,USB 2.0 Port 3 Differential Pair,
+80,GND,PWR,0V,Ground,
+81,USB2_P3_P,I/O,3.3V,USB 2.0 Port 3 Differential Pair,
+82,USB2_P8_P,I/O,3.3V,USB 2.0 Port 8 Differential Pair,
+83,GND,PWR,0V,Ground,
+84,USB2_P8_N,I/O,3.3V,USB 2.0 Port 8 Differential Pair,
+85,REFCLK0_P,O,0.8V,PCIe Reference Clock 0 Differential Pair,100MHz
+86,GND,PWR,0V,Ground,
+87,REFCLK0_N,O,0.8V,PCIe Reference Clock 0 Differential Pair,100MHz
+88,REFCLK3_P,O,0.8V,PCIe Reference Clock 3 Differential Pair,100MHz
+89,GND,PWR,0V,Ground,
+90,REFCLK3_N,O,0.8V,PCIe Reference Clock 3 Differential Pair,100MHz
+91,REFCLK1_P,O,0.8V,PCIe Reference Clock 1 Differential Pair,100MHz
+92,GND,PWR,0V,Ground,
+93,REFCLK1_N,O,0.8V,PCIe Reference Clock 1 Differential Pair,100MHz
+94,REFCLK4_P,O,0.8V,PCIe Reference Clock 4 Differential Pair,100MHz
+95,GND,PWR,0V,Ground,
+96,REFCLK4_N,O,0.8V,PCIe Reference Clock 4 Differential Pair,100MHz
+97,REFCLK2_P,O,0.8V,PCIe Reference Clock 2 Differential Pair,100MHz
+98,GND,PWR,0V,Ground,
+99,REFCLK2_N,O,0.8V,PCIe Reference Clock 2 Differential Pair,100MHz
+100,REFCLK_REQ3#,I,3.3V,Clock Request of REFCLK3,Active LOW; Internally 10K Pulled Up
+101,GND,PWR,0V,Ground,
+102,REFCLK_REQ4#,I,3.3V,Clock Request of REFCLK4,Active LOW; Internally 10K Pulled Up
+103,PCIE_WAKE#,I,3.3V,PCIe Wake Request,Pulled LOW to Wake System; Internally 1K Pulled Up
+104,SMB_ALERT#,I,3.3V,SMBus Alert Interrupt,Active LOW
+105,PLT_RST#,O,3.3V,Platform Reset for PCIe,Output LOW to Reset PCIe Device
+106,SMB_CLK,O,3.3V,SMBus Clock,Internally 2.2K Pulled Up
+107,GND,PWR,0V,Ground,
+108,SMB_DATA,I/O,3.3V,SMBus Data,Internally 2.2K Pulled Up
+109,USB2_P5_N,I/O,3.3V,USB 2.0 Port 5 Differential Pair,
+110,GND,PWR,0V,Ground,
+111,USB2_P5_P,I/O,3.3V,USB 2.0 Port 5 Differential Pair,
+112,USB2_P6_P,I/O,3.3V,USB 2.0 Port 6 Differential Pair,
+113,GND,PWR,0V,Ground,
+114,USB2_P6_N,I/O,3.3V,USB 2.0 Port 6 Differential Pair,
+115,VBAT,PWR,3.0V,RTC Battery Input,
+116,GND,PWR,0V,Ground,
+117,PROCHOT#,I,3.3V,(TCC) Overheat Protect,Active LOW; Internally 10K Pulled Up
+118,GPP_F16,I/O,3.3V,GPIO,
+119,GPP_E0,I/O,3.3V,GPIO,BIOS Default Function:WWAN_PWR_EN
+120,GPP_F15,I/O,3.3V,GPIO,
+121,GPP_A12,I/O,3.3V,GPIO,BIOS Default Function:CAM_PWR_EN
+122,GPP_F14,I/O,3.3V,GPIO,
+123,SATA_LED#,O,3.3V,SATA HDD Activity Status,Active LOW
+124,GPP_F13,I/O,3.3V,GPIO,
+125,PMCALERT#,I,3.3V,USB Type-C PD Controller / Re-timer Alert,Active LOW; Internally 10K Pulled Up
+126,GPP_F12,I/O,3.3V,GPIO,
+127,TPM_IRQ,I,3.3V,Discrete TPM Interrupt,
+128,GPP_D0,I/O,3.3V,GPIO,BIOS Default Function:WWAN_PWR_EN
+129,USB_OC#,I,3.3V,USB Over Current,Active LOW; Internally 10K Pulled Up
+130,GPP_D1,I/O,3.3V,GPIO,BIOS Default Function:WWAN_RST
+131,SUSCLK,O,3.3V,Suspend Clock,32.768KHz
+132,GPP_D2,I/O,3.3V,GPIO,BIOS Default Function:IT8851_INT
+133,BIOS_SEL,I,3.3V,BIOS ROM Select,Internally 100K Pulled Up; HIGH: Integrated ROM; LOW: Carrier ROM
+134,GPP_D3,I/O,3.3V,GPIO,BIOS Default Function:CAM_PWR_EN
+135,GND,PWR,0V,Ground,
+136,GND,PWR,0V,Ground,
+137,UART0_RXD / GPP_H10,I/O,3.3V,SoC UART0 RX / GPIO,BIOS Default Function: UART
+138,SOC_UART2_TXD / GPP_F2,I/O,3.3V,SoC UART2 TX / GPIO,BIOS Default Function: UART
+139,UART0_TXD / GPP_H11,I/O,3.3V,SoC UART0 TX / GPIO,BIOS Default Function: UART
+140,SOC_UART2_RXD / GPP_F1,I/O,3.3V,SoC UART2 RX / GPIO,BIOS Default Function: UART
+141,UART1_RXD / GPP_D17,I/O,3.3V,SoC UART1 RX / GPIO,BIOS Default Function: UART
+142,I2C5_SCL,O,3.3V,I2C5 Clock,Internally 2.2K Pulled Up
+143,UART1_TXD / GPP_D18,I/O,3.3V,SoC UART1 TX / GPIO,BIOS Default Function: UART
+144,I2C5_SDA,I/O,3.3V,I2C5 Data,Internally 2.2K Pulled Up
+145,SML1_DATA,I/O,3.3V,SMLink1 Data,Internally 2.2K Pulled Up
+146,I2C4_SCL,O,3.3V,I2C4 Clock,Internally 2.2K Pulled Up
+147,SML1_CLK,O,3.3V,SMLink1 Clock,Internally 2.2K Pulled Up
+148,I2C4_SDA,I/O,3.3V,I2C4 Data,Internally 2.2K Pulled Up
+149,SML1_ALERT#,I,3.3V,SMLink1 Alert,Active LOW
+150,I2C3_SCL,O,3.3V,I2C3 Clock,Internally 2.2K Pulled Up
+151,GND,PWR,0V,Ground,
+152,I2C3_SDA,I/O,3.3V,I2C3 Data,Internally 2.2K Pulled Up
+153,SPI_IO3,I/O,3.3V,SPI Bus for BIOS and dTPM,
+154,I2C2_SCL,O,3.3V,I2C2 Clock,Internally 2.2K Pulled Up
+155,SPI_CLK,O,3.3V,SPI Bus for BIOS and dTPM,
+156,I2C2_SDA,I/O,3.3V,I2C2 Data,Internally 2.2K Pulled Up
+157,SPI_CS2#,O,3.3V,SPI Chip Select for dTPM,
+158,GND,PWR,0V,Ground,
+159,SPI_MOSI/SPI_IO0,I/O,3.3V,SPI Bus for BIOS and dTPM,
+160,I2S_MCLK,O,1.8V,I2S Master Clock,
+161,SPI_IO2,I/O,3.3V,SPI Bus for BIOS and dTPM,
+162,I2S_SCLK,O,1.8V,I2S Bit Clock,
+163,SPI_MISO/SPI_IO1,I/O,3.3V,SPI Bus for BIOS and dTPM,
+164,I2S_SFRM,O,1.8V,I2S Word Select,
+165,SPI_CS#,O,3.3V,SPI Chip Select for BIOS ROM,
+166,I2S_TXD,O,1.8V,I2S Serial Data Out,
+167,GND,PWR,0V,Ground,
+168,I2S_RXD,I,1.8V,I2S Serial Data In,
+169,DDIB_CTRL_DATA,I/O,3.3V,DDIB Control Data,Internally 2.2K Pulled Up
+170,GND,PWR,0V,Ground,
+171,DDIB_CTRL_CLK,O,3.3V,DDIB Control Clock,Internally 2.2K Pulled Up
+172,HDA_RST,O,3.3V,HD Audio Reset,
+173,TCP1_CTRL_DATA,I/O,3.3V,TCP1 Control Data,Internally 2.2K Pulled Up
+174,HDA_BCLK,O,3.3V,HD Audio Codec Bit Clock,
+175,TCP1_CTRL_CLK,O,3.3V,TCP1 Control Clock,Internally 2.2K Pulled Up
+176,HDA_SYNC,O,3.3V,HD Audio Codec Sync,
+177,TCP0_CTRL_DATA,I/O,3.3V,TCP0 Control Data,Internally 2.2K Pulled Up
+178,HDA_SDOUT,O,3.3V,HD Audio Codec Serial Data Out,
+179,TCP0_CTRL_CLK,O,3.3V,TCP0 Control Clock,Internally 2.2K Pulled Up
+180,HDA_SDIN,I,3.3V,HD Audio Codec Serial Data In,
+181,GND,PWR,0V,Ground,
+182,GND,PWR,0V,Ground,
+183,DDIB_HPD,I,3.3V,DDIB Hot Plug Detect,
+184,CSI_D_CK_P,I,1.26V,MIPI CSI Port D Clock Lane Differential Pair,
+185,TCP1_HPD,I,3.3V,TCP1 Hot Plug Detect,
+186,CSI_D_CK_N,I,1.26V,MIPI CSI Port D Clock Lane Differential Pair,
+187,TCP0_HPD,I,3.3V,TCP0 Hot Plug Detect,
+188,GND,PWR,0V,Ground,
+189,GND,PWR,0V,Ground,
+190,CSI_D_D1_P,I,1.26V,MIPI CSI Port D Data Lane 1 Differential Pair,
+191,DDIB_AUX_N,I/O,0.6V,DDIB DP Auxiliary Channel,
+192,CSI_D_D1_N,I,1.26V,MIPI CSI Port D Data Lane 1 Differential Pair,
+193,DDIB_AUX_P,I/O,0.6V,DDIB DP Auxiliary Channel,
+194,GND,PWR,0V,Ground,
+195,GND,PWR,0V,Ground,
+196,CSI_D_D0_P,I,1.26V,MIPI CSI Port D Data Lane 0 Differential Pair,
+197,DDIB_TX3_N,O,1.2V,DDIB DP Lane 3 / HDMI TMDS Clock,External AC Coupling Capacitor Required
+198,CSI_D_D0_N,I,1.26V,MIPI CSI Port D Data Lane 0 Differential Pair,
+199,DDIB_TX3_P,O,1.2V,DDIB DP Lane 3 / HDMI TMDS Clock,External AC Coupling Capacitor Required
+200,GND,PWR,0V,Ground,
+201,GND,PWR,0V,Ground,
+202,CSI_C_CK_P,I,1.26V,MIPI CSI Port C Clock Lane Differential Pair,
+203,DDIB_TX2_N,O,1.2V,DDIB DP Lane 2 / HDMI TMDS Data0,External AC Coupling Capacitor Required
+204,CSI_C_CK_N,I,1.26V,MIPI CSI Port C Clock Lane Differential Pair,
+205,DDIB_TX2_P,O,1.2V,DDIB DP Lane 2 / HDMI TMDS Data0,External AC Coupling Capacitor Required
+206,GND,PWR,0V,Ground,
+207,GND,PWR,0V,Ground,
+208,CSI_C_D1_P,I,1.26V,MIPI CSI Port C Data Lane 1 Differential Pair,
+209,DDIB_TX1_N,O,1.2V,DDIB DP Lane 1 / HDMI TMDS Data1,External AC Coupling Capacitor Required
+210,CSI_C_D1_N,I,1.26V,MIPI CSI Port C Data Lane 1 Differential Pair,
+211,DDIB_TX1_P,O,1.2V,DDIB DP Lane 1 / HDMI TMDS Data1,External AC Coupling Capacitor Required
+212,GND,PWR,0V,Ground,
+213,GND,PWR,0V,Ground,
+214,CSI_C_D0_P,I,1.26V,MIPI CSI Port C Data Lane 0 Differential Pair,
+215,DDIB_TX0_N,O,1.2V,DDIB DP Lane 0 / HDMI TMDS Data2,External AC Coupling Capacitor Required
+216,CSI_C_D0_N,I,1.26V,MIPI CSI Port C Data Lane 0 Differential Pair,
+217,DDIB_TX0_P,O,1.2V,DDIB DP Lane 0 / HDMI TMDS Data2,External AC Coupling Capacitor Required
+218,GND,PWR,0V,Ground,
+219,GND,PWR,0V,Ground,
+220,TCP1_TX0_P,O,1.2V,TCP1 DP Lane 0 / HDMI TMDS Data2 / Type C TX Data Lane 1,External AC Coupling Capacitor Required
+221,TCP0_AUX_N,I/O,0.6V,TCP0 DP Auxiliary Channel,
+222,TCP1_TX0_N,O,1.2V,TCP1 DP Lane 0 / HDMI TMDS Data2 / Type C TX Data Lane 1,External AC Coupling Capacitor Required
+223,TCP0_AUX_P,I/O,0.6V,TCP0 DP Auxiliary Channel,
+224,GND,PWR,0V,Ground,
+225,GND,PWR,0V,Ground,
+226,TCP1_TXRX0_P,I/O,1.2V,TCP1 DP Lane 1 / HDMI TMDS Data1 / Type C RX Data Lane 1,External AC Coupling Capacitor Required
+227,TCP0_TXRX1_N,I/O,1.2V,TCP0 DP Lane 3 / HDMI TMDS Clock / Type C RX Data Lane 2,External AC Coupling Capacitor Required
+228,TCP1_TXRX0_N,I/O,1.2V,TCP1 DP Lane 1 / HDMI TMDS Data1 / Type C RX Data Lane 1,External AC Coupling Capacitor Required
+229,TCP0_TXRX1_P,I/O,1.2V,TCP0 DP Lane 3 / HDMI TMDS Clock / Type C RX Data Lane 2,External AC Coupling Capacitor Required
+230,GND,PWR,0V,Ground,
+231,GND,PWR,0V,Ground,
+232,TCP1_TX1_P,O,1.2V,TCP1 DP Lane 2 / HDMI TMDS Data0 / Type C TX Data Lane 2,External AC Coupling Capacitor Required
+233,TCP0_TX1_N,O,1.2V,TCP0 DP Lane 2 / HDMI TMDS Data0 / Type C TX Data Lane 2,External AC Coupling Capacitor Required
+234,TCP1_TX1_N,O,1.2V,TCP1 DP Lane 2 / HDMI TMDS Data0 / Type C TX Data Lane 2,External AC Coupling Capacitor Required
+235,TCP0_TX1_P,O,1.2V,TCP0 DP Lane 2 / HDMI TMDS Data0 / Type C TX Data Lane 2,External AC Coupling Capacitor Required
+236,GND,PWR,0V,Ground,
+237,GND,PWR,0V,Ground,
+238,TCP1_TXRX1_P,I/O,1.2V,TCP1 DP Lane 3 / HDMI TMDS Clock / Type C RX Data Lane 2,External AC Coupling Capacitor Required
+239,TCP0_TXRX0_N,I/O,1.2V,TCP0 DP Lane 1 / HDMI TMDS Data1 / Type C RX Data Lane 1,External AC Coupling Capacitor Required
+240,TCP1_TXRX1_N,I/O,1.2V,TCP1 DP Lane 3 / HDMI TMDS Clock / Type C RX Data Lane 2,External AC Coupling Capacitor Required
+241,TCP0_TXRX0_P,I/O,1.2V,TCP0 DP Lane 1 / HDMI TMDS Data1 / Type C RX Data Lane 1,External AC Coupling Capacitor Required
+242,GND,PWR,0V,Ground,
+243,GND,PWR,0V,Ground,
+244,TCP1_AUX_P,I/O,0.6V,TCP1 DP Auxiliary Channel,
+245,TCP0_TX0_N,O,1.2V,TCP0 DP Lane 0 / HDMI TMDS Data2 / Type C TX Data Lane 1,External AC Coupling Capacitor Required
+246,TCP1_AUX_N,I/O,0.6V,TCP1 DP Auxiliary Channel,
+247,TCP0_TX0_P,O,1.2V,TCP0 DP Lane 0 / HDMI TMDS Data2 / Type C TX Data Lane 1,External AC Coupling Capacitor Required
+248,GND,PWR,0V,Ground,
+249,GND,PWR,0V,Ground,
+250,VIN,PWR,9V ~ 20V,Main Power Input,
+251,VIN,PWR,9V ~ 20V,Main Power Input,
+252,VIN,PWR,9V ~ 20V,Main Power Input,
+253,VIN,PWR,9V ~ 20V,Main Power Input,
+254,VIN,PWR,9V ~ 20V,Main Power Input,
+255,VIN,PWR,9V ~ 20V,Main Power Input,
+256,VIN,PWR,9V ~ 20V,Main Power Input,
+257,VIN,PWR,9V ~ 20V,Main Power Input,
+258,VIN,PWR,9V ~ 20V,Main Power Input,
+259,VIN,PWR,9V ~ 20V,Main Power Input,
+260,VIN,PWR,9V ~ 20V,Main Power Input,

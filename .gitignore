@@ -23,3 +23,5 @@ sockets/slot1/**/*.html
 rtl/ext/
 rtl/build/
 sw/*/build/
+.Xil/
+clockInfo.txt

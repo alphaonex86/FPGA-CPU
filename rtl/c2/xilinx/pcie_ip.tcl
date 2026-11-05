@@ -1,15 +1,17 @@
-# The 7 Series PCIe IP of the C2 card (AX7A035B: xc7a35tfgg484-2): x2
-# Gen2, 64-bit AXI4-Stream at 125 MHz, one 8 KB 32-bit memory BAR0
-# (sw/c2-vmm/bus.h), 100 MHz reference clock from the slot.
-# Sourced by build.tcl into its open project, ip_dir set.
+# The 7 Series PCIe IP of the C2 card: 64-bit AXI4-Stream at 125 MHz, one
+# 8 KB 32-bit memory BAR0 (sw/c2-vmm/bus.h), 100 MHz reference clock.
+# Sourced by a build script into its open project, ip_dir set; pcie_width /
+# pcie_speed default to the AX7A035B's x2 Gen2 (x4 at 64 bits: Gen1 only).
 file mkdir $ip_dir
+if {![info exists pcie_width]} { set pcie_width X2 }
+if {![info exists pcie_speed]} { set pcie_speed 5.0_GT/s }
 create_ip -name pcie_7x -vendor xilinx.com -library ip -module_name c2_pcie -dir $ip_dir
 # shared_logic_in_core exists in the Advanced mode only and is locked while
 # en_ext_clk (the default) is set
 set_property -dict {CONFIG.mode_selection Advanced CONFIG.en_ext_clk false} [get_ips c2_pcie]
 set_property -dict [list \
-    CONFIG.Maximum_Link_Width {X2} \
-    CONFIG.Link_Speed {5.0_GT/s} \
+    CONFIG.Maximum_Link_Width $pcie_width \
+    CONFIG.Link_Speed $pcie_speed \
     CONFIG.Interface_Width {64_bit} \
     CONFIG.User_Clk_Freq {125} \
     CONFIG.Bar0_Enabled {true} \

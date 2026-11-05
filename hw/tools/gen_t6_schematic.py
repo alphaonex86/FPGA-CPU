@@ -56,10 +56,14 @@ def esc(net):
 
 
 def block(t, start):
-    depth, inq = 0, False
+    depth, inq, esc = 0, False, False
     for k in range(start, len(t)):
         ch = t[k]
-        if ch == '"':
+        if esc:
+            esc = False
+        elif ch == "\\" and inq:
+            esc = True
+        elif ch == '"':
             inq = not inq
         elif ch == "(" and not inq:
             depth += 1
