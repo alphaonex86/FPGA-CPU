@@ -386,6 +386,16 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   GTP RX, GTP TX -> Mu RX); REFCLK2 AC-coupled into MGTREFCLK1 (F10/E10);
   PLT_RST# into a 3.3 V FPGA IO as PERST#. The link trains at Gen2
   (GTP limit).
+- PCIe routing (2026-11-05, operator: template in code): `hw/tools/c2mu_pcie.py`
+  draws every pair from computed straight / 45 deg segments before
+  freerouting: FPGA TX on F.Cu (exits west, caps < 8 mm from U1, into the
+  J4 even row), FPGA RX + REFCLK south on In5 / In2 (one layer cannot keep
+  their order), a via row, B.Cu with the caps near J4, vias to the odd row;
+  85 ohm (0.2 / 0.2 mm on the 2116 outer layers), skew 0.000 mm by 45 deg
+  bumps (limit 5 mil, REFCLK 15 mil [design_guide_pcie]). Six pairs cross P
+  and N (TX3, RX0-3, REFCLK): polarity inversion, which every PCIe receiver
+  does by itself [design_guide_pcie] (the 7-series core too [pg054 p.1];
+  REFCLK: only the clock phase flips); lane order kept.
 - Power: 12 V input (Mu VIN + the FPGA / 16612 rails); budget ~30 W
   (N305 > 15 W + 50 % margin, fan, FPGA; viability.md), allowed by the CLAUDE.md external-supply rule for
   the C2 gain.

@@ -14,7 +14,8 @@ transceivers' 5 V pins; as a track it walled it too), the free column (PS1,
 the column loads, U13/U14), a spur to U9 and the PS2-PS4 row (routed as
 tracks, 8 V5 connections stayed open), In5 signal, In6 GND, B.Cu signal:
 each signal layer next to a plane.
-Every netted U1 ball gets a filled via in its pad (0.45 / 0.25, JLCPCB POFV,
+The PCIe pairs first: c2mu_pcie.py's template, its nets checked against
+the board (ball, AC capacitor, Mu pin), locked. Every netted U1 ball gets a filled via in its pad (0.45 / 0.25, JLCPCB POFV,
 free from 6 layers; not the unused IO balls); every other SMD pad of a plane
 net a via in / at the pad, a track to a near same-net via or a dogbone
 (plane_vias: freerouting is slow at plane fanout); every transceiver signal
@@ -30,8 +31,8 @@ passes at the same time (serial and parallel fork, layer cost variants), the
 session leaving the fewest connections open imported and saved, router copper in DRC errors dropped; when an iteration
 gains nothing, close_route.py (windowed A*) closes what it can; until nothing
 is unrouted or neither gains.
-Checks (exit 1): every connection routed, kicad-cli DRC 0 errors; PCIe
-intra-pair length mismatch printed.
+Checks (exit 1): every connection routed, kicad-cli DRC 0 errors, PCIe
+intra-pair skew (ball to pin, on the board) within c2mu_pcie's limits.
 """
 import collections
 import json
@@ -39,12 +40,12 @@ import math
 import os
 import pathlib
 import shutil
-import re
 import subprocess
 import sys
 
 import pcbnew
 
+import c2mu_pcie
 import close_route
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -67,7 +68,7 @@ Y_VTT = 10.0                             # VTT15 strip / VCC_3V3 split: below th
 V5 = [(None, 7.0, None, 12.5),           # under every transceiver's VCC (5 V) pin 50 (y 10.6)
       (16.2, 7.0, 44.0, 61.0),           # free column: PS1's L1, F2, J5, D2, the column parts, U13 / U14
       (76.0, 12.5, 80.0, 46.5),          # spur: U9 pin 50 (y 30.3), on to the regulator row
-      (64.5, 46.5, 110.8, 57.0)]         # PS2-PS4 inputs; east of the PCIe corridor
+      (64.5, 46.5, 110.8, 57.0)]         # PS2-PS4 inputs; east of the PCIe pairs
 PLANES = [("GND", pcbnew.In1_Cu, (None, None, None, None), 0),
           ("VCC_3V3", pcbnew.In3_Cu, (None, Y_VTT, None, None), 0),
           ("VTT15", pcbnew.In3_Cu, (None, None, None, Y_VTT), 0),
@@ -75,7 +76,6 @@ PLANES = [("GND", pcbnew.In1_Cu, (None, None, None, None), 0),
          [("V5", pcbnew.In4_Cu, r, 1 + k) for k, r in enumerate(V5)] + \
          [("GND", pcbnew.In6_Cu, (None, None, None, None), 0)]     # V5: overlapping, so distinct priorities
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
-PCIE = r"/(MU_TX|MU_RX|PCIE_TX|PCIE_RX|MU_REFCLK|PCIE_REFCLK)(\d*)_"
 FAN_PARTS = ("SN74GTL16612",)            # chip_fanout
 TERM_FP = "R_Array_Convex_4x0402"         # chip_fanout too: vias outward, VTT pads on the plane
 TERM_ROW = 1.55                          # a third via row: the chip pins on F.Cu often take the first
@@ -499,19 +499,41 @@ def settle(board, path):
     return unrouted(board), len(drop)
 
 
-def pcie_skew(board):
-    length = {}
+def pcie_pairs(board):
+    """draw the PCIe template: each track's ball, AC capacitor and J4 pin checked, tracks and vias locked"""
+    u1, j4 = board.FindFootprintByReference("U1"), board.FindFootprintByReference("J4")
+    pad = lambda f, n: next(p for p in f.Pads() if p.GetNumber() == n)
+    xy = lambda p: (p.GetPosition().x / 1e6, p.GetPosition().y / 1e6)
+    pairs = c2mu_pcie.plan(lambda b: xy(pad(u1, b)), lambda n: xy(pad(j4, n)))
+    caps = {frozenset(p.GetNetname() for p in f.Pads()): f for f in board.GetFootprints() if f.GetPadCount() == 2}
+    layer = {c2mu_pcie.F: pcbnew.F_Cu, c2mu_pcie.IN2: pcbnew.In2_Cu, c2mu_pcie.IN5: pcbnew.In5_Cu,
+             c2mu_pcie.B: pcbnew.B_Cu}
+    cu = Copper(board)
+    for t in (t for pair in pairs.values() for t in pair):
+        fpga, mu = pad(u1, t.ball).GetNet(), pad(j4, t.pin).GetNet()
+        f = caps.get(frozenset((fpga.GetNetname(), mu.GetNetname())))
+        if f is None or math.dist(xy(next(p for p in f.Pads() if p.GetNetCode() == fpga.GetNetCode())), t.cap[1]) > 0.01:
+            sys.exit(f"FAIL: PCIe U1 {t.ball} -> J4 {t.pin}: no AC capacitor at the template spot (rerun s6, s7)")
+        for lay, p, q, past in t.segments():
+            cu.track(mm(*p), mm(*q), layer[lay], mu if past else fpga, pcbnew.FromMM(c2mu_pcie.W))
+        for v, past in t.vias():
+            cu.via(mm(*v), mu if past else fpga)
+    print(f"PCIe: {len(pairs)} pairs drawn from the template")
+    return pairs
+
+
+def pcie_skew(board, pairs):
+    """ball -> pin length of every PCIe track on the board; exit 1 past the skew limits"""
+    length = collections.Counter()
     for t in board.GetTracks():
         if t.GetClass() == "PCB_TRACK":
-            length[t.GetNetname()] = length.get(t.GetNetname(), 0.0) + t.GetLength() / 1e6
-    worst = 0.0
-    for n in sorted(length):
-        m = re.fullmatch(PCIE + "P", n)
-        if m:
-            d = abs(length[n] - length.get(n[:-1] + "N", 0.0))
-            worst = max(worst, d)
-            print(f"  {n[1:-2]}: P {length[n]:.2f} mm, N {length.get(n[:-1] + 'N', 0.0):.2f} mm, diff {d:.2f}")
-    print(f"PCIe worst intra-pair mismatch {worst:.2f} mm")
+            length[t.GetNetname()] += t.GetLength() / 1e6
+    u1, j4 = board.FindFootprintByReference("U1"), board.FindFootprintByReference("J4")
+    net = lambda f, n: next(p for p in f.Pads() if p.GetNumber() == n).GetNetname()
+    lines, bad = c2mu_pcie.report(pairs, lambda t: length[net(u1, t.ball)] + length[net(j4, t.pin)])
+    print("PCIe ball -> pin length, west / east track:", *lines, sep="\n")
+    if bad:
+        sys.exit(f"FAIL: PCIe skew over the limit: {bad}")
 
 
 def drc_report(path):
@@ -541,6 +563,7 @@ def main():
         sys.exit("FAIL: board already routed: rerun gen_c2mu_s7.py first")
     planes(board)
     via_in_pad(board)
+    pairs = pcie_pairs(board)
     plane_vias(board)
     chip_fanout(board)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
@@ -550,7 +573,7 @@ def main():
     freeroute(board, path)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(path), board)
-    pcie_skew(board)
+    pcie_skew(board, pairs)
     if drc(path) != (0, 0):
         sys.exit(1)
     print("PASS  c2mu S8: routed, DRC 0 errors")

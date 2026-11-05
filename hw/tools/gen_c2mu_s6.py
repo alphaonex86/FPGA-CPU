@@ -11,7 +11,9 @@ Parts: U1 XC7A100T-2FGG484I; U2 the SC242 contacts; U3-U9 SN74GTL16612 and
 U10 CY2309 as on the D33 board (gen_c2cart_s6); J4 the LattePanda Mu on a
 LOTES ADDR0110 SO-DIMM 260 9.2H socket. Mu HSIO8-11 = PCIe lanes 0-3, 0.22 uF
 in both directions (an on-board endpoint), REFCLK2 AC-coupled into
-MGTREFCLK1 (the GTP input wants it), PLT_RST# -> PCIE_PERST#; PWRBTN# /
+MGTREFCLK1 (the GTP input wants it); each capacitor joins the ball and the Mu
+pin c2mu_pcie.LINKS pairs (its pair template: P / N swapped where the routing
+needs it, polarity inversion [design_guide_pcie]), PLT_RST# -> PCIE_PERST#; PWRBTN# /
 RSTBTN# pulled by NMOS from the FPGA (and SW1); PSON (S0) to the FPGA; CPU fan
 J5 as on the Lite carrier; cabled CR2032 on J8, 1k into VBAT; USB2 ports 1 and 3 on
 J6 (the 9-pin motherboard USB header: a bracket cable gives two USB-A),
@@ -33,6 +35,7 @@ import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import c2mu_pcie
 import gen_t6_schematic as t6
 import pdn
 from pdn import C0402, C0603, C0805, C1206, C1210, CPAIR, R0402, Parts, buck54620, buck62130, farads, u1_pairs
@@ -111,7 +114,7 @@ def stock_ic(lib, name, ref, X, Y, names, parts, flagged, footprint, value=None)
     parts.append(t6.syminst(f"{lib}:{name}", ref, X, Y, 1, pins, lab, value=value, footprint=footprint))
 
 
-def power(P, net_of_ball, agtl):
+def power(P, net_of_ball, agtl, mu_pin_net):
     """power tree, decoupling, terminations, PCIe caps, pull-ups: pdn.py rows"""
     P.add("F", "Device:Fuse", "5A", "Fuse:Fuse_1812_4532Metric", ["V12_IN", "V12"], "stage", "F1")
     # hot-plug damping on the jack (ceramics alone ring past the TPS54620 17 V max) + Mu VIN bulk
@@ -193,13 +196,11 @@ def power(P, net_of_ball, agtl):
     P.r("10k", "F_TDI", "VCC_3V3", "pullup", "U1")
     P.r("4.7k", "F_TCK", "GND", "pullup", "U1")
 
-    # PCIe: AC coupling on both directions (on-board endpoint) [design_guide_pcie]; REFCLK into the GTP
-    for k in range(4):
-        for s in "PN":
-            P.add("C", "Device:C", "220nF", C0402, [f"MU_TX{k}_{s}", f"PCIE_RX{k}_{s}"], "pcie", "U1")
-            P.add("C", "Device:C", "220nF", C0402, [f"PCIE_TX{k}_{s}", f"MU_RX{k}_{s}"], "pcie", "J4")
-    for s in "PN":
-        P.add("C", "Device:C", "100nF", C0402, [f"MU_REFCLK_{s}", f"PCIE_REFCLK_{s}"], "pcie", "U1")
+    # PCIe: AC coupling on both directions (on-board endpoint) [design_guide_pcie]; REFCLK into the GTP;
+    # pad 1 on the FPGA side, ball and pin as the pair template routes them
+    for ball, pin in c2mu_pcie.LINKS:
+        value = "100nF" if "REFCLK" in net_of_ball[ball] else "220nF"
+        P.add("C", "Device:C", value, C0402, [net_of_ball[ball], mu_pin_net[pin]], "pcie", "U1", ball)
     P.r("10k", "PCIE_PERST#", "VCC_3V3", "pullup", "U1")
 
     # Mu power / reset buttons: NMOS gates from the FPGA, 100k down while it configures
@@ -370,7 +371,8 @@ def main():
         parts.append(t6.syminst("mu_n:" + musym[0], "J4", X0 + 60 + int(uid) * 60, Y0 + 130, int(uid), mpins, mlab,
                                 footprint=MU_FP))
 
-    rows = power(Parts("Slot1Parts", taken={"F2"}), net_of, agtl)
+    mu_pin_net = {p["num"]: mnets[p["name"]] for mpins in musym[2].values() for p in mpins if p["name"] in mnets}
+    rows = power(Parts("Slot1Parts", taken={"F2"}), net_of, agtl, mu_pin_net)
     parts += pdn.draw(rows, PARTS, "Slot1Parts", 30.0, 455.0, flagged)
     with open(OUT / "pdn.csv", "w", newline="") as f:
         w = csv.DictWriter(f, pdn.CSV_FIELDS)
@@ -407,13 +409,11 @@ def main():
             need("BCLK", ("U1", ball), ("U2", ct), ("U10", "1"))
         else:
             need(sig, ("U1", ball))
-    for k in range(4):                  # lane k: Mu TX -> cap -> GTP RX, GTP TX -> cap -> Mu RX
-        for s in "PN":
-            if not series(f"MU_TX{k}_{s}", f"PCIE_RX{k}_{s}") or not series(f"PCIE_TX{k}_{s}", f"MU_RX{k}_{s}"):
-                fails.append(f"lane {k} {s}: no series capacitor")
-    for s in "PN":
-        if not series(f"MU_REFCLK_{s}", f"PCIE_REFCLK_{s}"):
-            fails.append(f"REFCLK {s}: no series capacitor")
+    for ball, pin in c2mu_pcie.LINKS:    # Mu TX -> cap -> GTP RX, GTP TX -> cap -> Mu RX, REFCLK2 -> MGTREFCLK1
+        fpga, mu = net_of[ball], mu_pin_net[pin]
+        if not (fpga.startswith("PCIE_") and mu.startswith("MU_")) or not series(fpga, mu):
+            fails.append(f"U1 {ball} {fpga} -> J4 {pin} {mu}: no series capacitor")
+        need(mu, ("J4", pin))
     need("PCIE_PERST#", ("J4", "105"))
     need("V12", ("J4", "250"), ("J4", "260"))
     for chip, ref in GTL_REFS.items():

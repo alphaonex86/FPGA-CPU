@@ -13,7 +13,9 @@ parts <= 4 mm (Mu bottom parts 2.0 mm, 6.6 mm standoff): the tall parts
 and everything the user touches stay in the free column x 16..33.3. H1/H2
 (M2 standoffs) at the Mu holes split the transceiver band: DATA0 left of
 H1, DATA1-3 / CY2309 / ADDR0-1 between, TX (7 channels) right of U1 at its
-balls. U1 under the band, GTP quad towards the socket's HSIO8-11 pins.
+balls. U1 under the band, GTP quad towards the socket's HSIO8-11 pins; the
+PCIe pairs and their AC capacitors where c2mu_pcie.py's template puts them,
+other parts off its copper.
 B.Cu: 0402 class parts only (terminations along the edge at their
 contacts, their VTT decoupling (0805 too) at the row's left end, U1 via-pair
 capacitors, chip decoupling under the chips).
@@ -22,6 +24,7 @@ with a 3D model file (U2 exempt), kicad-cli DRC 0 errors apart
 from the unrouted nets.
 """
 import csv
+import math
 import pathlib
 import re
 import sys
@@ -29,6 +32,7 @@ import sys
 import pcbnew
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import c2mu_pcie
 import placer
 from gen_c2cart_s6 import GTL_REFS
 from placer import Placer, mm
@@ -42,8 +46,8 @@ MU_AT = (72.0, 69.5)                     # J4 origin (contact centre line), 180 
 MU_HOLES = [(31.8, 57.0), (-31.8, 57.0)]  # Mu M2 holes, J4 local [vendor footprint F.Fab]
 MU_AREA = (33.26, 9.26, 110.74, H)       # module shadow: parts <= 4 mm
 COLUMN = (RET + 0.2, 7.1, 33.2, H)       # free column: tall and user-touched parts
+KEEP = 0.25                              # other parts' courtyards this far from the PCIe template copper
 U1_AT = (58.0, 34.0)
-PCIE_CORRIDOR = (45.5, 45.5, 64.5, 64.0)  # GTP corner of U1 -> HSIO8-11 / REFCLK2 pins: AC caps only
 BAND_Y = 7.1                             # chip band top (the cavity band ends at 7.0)
 FIXED_FP = {"U1": "Interposer:FPGA_Artix7_XC7A100T_FGG484_BGA", "U2": "Slot1:SC242_CardEdge_242"}
 NO_MODEL = {"U2"}                        # card edge
@@ -53,6 +57,15 @@ NET_CLASSES = {"PWR": ["VCC_3V3", "V5", "VTT15", "USB_VBUS", "FT_VPHY", "FT_VCOR
                "CORE": ["VCC_1V0", "VCC_1V8", "VCC_MGT*"],
                "VIN": ["V12", "V12_IN"],
                "PCIE": ["MU_TX*", "MU_RX*", "PCIE_TX*", "PCIE_RX*", "MU_REFCLK_*", "PCIE_REFCLK_*"]}
+
+
+def keep_off(P, sides, p, q, r):
+    """mark the occupancy grid on sides along segment p-q, r around it"""
+    n = 1 + int(math.dist(p, q) / 0.2)
+    for k in range(n + 1):
+        x, y = p[0] + (q[0] - p[0]) * k / n, p[1] + (q[1] - p[1]) * k / n
+        for s in sides:
+            P.grid[s][P.cells((x - r, y - r, x + r, y + r))] = True
 
 
 def tall_under_mu(comps):
@@ -186,15 +199,25 @@ def main():
             sys.exit(f"FAIL: {r['ref']} pads do not land on {r['a']} / {r['b']}")
     P.grid["B"][P.cells(P.box(P.fp["U1"], "F"))] = True    # every ball gets a via in pad (gen_c2mu_s8.py)
 
-    # PCIe AC capacitors at the receiver ends (< 8 mm [design_guide_pcie]), along the lanes; then the
-    # corridor between the GTP corner and the socket stays free of other F.Cu parts
-    # pad 2 (the anchor's net) faces it: J4 below (+y, 270 deg), U1 east (+x, 0 deg); else the other pad
-    # and the J4 ground dogbones wall the short side in
-    for r in sorted((r for r in rows.values() if r["kind"] == "pcie"), key=lambda r: r["ref"]):
-        a = r["a"]
-        P.near(r["ref"], *P.pad_xy(a, next(p for ref, p in nets[r["nets"].split("|")[1]] if ref == a)),
-               rots=(270.0,) if a == "J4" else (0.0,))
-    P.grid["F"][P.cells(PCIE_CORRIDOR)] = True
+    # PCIe pair template (c2mu_pcie.py): its AC capacitors at their spots, other parts off its copper
+    pcie = c2mu_pcie.plan(lambda b: P.pad_xy("U1", b), lambda n: P.pad_xy("J4", n))
+    cap_row = {r["b"]: r for r in rows.values() if r["kind"] == "pcie"}
+    for t in (t for pair in pcie.values() for t in pair):
+        _, fpga_xy, mu_xy, side = t.cap
+        ref = cap_row[t.ball]["ref"]
+        mid = ((fpga_xy[0] + mu_xy[0]) / 2, (fpga_xy[1] + mu_xy[1]) / 2)
+        for rot in (0.0, 90.0, 180.0, 270.0):
+            P.put(ref, *mid, rot, side, mark=False)
+            if all(abs(a - b) < 0.01 for a, b in zip(P.pad_xy(ref, "1"), fpga_xy)):
+                P.put(ref, *mid, rot, side)
+                break
+        else:
+            sys.exit(f"FAIL: {ref} pads do not land on the PCIe template")
+        for layer, p, q, _ in t.segments():
+            keep_off(P, "F" if layer == c2mu_pcie.F else "B" if layer == c2mu_pcie.B else "", p, q,
+                     c2mu_pcie.W / 2 + KEEP)
+        for v, _ in t.vias():
+            keep_off(P, "FB", v, v, c2mu_pcie.VIA[0] / 2 + KEEP)
 
     # ICs near the balls / pins they serve
     def ball(net):
@@ -202,7 +225,7 @@ def main():
     P.near("U11", *ball("SPI_CLK"), reach=30.0)
     P.near("U12", *ball("OSC50"), reach=30.0)
     for ref, net in (("U13", "VCC_MGT10"), ("U14", "VCC_MGT12")):
-        P.near(ref, *ball(net), region=(MU_AREA[0], 46.0, PCIE_CORRIDOR[0], 63.0))
+        P.near(ref, *ball(net), reach=30.0)
     for ref, anchor in (("Q1", ("J4", "1")), ("Q2", ("J4", "3")), ("U16", ("J4", "73")), ("Y1", ("J4", "73"))):
         P.near(ref, P.pad_xy(*anchor)[0], 56.0)
     for ref, at in (("U15", ("J6", "3")), ("U17", ("J6", "4")), ("F2", ("J6", "1")), ("D2", ("J5", "3"))):
