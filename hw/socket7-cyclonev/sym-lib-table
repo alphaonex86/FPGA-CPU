@@ -1,5 +1,6 @@
 (sym_lib_table
   (version 7)
+  (lib (name "SocketParts")(type "KiCad")(uri "${KIPRJMOD}/../lib/Socket_Parts.kicad_sym")(options "")(descr "Bus switch, power"))
   (lib (name "SocketFPGA")(type "KiCad")(uri "${KIPRJMOD}/../lib/FPGA_CycloneV_5CEFA9_F484.kicad_sym")(options "")(descr "FPGA"))
   (lib (name "SocketCPU")(type "KiCad")(uri "${KIPRJMOD}/../../sockets/kicad/Intel_Pentium_MMX_P55C_Socket7.kicad_sym")(options "")(descr "CPU"))
 )

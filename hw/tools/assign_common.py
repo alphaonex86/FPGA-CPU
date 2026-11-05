@@ -27,6 +27,12 @@ def ball_key(b):
     return (len(m.group(1)), m.group(1), int(m.group(2)))
 
 
+# AS x4 from the MT25QL01G (MSEL 10011, gen_socket3_t6.py); Quartus checks the device name only at assembly
+AS_X4_QSF = ['set_global_assignment -name STRATIXV_CONFIGURATION_SCHEME "ACTIVE SERIAL X4"',
+             "set_global_assignment -name USE_CONFIGURATION_DEVICE ON",
+             "set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE MT25QL01G"]
+
+
 def write_outputs(out, rows, pullup, qsf=()):
     """pins.csv and assignment_quartus.qsf; rows: [signal, ball, bank, vccio,
     io_standard, translator, distance_mm, socket_pin, source]; pullup: signals
@@ -51,9 +57,10 @@ def write_outputs(out, rows, pullup, qsf=()):
 
 
 def assign(root, t1_path, out, plan, vccio, clock, translated, local=(),
-           pullup=()):
+           pullup=(), qsf=()):
     """local: (signal, bank) board-only FPGA inputs, no socket pin or
-    translator; pullup: signals given the FPGA weak pull-up in the .qsf"""
+    translator; pullup: signals given the FPGA weak pull-up in the .qsf;
+    qsf: extra global .qsf lines"""
     rows = list(csv.reader(open(root / ROOT_FPGACSV)))[1:]
     ncols, nrows = SIZE
     cols = sorted({re.match(r"^([A-Za-z]+)([0-9]+)$", r[0]).group(1)
@@ -154,7 +161,7 @@ def assign(root, t1_path, out, plan, vccio, clock, translated, local=(),
         out_rows.append([name, ball, bank, vccio[bank], "3.3-V LVTTL", "",
                          f"{dist(ball):.1f}", "", "board-local"])
 
-    write_outputs(out, out_rows, pullup)
+    write_outputs(out, out_rows, pullup, qsf)
 
     freeio = sum(len([b for b in pool if b not in used and b not in reserved])
                  for pool in banked.values())

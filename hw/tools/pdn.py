@@ -41,9 +41,9 @@ L_SMALL = "Inductor_SMD:L_Coilcraft_XxL4020"     # tps62130 Table 9-1 p.13
 FARAD = {"p": 1e-12, "n": 1e-9, "u": 1e-6}
 # inductor (Isat at 20 % drop, Irms at 20 C rise) [Coilcraft Doc 462-1
 # rev 10/15/08 MSS1048; Doc 745-1 rev 02/10/11 XFL4020; changjiang_fxl1040
-# max columns]
+# max columns]; XFL4020-102: LCSC C5355380 (lcsc_C5355380.html, drop not stated)
 L_RATING = {"MSS1048-682": (5.00, 4.52), "MSS1048-152": (7.80, 7.41),
-            "XFL4020-222": (3.5, 6.0), "FXL1040-6R8": (9.6, 7.0)}
+            "XFL4020-222": (3.5, 6.0), "FXL1040-6R8": (9.6, 7.0), "XFL4020-102": (5.4, 11.0)}
 
 
 def l_check(name, part, iout, ripple):
@@ -99,16 +99,16 @@ def tps54620(name, vin, vout, iout, cout_n, cout_v, cout_eff, l_nom, dv,
                 vset=vset)
 
 
-def tps62130_r1(vout, band):
+def tps62130_r1(vout, band, vref=VREF):
     """R2 = 100 k <= 400 k; R1 = R2 (Vout/0.8 - 1) [tps62130 Eq 6 p.14]:
     the E96 R1 nearest to vout whose output stays inside the rail band"""
-    ideal = 100e3 * (vout / VREF - 1)
+    ideal = 100e3 * (vout / vref - 1)
     d = 10 ** math.floor(math.log10(ideal))
     cands = [t * d * s for t in E96 for s in (0.1, 1, 10)
-             if band[0] <= VREF * (1 + t * d * s / 100e3) <= band[1]]
-    r1 = min(cands, key=lambda r: (round(abs(VREF * (1 + r / 100e3) - vout), 4),
+             if band[0] <= vref * (1 + t * d * s / 100e3) <= band[1]]
+    r1 = min(cands, key=lambda r: (round(abs(vref * (1 + r / 100e3) - vout), 4),
                                    -r))          # tie: the higher output
-    return r1, VREF * (1 + r1 / 100e3)
+    return r1, vref * (1 + r1 / 100e3)
 
 
 def nf(c):

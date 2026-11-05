@@ -4,7 +4,8 @@ base CPU symbol sockets/kicad/CPU_Socket3_Am5x86.kicad_sym from
 hw/common/socket3_signals.csv (shape of gen_slot1_cpu_sym.py), the
 SN74CB3T3245 bus switch (D2 translator), the regulators, the TLV6700
 VCORE-present detector and the MT25QL01G AS x4 flash in
-hw/lib/Socket3_Parts.kicad_sym, and verify
+hw/lib/Socket_Parts.kicad_sym (shared with socket 7: its TLV62585 core
+buck, TPS22918 VCCIO switch and TLV75725 aux LDO), and verify
 the library pieces T6 will use: symbol = T1, base footprint pads = symbol
 pins, FPGA symbols = their ball CSVs. Checks pass or exit 1.
 """
@@ -19,7 +20,7 @@ from gen_slot1_lib import reg_sym, tps_syms
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 T1 = ROOT / "hw/common/socket3_signals.csv"
 OUT = ROOT / "sockets/kicad/CPU_Socket3_Am5x86.kicad_sym"
-PARTS = ROOT / "hw/lib/Socket3_Parts.kicad_sym"
+PARTS = ROOT / "hw/lib/Socket_Parts.kicad_sym"
 MOD = ROOT / "sockets/kicad/Interposer.pretty/Socket3_Base_PGA168.kicad_mod"
 FPGA = [("FPGA_CycloneV_5CEFA9_F484_FPGA", "FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv"),
         ("FPGA_Ti180_TI180G400_FPGA", "FPGAlist/Ti180_G400/pins/ti180g400.csv")]
@@ -76,8 +77,16 @@ flash = reg_sym("MT25QL01G", [("7", "S#"), ("16", "C"), ("3", "RESET#")],
                 [("15", "DQ0"), ("8", "DQ1"), ("9", "DQ2"), ("1", "DQ3")]
                 + [(n, "DNU") for n in ("4", "5", "6", "11", "12", "13", "14")],
                 [("2", "VCC"), ("10", "GND")], "sockets/parts/micron_mt25ql01gbbb.pdf", ref="U")
+# socket 7 power tree (socket7_pdn.py): TLV62585PDRL SOT563 [ti_tlv62585 p.4], TPS22918 DBV
+# [ti_tps22918 p.3], TLV75725P DBV [ti_tlv757p p.3 Table 4-1]
+s7 = [reg_sym("TLV62585", [("3", "VIN"), ("4", "EN")], [("2", "SW"), ("5", "FB"), ("6", "PG")], [("1", "GND")],
+              "sockets/parts/ti_tlv62585.pdf"),
+      reg_sym("TPS22918", [("1", "VIN"), ("3", "ON"), ("4", "CT")], [("6", "VOUT"), ("5", "QOD")], [("2", "GND")],
+              "sockets/parts/ti_tps22918.pdf", ref="U"),
+      reg_sym("TLV75725", [("1", "IN"), ("3", "EN")], [("5", "OUT"), ("4", "NC")], [("2", "GND")],
+              "sockets/parts/ti_tlv757p.pdf")]
 parts_text = ('(kicad_symbol_lib (version 20241209) (generator "gen_socket3_lib.py")\n'
-              + "\n".join([cb3t] + tps_syms() + [tlv, flash]) + '\n)\n')
+              + "\n".join([cb3t] + tps_syms() + [tlv, flash] + s7) + '\n)\n')
 PARTS.write_text(parts_text)
 
 

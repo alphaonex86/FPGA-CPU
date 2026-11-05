@@ -33,7 +33,7 @@ from scipy.optimize import linear_sum_assignment
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import gen_socket3_t7 as t7
-from assign_common import write_outputs
+from assign_common import AS_X4_QSF, write_outputs
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 T1 = ROOT / "hw/common/socket3_signals.csv"
@@ -41,10 +41,6 @@ FCSV = ROOT / "FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv"
 OUT = ROOT / "hw/socket3-cyclonev"
 DEPTH_MM = 6.0                           # a ring deeper costs as much as 6 mm of trace
 CHANNELS = 8
-# AS x4 from U4 (MSEL 10011, gen_socket3_t6.py); Quartus checks the device name only at assembly
-CONFIG = ['set_global_assignment -name STRATIXV_CONFIGURATION_SCHEME "ACTIVE SERIAL X4"',
-          "set_global_assignment -name USE_CONFIGURATION_DEVICE ON",
-          "set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE MT25QL01G"]
 
 
 def least_length(targets, spots, extra=lambda spot: 0.0):
@@ -132,7 +128,7 @@ def main():
                      f"{math.dist(u1[b], xy[k][str(1 + ch)]):.1f}", pin, src[n]])
     b = ball["VCORE_OK"]
     rows.append(["VCORE_OK", b, bank[b], "3.3 V", "3.3-V LVTTL", "", "", "", "board-local"])
-    write_outputs(OUT, rows, ["CLKMUL"], CONFIG)
+    write_outputs(OUT, rows, ["CLKMUL"], AS_X4_QSF)
     with open(OUT / "layout.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["ref", "x", "y", "rot", "side"])

@@ -38,7 +38,7 @@ NAME = "socket3-cyclonev"
 FCSV = ROOT / "FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv"
 FSYM = ROOT / "hw/lib/FPGA_CycloneV_5CEFA9_F484_FPGA.kicad_sym"
 CPUSYM = ROOT / "sockets/kicad/CPU_Socket3_Am5x86.kicad_sym"
-PARTS = ROOT / "hw/lib/Socket3_Parts.kicad_sym"
+PARTS = ROOT / "hw/lib/Socket_Parts.kicad_sym"
 
 VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5, "V3V3": 3.3}
 
@@ -224,7 +224,7 @@ def main():
     pdn_rows = socket3_pdn.build(net_of, ["TR%02d" % c for c in sorted(chips)],
                                  {f"R{k}" for k in range(1, len(PULLS) + 1)}
                                  | {"U1", "U2", "U4"})
-    parts += pdn.draw(pdn_rows, PARTS, "Socket3Parts", 30.0, 440.0, flagged)
+    parts += pdn.draw(pdn_rows, PARTS, "SocketParts", 30.0, 440.0, flagged)
     with open(OUT / "pdn.csv", "w", newline="") as f:
         w = csv.DictWriter(f, pdn.CSV_FIELDS)
         w.writeheader()
@@ -284,7 +284,7 @@ def main():
     t6.run_erc(schpath, OUT / f"{NAME}.erc.json")
     print("PASS  T6 checks (supply bands + netlist audit + ERC)")
     t6.write_project(OUT, NAME, [
-        ("Socket3Parts", "../lib/Socket3_Parts.kicad_sym", "Bus switch"),
+        ("SocketParts", "../lib/Socket_Parts.kicad_sym", "Bus switch, power"),
         ("SocketFPGA", f"../lib/{fsym[0]}.kicad_sym", "FPGA"),
         ("SocketCPU", f"../../sockets/kicad/{csym[0]}.kicad_sym", "CPU")])
 

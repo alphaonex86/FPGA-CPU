@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/user/Desktop/CatchChallenger/FPGA-CPU/hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
-		(date "2026-11-01T10:38:49")
+		(date "2026-11-05T08:59:22")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -55,12 +55,4818 @@
 	)
 	(components
 		(comp
-			(ref "J1")
-			(value "Conn_02x03_Odd_Even")
+			(ref "C1")
+			(value "22uF/10V")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
 			(fields
 				(field
-					(name "Footprint")
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
 				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5f717791-671b-4121-9b8e-c5db85c0234b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C2")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "04f6ed5f-3ce4-4a79-832c-2434d272fdcd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C3")
+			(value "22uF/6.3V")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a8a5017a-7ffd-47ec-a3f0-3f7187aca10b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C4")
+			(value "1nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1fc37cc8-4587-40c4-9692-c5f61c113a57")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C5")
+			(value "10uF/10V")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1add753e-9444-461b-8573-9ad16f3afe9a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C6")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "72f212b6-9455-4c04-9ad6-db9ba60d2386")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C7")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "72ea78a7-8ca7-4319-943e-64231a487723")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C8")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b7964a7c-c687-49ae-ac11-d9a5a1abe9a5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C9")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d58f6fed-9888-4751-8e3e-44361e1b9f58")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C10")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e930de03-2669-4e6b-9078-f91e70bad29b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C11")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "09e8ab20-468e-4e32-b89e-8b4755d87e16")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C12")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b36c9edb-9835-4f01-bf03-a5b915aa8db0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C13")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "aca62069-269e-46bc-b4be-5a81999e020b")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C14")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1a7a4d4e-6c72-4e87-b60e-0e3b75ada840")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C15")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d9db6d05-3013-487b-ab60-7285ab8410de")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C16")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "62476133-65a9-4d02-ac4c-0f495aa015ce")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C17")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5cd17121-bbe3-4104-b949-55056a51068c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C18")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8dac4a08-ceb5-4387-a37d-7b85aad736fa")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C19")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3ef1edb5-6df0-494b-a854-8799d1e8d7bd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C20")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1fbb9ef9-75ee-4aac-af73-fb1d1cd608d8")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C21")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6df949be-66fd-4712-b500-ff608640acb1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C22")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "ec518e38-a468-4a7f-964b-f609cedcdc1a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C23")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "4b8affac-2cc8-4160-953b-58e70e3c74b7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C24")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "24b8be85-675d-493f-9b24-c71130d68f0c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C25")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "71982a74-d976-461d-9957-5ed76e564228")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C26")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d6d5a655-4536-454c-8926-be3f493c7f62")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C27")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0d02a338-3fd4-478b-a93e-19cd8b71ebed")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C28")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0167a320-25d2-44f0-bf2b-152298911731")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C29")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "17fb3603-dd96-42e0-843f-106b8d21a3ef")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C30")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "37d1e4c6-2264-4a69-be5d-af18368099ed")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C31")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "62e967d2-ade8-4a77-9050-2c07bd9e752e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C32")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "aa2956cc-bd7b-4595-aa45-ba8997ff41f3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C33")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3e6083e9-1a4a-40d7-a01c-6afc20c8beaf")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C34")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "c0599a79-c265-4dae-9d74-61757dc44731")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C35")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e1c6122e-66c2-4076-ad9d-235422e0f233")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C36")
+			(value "10nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f5edce97-c36e-4c86-86ea-04a043e7ff99")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C37")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "59690c6c-305a-4ed6-a5f0-9750683c26ad")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C38")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7132cfb6-2b05-4471-8b77-313c1eb1fb0f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C39")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "7c3212f3-cd10-49fe-8efc-a6f35c6f4043")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C40")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d74d8198-dbbe-4ad5-bd38-6952cad1691c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C41")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "40d68614-284a-41d5-a344-36ed126db0c4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C42")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5cc7427e-cdb2-4178-a973-0ab113817e3e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C43")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e1ada3ed-0105-4f93-b38b-6f0e06556414")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C44")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6dabd218-133a-40d1-9356-91cda373efec")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C45")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6c9f6491-7111-4640-9f7b-a8bc345673d7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C46")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8ce2d895-bb4c-4a0d-bd36-c90fe6352d4c")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C47")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f521b796-6037-4427-abaa-7ba58263b3cd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C48")
+			(value "22nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5f523af9-e29f-46cf-a615-fa9974782225")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C49")
+			(value "47nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e9c64bc3-ed47-499d-a739-cd5b17d0008f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C50")
+			(value "47nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "84ed2376-ffa8-4308-bc73-ceb6243a2c55")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C51")
+			(value "47nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "61581129-ad04-4050-8b1a-de2842d23f2f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C52")
+			(value "47nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3fb525ee-e5f7-448d-ab3d-fd60552f03dc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C53")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "fef6ba78-9e27-4456-81a4-d480b4bc0df3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C54")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "513c3cfa-184b-4cd6-b430-90a36c7f605a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C55")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "502e5071-56ee-4392-8da6-3bebe85ac389")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C56")
+			(value "220nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2dd8be49-ed8c-4969-97db-0e3f8d19ddcd")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C57")
+			(value "220nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "358ba7a8-16d8-47d1-b28b-f110bfd07b1a")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C58")
+			(value "470nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "42eaf75c-e35a-4322-9ee4-83730b0d4dd5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C59")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "f3fe493a-b55b-4d84-a0fd-81255f72b9bc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C60")
+			(value "2.2nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6f906d0f-7400-40d0-bf40-8d51f302f1a6")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C61")
+			(value "2.2nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8455a5d7-a246-48f8-8c5d-b9b0ce4d590f")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C62")
+			(value "2.2nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "059b2720-e57b-440b-a841-dbfa215fa2f5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C63")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b27b7d93-e521-46b5-8fca-a04d8e054cbf")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C64")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "d2328b17-8ac5-4bc1-90b4-ff723e24349d")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C65")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "06de4cb8-f99c-4488-b2f4-f75dabd65c84")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C66")
+			(value "4.7nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "0cd69438-9a77-41c2-87be-add92003fdcc")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C67")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1308c87d-42c7-4f0d-9f2e-674cd62a3a09")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C68")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5253ac18-2bed-4d5a-9cbc-56bc6a86db5e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C69")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "bd45f49d-2047-4d14-8d1a-26398801f675")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C70")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "703b7894-ce65-4359-a55b-85fa3678cf83")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C71")
+			(value "22nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "6351a0cf-fc69-4d84-817b-a74789ca4a8e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C72")
+			(value "22nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "59166d8f-3885-42c9-aca8-9ddbd4dedfc1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C73")
+			(value "47nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "922bfb65-07bc-4cf0-9118-e78611e35922")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C74")
+			(value "47nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "56624514-63ac-4140-a812-611f86666001")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C75")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "cb3ae3d2-595f-43e8-a0fe-37eaa9a65dee")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C76")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1dcd76da-8b70-4733-ac11-57f0f7392ef5")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C77")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "61837f78-91a7-47f0-aae5-ac53ba6b1d7e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C78")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e699da54-3d61-4688-8c30-b5b20e12ade7")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C79")
+			(value "1uF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "1a2537b3-516f-414e-98b4-9ccb8ddb6b37")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C80")
+			(value "10nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "842a9bcd-66d8-412b-9f9e-586106e50fe8")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C81")
+			(value "100nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "2e1e5994-f2c6-458a-930f-fba6bdb9caee")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C82")
+			(value "1uF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "cdcf9fc3-233a-4c63-8573-56b5ec3b0f35")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C83")
+			(value "100nF")
+			(footprint "Pwr:C_0402_P1.00")
+			(fields
+				(field
+					(name "Footprint") "Pwr:C_0402_P1.00")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b726fb9a-0e2e-4e34-b922-ac65b3ede3ae")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C84")
+			(value "22uF/6.3V")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "5329217d-ce85-4bd6-b858-0a98559989b0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C85")
+			(value "10uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "3d6a862f-01a2-4dd3-93af-8056e58f560e")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C86")
+			(value "22uF")
+			(footprint "Capacitor_SMD:C_0805_2012Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0805_2012Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "752e7abb-c36c-4e54-9c1c-a04fc9a55284")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C87")
+			(value "4.7uF")
+			(footprint "Capacitor_SMD:C_0603_1608Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "aa54a1c2-ab7d-4ac4-b333-c4fc3f7891a4")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "C88")
+			(value "100nF")
+			(footprint "Capacitor_SMD:C_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Capacitor_SMD:C_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "C")
+				(description "Unpolarized capacitor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "cap capacitor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "C_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "a39468ed-5ca8-473d-a634-798d20d19555")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "FB1")
+			(value "BLM18AG601SN1D")
+			(footprint "Inductor_SMD:L_0603_1608Metric")
+			(fields
+				(field
+					(name "Footprint") "Inductor_SMD:L_0603_1608Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "FerriteBead")
+				(description "Ferrite bead")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "L ferrite bead inductor filter")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "Inductor_* L_* *Ferrite*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "548f3169-9214-4070-bcb5-0add55e7dc10")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "J1")
+			(value "Conn_02x03_Odd_Even")
+			(footprint "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical")
+			(fields
+				(field
+					(name "Footprint") "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical")
 				(field
 					(name "Datasheet")
 				)
@@ -93,7 +4899,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a2f10cdb-85bc-4b7e-a45e-c9bb5d5d6320")
+			(tstamps "74e38dcd-40b4-487a-b581-82515c0ec7bc")
 			(units
 				(unit
 					(name "A")
@@ -121,12 +4927,12 @@
 			)
 		)
 		(comp
-			(ref "J2")
-			(value "Conn_02x05_Odd_Even")
+			(ref "L1")
+			(value "1uH XFL4020-102")
+			(footprint "Inductor_SMD:L_Coilcraft_XxL4020")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Inductor_SMD:L_Coilcraft_XxL4020")
 				(field
 					(name "Datasheet")
 				)
@@ -135,9 +4941,9 @@
 				)
 			)
 			(libsource
-				(lib "Connector_Generic")
-				(part "Conn_02x05_Odd_Even")
-				(description "Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+				(lib "Device")
+				(part "L")
+				(description "Inductor")
 			)
 			(property
 				(name "Sheetname")
@@ -149,17 +4955,121 @@
 			)
 			(property
 				(name "ki_keywords")
-				(value "connector")
+				(value "inductor choke coil reactor magnetic")
 			)
 			(property
 				(name "ki_fp_filters")
-				(value "Connector*:*_2x??_*")
+				(value "Choke_* *Coil* Inductor_* L_*")
 			)
 			(sheetpath
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "65237512-e1cf-43f0-b3ef-0b84dc4cfc20")
+			(tstamps "7a03e94f-027b-4237-8d47-df1b0e4500c3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "PS1")
+			(value "TLV62585PDRL")
+			(footprint "Package_TO_SOT_SMD:SOT-563")
+			(fields
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-563")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "hw_n")
+				(part "TLV62585")
+				(description "")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "8dafa180-867c-4908-bec3-e9e4f461e000")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "PS2")
+			(value "TLV75725PDBVR")
+			(footprint "Package_TO_SOT_SMD:SOT-23-5")
+			(fields
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-5")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "hw_n")
+				(part "TLV75725")
+				(description "")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "b7387df6-9314-441f-b017-444189b90b7d")
 			(units
 				(unit
 					(name "A")
@@ -171,28 +5081,13 @@
 							(num "3")
 						)
 						(pin
-							(num "5")
-						)
-						(pin
-							(num "7")
-						)
-						(pin
-							(num "9")
-						)
-						(pin
 							(num "2")
 						)
 						(pin
+							(num "5")
+						)
+						(pin
 							(num "4")
-						)
-						(pin
-							(num "6")
-						)
-						(pin
-							(num "8")
-						)
-						(pin
-							(num "10")
 						)
 					)
 				)
@@ -201,10 +5096,10 @@
 		(comp
 			(ref "R1")
 			(value "4k7")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -237,7 +5132,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "92fb16c2-b5b0-41dd-a537-5f82c8717053")
+			(tstamps "dcdd4def-3690-4937-8563-f12f1b8785a4")
 			(units
 				(unit
 					(name "A")
@@ -255,10 +5150,10 @@
 		(comp
 			(ref "R2")
 			(value "4k7")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -291,7 +5186,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d0859c34-2982-43a1-a64c-461d4dc7199f")
+			(tstamps "8252030e-cb92-41c4-b34d-54e48eae4973")
 			(units
 				(unit
 					(name "A")
@@ -309,10 +5204,10 @@
 		(comp
 			(ref "R3")
 			(value "4k7")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -345,7 +5240,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f56420c6-ad8d-4fbb-ae7d-3ae3ceff89ac")
+			(tstamps "4cd17f6a-bbf5-4ef0-86fb-9c9d166e4a35")
 			(units
 				(unit
 					(name "A")
@@ -363,10 +5258,10 @@
 		(comp
 			(ref "R4")
 			(value "4k7")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -399,7 +5294,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "16ebe759-31ec-442a-836b-3964d0499806")
+			(tstamps "3fa9764c-3d35-412d-8027-70161ce69ca3")
 			(units
 				(unit
 					(name "A")
@@ -417,10 +5312,10 @@
 		(comp
 			(ref "R5")
 			(value "4k7")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -453,7 +5348,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b03df462-83e5-4731-8405-517f6958df77")
+			(tstamps "81395b1d-ff2a-41da-a6b1-e7a4a6b3ed63")
 			(units
 				(unit
 					(name "A")
@@ -471,10 +5366,10 @@
 		(comp
 			(ref "R6")
 			(value "4k7")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -507,7 +5402,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6799cce5-1bd7-4c10-aeca-086c9580fddd")
+			(tstamps "44cb79cf-5cab-4679-8f05-559416b595cc")
 			(units
 				(unit
 					(name "A")
@@ -525,10 +5420,10 @@
 		(comp
 			(ref "R7")
 			(value "4k7")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -561,7 +5456,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ca771bf4-616a-435b-94fc-ac6bd8d63768")
+			(tstamps "89d8723d-d2c3-4e15-8660-e2abbc9db116")
 			(units
 				(unit
 					(name "A")
@@ -579,10 +5474,10 @@
 		(comp
 			(ref "R8")
 			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -615,7 +5510,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8d488a79-1012-43f7-b1fc-49ca7091362b")
+			(tstamps "fc5f0460-cc88-47ac-b6a3-bf0bd4ad37b7")
 			(units
 				(unit
 					(name "A")
@@ -633,10 +5528,10 @@
 		(comp
 			(ref "R9")
 			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -669,7 +5564,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2c9678a8-59d8-40e3-84dd-c62693b5289e")
+			(tstamps "3245a55c-a87d-4b62-9418-7685d5f6972d")
 			(units
 				(unit
 					(name "A")
@@ -687,10 +5582,10 @@
 		(comp
 			(ref "R10")
 			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -723,7 +5618,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "70d3c083-3a8a-4055-af11-6b4e317be10f")
+			(tstamps "fe114c40-f3b8-4d38-9676-9b4755b441ed")
 			(units
 				(unit
 					(name "A")
@@ -740,11 +5635,11 @@
 		)
 		(comp
 			(ref "R11")
-			(value "1k")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -777,7 +5672,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bcefbc11-0a49-4dc8-a9a8-c8cf649b3667")
+			(tstamps "db668db8-2cfe-4207-952d-1daf939ef6ee")
 			(units
 				(unit
 					(name "A")
@@ -795,10 +5690,10 @@
 		(comp
 			(ref "R12")
 			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -831,7 +5726,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6d1b8dfe-27e7-4b31-8e96-a99efa64693f")
+			(tstamps "d54af711-39c3-44a6-9703-8d6564f536d3")
 			(units
 				(unit
 					(name "A")
@@ -848,11 +5743,11 @@
 		)
 		(comp
 			(ref "R13")
-			(value "10k")
+			(value "1k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -885,7 +5780,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3661b553-b810-4d6a-8b72-8fd1b4eac2bc")
+			(tstamps "dd4a6c32-623b-4c89-859a-e1f4409d58bc")
 			(units
 				(unit
 					(name "A")
@@ -902,11 +5797,11 @@
 		)
 		(comp
 			(ref "R14")
-			(value "2k0 1%")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
 				(field
 					(name "Datasheet")
 				)
@@ -939,7 +5834,277 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4d25cd30-200d-4f35-b4a9-a8b36dcba061")
+			(tstamps "ccbdb929-8b17-46e5-b0e8-9261c2745963")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R15")
+			(value "10k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "e8beca3f-a84f-47b3-92b5-1f5ae813ecd3")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R16")
+			(value "2k0 1%")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "aec0926f-6f2c-4083-a1a4-09e0e2afc4fa")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R17")
+			(value "82.5k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "afd1085f-8d28-4b11-95cd-5b28b26849e1")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R18")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "64cd5399-775b-420b-943f-4e0808f62d91")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "2")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "R19")
+			(value "100k")
+			(footprint "Resistor_SMD:R_0402_1005Metric")
+			(fields
+				(field
+					(name "Footprint") "Resistor_SMD:R_0402_1005Metric")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "Device")
+				(part "R")
+				(description "Resistor")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(property
+				(name "ki_keywords")
+				(value "R res resistor")
+			)
+			(property
+				(name "ki_fp_filters")
+				(value "R_*")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "695f8822-d677-405d-9eca-7c60489594bc")
 			(units
 				(unit
 					(name "A")
@@ -957,10 +6122,10 @@
 		(comp
 			(ref "U1")
 			(value "FPGA_CycloneV_5CEFA9_F484")
+			(footprint "Interposer:FPGA_CycloneV_5CEFA9_F484_BGA")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "Interposer:FPGA_CycloneV_5CEFA9_F484_BGA")
 				(field
 					(name "Datasheet")
 				)
@@ -985,11 +6150,11 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c2f341ab-265d-4273-bcfe-aa228f7287ad" "1ef71461-b37a-4a9b-b966-ceb14ffbd3a2"
-				"504a1782-dd50-4916-9b0e-680c8bb28809" "1015ac10-5b7f-4990-8271-35e271516fff"
-				"66e122c2-64ab-434c-bcbb-2652862b1d45" "660ad2eb-a332-479a-98a1-35a7d279472a"
-				"cbcb0e0a-19e7-4f85-a094-b2c8fa26f70a" "936e58b4-0774-4858-ae6a-258046c2e466"
-				"be5d1f0d-88ed-4593-8f0f-3e9eed0dd4d0" "02ab87db-c00d-4c18-b621-b4df92aa1dbf"
+			(tstamps "cc4da80e-cfe0-4c64-9d46-8067652d6da3" "3b17df02-899b-483a-a3e7-becdf19fefd5"
+				"af9388fb-21f8-440b-856e-0b9c71a9fb79" "ce492339-8e96-474d-85c1-9a50abc8da2e"
+				"95876247-9916-40f1-bea7-59229cab0542" "c8a762a0-b0f3-4768-89f4-95a929664a92"
+				"c34b4746-3f8e-49d9-843e-d81c8d366a03" "91fadaaa-1f09-4841-8599-069b0d11949f"
+				"4102e017-88cf-4b04-bc4b-e5b1a6236222" "19ba5e5c-e36d-4c5a-84b6-0d7d2d1c0a23"
 			)
 			(units
 				(unit
@@ -2499,10 +7664,10 @@
 		(comp
 			(ref "U2")
 			(value "Intel_Pentium_MMX_P55C_Socket7")
+			(footprint "SocketBase:Socket7_Base_PGA296")
 			(fields
 				(field
-					(name "Footprint")
-				)
+					(name "Footprint") "SocketBase:Socket7_Base_PGA296")
 				(field
 					(name "Datasheet")
 				)
@@ -2527,12 +7692,12 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e9b446d0-1339-4d33-a56e-44c1abee2191" "6b96984b-afcd-48d5-968e-f8cf1b3e8e31"
-				"bcb262d9-a551-411a-840a-cd9c53e898e0" "e66050a9-a99c-4624-b991-795b95fd582c"
-				"a59c7246-1b7a-4e98-9357-41b0db843f65" "b72da258-95a3-4476-aff2-3edbfac7948d"
-				"87c1a291-603d-4ad3-bdd3-14f8fc822686" "93a6c52d-595e-4d2a-81a2-e5d002efae37"
-				"a331d967-b01b-4fbe-b739-9aebc219892f" "f41ceeaf-ae3f-4088-ad02-3aa0382aa90c"
-				"2a78cfca-01bd-4253-af5f-2f8cb8dc0751"
+			(tstamps "e6b13a2b-92ce-4682-9086-dd1885d4847a" "feaed5b5-2fb2-4d79-8053-fe2b056477a4"
+				"cd79b4b6-eaa6-4d47-b948-3105386a6ef4" "71c73a1a-f3c7-431e-a345-4979f619d547"
+				"5c22c38d-7ff5-4307-b6da-3804201c135f" "9bf15b01-f560-415d-9322-b899b0618bd1"
+				"4bd653e1-357f-45c4-9ca5-c0c2e8f3f61f" "8e339be8-7451-40a5-bff3-c703775b435f"
+				"ddf4b260-eafb-4796-94ec-3f2b2f7d5096" "d70f82a8-263d-4c64-8e50-c921b31614af"
+				"48174059-785c-4bf6-86b4-bef00356963b"
 			)
 			(units
 				(unit
@@ -3480,6 +8645,152 @@
 				)
 			)
 		)
+		(comp
+			(ref "U3")
+			(value "TPS22918DBVR")
+			(footprint "Package_TO_SOT_SMD:SOT-23-6")
+			(fields
+				(field
+					(name "Footprint") "Package_TO_SOT_SMD:SOT-23-6")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "hw_n")
+				(part "TPS22918")
+				(description "")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "73735f53-58f9-4780-b4b9-cbc489b10180")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "5")
+						)
+					)
+				)
+			)
+		)
+		(comp
+			(ref "U4")
+			(value "MT25QL01GBBB8ESF-0SIT")
+			(footprint "Package_SO:SOIC-16W_7.5x10.3mm_P1.27mm")
+			(fields
+				(field
+					(name "Footprint") "Package_SO:SOIC-16W_7.5x10.3mm_P1.27mm")
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description")
+				)
+			)
+			(libsource
+				(lib "hw_n")
+				(part "MT25QL01G")
+				(description "")
+			)
+			(property
+				(name "Sheetname")
+				(value "")
+			)
+			(property
+				(name "Sheetfile")
+				(value "socket7-cyclonev.kicad_sch")
+			)
+			(sheetpath
+				(names "/")
+				(tstamps "/")
+			)
+			(tstamps "21df74f2-8f13-466f-bc57-68137c3f96c0")
+			(units
+				(unit
+					(name "A")
+					(pins
+						(pin
+							(num "7")
+						)
+						(pin
+							(num "16")
+						)
+						(pin
+							(num "3")
+						)
+						(pin
+							(num "2")
+						)
+						(pin
+							(num "10")
+						)
+						(pin
+							(num "15")
+						)
+						(pin
+							(num "8")
+						)
+						(pin
+							(num "9")
+						)
+						(pin
+							(num "1")
+						)
+						(pin
+							(num "4")
+						)
+						(pin
+							(num "5")
+						)
+						(pin
+							(num "6")
+						)
+						(pin
+							(num "11")
+						)
+						(pin
+							(num "12")
+						)
+						(pin
+							(num "13")
+						)
+						(pin
+							(num "14")
+						)
+					)
+				)
+			)
+		)
 	)
 	(groups)
 	(variants)
@@ -3539,17 +8850,17 @@
 			)
 		)
 		(libpart
-			(lib "Connector_Generic")
-			(part "Conn_02x05_Odd_Even")
-			(description "Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+			(lib "Device")
+			(part "C")
+			(description "Unpolarized capacitor")
 			(footprints
-				(fp "Connector*:*_2x??_*")
+				(fp "C_*")
 			)
 			(fields
 				(field
-					(name "Reference") "J")
+					(name "Reference") "C")
 				(field
-					(name "Value") "Conn_02x05_Odd_Even")
+					(name "Value") "C")
 				(field
 					(name "Footprint")
 				)
@@ -3557,57 +8868,90 @@
 					(name "Datasheet")
 				)
 				(field
-					(name "Description") "Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)")
+					(name "Description") "Unpolarized capacitor")
 			)
 			(pins
 				(pin
 					(num "1")
-					(name "Pin_1")
+					(name "")
 					(type "passive")
 				)
 				(pin
 					(num "2")
-					(name "Pin_2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "FerriteBead")
+			(description "Ferrite bead")
+			(footprints
+				(fp "Inductor_*")
+				(fp "L_*")
+				(fp "*Ferrite*")
+			)
+			(fields
+				(field
+					(name "Reference") "FB")
+				(field
+					(name "Value") "FerriteBead")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Ferrite bead")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "")
 					(type "passive")
 				)
 				(pin
-					(num "3")
-					(name "Pin_3")
+					(num "2")
+					(name "")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "Device")
+			(part "L")
+			(description "Inductor")
+			(footprints
+				(fp "Choke_*")
+				(fp "*Coil*")
+				(fp "Inductor_*")
+				(fp "L_*")
+			)
+			(fields
+				(field
+					(name "Reference") "L")
+				(field
+					(name "Value") "L")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet")
+				)
+				(field
+					(name "Description") "Inductor")
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "1")
 					(type "passive")
 				)
 				(pin
-					(num "4")
-					(name "Pin_4")
-					(type "passive")
-				)
-				(pin
-					(num "5")
-					(name "Pin_5")
-					(type "passive")
-				)
-				(pin
-					(num "6")
-					(name "Pin_6")
-					(type "passive")
-				)
-				(pin
-					(num "7")
-					(name "Pin_7")
-					(type "passive")
-				)
-				(pin
-					(num "8")
-					(name "Pin_8")
-					(type "passive")
-				)
-				(pin
-					(num "9")
-					(name "Pin_9")
-					(type "passive")
-				)
-				(pin
-					(num "10")
-					(name "Pin_10")
+					(num "2")
+					(name "2")
 					(type "passive")
 				)
 			)
@@ -7586,6 +12930,255 @@
 				)
 			)
 		)
+		(libpart
+			(lib "hw_n")
+			(part "MT25QL01G")
+			(docs "sockets/parts/micron_mt25ql01gbbb.pdf")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "MT25QL01G")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "sockets/parts/micron_mt25ql01gbbb.pdf")
+				(field
+					(name "Description")
+				)
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "DQ3")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "VCC")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "RESET#")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "DNU")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "DNU")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "DNU")
+					(type "passive")
+				)
+				(pin
+					(num "7")
+					(name "S#")
+					(type "passive")
+				)
+				(pin
+					(num "8")
+					(name "DQ1")
+					(type "passive")
+				)
+				(pin
+					(num "9")
+					(name "DQ2")
+					(type "passive")
+				)
+				(pin
+					(num "10")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "11")
+					(name "DNU")
+					(type "passive")
+				)
+				(pin
+					(num "12")
+					(name "DNU")
+					(type "passive")
+				)
+				(pin
+					(num "13")
+					(name "DNU")
+					(type "passive")
+				)
+				(pin
+					(num "14")
+					(name "DNU")
+					(type "passive")
+				)
+				(pin
+					(num "15")
+					(name "DQ0")
+					(type "passive")
+				)
+				(pin
+					(num "16")
+					(name "C")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "hw_n")
+			(part "TLV62585")
+			(docs "sockets/parts/ti_tlv62585.pdf")
+			(fields
+				(field
+					(name "Reference") "PS")
+				(field
+					(name "Value") "TLV62585")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "sockets/parts/ti_tlv62585.pdf")
+				(field
+					(name "Description")
+				)
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "SW")
+					(type "passive")
+				)
+				(pin
+					(num "3")
+					(name "VIN")
+					(type "power_in")
+				)
+				(pin
+					(num "4")
+					(name "EN")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "FB")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "PG")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "hw_n")
+			(part "TLV75725")
+			(docs "sockets/parts/ti_tlv757p.pdf")
+			(fields
+				(field
+					(name "Reference") "PS")
+				(field
+					(name "Value") "TLV75725")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "sockets/parts/ti_tlv757p.pdf")
+				(field
+					(name "Description")
+				)
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "IN")
+					(type "passive")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "EN")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "NC")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "OUT")
+					(type "passive")
+				)
+			)
+		)
+		(libpart
+			(lib "hw_n")
+			(part "TPS22918")
+			(docs "sockets/parts/ti_tps22918.pdf")
+			(fields
+				(field
+					(name "Reference") "U")
+				(field
+					(name "Value") "TPS22918")
+				(field
+					(name "Footprint")
+				)
+				(field
+					(name "Datasheet") "sockets/parts/ti_tps22918.pdf")
+				(field
+					(name "Description")
+				)
+			)
+			(pins
+				(pin
+					(num "1")
+					(name "VIN")
+					(type "power_in")
+				)
+				(pin
+					(num "2")
+					(name "GND")
+					(type "power_in")
+				)
+				(pin
+					(num "3")
+					(name "ON")
+					(type "passive")
+				)
+				(pin
+					(num "4")
+					(name "CT")
+					(type "passive")
+				)
+				(pin
+					(num "5")
+					(name "QOD")
+					(type "passive")
+				)
+				(pin
+					(num "6")
+					(name "VOUT")
+					(type "passive")
+				)
+			)
+		)
 	)
 	(libraries
 		(library
@@ -8200,6 +13793,118 @@
 		)
 		(net
 			(code "36")
+			(name "/AS_DATA0")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "AB4")
+				(pinfunction "AB4_AB4")
+				(pintype "passive")
+			)
+			(node
+				(ref "U4")
+				(pin "15")
+				(pinfunction "DQ0_15")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "37")
+			(name "/AS_DATA1")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "AB3")
+				(pinfunction "AB3_AB3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U4")
+				(pin "8")
+				(pinfunction "DQ1_8")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "38")
+			(name "/AS_DATA2")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "AA5")
+				(pinfunction "AA5_AA5")
+				(pintype "passive")
+			)
+			(node
+				(ref "U4")
+				(pin "9")
+				(pinfunction "DQ2_9")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "39")
+			(name "/AS_DATA3")
+			(class "Default")
+			(node
+				(ref "R12")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "T4")
+				(pinfunction "T4_T4")
+				(pintype "passive")
+			)
+			(node
+				(ref "U4")
+				(pin "1")
+				(pinfunction "DQ3_1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "40")
+			(name "/AS_DCLK")
+			(class "Default")
+			(node
+				(ref "R11")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
+				(pin "V3")
+				(pinfunction "V3_V3")
+				(pintype "passive")
+			)
+			(node
+				(ref "U4")
+				(pin "16")
+				(pinfunction "C_16")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "41")
+			(name "/AS_nCS")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "R4")
+				(pinfunction "R4_R4")
+				(pintype "passive")
+			)
+			(node
+				(ref "U4")
+				(pin "7")
+				(pinfunction "S#_7")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "42")
 			(name "/BE0#")
 			(class "Default")
 			(node
@@ -8216,7 +13921,7 @@
 			)
 		)
 		(net
-			(code "37")
+			(code "43")
 			(name "/BE1#")
 			(class "Default")
 			(node
@@ -8233,7 +13938,7 @@
 			)
 		)
 		(net
-			(code "38")
+			(code "44")
 			(name "/BE2#")
 			(class "Default")
 			(node
@@ -8250,7 +13955,7 @@
 			)
 		)
 		(net
-			(code "39")
+			(code "45")
 			(name "/BE3#")
 			(class "Default")
 			(node
@@ -8267,7 +13972,7 @@
 			)
 		)
 		(net
-			(code "40")
+			(code "46")
 			(name "/BE4#")
 			(class "Default")
 			(node
@@ -8284,7 +13989,7 @@
 			)
 		)
 		(net
-			(code "41")
+			(code "47")
 			(name "/BE5#")
 			(class "Default")
 			(node
@@ -8301,7 +14006,7 @@
 			)
 		)
 		(net
-			(code "42")
+			(code "48")
 			(name "/BE6#")
 			(class "Default")
 			(node
@@ -8318,7 +14023,7 @@
 			)
 		)
 		(net
-			(code "43")
+			(code "49")
 			(name "/BE7#")
 			(class "Default")
 			(node
@@ -8335,7 +14040,7 @@
 			)
 		)
 		(net
-			(code "44")
+			(code "50")
 			(name "/BF0")
 			(class "Default")
 			(node
@@ -8352,7 +14057,7 @@
 			)
 		)
 		(net
-			(code "45")
+			(code "51")
 			(name "/BF1")
 			(class "Default")
 			(node
@@ -8369,7 +14074,7 @@
 			)
 		)
 		(net
-			(code "46")
+			(code "52")
 			(name "/BOFF#")
 			(class "Default")
 			(node
@@ -8386,7 +14091,7 @@
 			)
 		)
 		(net
-			(code "47")
+			(code "53")
 			(name "/BP2")
 			(class "Default")
 			(node
@@ -8408,7 +14113,7 @@
 			)
 		)
 		(net
-			(code "48")
+			(code "54")
 			(name "/BP3")
 			(class "Default")
 			(node
@@ -8430,7 +14135,7 @@
 			)
 		)
 		(net
-			(code "49")
+			(code "55")
 			(name "/BRDY#")
 			(class "Default")
 			(node
@@ -8447,7 +14152,7 @@
 			)
 		)
 		(net
-			(code "50")
+			(code "56")
 			(name "/BRDYC#")
 			(class "Default")
 			(node
@@ -8464,7 +14169,7 @@
 			)
 		)
 		(net
-			(code "51")
+			(code "57")
 			(name "/BREQ")
 			(class "Default")
 			(node
@@ -8486,7 +14191,7 @@
 			)
 		)
 		(net
-			(code "52")
+			(code "58")
 			(name "/BUSCHK#")
 			(class "Default")
 			(node
@@ -8503,7 +14208,7 @@
 			)
 		)
 		(net
-			(code "53")
+			(code "59")
 			(name "/CACHE#")
 			(class "Default")
 			(node
@@ -8520,7 +14225,7 @@
 			)
 		)
 		(net
-			(code "54")
+			(code "60")
 			(name "/CFG_CLKUSR")
 			(class "Default")
 			(node
@@ -8531,15 +14236,9 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "61")
 			(name "/CFG_CONF_DONE")
 			(class "Default")
-			(node
-				(ref "J2")
-				(pin "5")
-				(pinfunction "Pin_5_5")
-				(pintype "passive")
-			)
 			(node
 				(ref "R9")
 				(pin "1")
@@ -8553,7 +14252,7 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "62")
 			(name "/CFG_CRC_ERROR")
 			(class "Default")
 			(node
@@ -8564,7 +14263,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "63")
 			(name "/CFG_CvP_CONFDONE")
 			(class "Default")
 			(node
@@ -8575,68 +14274,7 @@
 			)
 		)
 		(net
-			(code "58")
-			(name "/CFG_DATA0")
-			(class "Default")
-			(node
-				(ref "J2")
-				(pin "9")
-				(pinfunction "Pin_9_9")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "AB4")
-				(pinfunction "AB4_AB4")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "59")
-			(name "/CFG_DATA1")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AB3")
-				(pinfunction "AB3_AB3")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "60")
-			(name "/CFG_DATA2")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AA5")
-				(pinfunction "AA5_AA5")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "61")
-			(name "/CFG_DATA3")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "T4")
-				(pinfunction "T4_T4")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "62")
-			(name "/CFG_DATA4")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "R4")
-				(pinfunction "R4_R4")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "63")
+			(code "64")
 			(name "/CFG_DATA5")
 			(class "Default")
 			(node
@@ -8647,7 +14285,7 @@
 			)
 		)
 		(net
-			(code "64")
+			(code "65")
 			(name "/CFG_DATA6")
 			(class "Default")
 			(node
@@ -8658,7 +14296,7 @@
 			)
 		)
 		(net
-			(code "65")
+			(code "66")
 			(name "/CFG_DATA7")
 			(class "Default")
 			(node
@@ -8669,7 +14307,7 @@
 			)
 		)
 		(net
-			(code "66")
+			(code "67")
 			(name "/CFG_DATA8")
 			(class "Default")
 			(node
@@ -8680,7 +14318,7 @@
 			)
 		)
 		(net
-			(code "67")
+			(code "68")
 			(name "/CFG_DATA9")
 			(class "Default")
 			(node
@@ -8691,7 +14329,7 @@
 			)
 		)
 		(net
-			(code "68")
+			(code "69")
 			(name "/CFG_DATA10")
 			(class "Default")
 			(node
@@ -8702,7 +14340,7 @@
 			)
 		)
 		(net
-			(code "69")
+			(code "70")
 			(name "/CFG_DATA11")
 			(class "Default")
 			(node
@@ -8713,7 +14351,7 @@
 			)
 		)
 		(net
-			(code "70")
+			(code "71")
 			(name "/CFG_DATA12")
 			(class "Default")
 			(node
@@ -8724,7 +14362,7 @@
 			)
 		)
 		(net
-			(code "71")
+			(code "72")
 			(name "/CFG_DATA13")
 			(class "Default")
 			(node
@@ -8735,7 +14373,7 @@
 			)
 		)
 		(net
-			(code "72")
+			(code "73")
 			(name "/CFG_DATA14")
 			(class "Default")
 			(node
@@ -8746,35 +14384,13 @@
 			)
 		)
 		(net
-			(code "73")
+			(code "74")
 			(name "/CFG_DATA15")
 			(class "Default")
 			(node
 				(ref "U1")
 				(pin "V6")
 				(pinfunction "V6_V6")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "74")
-			(name "/CFG_DCLK")
-			(class "Default")
-			(node
-				(ref "J2")
-				(pin "7")
-				(pinfunction "Pin_7_7")
-				(pintype "passive")
-			)
-			(node
-				(ref "R10")
-				(pin "1")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "V3")
-				(pinfunction "V3_V3")
 				(pintype "passive")
 			)
 		)
@@ -8871,9 +14487,8 @@
 			(name "/CFG_nCONFIG")
 			(class "Default")
 			(node
-				(ref "J2")
+				(ref "R10")
 				(pin "1")
-				(pinfunction "Pin_1_1")
 				(pintype "passive")
 			)
 			(node
@@ -8887,12 +14502,6 @@
 			(code "84")
 			(name "/CFG_nSTATUS")
 			(class "Default")
-			(node
-				(ref "J2")
-				(pin "3")
-				(pinfunction "Pin_3_3")
-				(pintype "passive")
-			)
 			(node
 				(ref "R8")
 				(pin "1")
@@ -10259,7 +15868,7 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R11")
+				(ref "R13")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -10281,7 +15890,7 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R13")
+				(ref "R15")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -10320,7 +15929,7 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R12")
+				(ref "R14")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -10336,6 +15945,446 @@
 			(name "/GND")
 			(class "Default")
 			(node
+				(ref "C1")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C10")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C11")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C12")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C13")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C14")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C15")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C16")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C17")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C18")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C19")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C2")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C20")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C21")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C22")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C23")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C24")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C25")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C26")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C27")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C28")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C29")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C30")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C31")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C32")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C33")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C34")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C35")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C36")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C37")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C38")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C39")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C4")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C40")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C41")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C42")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C43")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C44")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C45")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C46")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C47")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C48")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C49")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C5")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C50")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C51")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C52")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C53")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C54")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C55")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C56")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C57")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C58")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C59")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C60")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C61")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C62")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C63")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C64")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C65")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C66")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C67")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C68")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C69")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C7")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C70")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C71")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C72")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C73")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C74")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C75")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C76")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C77")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C78")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C79")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C8")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C80")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C81")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C82")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C83")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C84")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C85")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C86")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C87")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C88")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "C9")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
 				(ref "J1")
 				(pin "2")
 				(pinfunction "Pin_2_2")
@@ -10348,42 +16397,19 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "J2")
-				(pin "10")
-				(pinfunction "Pin_10_10")
-				(pintype "passive")
+				(ref "PS1")
+				(pin "1")
+				(pinfunction "GND_1")
+				(pintype "power_in")
 			)
 			(node
-				(ref "J2")
+				(ref "PS2")
 				(pin "2")
-				(pinfunction "Pin_2_2")
-				(pintype "passive")
-			)
-			(node
-				(ref "J2")
-				(pin "4")
-				(pinfunction "Pin_4_4")
-				(pintype "passive")
-			)
-			(node
-				(ref "J2")
-				(pin "6")
-				(pinfunction "Pin_6_6")
-				(pintype "passive")
-			)
-			(node
-				(ref "J2")
-				(pin "8")
-				(pinfunction "Pin_8_8")
-				(pintype "passive")
+				(pinfunction "GND_2")
+				(pintype "power_in")
 			)
 			(node
 				(ref "R1")
-				(pin "2")
-				(pintype "passive")
-			)
-			(node
-				(ref "R10")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -10393,7 +16419,17 @@
 				(pintype "passive")
 			)
 			(node
-				(ref "R14")
+				(ref "R13")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R16")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R18")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -10749,12 +16785,6 @@
 				(ref "U1")
 				(pin "J5")
 				(pinfunction "J5_J5")
-				(pintype "passive")
-			)
-			(node
-				(ref "U1")
-				(pin "J6")
-				(pinfunction "J6_J6")
 				(pintype "passive")
 			)
 			(node
@@ -11421,6 +17451,18 @@
 				(ref "U2")
 				(pin "Z36")
 				(pinfunction "VSS_Z36")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U3")
+				(pin "2")
+				(pinfunction "GND_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U4")
+				(pin "10")
+				(pinfunction "GND_10")
 				(pintype "power_in")
 			)
 		)
@@ -12340,6 +18382,17 @@
 		)
 		(net
 			(code "245")
+			(name "/NC_PS2_4")
+			(class "Default")
+			(node
+				(ref "PS2")
+				(pin "4")
+				(pinfunction "NC_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "246")
 			(name "/NC_R1")
 			(class "Default")
 			(node
@@ -12350,7 +18403,7 @@
 			)
 		)
 		(net
-			(code "246")
+			(code "247")
 			(name "/NC_R2")
 			(class "Default")
 			(node
@@ -12361,7 +18414,7 @@
 			)
 		)
 		(net
-			(code "247")
+			(code "248")
 			(name "/NC_R15")
 			(class "Default")
 			(node
@@ -12372,7 +18425,7 @@
 			)
 		)
 		(net
-			(code "248")
+			(code "249")
 			(name "/NC_R16")
 			(class "Default")
 			(node
@@ -12383,7 +18436,7 @@
 			)
 		)
 		(net
-			(code "249")
+			(code "250")
 			(name "/NC_R17")
 			(class "Default")
 			(node
@@ -12394,7 +18447,7 @@
 			)
 		)
 		(net
-			(code "250")
+			(code "251")
 			(name "/NC_T15")
 			(class "Default")
 			(node
@@ -12405,7 +18458,7 @@
 			)
 		)
 		(net
-			(code "251")
+			(code "252")
 			(name "/NC_T19")
 			(class "Default")
 			(node
@@ -12416,7 +18469,7 @@
 			)
 		)
 		(net
-			(code "252")
+			(code "253")
 			(name "/NC_U1")
 			(class "Default")
 			(node
@@ -12427,7 +18480,7 @@
 			)
 		)
 		(net
-			(code "253")
+			(code "254")
 			(name "/NC_U2")
 			(class "Default")
 			(node
@@ -12438,7 +18491,84 @@
 			)
 		)
 		(net
-			(code "254")
+			(code "255")
+			(name "/NC_U4_4")
+			(class "Default")
+			(node
+				(ref "U4")
+				(pin "4")
+				(pinfunction "DNU_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "256")
+			(name "/NC_U4_5")
+			(class "Default")
+			(node
+				(ref "U4")
+				(pin "5")
+				(pinfunction "DNU_5")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "257")
+			(name "/NC_U4_6")
+			(class "Default")
+			(node
+				(ref "U4")
+				(pin "6")
+				(pinfunction "DNU_6")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "258")
+			(name "/NC_U4_11")
+			(class "Default")
+			(node
+				(ref "U4")
+				(pin "11")
+				(pinfunction "DNU_11")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "259")
+			(name "/NC_U4_12")
+			(class "Default")
+			(node
+				(ref "U4")
+				(pin "12")
+				(pinfunction "DNU_12")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "260")
+			(name "/NC_U4_13")
+			(class "Default")
+			(node
+				(ref "U4")
+				(pin "13")
+				(pinfunction "DNU_13")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "261")
+			(name "/NC_U4_14")
+			(class "Default")
+			(node
+				(ref "U4")
+				(pin "14")
+				(pinfunction "DNU_14")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "262")
 			(name "/NC_V11")
 			(class "Default")
 			(node
@@ -12449,7 +18579,7 @@
 			)
 		)
 		(net
-			(code "255")
+			(code "263")
 			(name "/NC_V14")
 			(class "Default")
 			(node
@@ -12460,7 +18590,7 @@
 			)
 		)
 		(net
-			(code "256")
+			(code "264")
 			(name "/NC_V15")
 			(class "Default")
 			(node
@@ -12471,7 +18601,7 @@
 			)
 		)
 		(net
-			(code "257")
+			(code "265")
 			(name "/NC_V16")
 			(class "Default")
 			(node
@@ -12482,7 +18612,7 @@
 			)
 		)
 		(net
-			(code "258")
+			(code "266")
 			(name "/NC_W1")
 			(class "Default")
 			(node
@@ -12493,7 +18623,7 @@
 			)
 		)
 		(net
-			(code "259")
+			(code "267")
 			(name "/NC_W2")
 			(class "Default")
 			(node
@@ -12504,7 +18634,7 @@
 			)
 		)
 		(net
-			(code "260")
+			(code "268")
 			(name "/NC_W16")
 			(class "Default")
 			(node
@@ -12515,7 +18645,7 @@
 			)
 		)
 		(net
-			(code "261")
+			(code "269")
 			(name "/NC_Y3")
 			(class "Default")
 			(node
@@ -12526,7 +18656,7 @@
 			)
 		)
 		(net
-			(code "262")
+			(code "270")
 			(name "/NC_Y4")
 			(class "Default")
 			(node
@@ -12537,7 +18667,7 @@
 			)
 		)
 		(net
-			(code "263")
+			(code "271")
 			(name "/NC_Y6")
 			(class "Default")
 			(node
@@ -12548,7 +18678,7 @@
 			)
 		)
 		(net
-			(code "264")
+			(code "272")
 			(name "/NMI{slash}LINT1")
 			(class "Default")
 			(node
@@ -12565,7 +18695,7 @@
 			)
 		)
 		(net
-			(code "265")
+			(code "273")
 			(name "/PCD")
 			(class "Default")
 			(node
@@ -12582,7 +18712,7 @@
 			)
 		)
 		(net
-			(code "266")
+			(code "274")
 			(name "/PCHK#")
 			(class "Default")
 			(node
@@ -12599,7 +18729,7 @@
 			)
 		)
 		(net
-			(code "267")
+			(code "275")
 			(name "/PEN#")
 			(class "Default")
 			(node
@@ -12616,7 +18746,35 @@
 			)
 		)
 		(net
-			(code "268")
+			(code "276")
+			(name "/PG_1V1")
+			(class "Default")
+			(node
+				(ref "PS1")
+				(pin "6")
+				(pinfunction "PG_6")
+				(pintype "passive")
+			)
+			(node
+				(ref "PS2")
+				(pin "3")
+				(pinfunction "EN_3")
+				(pintype "passive")
+			)
+			(node
+				(ref "R19")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "3")
+				(pinfunction "ON_3")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "277")
 			(name "/PM0{slash}BP0")
 			(class "Default")
 			(node
@@ -12638,7 +18796,7 @@
 			)
 		)
 		(net
-			(code "269")
+			(code "278")
 			(name "/PM1{slash}BP1")
 			(class "Default")
 			(node
@@ -12660,7 +18818,7 @@
 			)
 		)
 		(net
-			(code "270")
+			(code "279")
 			(name "/PRDY")
 			(class "Default")
 			(node
@@ -12677,7 +18835,45 @@
 			)
 		)
 		(net
-			(code "271")
+			(code "280")
+			(name "/PS1_FB")
+			(class "Default")
+			(node
+				(ref "PS1")
+				(pin "5")
+				(pinfunction "FB_5")
+				(pintype "passive")
+			)
+			(node
+				(ref "R17")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R18")
+				(pin "1")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "281")
+			(name "/PS1_SW")
+			(class "Default")
+			(node
+				(ref "L1")
+				(pin "1")
+				(pinfunction "1_1")
+				(pintype "passive")
+			)
+			(node
+				(ref "PS1")
+				(pin "2")
+				(pinfunction "SW_2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "282")
 			(name "/PWT")
 			(class "Default")
 			(node
@@ -12694,7 +18890,7 @@
 			)
 		)
 		(net
-			(code "272")
+			(code "283")
 			(name "/RESET")
 			(class "Default")
 			(node
@@ -12711,11 +18907,11 @@
 			)
 		)
 		(net
-			(code "273")
+			(code "284")
 			(name "/RREF_TL")
 			(class "Default")
 			(node
-				(ref "R14")
+				(ref "R16")
 				(pin "1")
 				(pintype "passive")
 			)
@@ -12727,7 +18923,7 @@
 			)
 		)
 		(net
-			(code "274")
+			(code "285")
 			(name "/SCYC")
 			(class "Default")
 			(node
@@ -12749,7 +18945,7 @@
 			)
 		)
 		(net
-			(code "275")
+			(code "286")
 			(name "/SMI#")
 			(class "Default")
 			(node
@@ -12766,7 +18962,7 @@
 			)
 		)
 		(net
-			(code "276")
+			(code "287")
 			(name "/SMIACT#")
 			(class "Default")
 			(node
@@ -12783,7 +18979,7 @@
 			)
 		)
 		(net
-			(code "277")
+			(code "288")
 			(name "/STPCLK#")
 			(class "Default")
 			(node
@@ -12800,9 +18996,31 @@
 			)
 		)
 		(net
-			(code "278")
+			(code "289")
 			(name "/S_VCC2")
 			(class "Default")
+			(node
+				(ref "C1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C2")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "PS1")
+				(pin "3")
+				(pinfunction "VIN_3")
+				(pintype "power_in")
+			)
+			(node
+				(ref "PS1")
+				(pin "4")
+				(pinfunction "EN_4")
+				(pintype "passive")
+			)
 			(node
 				(ref "U2")
 				(pin "A07")
@@ -12955,9 +19173,25 @@
 			)
 		)
 		(net
-			(code "279")
+			(code "290")
 			(name "/S_VCC3")
 			(class "Default")
+			(node
+				(ref "C5")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C6")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "PS2")
+				(pin "1")
+				(pinfunction "IN_1")
+				(pintype "passive")
+			)
 			(node
 				(ref "U2")
 				(pin "A19")
@@ -13126,9 +19360,15 @@
 				(pinfunction "VCC3_Y37")
 				(pintype "power_in")
 			)
+			(node
+				(ref "U3")
+				(pin "1")
+				(pinfunction "VIN_1")
+				(pintype "power_in")
+			)
 		)
 		(net
-			(code "280")
+			(code "291")
 			(name "/TCK")
 			(class "Default")
 			(node
@@ -13145,7 +19385,7 @@
 			)
 		)
 		(net
-			(code "281")
+			(code "292")
 			(name "/TDI")
 			(class "Default")
 			(node
@@ -13162,7 +19402,7 @@
 			)
 		)
 		(net
-			(code "282")
+			(code "293")
 			(name "/TDO")
 			(class "Default")
 			(node
@@ -13179,7 +19419,7 @@
 			)
 		)
 		(net
-			(code "283")
+			(code "294")
 			(name "/TMS")
 			(class "Default")
 			(node
@@ -13196,7 +19436,7 @@
 			)
 		)
 		(net
-			(code "284")
+			(code "295")
 			(name "/TRST#")
 			(class "Default")
 			(node
@@ -13213,7 +19453,23 @@
 			)
 		)
 		(net
-			(code "285")
+			(code "296")
+			(name "/U3_CT")
+			(class "Default")
+			(node
+				(ref "C4")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "4")
+				(pinfunction "CT_4")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "297")
 			(name "/VCC2DET#")
 			(class "Default")
 			(node
@@ -13230,9 +19486,19 @@
 			)
 		)
 		(net
-			(code "286")
+			(code "298")
 			(name "/VCCA_FPLL25")
 			(class "Default")
+			(node
+				(ref "C83")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "FB1")
+				(pin "2")
+				(pintype "passive")
+			)
 			(node
 				(ref "U1")
 				(pin "F4")
@@ -13271,16 +19537,141 @@
 			)
 		)
 		(net
-			(code "287")
+			(code "299")
 			(name "/VCCIO33")
 			(class "Default")
+			(node
+				(ref "C60")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C61")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C62")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C63")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C64")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C65")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C66")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C67")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C68")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C69")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C70")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C71")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C72")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C73")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C74")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C75")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C76")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C77")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C78")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C79")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C85")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C86")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C88")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R10")
+				(pin "2")
+				(pintype "passive")
+			)
 			(node
 				(ref "R12")
 				(pin "2")
 				(pintype "passive")
 			)
 			(node
-				(ref "R13")
+				(ref "R14")
+				(pin "2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R15")
 				(pin "2")
 				(pintype "passive")
 			)
@@ -13434,6 +19825,12 @@
 			)
 			(node
 				(ref "U1")
+				(pin "J6")
+				(pinfunction "J6_J6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U1")
 				(pin "K18")
 				(pinfunction "K18_K18")
 				(pintype "passive")
@@ -13582,11 +19979,326 @@
 				(pinfunction "Y8_Y8")
 				(pintype "passive")
 			)
+			(node
+				(ref "U3")
+				(pin "5")
+				(pinfunction "QOD_5")
+				(pintype "passive")
+			)
+			(node
+				(ref "U3")
+				(pin "6")
+				(pinfunction "VOUT_6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U4")
+				(pin "2")
+				(pinfunction "VCC_2")
+				(pintype "power_in")
+			)
+			(node
+				(ref "U4")
+				(pin "3")
+				(pinfunction "RESET#_3")
+				(pintype "passive")
+			)
 		)
 		(net
-			(code "288")
+			(code "300")
 			(name "/VCC_1V1")
 			(class "Default")
+			(node
+				(ref "C10")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C11")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C12")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C13")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C14")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C15")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C16")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C17")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C18")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C19")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C20")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C21")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C22")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C23")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C24")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C25")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C26")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C27")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C28")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C29")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C3")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C30")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C31")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C32")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C33")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C34")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C35")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C36")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C37")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C38")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C39")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C40")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C41")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C42")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C43")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C44")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C45")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C46")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C47")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C48")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C49")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C50")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C51")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C52")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C53")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C54")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C55")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C56")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C57")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C58")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C59")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C7")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C8")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C84")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C9")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "L1")
+				(pin "2")
+				(pinfunction "2_2")
+				(pintype "passive")
+			)
+			(node
+				(ref "R17")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "R19")
+				(pin "2")
+				(pintype "passive")
+			)
 			(node
 				(ref "U1")
 				(pin "J10")
@@ -13745,9 +20457,40 @@
 			)
 		)
 		(net
-			(code "289")
+			(code "301")
 			(name "/VCC_AUX25")
 			(class "Default")
+			(node
+				(ref "C80")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C81")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C82")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "C87")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "FB1")
+				(pin "1")
+				(pintype "passive")
+			)
+			(node
+				(ref "PS2")
+				(pin "5")
+				(pinfunction "OUT_5")
+				(pintype "passive")
+			)
 			(node
 				(ref "U1")
 				(pin "A3")
@@ -13792,7 +20535,7 @@
 			)
 		)
 		(net
-			(code "290")
+			(code "302")
 			(name "/WB{slash}WT#")
 			(class "Default")
 			(node
@@ -13809,7 +20552,7 @@
 			)
 		)
 		(net
-			(code "291")
+			(code "303")
 			(name "/W{slash}R#")
 			(class "Default")
 			(node
@@ -13826,7 +20569,7 @@
 			)
 		)
 		(net
-			(code "292")
+			(code "304")
 			(name "unconnected-(U2F-FRCMC#1-PadY35)")
 			(class "Default")
 			(node
@@ -13837,7 +20580,7 @@
 			)
 		)
 		(net
-			(code "293")
+			(code "305")
 			(name "unconnected-(U2F-R{slash}S#-PadAC35)")
 			(class "Default")
 			(node
@@ -13848,7 +20591,7 @@
 			)
 		)
 		(net
-			(code "294")
+			(code "306")
 			(name "unconnected-(U2G-D{slash}P#-PadAE35)")
 			(class "Default")
 			(node
@@ -13859,7 +20602,7 @@
 			)
 		)
 		(net
-			(code "295")
+			(code "307")
 			(name "unconnected-(U2G-PBGNT#-PadAD04)")
 			(class "Default")
 			(node
@@ -13870,7 +20613,7 @@
 			)
 		)
 		(net
-			(code "296")
+			(code "308")
 			(name "unconnected-(U2G-PBREQ#-PadAE03)")
 			(class "Default")
 			(node
@@ -13881,7 +20624,7 @@
 			)
 		)
 		(net
-			(code "297")
+			(code "309")
 			(name "unconnected-(U2G-PHIT#-PadAA03)")
 			(class "Default")
 			(node
@@ -13892,7 +20635,7 @@
 			)
 		)
 		(net
-			(code "298")
+			(code "310")
 			(name "unconnected-(U2G-PHITM#-PadAC03)")
 			(class "Default")
 			(node
@@ -13903,7 +20646,7 @@
 			)
 		)
 		(net
-			(code "299")
+			(code "311")
 			(name "unconnected-(U2G-PICCLK-PadH34)")
 			(class "Default")
 			(node
@@ -13914,7 +20657,7 @@
 			)
 		)
 		(net
-			(code "300")
+			(code "312")
 			(name "unconnected-(U2G-PICD0-PadJ33)")
 			(class "Default")
 			(node
@@ -13925,7 +20668,7 @@
 			)
 		)
 		(net
-			(code "301")
+			(code "313")
 			(name "unconnected-(U2G-PICD1-PadL35)")
 			(class "Default")
 			(node
@@ -13936,7 +20679,7 @@
 			)
 		)
 		(net
-			(code "302")
+			(code "314")
 			(name "unconnected-(U2K-INC-PadA03)")
 			(class "Default")
 			(node
@@ -13947,7 +20690,7 @@
 			)
 		)
 		(net
-			(code "303")
+			(code "315")
 			(name "unconnected-(U2K-INC-PadAN01)")
 			(class "Default")
 			(node
@@ -13958,7 +20701,7 @@
 			)
 		)
 		(net
-			(code "304")
+			(code "316")
 			(name "unconnected-(U2K-INC-PadAN03)")
 			(class "Default")
 			(node
@@ -13969,7 +20712,7 @@
 			)
 		)
 		(net
-			(code "305")
+			(code "317")
 			(name "unconnected-(U2K-INC-PadAN05)")
 			(class "Default")
 			(node
@@ -13980,7 +20723,7 @@
 			)
 		)
 		(net
-			(code "306")
+			(code "318")
 			(name "unconnected-(U2K-INC-PadB02)")
 			(class "Default")
 			(node
@@ -13991,7 +20734,7 @@
 			)
 		)
 		(net
-			(code "307")
+			(code "319")
 			(name "unconnected-(U2K-INC-PadC01)")
 			(class "Default")
 			(node
@@ -14002,7 +20745,7 @@
 			)
 		)
 		(net
-			(code "308")
+			(code "320")
 			(name "unconnected-(U2K-NC-PadA37)")
 			(class "Default")
 			(node
@@ -14013,7 +20756,7 @@
 			)
 		)
 		(net
-			(code "309")
+			(code "321")
 			(name "unconnected-(U2K-NC-PadAL19)")
 			(class "Default")
 			(node
@@ -14024,7 +20767,7 @@
 			)
 		)
 		(net
-			(code "310")
+			(code "322")
 			(name "unconnected-(U2K-NC-PadAN35)")
 			(class "Default")
 			(node
@@ -14035,7 +20778,7 @@
 			)
 		)
 		(net
-			(code "311")
+			(code "323")
 			(name "unconnected-(U2K-NC-PadR34)")
 			(class "Default")
 			(node
@@ -14046,7 +20789,7 @@
 			)
 		)
 		(net
-			(code "312")
+			(code "324")
 			(name "unconnected-(U2K-NC-PadS33)")
 			(class "Default")
 			(node
@@ -14057,7 +20800,7 @@
 			)
 		)
 		(net
-			(code "313")
+			(code "325")
 			(name "unconnected-(U2K-NC-PadS35)")
 			(class "Default")
 			(node
@@ -14068,7 +20811,7 @@
 			)
 		)
 		(net
-			(code "314")
+			(code "326")
 			(name "unconnected-(U2K-NC-PadW33)")
 			(class "Default")
 			(node
@@ -14079,7 +20822,7 @@
 			)
 		)
 		(net
-			(code "315")
+			(code "327")
 			(name "unconnected-(U2K-NC-PadW35)")
 			(class "Default")
 			(node

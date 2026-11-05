@@ -28,7 +28,7 @@ U1_BULK = [("VCC_1V1", "100uF/6.3V", C1210)] * 3 + [
 def build(net_of_ball, translators, taken):
     """net_of_ball: U1 ball -> net; translators: [SN74CB3T3245 refs];
     taken: references already on the sheet"""
-    P = Parts("Socket3Parts", taken)
+    P = Parts("SocketParts", taken)
     print("power tree values:")
     P.add("F", "Device:Fuse", "2A", "Fuse:Fuse_1206_3216Metric",
           ["V12_IN", "V12"], "stage", "F1")

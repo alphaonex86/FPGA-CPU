@@ -15,7 +15,7 @@ Checks and outputs: hw/tools/assign_common.py.
 """
 import pathlib
 
-from assign_common import assign
+from assign_common import AS_X4_QSF, assign
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 T1 = ROOT / "hw/common/socket7_signals.csv"
@@ -60,7 +60,7 @@ VCCIO = {"3A": "3.3 V", "3B": "3.3 V", "4A": "3.3 V", "5A": "3.3 V",
 
 
 def main():
-    assign(ROOT, T1, OUT, CV_PLAN, VCCIO, "CLK", translated=False)
+    assign(ROOT, T1, OUT, CV_PLAN, VCCIO, "CLK", translated=False, qsf=AS_X4_QSF)
     print("  translators: 0 (direct 3.3 V landing, notes R1)")
     print(f"  wrote {OUT.relative_to(ROOT)}/pins.csv + assignment_quartus.qsf")
 

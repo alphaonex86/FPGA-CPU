@@ -88,3 +88,4 @@ parts/winbond_w25q128jv.pdf https://datasheet.lcsc.com/datasheet/pdf/d009d960f1d
 parts/ti_tlv62585.pdf https://www.ti.com/lit/ds/symlink/tlv62585.pdf
 parts/ti_tps22918.pdf https://www.ti.com/lit/ds/symlink/tps22918.pdf
 parts/ti_slva463a_tps6213x_output_filter.pdf https://www.ti.com/lit/an/slva463a/slva463a.pdf
+parts/lcsc_C5355380.html https://www.lcsc.com/product-detail/C5355380.html

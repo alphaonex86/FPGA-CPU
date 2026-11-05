@@ -265,7 +265,7 @@ Every Cyclone V generator first checks each supply ball against its band
 (cvds p.8-9 Table 4, VCCPD per note 4: `cv_supply_errors` in
 `gen_t6_schematic.py`) and refuses to write the sheet on a violation.
 Status socket3-cyclonev (`hw/tools/gen_socket3_t6.py`, 2026-11-01): 113
-signals via 16 SN74CB3T3245 (`hw/lib/Socket3_Parts.kicad_sym`, single VCC
+signals via 16 SN74CB3T3245 (`hw/lib/Socket_Parts.kicad_sym`, single VCC
 3.3 V, OE# = BUS_OE# from the VCORE-present TLV6700, see FPGAmotherboard
 compatibility); S4 tied to VSS; 16 resistors: socket-side 4k7 pull-downs
 HLDA, BREQ, 100k RESET; FPGA-side 4k7 HOLD down, 10k UP#, DP0-3 up (notes
@@ -293,8 +293,13 @@ the chipset samples at RESET, notes R4); FPGA configuration pulls as
 socket 3. The 10 socket pins the interposer leaves open (PICCLK, PICD0/1,
 FRCMC#, PHIT#/PHITM#, PBREQ#/PBGNT#, R/S#, D/P#: NC on UP boards, notes
 R4) and the NC pins carry a no-connect flag (`t6.NOCONNECT`). No FLUSH#
-pull-up: the board has its 8.2 k [fmb p.2-2]. Not drawn yet: power tree
-and decoupling. Audit 166/166, VCC2 25 / VCC3 28 / VSS 53 pins, ERC 0.
+pull-up: the board has its 8.2 k [fmb p.2-2]. 2026-11-05: AS x4 flash U4
+as socket 3 (MSEL 10011, nCONFIG/AS_DATA3 up, AS_DCLK down, PS header
+gone, AS x4 lines in the .qsf), footprints on every instance, power tree
++ decoupling from `socket7_pdn.py` (96 parts, `pdn.csv`): TLV62585 core
+buck on VCC2, TLV75725 aux LDO and TPS22918 VCCIO33 switch on VCC3, both
+enabled by the buck PG pulled up to VCC_1V1 (power.md). Audit 166/166 +
+AS nets, VCC2 25 / VCC3 28 / VSS 53 pins, ERC 0.
 Status socket370 (both, `hw/tools/gen_t6_schematic.py`, 2026-10-20): label-wired
 sheet, no wires; every required signal's net holds its FPGA ball and its
 translator A-pin, its `S_<signal>` net holds the CPU socket pin and the paired
