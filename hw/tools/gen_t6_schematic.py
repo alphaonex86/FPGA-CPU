@@ -284,7 +284,7 @@ def power_nets(pins, labels):
             if p["el"] == "power_in" and labels.get(p["num"])}
 
 
-def header(ref, nick, nets, X, Y, flagged, project="fpga-cpu"):
+def header(ref, nick, nets, X, Y, flagged, project="fpga-cpu", footprint=""):
     """stock connector instance, pin k (by number) -> nets[k]"""
     lib, name = nick.split(":")
     d = next(d for d in parse_lib(pathlib.Path(STOCK + lib + ".kicad_sym"))
@@ -294,7 +294,7 @@ def header(ref, nick, nets, X, Y, flagged, project="fpga-cpu"):
     assert len(pins) == len(nets), (ref, len(pins), len(nets))
     lab = {p["num"]: n for p, n in zip(pins, nets)}
     flagged |= power_nets(pins, lab)
-    return syminst(nick, ref, X, Y, 1, pins, lab, project=project)
+    return syminst(nick, ref, X, Y, 1, pins, lab, project=project, footprint=footprint)
 
 
 def flags(nets, X, Y0, dy, project="fpga-cpu"):

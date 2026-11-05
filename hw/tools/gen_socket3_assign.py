@@ -41,11 +41,15 @@ CV_PLAN = [
     ("BS16#", "4A"), ("BS8#", "4A"),
 ]
 VCCIO = {"3B": "3.3 V", "7A": "3.3 V", "4A": "3.3 V"}
+# AS x4 from U4 (MSEL 10011, gen_socket3_t6.py); Quartus checks the device name only at assembly
+CONFIG = ['set_global_assignment -name STRATIXV_CONFIGURATION_SCHEME "ACTIVE SERIAL X4"',
+          "set_global_assignment -name USE_CONFIGURATION_DEVICE ON",
+          "set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE MT25QL01G"]
 
 
 def main():
     rows, chips = assign(ROOT, T1, OUT, CV_PLAN, VCCIO, "CLK", translated=True,
-                         local=[("VCORE_OK", "3B")], pullup=["CLKMUL"])
+                         local=[("VCORE_OK", "3B")], pullup=["CLKMUL"], qsf=CONFIG)
     if any(not r[5] for r in rows if r[0] != "VCORE_OK"):
         raise SystemExit("signal without a translator channel")
     print(f"  translators: {chips} x 8 channels for "

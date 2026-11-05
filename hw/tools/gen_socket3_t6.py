@@ -6,8 +6,10 @@ gen_t6_schematic.py.
 One sheet: FPGA symbol (one instance per bank unit), the PGA168 CPU symbol,
 16 SN74CB3T3245 bus switches (A = FPGA net, B = S_<sig> socket net, single
 3.3 V VCC, OE# = BUS_OE# from the VCORE-present detector of socket3_pdn.py:
-open while the socket rail is down), pull resistors, FPGA JTAG /
-passive-serial headers, the 12 V barrel jack, and the power tree +
+open while the socket rail is down), pull resistors, the MT25QL01G AS x4
+configuration flash (U4: bitstream + BIOS / UEFI / option ROM images,
+plan/interposers.md Flash), the FPGA JTAG header, the 12 V barrel jack,
+every instance with its footprint, and the power tree +
 decoupling of socket3_pdn.py (power.md; also written to pdn.csv for
 placement). S4 (VOLDET) is tied to VSS like on the Am5x86.
 
@@ -16,7 +18,8 @@ sheet is written (gen_t6_schematic.cv_supply_errors).
 
 Audit: every T5 signal's net holds its FPGA ball and its switch A pin; the
 S_<signal> net holds the socket pin and the switch B pin of the channel
-pins.csv names; every resistor joins two nets that reach other pins; 23
+pins.csv names; each AS net joins its U1 ball and its U4 flash pin; every
+resistor joins two nets that reach other pins; 23
 socket VCC pins share S_VCC (board supply, only the detector divider: D1),
 28 VSS + S4 on GND; every power-tree net reaches at least two pins.
 """
@@ -39,10 +42,22 @@ PARTS = ROOT / "hw/lib/Socket3_Parts.kicad_sym"
 
 VOLTS = {"VCC_1V1": 1.1, "VCC_AUX25": 2.5, "VCCA_FPLL25": 2.5, "V3V3": 3.3}
 
-# passive serial, standard POR: MSEL[4..0] = 10001 [cvhb p.7-3 Table 7-2];
-# fast POR would need every supply ramp <= 4 ms [cvds p.9 Table 4]
-MSEL = {"MSEL4": "V3V3", "MSEL3": "GND", "MSEL2": "GND", "MSEL1": "GND",
+# AS x1/x4, standard POR: MSEL[4..0] = 10011, VCCPGM 3.0/3.3 V [cvhb p.7-3
+# Table 7-2]; fast POR would need every supply ramp <= 4 ms [cvds p.9 Table 4]
+MSEL = {"MSEL4": "V3V3", "MSEL3": "GND", "MSEL2": "GND", "MSEL1": "V3V3",
         "MSEL0": "V3V3"}
+# dedicated AS balls (function column) -> flash nets
+AS = {"nCSO": "AS_nCS", "DCLK": "AS_DCLK", "AS_DATA0,ASDO": "AS_DATA0",
+      "AS_DATA1": "AS_DATA1", "AS_DATA2": "AS_DATA2", "AS_DATA3": "AS_DATA3"}
+FLASH = {"S#": "AS_nCS", "C": "AS_DCLK", "DQ0": "AS_DATA0", "DQ1": "AS_DATA1",
+         "DQ2": "AS_DATA2", "DQ3": "AS_DATA3", "RESET#": "V3V3", "VCC": "V3V3",
+         "GND": "GND"}                     # RESET# unused: to VCC [cf52014 Table 8]
+FP = {"U1": "Interposer:FPGA_CycloneV_5CEFA9_F484_BGA",
+      "U2": "Interposer:Socket3_Base_PGA168",
+      "TR": "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm",
+      "U4": "Package_SO:SOIC-16W_7.5x10.3mm_P1.27mm",
+      "J1": "Connector_PinHeader_2.54mm:PinHeader_2x03_P2.54mm_Vertical",
+      "J3": "Connector_BarrelJack:BarrelJack_CUI_PJ-063AH_Horizontal"}
 
 # (value, net 1, net 2, source); pull-ups sit on the FPGA side so an open
 # switch never feeds the socket rail (plan/interposers.md)
@@ -57,7 +72,10 @@ PULLS = [
       for k in range(4)],
     ("10k", "CFG_nSTATUS", "V3V3", "cvpcg p.5"),
     ("10k", "CFG_CONF_DONE", "V3V3", "cvpcg p.4"),
-    ("10k", "CFG_DCLK", "GND", "cvpcg p.7 (never floating)"),
+    ("10k", "CFG_nCONFIG", "V3V3", "cvpcg p.4"),
+    ("10k", "AS_DCLK", "GND", "cvpcg p.7 (never floating)"),
+    # DQ3 shares HOLD#: high in x1 / x2 commands [micron_mt25ql01gbbb Fig. 5 note 1]
+    ("10k", "AS_DATA3", "V3V3", "micron_mt25ql01gbbb p.13"),
     ("1k", "F_TCK", "GND", "cvpcg p.6"),
     ("10k", "F_TMS", "V3V3", "cvpcg p.6"),
     ("10k", "F_TDI", "V3V3", "cvpcg p.7"),
@@ -71,6 +89,8 @@ def fpga_net(ball, func, conf):
         return "F_" + func
     if func in MSEL:
         return MSEL[func]
+    if func in AS:
+        return AS[func]
     if func == "nCE":
         return "GND"                         # single device [cvpcg p.4]
     if conf:
@@ -114,8 +134,7 @@ def main():
         "gen_socket3_t6", "Socket 3 interposer: 5CEBA9 + 16x SN74CB3T3245",
         [("hw_n:" + fsym[0], fsym[1]), ("cpu_n:" + csym[0], csym[1]),
         ] + [("hw_n:" + d[0], d[1]) for d in psyms] + t6.stock_defs(
-            [("Connector_Generic", ["Conn_02x03_Odd_Even",
-                                    "Conn_02x05_Odd_Even"]),
+            [("Connector_Generic", ["Conn_02x03_Odd_Even"]),
              ("Connector", ["Barrel_Jack"]),
              ("Device", ["C", "R", "L", "Fuse", "FerriteBead"])]))
     flagged = set()
@@ -125,7 +144,7 @@ def main():
         pins = fsym[2][uid]
         lab = {p["num"]: net_of[p["num"]] for p in pins}
         parts.append(t6.syminst("hw_n:" + fsym[0], "U1", 80.0 + i % 3 * 95.0,
-                                35.0 + i // 3 * 62.0, int(uid), pins, lab))
+                                35.0 + i // 3 * 62.0, int(uid), pins, lab, footprint=FP["U1"]))
         flagged |= {n for n in lab.values() if n in VOLTS}
 
     # ---- bus switches: chip/channel from pins.csv T<dd>c<n> ----
@@ -155,7 +174,7 @@ def main():
         flagged |= t6.power_nets(spins, lab)
         parts.append(t6.syminst("hw_n:" + ssym[0], ref,
                                 25.0 + (cid - 1) % 8 * 45.0,
-                                260.0 + (cid - 1) // 8 * 75.0, 1, spins, lab))
+                                260.0 + (cid - 1) // 8 * 75.0, 1, spins, lab, footprint=FP["TR"]))
 
     # ---- CPU socket ----
     row_of = {r["pin"]: r for r in t1}
@@ -173,7 +192,7 @@ def main():
         if y + max(ys) - min(ys) > 800.0:
             y, col = 25.0, col + 1
         parts.append(t6.syminst("cpu_n:" + csym[0], "U2", 480.0 + col * 120.0,
-                                y + max(ys) + 8.0, int(uid), pins, lab))
+                                y + max(ys) + 8.0, int(uid), pins, lab, footprint=FP["U2"]))
         y += max(ys) - min(ys) + 22.0
 
     # ---- pull resistors ----
@@ -182,23 +201,29 @@ def main():
     for k, (val, a, b, _src) in enumerate(PULLS, 1):
         parts.append(t6.syminst("Device:R", f"R{k}", 760.0 + (k - 1) % 10 * 20.0,
                                 40.0 + (k - 1) // 10 * 25.0, 1, rpins,
-                                {"1": a, "2": b}, value=val))
+                                {"1": a, "2": b}, value=val,
+                                footprint="Resistor_SMD:R_0402_1005Metric"))
+
+    # ---- configuration flash ----
+    msym = next(d for d in psyms if d[0] == "MT25QL01G")
+    mpins = msym[2]["1"]
+    lab = {p["num"]: FLASH.get(p["name"], f"NC_U4_{p['num']}") for p in mpins}
+    flagged |= t6.power_nets(mpins, lab)
+    parts.append(t6.syminst("hw_n:MT25QL01G", "U4", 780.0, 110.0, 1, mpins, lab,
+                            value="MT25QL01GBBB8ESF-0SIT", footprint=FP["U4"]))
 
     # ---- headers ----
     HD = [("J1", "Connector_Generic:Conn_02x03_Odd_Even",
            ["F_TCK", "GND", "F_TMS", "GND", "F_TDI", "F_TDO"]),
-          ("J2", "Connector_Generic:Conn_02x05_Odd_Even",
-           ["CFG_nCONFIG", "GND", "CFG_nSTATUS", "GND", "CFG_CONF_DONE",
-            "GND", "CFG_DCLK", "GND", "CFG_DATA0", "GND"]),
           ("J3", "Connector:Barrel_Jack", ["V12_IN", "GND"])]
     for k, (ref, nick, nets) in enumerate(HD):
         parts.append(t6.header(ref, nick, nets, 780.0, 150.0 + k * 40.0,
-                               flagged))
+                               flagged, footprint=FP[ref]))
 
     # ---- power tree + decoupling ----
     pdn_rows = socket3_pdn.build(net_of, ["TR%02d" % c for c in sorted(chips)],
                                  {f"R{k}" for k in range(1, len(PULLS) + 1)}
-                                 | {"U1", "U2"})
+                                 | {"U1", "U2", "U4"})
     parts += pdn.draw(pdn_rows, PARTS, "Socket3Parts", 30.0, 440.0, flagged)
     with open(OUT / "pdn.csv", "w", newline="") as f:
         w = csv.DictWriter(f, pdn.CSV_FIELDS)
@@ -230,6 +255,14 @@ def main():
     if len({ref for ref, _ in on("BUS_OE#")} & {f"TR{c:02d}" for c in chips}) \
             != len(chips):
         fails.append("BUS_OE# does not reach every bus switch")
+    as_ball = {AS[f]: b for b, f in func_by.items() if f in AS}
+    flash_pin = {p["name"]: p["num"] for p in mpins}
+    if len(as_ball) != len(AS):
+        fails.append(f"AS balls found: {sorted(as_ball)}")
+    for name, net in FLASH.items():
+        if ("U4", flash_pin[name]) not in on(net) or \
+                (net in as_ball and ("U1", as_ball[net]) not in on(net)):
+            fails.append(f"{net}: lacks U4 {name} or its U1 AS ball")
     for k, (val, a, b, _src) in enumerate(PULLS, 1):
         for net, pin in ((a, "1"), (b, "2")):
             if (f"R{k}", pin) not in on(net) or len(on(net)) < 2:

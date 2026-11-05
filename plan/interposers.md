@@ -123,7 +123,8 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   socket370-ti180 stayed (until D10): AGTL+ is open-drain with VTT pull-ups (D3).
 - **D7** (decided 2026-10-20 by the operator) JTAG header only (no USB
   bridge); TAP and PRDY#/PREQ# land on it; configuration via passive
-  serial from the host.
+  serial from the host (socket3-cyclonev: replaced by the AS x4 flash, Flash
+  below).
 - **D6** provisional 2026-10-20: outline estimated from the socket/ZIF
   footprint keepout until M1/M2 land; M2 numbers re-check the outline.
 
@@ -138,10 +139,10 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   operator 2026-11-01: one large flash, Active Serial x4; size decided by
   the operator 2026-11-01: one SOIC-16 footprint, MT25QL01G (1 Gbit,
   128 MiB) fitted, MT25QL256 (EPCQ256 class) the fallback if AS x4 does
-  not boot from the 1 Gbit part on the bench; before T7: confirm from the
-  Micron datasheets that both are pin-compatible in SOIC-16, 300 mil
-  (not downloadable by script: Micron's pages render by JavaScript, the
-  Arrow copy resets the connection))
+  not boot from the 1 Gbit part on the bench; pin-compatible: the
+  MT25QL SOIC-16W pin-out is family-wide and equals the EPCQ128A AS x4 one
+  [sockets/parts/micron_mt25ql01gbbb.pdf, cf52014 Figure 3], checked
+  2026-11-05)
   every variant carries a flash large enough for the FPGA bitstream and
   also BIOS and/or UEFI images, option ROMs and other firmware to
   experiment with; JTAG kept. One 5CEA9 bitstream is 102,871,776 bits
@@ -259,15 +260,19 @@ signals via 16 SN74CB3T3245 (`hw/lib/Socket3_Parts.kicad_sym`, single VCC
 3.3 V, OE# = BUS_OE# from the VCORE-present TLV6700, see FPGAmotherboard
 compatibility); S4 tied to VSS; 16 resistors: socket-side 4k7 pull-downs
 HLDA, BREQ, 100k RESET; FPGA-side 4k7 HOLD down, 10k UP#, DP0-3 up (notes
-R4/R6); CLKMUL FPGA weak pull-up only; FPGA nSTATUS/CONF_DONE 10k up, DCLK
-10k down, TCK 1k down, TMS/TDI 10k up, RREF_TL 2k0 1% (PLL used) (cvpcg
-p.4-7, p.16); MSEL[4..0] = 10001 passive serial, standard POR (cvhb p.7-3
-Table 7-2; fast POR would need ramps <= 4 ms, cvds p.9), nCE to GND,
+R4/R6); CLKMUL FPGA weak pull-up only; FPGA nSTATUS/CONF_DONE/nCONFIG
+10k up, AS_DCLK 10k down, AS_DATA3 10k up (flash HOLD# in x1), TCK 1k
+down, TMS/TDI 10k up, RREF_TL 2k0 1% (PLL used) (cvpcg p.4-7, p.16);
+U4 MT25QL01GBBB8ESF on the dedicated AS balls, AS x4, MSEL[4..0] = 10011,
+standard POR (cvhb p.7-3 Table 7-2; fast POR would need ramps <= 4 ms,
+cvds p.9), configuration scheme + device in the T5 .qsf; J1 FPGA JTAG
+2x3, J3 12 V jack (the passive-serial header is gone); every instance
+carries its footprint (2026-11-05); nCE to GND,
 unused VREFB to GND (cvpcg p.4, p.19). S_VCC joins the 23 socket VCC pins
 and the detector divider only (D1). FLUSH# gets no pull-down: it is active
 low, a pull-down would flush permanently (notes R4 proposal rejected,
-NM3). Power tree + decoupling drawn from `socket3_pdn.py` (147 parts,
-`pdn.csv` for T7). Audit 113/113 + VCORE_OK, ERC 0.
+NM3). Power tree + decoupling drawn from `socket3_pdn.py` (148 parts,
+`pdn.csv` for T7). Audit 113/113 + VCORE_OK + AS nets, ERC 0.
 Status socket7-cyclonev (`hw/tools/gen_socket7_t6.py`, 2026-11-01): 166
 signals direct, FPGA ball net = socket pin net (3.3 V TTL bus, no
 translators, notes R1); every bank, VCCPD and VCCPGM on VCCIO33, the

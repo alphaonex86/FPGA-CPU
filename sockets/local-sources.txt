@@ -50,3 +50,5 @@ parts/cui_pj-063ah_barrel_jack.pdf file:///home/user/Desktop/CatchChallenger/FPG
 slot1/celeron_sepp_24365803.pdf file:///mnt/data/perso/retro/SLOT%201/24365803.pdf
 slot1/ap587_slot1_power_distribution_24333201.pdf file:///mnt/data/perso/retro/SLOT%201/24333201-65c637c4b2b49179115712.pdf
 slot1/pentium3_power_distribution_24508501.pdf file:///mnt/data/perso/retro/SLOT%201/24508501.pdf
+# Micron MT25QL01GBBB 1 Gb 3 V serial NOR (socket3-cyclonev AS x4 flash; micron.com is not script-downloadable)
+parts/micron_mt25ql01gbbb.pdf file:///mnt/data/perso/retro/Socket%203/MT25QL01GBBB.PDF

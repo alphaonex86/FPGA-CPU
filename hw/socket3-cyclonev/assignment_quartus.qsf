@@ -1,4 +1,7 @@
 set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name STRATIXV_CONFIGURATION_SCHEME "ACTIVE SERIAL X4"
+set_global_assignment -name USE_CONFIGURATION_DEVICE ON
+set_global_assignment -name STRATIXII_CONFIGURATION_DEVICE MT25QL01G
 set_location_assignment PIN_A12 -to "D20"
 set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to "D20"
 set_location_assignment PIN_A13 -to "D22"

@@ -78,4 +78,5 @@ def build(net_of_ball, translators, taken):
         P.c(v, f, rail, "u1bulk")
     for ref in translators:                               # cb3t p.11: 0.1 uF
         P.c("100nF", C0402, "V3V3", "trpin", ref, "VCC")
+    P.c("100nF", C0402, "V3V3", "pin", "U4", "2")         # flash VCC
     return P.rows

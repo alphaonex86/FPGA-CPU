@@ -9,28 +9,28 @@ C4,Device:C,22uF/10V,Capacitor_SMD:C_1206_3216Metric,V5|GND,F,stage,PS1,
 C5,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,PS1_BOOT|PS1_SW,F,stage,PS1,
 C6,Device:C,10nF,Capacitor_SMD:C_0402_1005Metric,PS1_SS|GND,F,stage,PS1,
 C7,Device:C,27nF,Capacitor_SMD:C_0402_1005Metric,PS1_CZ|GND,F,stage,PS1,
-R17,Device:R,1.33k,Resistor_SMD:R_0402_1005Metric,PS1_COMP|PS1_CZ,F,stage,PS1,
-R18,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PS1_RT|GND,F,stage,PS1,
-R19,Device:R,52.3k,Resistor_SMD:R_0402_1005Metric,V5|PS1_FB,F,stage,PS1,
-R20,Device:R,10k,Resistor_SMD:R_0402_1005Metric,PS1_FB|GND,F,stage,PS1,
-R21,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PG_5V|V5,F,stage,PS1,
+R19,Device:R,1.33k,Resistor_SMD:R_0402_1005Metric,PS1_COMP|PS1_CZ,F,stage,PS1,
+R20,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PS1_RT|GND,F,stage,PS1,
+R21,Device:R,52.3k,Resistor_SMD:R_0402_1005Metric,V5|PS1_FB,F,stage,PS1,
+R22,Device:R,10k,Resistor_SMD:R_0402_1005Metric,PS1_FB|GND,F,stage,PS1,
+R23,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PG_5V|V5,F,stage,PS1,
 PS2,Socket3Parts:TPS62130,TPS62130RGT,Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm,PS2_SW|PS2_SW|PS2_SW|PG_1V1|PS2_FB|GND|GND|GND|PS2_SS|V5|V5|V5|PG_5V|VCC_1V1|GND|GND|GND,F,stage,PS2,
 L2,Device:L,2.2uH XFL4020-222,Inductor_SMD:L_Coilcraft_XxL4020,PS2_SW|VCC_1V1,F,stage,PS2,
 C8,Device:C,10uF/25V,Capacitor_SMD:C_1210_3225Metric,V5|GND,F,stage,PS2,
 C9,Device:C,22uF/6.3V,Capacitor_SMD:C_0805_2012Metric,VCC_1V1|GND,F,stage,PS2,
 C10,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V5|GND,F,stage,PS2,
 C11,Device:C,3.3nF,Capacitor_SMD:C_0402_1005Metric,PS2_SS|GND,F,stage,PS2,
-R22,Device:R,37.4k,Resistor_SMD:R_0402_1005Metric,VCC_1V1|PS2_FB,F,stage,PS2,
-R23,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PS2_FB|GND,F,stage,PS2,
-R24,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PG_1V1|V5,F,stage,PS2,
+R24,Device:R,37.4k,Resistor_SMD:R_0402_1005Metric,VCC_1V1|PS2_FB,F,stage,PS2,
+R25,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PS2_FB|GND,F,stage,PS2,
+R26,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PG_1V1|V5,F,stage,PS2,
 PS3,Socket3Parts:TPS62130,TPS62130RGT,Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm,PS3_SW|PS3_SW|PS3_SW|NC_PS3_4|PS3_FB|GND|GND|GND|PS3_SS|V5|V5|V5|PG_1V1|VCC_AUX25|GND|GND|GND,F,stage,PS3,
 L3,Device:L,2.2uH XFL4020-222,Inductor_SMD:L_Coilcraft_XxL4020,PS3_SW|VCC_AUX25,F,stage,PS3,
 C12,Device:C,10uF/25V,Capacitor_SMD:C_1210_3225Metric,V5|GND,F,stage,PS3,
 C13,Device:C,22uF/6.3V,Capacitor_SMD:C_0805_2012Metric,VCC_AUX25|GND,F,stage,PS3,
 C14,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V5|GND,F,stage,PS3,
 C15,Device:C,3.3nF,Capacitor_SMD:C_0402_1005Metric,PS3_SS|GND,F,stage,PS3,
-R25,Device:R,215k,Resistor_SMD:R_0402_1005Metric,VCC_AUX25|PS3_FB,F,stage,PS3,
-R26,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PS3_FB|GND,F,stage,PS3,
+R27,Device:R,215k,Resistor_SMD:R_0402_1005Metric,VCC_AUX25|PS3_FB,F,stage,PS3,
+R28,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PS3_FB|GND,F,stage,PS3,
 FB1,Device:FerriteBead,BLM18AG601SN1D,Inductor_SMD:L_0603_1608Metric,VCC_AUX25|VCCA_FPLL25,F,stage,PS3,
 PS4,Socket3Parts:TPS62130,TPS62130RGT,Package_DFN_QFN:VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm,PS4_SW|PS4_SW|PS4_SW|NC_PS4_4|PS4_FB|GND|GND|GND|PS4_SS|V5|V5|V5|PG_1V1|V3V3|GND|GND|GND,F,stage,PS4,
 L4,Device:L,2.2uH XFL4020-222,Inductor_SMD:L_Coilcraft_XxL4020,PS4_SW|V3V3,F,stage,PS4,
@@ -38,25 +38,25 @@ C16,Device:C,10uF/25V,Capacitor_SMD:C_1210_3225Metric,V5|GND,F,stage,PS4,
 C17,Device:C,22uF/6.3V,Capacitor_SMD:C_0805_2012Metric,V3V3|GND,F,stage,PS4,
 C18,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V5|GND,F,stage,PS4,
 C19,Device:C,3.3nF,Capacitor_SMD:C_0402_1005Metric,PS4_SS|GND,F,stage,PS4,
-R27,Device:R,316k,Resistor_SMD:R_0402_1005Metric,V3V3|PS4_FB,F,stage,PS4,
-R28,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PS4_FB|GND,F,stage,PS4,
+R29,Device:R,316k,Resistor_SMD:R_0402_1005Metric,V3V3|PS4_FB,F,stage,PS4,
+R30,Device:R,100k,Resistor_SMD:R_0402_1005Metric,PS4_FB|GND,F,stage,PS4,
 U3,Socket3Parts:TLV6700,TLV6700DDC,Package_TO_SOT_SMD:SOT-23-6,VCORE_OK|GND|VCORE_SENSE|VCORE_SENSE|V5|BUS_OE#,F,stage,VDET,
-R29,Device:R,68.1k 1%,Resistor_SMD:R_0402_1005Metric,S_VCC|VCORE_SENSE,F,stage,VDET,
-R30,Device:R,10k 1%,Resistor_SMD:R_0402_1005Metric,VCORE_SENSE|GND,F,stage,VDET,
+R31,Device:R,68.1k 1%,Resistor_SMD:R_0402_1005Metric,S_VCC|VCORE_SENSE,F,stage,VDET,
+R32,Device:R,10k 1%,Resistor_SMD:R_0402_1005Metric,VCORE_SENSE|GND,F,stage,VDET,
 C20,Device:C,10nF,Capacitor_SMD:C_0402_1005Metric,VCORE_SENSE|GND,F,stage,VDET,
 C21,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V5|GND,F,stage,VDET,
-R31,Device:R,10k,Resistor_SMD:R_0402_1005Metric,BUS_OE#|V3V3,F,stage,VDET,
-R32,Device:R,10k,Resistor_SMD:R_0402_1005Metric,VCORE_OK|V3V3,F,stage,VDET,
+R33,Device:R,10k,Resistor_SMD:R_0402_1005Metric,BUS_OE#|V3V3,F,stage,VDET,
+R34,Device:R,10k,Resistor_SMD:R_0402_1005Metric,VCORE_OK|V3V3,F,stage,VDET,
 C22,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,J10,K10
 C23,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,J12,H12
 C24,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,J14,K14
 C25,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,J16,J15
-C26,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,J4,K4
+C26,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,J4,H4
 C27,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,K11,L11
 C28,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,K13,L13
 C29,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,K15,L15
 C30,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,K3,L3
-C31,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,K5,J5
+C31,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,K5,K4
 C32,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,L10,M10
 C33,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,L12,K12
 C34,Device:C,4.7nF,Pwr:C_0402_P1.00,VCC_1V1|GND,B,u1pair,L14,M14
@@ -105,15 +105,15 @@ C76,Device:C,2.2nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,C10,D10
 C77,Device:C,2.2nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,D14,C14
 C78,Device:C,4.7nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,F3,G3
 C79,Device:C,4.7nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,G7,H7
-C80,Device:C,4.7nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,L6,L5
-C81,Device:C,4.7nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,M17,N17
-C82,Device:C,10nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,P20,R20
-C83,Device:C,10nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,V8,V7
-C84,Device:C,10nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,W12,V12
-C85,Device:C,10nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,W17,V17
-C86,Device:C,22nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,Y13,Y12
-C87,Device:C,22nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,Y8,Y7
-C88,Device:C,47nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,u1bulk,,
+C80,Device:C,4.7nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,J6,J5
+C81,Device:C,4.7nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,L6,L5
+C82,Device:C,10nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,M17,N17
+C83,Device:C,10nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,P20,R20
+C84,Device:C,10nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,V8,V7
+C85,Device:C,10nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,W12,V12
+C86,Device:C,22nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,W17,V17
+C87,Device:C,22nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,Y13,Y12
+C88,Device:C,47nF,Pwr:C_0402_P1.00,V3V3|GND,B,u1pair,Y8,Y7
 C89,Device:C,47nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,u1bulk,,
 C90,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,u1bulk,,
 C91,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,u1bulk,,
@@ -146,3 +146,4 @@ C117,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,trpin,TR13,VCC
 C118,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,trpin,TR14,VCC
 C119,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,trpin,TR15,VCC
 C120,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,trpin,TR16,VCC
+C121,Device:C,100nF,Capacitor_SMD:C_0402_1005Metric,V3V3|GND,F,pin,U4,2
