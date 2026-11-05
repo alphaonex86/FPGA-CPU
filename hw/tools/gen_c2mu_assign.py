@@ -10,9 +10,11 @@ the contacts (SSTL18_I, internal VREF 0.90 V) and VTT_SENSE (slot VTT 1.5 V:
 board powered); 14, 16, 13 at 3.3 V take the 111 transceiver A-side nets
 (the 16612 groups of gen_c2cart_assign), the 11 CMOS pins (2.5 V signals, VIH 2.0 V: no
 pass-gate), BCLK and the 50 MHz oscillator on MRCC balls, the SPI x4 flash
-pins of bank 14, the Mu control lines and a LED. 34/35 unused. Each bank's
-nets take the balls of least total length to where their other end sits
-(match(): no two ratsnest lines from the BGA cross, few deep balls). PCIe x4 to
+pins of bank 14, the Mu control lines and a LED; 34/35 at 3.3 V give spare
+balls so the nets take the outer rings. Each net takes the ball of least
+length to where its other end sits plus DEPTH_MM per ring from the BGA edge
+(match(): no two ratsnest lines from the BGA cross, no ball deeper than the
+3 signal layers escape). PCIe x4 to
 the Mu (HSIO8-11): Mu lane k = GTP channel 3-k (pcie_7x x4 places lane k on
 GTPE2_CHANNEL_X0Y(7-k), checked in Vivado), refclk MGTREFCLK1.
 Checks (exit 1): every ball used once, user IO in its planned bank,
@@ -37,7 +39,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 TABLE = ROOT / "FPGAlist/c2_cards/xilinx/xc7a100t_fgg484.csv"
 OUT = ROOT / "hw/slot1-c2mu"
 RX_BANK = "15"
-IO_BANKS = ["16", "14", "13"]           # 3.3 V
+IO_BANKS = ["16", "14", "13", "34", "35"]     # 3.3 V
+DEPTH_MM = 6.0                          # a ring deeper costs as much as 6 mm of trace
 CLOCKS = {"BCLK": "IO_L12P_T1_MRCC_14", "OSC50": "IO_L12P_T1_MRCC_13"}
 SPI = {"SPI_CS#": "FCS_B", "SPI_D0": "D00_MOSI", "SPI_D1": "D01_DIN", "SPI_D2": "D02", "SPI_D3": "D03"}
 # Mu lane k -> GTP channel 3 - k
@@ -65,12 +68,14 @@ def gtl_pin_xy():
 
 
 def match(nets, balls):
-    """net -> ball of least total length (target to ball): a least length matching has no crossing
-    pair, so the fanout from the balls stays planar"""
+    """net -> ball of least total length (target to ball) plus the ring depth: a least length matching
+    has no crossing pair (the depth term is per ball, a swap keeps it), so the fanout stays planar"""
     def at(b):
         x, y = ball_xy(b)
         return U1_AT[0] + x, U1_AT[1] + y
-    cost = np.array([[np.hypot(at(b)[0] - tx, at(b)[1] - ty) for b in balls] for _, (tx, ty) in nets])
+    depth = lambda b: 10.5 - max(abs(v) for v in ball_xy(b))
+    cost = np.array([[np.hypot(at(b)[0] - tx, at(b)[1] - ty) + DEPTH_MM * depth(b) for b in balls]
+                     for _, (tx, ty) in nets])
     rows, cols = linear_sum_assignment(cost)
     return {nets[r][0]: balls[c] for r, c in zip(rows, cols)}
 

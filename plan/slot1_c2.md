@@ -394,7 +394,7 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   the vendor xlsx, LOTES 9.2H socket and M2 standoff footprints),
   `gen_c2mu_assign.py` (pins.csv: least-total-length matching of each
   net to its other end, so no two bus lines cross), `build_c2mu.tcl`
-  (bitstream x4 Gen1, 2026-11-05: WNS +0.090 / WHS +0.052 ns, 1.0 W), `gen_c2mu_s6.py`
+  (bitstream x4 Gen1, 2026-11-05: WNS +0.245 / WHS +0.052 ns, 1.0 W), `gen_c2mu_s6.py`
   (schematic, ERC 0), `_s7.py` (placement: FPGA and the transceiver band
   under the module, parts <= 4 mm there; connectors, PS1 coil and C1 in
   the free column; DRC 0), `_s8.py` (planes, via in every U1 ball, plane
@@ -442,8 +442,10 @@ reference clock pairs [xilinx/xc7a100tfgg484pkg.txt]; the card RTL
   1.5 V high leave 0.2 / 0.5 V; no divider). Banks 14 (45 IO after the
   SPI x4 flash pins), 16 and 13 at 3.3 V: 111 bus nets (64 data,
   34 address, 7 tx, 6 control) + 11 CMOS + BCLK (MRCC, LVCMOS33: the
-  2.5 V clock passes VIH 2.0 V) + PERST# = 124 of 130. Banks 34/35
-  unused (VCCO to 3.3 V). Bank 0 and CFGBVS at 3.3 V.
+  2.5 V clock passes VIH 2.0 V) + PERST#. Banks 34/35 at 3.3 V too:
+  the spare balls let every net sit at most 3 rings deep (all-top banks
+  reached 9 rings: the 3 signal layers could not escape them, 2026-11-05).
+  Bank 0 and CFGBVS at 3.3 V.
 - Power: VCCINT + VCCBRAM 1.0 V, VCCAUX + VCCO15 1.8 V, MGTAVCC 1.0 V and
   MGTAVTT 1.2 V on their own regulators, VCCO 3.3 V; order VCCINT ->
   VCCAUX -> VCCO, MGTAVCC after VCCINT, MGTAVTT after MGTAVCC [UG482].
