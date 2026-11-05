@@ -418,7 +418,7 @@ def freeroute(board, path):
             sys.exit("FAIL: SES import")
         n, dropped = settle(board, path)
         print(f"iteration {it}: {n} unrouted, {dropped} router items in DRC errors dropped", flush=True)
-        if 0 < n >= best:                                 # freerouting stalled: the windowed router
+        if n:                         # the windowed router closes ~30 % per round; freerouting rips up the rest
             routed, tried = close_route.close(board, drc_report(path))
             n, dropped = settle(board, path)
             print(f"  close_route: {routed} of {tried} routed; {n} unrouted, {dropped} dropped", flush=True)
