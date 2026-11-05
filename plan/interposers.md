@@ -73,6 +73,11 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   module RAM; the RAM-module variant is a later build.
 - **D5** (decided 2026-10-20 by the operator) 4 layers on the socket 370
   prototypes (signals F&B, one ground mid, one power mid); no HDI.
+  Socket 3 and socket 7 (operator 2026-11-05): 6 layers, JLCPCB
+  JLC06161H-2116 (F sig, In1 GND, In2 VCC_1V1 whole, In3 split rails, In4
+  GND, B sig): on 4 layers the core current reached U1 through a split-plane
+  corridor (~30 mV drop against a ~14 mV margin); via-in-pad under U1 is free
+  from 6 layers, charged on 4 (`sockets/parts/jlcpcb_free_pofv_6-20_layers.html`).
 - **D1** (decided 2026-10-31 by the operator) Socket 3: external 12 V supply
   on the interposer (barrel jack, FPGAmotherboard power tree); the socket VCC
   pins stay unused (board LDO PQ30RV21: 2 A abs max, `hw/common/socket3_notes.md` R2).
@@ -364,6 +369,10 @@ the cam housing, 3.99 mm above the socket top (M1). DRC 0 errors.
 
 **T8 Routing**: layers per D5; Socket 370 per AP-906 (AGTL+, 133 MHz), Socket 7 at
 66 MHz with matched lengths per byte lane. Check: DRC 0 errors, 0 unconnected.
+Status (2026-11-05): `hw/tools/gen_socket7_t8.py` and `gen_socket3_t8.py` on the shared
+`autoroute.py` (planes, via in every netted U1 ball, plane fanout, freerouting + close_route);
+pre-route copper DRC 0 errors on both (socket 7: 220 connections left to the router, socket 3: 344).
+Routing runs queued after the C2 Mu run.
 
 **T9 Verification**: audit script: every base pad's net is the T1 signal and
 reaches the T5 ball (or its translator); every power pad on its rail. 3D check

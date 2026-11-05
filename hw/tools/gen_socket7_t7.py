@@ -64,7 +64,7 @@ def main():
     rows = {r["ref"]: r for r in csv.DictReader(open(OUT / "pdn.csv"))}
     lay = {r["ref"]: r for r in csv.DictReader(open(OUT / "layout.csv"))}
     board = pcbnew.BOARD()
-    board.SetCopperLayerCount(4)
+    board.SetCopperLayerCount(6)                 # JLC06161H-2116 (operator 2026-11-05: 6 layers)
     region = (WEST + 0.3, NORTH + 0.3, EAST - 0.3, SOUTH - 0.3)
     P = placer.Placer(board, comps, nets, full, (EAST + 1.0, SOUTH + 1.0), region, shaped=("U2",), libs=LIBS)
     P.put("U2", CX, CY)
