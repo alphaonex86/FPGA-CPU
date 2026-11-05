@@ -13,24 +13,16 @@ used; live JLCPCB stock >= quantity x boards, except CONSIGNED parts (not
 stocked by JLCPCB/LCSC: bought elsewhere and sent to JLCPCB, or JLCPCB Global
 Sourcing), printed with their source. JLCPCB's placement preview still has to
 be checked by eye: its library rotations differ from KiCad's for some
-packages.
+packages. The steps are jlcfab.py's.
 """
-import collections
-import csv
-import json
 import pathlib
-import subprocess
 import sys
-import time
-import urllib.request
-import zipfile
 
-import pcbnew
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import jlcfab
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT, NAME = ROOT / "hw/slot1-c2mu", "slot1-c2mu"
-FAB = OUT / "fab"
-JLC_SEARCH = "https://jlcpcb.com/api/overseas-pcb-order/v1/shoppingCart/smtGood/selectSmtComponentList"
 NO_PART = {"U2"}                          # gold fingers of the PCB
 ORDER = ("JLCPCB order: 8 layers, 1.6 mm, stack JLC08161H-2116, ENIG, gold fingers with 45 deg bevel "
          "(Slot 1 edge), via-in-pad (POFV: U1 and the plane vias), PCBA both sides incl. BGA")
@@ -116,125 +108,9 @@ LCSC = {
 }
 
 
-def drc_clean(pcb):
-    out = FAB / "drc.json"
-    r = subprocess.run(["nice", "-n", "19", "kicad-cli", "pcb", "drc", "--severity-error", "--format", "json",
-                        "-o", str(out), str(pcb)], capture_output=True, text=True)
-    if r.returncode != 0 or not out.exists():
-        sys.exit(f"FAIL: kicad-cli drc: {r.stderr.strip()[:300]}")
-    rep = json.load(open(out))
-    out.unlink()
-    viol, unrouted = rep.get("violations", []), rep.get("unconnected_items", [])
-    print(f"DRC: {len(viol)} errors, {len(unrouted)} unrouted")
-    return not viol and not unrouted
-
-
-def bom_groups(board):
-    groups = collections.defaultdict(list)
-    for f in board.GetFootprints():
-        ref = f.GetReference()
-        if ref not in NO_PART:
-            groups[(f.GetValue(), f.GetFPID().GetLibItemName().wx_str())].append(ref)
-    return groups
-
-
-def jlc_part(code):
-    req = urllib.request.Request(JLC_SEARCH, json.dumps({"keyword": code, "currentPage": 1, "pageSize": 5}).encode(),
-                                 {"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        d = json.load(r)
-    hits = [p for p in (d.get("data") or {}).get("componentPageInfo", {}).get("list") or []
-            if p["componentCode"] == code]
-    return hits[0] if hits else None
-
-
-def stock_check(groups, boards):
-    ok, cost = True, 0.0
-    for (value, fp), refs in sorted(groups.items(), key=lambda g: LCSC[g[0]]):
-        code, need = LCSC[(value, fp)], len(refs) * boards
-        p = jlc_part(code)
-        time.sleep(0.3)
-        if p is None:
-            print(f"FAIL  {code} {value}: not found at JLCPCB")
-            ok = False
-            continue
-        price = next((q["productPrice"] for q in p["componentPrices"] if q["startNumber"] <= need <= q["endNumber"]),
-                     p["componentPrices"][-1]["productPrice"])
-        cost += price * need
-        line = (f"{code:>10} {p['componentLibraryType'][:5]:5} stock {p['stockCount']:>8} need {need:>4} "
-                f"{p['componentModelEn'][:24]:24} {p['componentSpecificationEn'][:16]:16} {value}")
-        if code in CONSIGNED:
-            print(f"CONS  {line}  <- {CONSIGNED[code]}")
-        elif p["stockCount"] < need:
-            print(f"FAIL  {line}  (short)")
-            ok = False
-        else:
-            print(f"ok    {line}")
-    print(f"parts at JLCPCB list prices: ~US$ {cost:.0f} for {boards} boards (consigned included at list price)")
-    return ok
-
-
-def write_bom(groups):
-    with open(FAB / f"{NAME}-bom.csv", "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["Comment", "Designator", "Footprint", "LCSC Part #"])
-        for (value, fp), refs in sorted(groups.items(), key=lambda g: g[1][0]):
-            w.writerow([value, ",".join(sorted(refs)), fp, LCSC[(value, fp)]])
-
-
-def write_cpl(board):
-    with open(FAB / f"{NAME}-cpl.csv", "w", newline="") as f:
-        w = csv.writer(f)
-        w.writerow(["Designator", "Mid X", "Mid Y", "Layer", "Rotation"])
-        for fp in sorted(board.GetFootprints(), key=lambda fp: fp.GetReference()):
-            if fp.GetReference() in NO_PART:
-                continue
-            pos = fp.GetPosition()
-            w.writerow([fp.GetReference(), f"{pos.x / 1e6:.4f}mm", f"{-pos.y / 1e6:.4f}mm",
-                        "Bottom" if fp.IsFlipped() else "Top", f"{fp.GetOrientationDegrees() % 360:.1f}"])
-
-
-def write_gerbers(pcb):
-    tmp = FAB / "gerbers"
-    tmp.mkdir(exist_ok=True)
-    for cmd in (["gerbers", "--no-protel-ext", "--subtract-soldermask", "--layers",
-                 "F.Cu,In1.Cu,In2.Cu,In3.Cu,In4.Cu,In5.Cu,In6.Cu,B.Cu,F.Paste,B.Paste,F.SilkS,B.SilkS,F.Mask,B.Mask,Edge.Cuts"],
-                ["drill", "--format", "excellon", "--excellon-separate-th", "--generate-map", "--map-format", "gerberx2"]):
-        r = subprocess.run(["nice", "-n", "19", "kicad-cli", "pcb", "export", *cmd, "-o", f"{tmp}/", str(pcb)],
-                           capture_output=True, text=True)
-        if r.returncode != 0:
-            sys.exit(f"FAIL: kicad-cli export {cmd[0]}: {r.stderr.strip()[:300]}")
-    files = sorted(p for p in tmp.iterdir() if p.is_file())
-    with zipfile.ZipFile(FAB / f"{NAME}-gerbers.zip", "w", zipfile.ZIP_DEFLATED) as z:
-        for p in files:
-            z.write(p, p.name)
-    for p in files:
-        p.unlink()
-    tmp.rmdir()
-    print(f"gerbers: {len(files)} files")
-
-
 def main():
     boards = int(sys.argv[1]) if len(sys.argv) > 1 else 2
-    pcb = OUT / f"{NAME}.kicad_pcb"
-    FAB.mkdir(exist_ok=True)
-    if not drc_clean(pcb):
-        sys.exit("FAIL: route the board first (gen_c2mu_s8.py)")
-    board = pcbnew.LoadBoard(str(pcb))
-    groups = bom_groups(board)
-    missing = sorted(set(groups) - set(LCSC))
-    unused = sorted(set(LCSC) - set(groups))
-    if missing or unused:
-        sys.exit(f"FAIL: parts without an LCSC number {missing}; LCSC entries no part uses {unused}")
-    ok = stock_check(groups, boards)
-    write_bom(groups)
-    write_cpl(board)
-    write_gerbers(pcb)
-    if not ok:
-        sys.exit(1)
-    print(f"PASS  c2mu S9: {sum(map(len, groups.values()))} parts in {len(groups)} BOM lines, fab files in "
-          f"{FAB.relative_to(ROOT)}")
-    print(ORDER)
+    jlcfab.fab(OUT / f"{NAME}.kicad_pcb", LCSC, NO_PART, CONSIGNED, boards, ORDER)
 
 
 if __name__ == "__main__":
