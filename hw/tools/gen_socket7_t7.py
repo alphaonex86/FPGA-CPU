@@ -37,7 +37,7 @@ RING_F, RING_B = 23.735, 24.38           # base tail ring / insulator outer cour
 U1_AT = (CX, CY)
 FPS = {"U1": "Interposer:FPGA_CycloneV_5CEFA9_F484_BGA", "U2": "SocketBase:Socket7_Base_PGA296"}
 BASE_MODEL = "${KIPRJMOD}/../../sockets/kicad/3dmodels/Socket7_Base_PGA296.step"
-NET_CLASSES = {"PWR": ["S_VCC3", "VCCIO33", "VCC_AUX25", "VCCA_FPLL25", "PS*_SW"],
+NET_CLASSES = {"PWR": ["S_VCC3", "VCCIO33", "PS*_SW"], "AUX": ["VCC_AUX25", "VCCA_FPLL25"],   # AUX: between U1 ball vias
                "CORE": ["VCC_1V1", "S_VCC2"]}
 SUPPLY = {"GND", "S_VCC2", "S_VCC3", "VCCIO33", "VCC_1V1", "VCC_AUX25", "VCCA_FPLL25"}
 
@@ -136,7 +136,8 @@ def main():
         '  (lib (name "%s")(type "KiCad")(uri "${KIPRJMOD}/%s")(options "")(descr "socket7 footprint set"))\n'
         % (n, u) for n, u in (("Interposer", "../lib/Interposer.pretty"), ("Pwr", "../lib/Pwr.pretty"),
                               ("SocketBase", "../../sockets/kicad/Interposer.pretty"))) + ")\n")
-    placer.write_rules(OUT / f"{NAME}.kicad_pro", [("PWR", 0.15, 0.4), ("CORE", 0.15, 0.6)], NET_CLASSES)
+    placer.write_rules(OUT / f"{NAME}.kicad_pro", [("PWR", 0.15, 0.4), ("CORE", 0.15, 0.6), ("AUX", 0.1, 0.25)],
+                       NET_CLASSES)
     if fails:
         print("FAIL", *fails, sep="\n  ")
         sys.exit(1)

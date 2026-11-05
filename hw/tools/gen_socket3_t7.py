@@ -74,7 +74,8 @@ def layout(u1_rot):
 REGION = (WEST + 0.3, CY - 110.0, EAST - 0.3, SOUTH - 0.3)     # north: the outline closes on the parts
 NORTH_BAND = CY - 51.0                   # north of the translator columns: power entry, regulators, headers
 BASE_MODEL = "${KIPRJMOD}/../../sockets/kicad/3dmodels/Socket3_Base_PGA168.step"
-NET_CLASSES = {"PWR": ["V5", "V3V3", "VCC_AUX25", "VCCA_FPLL25", "PS*_SW"], "CORE": ["VCC_1V1"],
+NET_CLASSES = {"PWR": ["V5", "V3V3", "PS*_SW"], "CORE": ["VCC_1V1"],
+               "AUX": ["VCC_AUX25", "VCCA_FPLL25"],      # between U1 ball vias
                "VIN": ["V12", "V12_IN"]}
 SUPPLY = {"GND", "V3V3", "V5", "V12", "V12_IN", "VCC_1V1", "VCC_AUX25", "VCCA_FPLL25"}
 
@@ -173,7 +174,8 @@ def main():
         '  (lib (name "%s")(type "KiCad")(uri "${KIPRJMOD}/%s")(options "")(descr "socket3 footprint set"))\n'
         % (n, u) for n, u in (("Interposer", "../lib/Interposer.pretty"), ("Pwr", "../lib/Pwr.pretty"),
                               ("SocketBase", "../../sockets/kicad/Interposer.pretty"))) + ")\n")
-    placer.write_rules(OUT / f"{NAME}.kicad_pro", [("PWR", 0.15, 0.4), ("CORE", 0.15, 0.6), ("VIN", 0.2, 1.0)],
+    placer.write_rules(OUT / f"{NAME}.kicad_pro", [("PWR", 0.15, 0.4), ("CORE", 0.15, 0.6), ("VIN", 0.2, 1.0),
+                                                        ("AUX", 0.1, 0.25)],
                        NET_CLASSES)
     if fails:
         print("FAIL", *fails, sep="\n  ")
