@@ -53,28 +53,11 @@ def slots():
 def tr_rotation(x, side):
     """the rotation that puts the A pins (2..9) on the U1 side"""
     for rot in (0.0, 180.0):
-        f = placed(TR_FP, x, 0.0, rot, side)
+        f = placer.placed(TR_FP, x, 0.0, rot, side, LIBS)
         ax = sum(p.GetPosition().x for p in f.Pads() if 2 <= int(p.GetNumber()) <= 9) / 8e6
         if abs(ax - CX) < abs(x - CX):
             return rot
     sys.exit("FAIL: no translator rotation faces U1")
-
-
-SCRATCH = pcbnew.BOARD()                 # a footprint flips only on a board
-
-
-def placed(fpid, x, y, rot, side):
-    f = placer.load(fpid, LIBS)
-    SCRATCH.Add(f)
-    if side == "B":
-        f.Flip(f.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
-    f.SetPosition(placer.mm(x, y))
-    f.SetOrientationDegrees(rot)
-    return f
-
-
-def pads(f):
-    return {p.GetNumber(): (p.GetPosition().x / 1e6, p.GetPosition().y / 1e6) for p in f.Pads()}
 
 
 def layout(u1_rot):
@@ -84,13 +67,8 @@ def layout(u1_rot):
     for k, (x, y, side) in enumerate(slots()):
         at[k] = (x, y, tr_rotation(x, side), side)
     fps = {"U1": "Interposer:FPGA_CycloneV_5CEFA9_F484_BGA", "U2": "SocketBase:Socket3_Base_PGA168"}
-    xy = {key: pads(placed(fps.get(key, TR_FP), *v)) for key, v in at.items()}
+    xy = {key: placer.pads(placer.placed(fps.get(key, TR_FP), *v, LIBS)) for key, v in at.items()}
     return at, xy
-
-
-def ring_depth(ball_xy, centre):
-    """rings in from the BGA edge (1.0 mm pitch, 22 x 22)"""
-    return 10.5 - max(abs(ball_xy[0] - centre[0]), abs(ball_xy[1] - centre[1]))
 
 
 REGION = (WEST + 0.3, CY - 110.0, EAST - 0.3, SOUTH - 0.3)     # north: the outline closes on the parts

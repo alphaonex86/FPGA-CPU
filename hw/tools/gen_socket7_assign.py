@@ -1,68 +1,98 @@
 #!/usr/bin/env python3
 """Task T5 (plan/interposers.md): assign socket 7 signals to Cyclone V
-balls -> hw/socket7-cyclonev/pins.csv + assignment_quartus.qsf.
+balls -> hw/socket7-cyclonev/pins.csv, layout.csv + assignment_quartus.qsf.
 
 Socket 7 needs no translators (hw/common/socket7_notes.md R1: the 430TX
-drives 3.3 V TTL and both FPGAs take 3.3 V on any bank), so every bank
-runs VCCIO 3.3 V and all signals land directly (socket7-ti180 is
-dropped: plan/interposers.md D9).
-
-Bank plan: D bytes (8 D + their DP bit) never split across banks; the
-address bus, then control, fill the remaining banks; TAP + sideband +
-core local signals sit with the clock bank (3B, N9 = CLK1p, R5).
-
-Checks and outputs: hw/tools/assign_common.py.
+drives 3.3 V TTL), so every bank runs VCCIO 3.3 V, any user I/O ball serves
+any signal and each signal is one net, socket pin -> ball. As on socket 3
+(gen_socket3_assign.py, operator 2026-11-05: pins in a crossing-free order
+before routing), the map is a least total length matching on the T7 layout
+(gen_socket7_t7.py: U1 in the centre of the pin ring), plus DEPTH_MM per
+ring in from the BGA edge, over the user I/O balls without a configuration
+or clock function; a least length matching has no two crossing lines. CLK
+goes first to the clock input (CLKnp) with the fewest crossings, then the
+least length; U1 takes the rotation of the fewest CLK crossings, then the
+least total length.
+Checks (exit 1): every required T1 signal assigned, no ball used twice,
+CLK clock-capable.
 """
+import csv
+import math
 import pathlib
+import sys
 
-from assign_common import AS_X4_QSF, assign
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import gen_socket7_t7 as t7
+import placer
+from assign_common import AS_X4_QSF, write_outputs
+from gen_socket3_assign import DEPTH_MM, crossing, least_length
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 T1 = ROOT / "hw/common/socket7_signals.csv"
+FCSV = ROOT / "FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv"
 OUT = ROOT / "hw/socket7-cyclonev"
 
-CV_PLAN = [
-    # 3B (28 user I/O + CLK1p ball N9): clock, interrupts, sideband, TAP
-    ("CLK", "3B:N9"),
-    ("FLUSH#", "3B"), ("SMI#", "3B"), ("SMIACT#", "3B"), ("STPCLK#", "3B"),
-    ("INTR/LINT0", "3B"), ("NMI/LINT1", "3B"), ("FERR#", "3B"),
-    ("IGNNE#", "3B"), ("PM0/BP0", "3B"), ("PM1/BP1", "3B"),
-    ("BP2", "3B"), ("BP3", "3B"),
-    ("TCK", "3B"), ("TMS", "3B"), ("TDI", "3B"), ("TDO", "3B"),
-    ("TRST#", "3B"), ("PRDY", "3B"), ("VCC2DET#", "3B"),
-    # 7A (60): lower 6 data bytes + parity + fastest bus control
-    ("D[0-9]", "7A"), ("D1[0-9]", "7A"), ("D2[0-9]", "7A"),
-    ("D3[0-9]", "7A"), ("D4[0-7]", "7A"), ("DP[0-5]", "7A"),
-    ("ADS#", "7A"), ("ADSC#", "7A"), ("BRDY#", "7A"), ("BRDYC#", "7A"),
-    ("NA#", "7A"), ("BOFF#", "7A"),
-    # 4A (44): upper 2 data bytes + parity, low address, snoop/arbitration
-    ("D4[89]", "4A"), ("D5[0-9]", "4A"), ("D6[0-3]", "4A"),
-    ("DP[67]", "4A"),
-    ("A[3-9]", "4A"), ("A1[0-4]", "4A"), ("AP", "4A"),
-    ("BE[0-3]#", "4A"), ("BE6#", "4A"),
-    ("AHOLD", "4A"), ("EADS#", "4A"), ("HIT#", "4A"), ("HITM#", "4A"),
-    ("INV", "4A"), ("KEN#", "4A"), ("HOLD", "4A"), ("HLDA", "4A"),
-    # 8A (28): high address, cycle definition, cache hints, reset-time straps
-    ("A1[5-9]", "8A"), ("A2[0-9]", "8A"), ("A3[01]", "8A"),
-    ("M/IO#", "8A"), ("D/C#", "8A"), ("W/R#", "8A"),
-    ("PWT", "8A"), ("PCD", "8A"), ("WB/WT#", "8A"), ("EWBE#", "8A"),
-    ("A20M#", "8A"), ("IERR#", "8A"),
-    ("BF0", "8A"), ("BF1", "8A"),
-    # 5B (14): board-absent sideband, machine-check parity, system control,
-    # the bytes enables and SCYC that do not fit 7A/4A
-    ("BE4#", "5B"), ("BE5#", "5B"), ("SCYC", "5B"), ("CACHE#", "5B"), ("LOCK#", "5B"),
-    ("APCHK#", "5B"), ("PCHK#", "5B"), ("PEN#", "5B"), ("BUSCHK#", "5B"),
-    ("BE7#", "5B"), ("RESET", "5B"), ("INIT", "5B"), ("CPUTYP", "5B"),
-    ("BREQ", "5B"),
-]
-VCCIO = {"3A": "3.3 V", "3B": "3.3 V", "4A": "3.3 V", "5A": "3.3 V",
-         "5B": "3.3 V", "7A": "3.3 V", "8A": "3.3 V"}
+
+def assign(u1_rot, signals, balls, clocks):
+    """signals [(name, socket pin)] -> ({name: ball}, cost, CLK crossings)"""
+    _, xy = t7.layout(u1_rot)
+    socket, u1 = xy["U2"], xy["U1"]
+    depth = lambda b: DEPTH_MM * placer.ring_depth(u1[b], t7.U1_AT)
+    pin = dict(signals)
+    others = [(n, socket[p]) for n, p in signals if n != "CLK"]
+    best = None
+    for c in clocks:
+        ball, cost = least_length(others, [(b, u1[b]) for b in balls if b != c], depth)
+        leg = (socket[pin["CLK"]], u1[c])
+        n_cross = sum(crossing(leg, (socket[pin[n]], u1[b])) for n, b in ball.items())
+        cost += math.dist(*leg) + depth(c)
+        if best is None or (n_cross, cost) < best[0]:
+            best = ((n_cross, cost), dict(ball, CLK=c))
+    (n_cross, cost), ball = best
+    return ball, cost, n_cross
 
 
 def main():
-    assign(ROOT, T1, OUT, CV_PLAN, VCCIO, "CLK", translated=False, qsf=AS_X4_QSF)
-    print("  translators: 0 (direct 3.3 V landing, notes R1)")
-    print(f"  wrote {OUT.relative_to(ROOT)}/pins.csv + assignment_quartus.qsf")
+    t1 = [r for r in csv.DictReader(open(T1)) if r["required"] == "yes"]
+    signals = [(r["signal"], r["pin"]) for r in t1]
+    fpga = list(csv.DictReader(open(FCSV)))
+    bank = {r["ball"]: r["bank"] for r in fpga}
+    user = [r for r in fpga if r["user_io"] == "1"]
+    clocks = [r["ball"] for r in user if r["clock"].startswith("CLK") and r["clock"].endswith("p")]
+    balls = [r["ball"] for r in user if not r["config"] and not r["clock"] and "PLL" not in r["function"]]
+
+    tries = [assign(rot, signals, balls, clocks) + (rot,) for rot in (0.0, 90.0, 180.0, 270.0)]
+    for _, cost, n_cross, rot in tries:
+        print(f"  U1 rotation {rot:3.0f}: length + depth {cost:.0f} mm, CLK crossings {n_cross}")
+    ball, cost, n_cross, rot = min(tries, key=lambda a: (a[2], a[1]))
+
+    fails = []
+    if len(set(ball.values())) != len(ball):
+        fails.append("a ball used twice")
+    if ball["CLK"] not in clocks:
+        fails.append(f"CLK on {ball['CLK']}, not a clock input")
+    missing = [n for n, _ in signals if n not in ball]
+    if missing:
+        fails.append(f"unassigned: {missing}")
+    if fails:
+        print("FAIL", *fails, sep="\n  ")
+        sys.exit(1)
+
+    at, xy = t7.layout(rot)
+    src = {r["signal"]: r["source"] for r in t1}
+    rows = [[n, ball[n], bank[ball[n]], "3.3 V", "3.3-V LVTTL", "",
+             f"{math.dist(xy['U1'][ball[n]], xy['U2'][pin]):.1f}", pin, src[n]] for n, pin in signals]
+    write_outputs(OUT, rows, [], AS_X4_QSF)
+    with open(OUT / "layout.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["ref", "x", "y", "rot", "side"])
+        w.writerow(["U1", *at["U1"]])
+    per_bank = {}
+    for r in rows:
+        per_bank[r[2]] = per_bank.get(r[2], 0) + 1
+    print(f"socket7-cyclonev: {len(rows)} signals direct, U1 at {rot:.0f} deg, {cost:.0f} mm; "
+          f"per bank {sorted(per_bank.items())}; CLK on {ball['CLK']}")
+    print(f"  wrote {OUT.relative_to(ROOT)}/pins.csv, layout.csv, assignment_quartus.qsf")
 
 
 if __name__ == "__main__":

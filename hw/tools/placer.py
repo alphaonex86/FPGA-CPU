@@ -71,6 +71,29 @@ def localize_models(f, fails, out, no_model=()):
             fails.append(f"{ref}: 3D model file missing {path}")
 
 
+SCRATCH = pcbnew.BOARD()                 # a footprint flips only on a board
+
+
+def placed(fpid, x, y, rot, side, libs=None):
+    """a footprint at a spot, off the real board (pad positions for planning)"""
+    f = load(fpid, libs)
+    SCRATCH.Add(f)
+    if side == "B":
+        f.Flip(f.GetPosition(), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
+    f.SetPosition(mm(x, y))
+    f.SetOrientationDegrees(rot)
+    return f
+
+
+def pads(f):
+    return {p.GetNumber(): (p.GetPosition().x / 1e6, p.GetPosition().y / 1e6) for p in f.Pads()}
+
+
+def ring_depth(ball_xy, centre):
+    """rings in from the edge of a 22 x 22, 1.0 mm pitch BGA"""
+    return 10.5 - max(abs(ball_xy[0] - centre[0]), abs(ball_xy[1] - centre[1]))
+
+
 class Placer:
     """footprints on the board, courtyard occupancy per side. size: the grid (mm, from 0, 0);
     region: near()'s default search box; shaped: refs marked by their courtyard polygon, not its

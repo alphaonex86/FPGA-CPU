@@ -2,7 +2,7 @@
 	(version "E")
 	(design
 		(source "/home/user/Desktop/CatchChallenger/FPGA-CPU/hw/socket7-cyclonev/socket7-cyclonev.kicad_sch")
-		(date "2026-11-05T08:59:22")
+		(date "2026-11-05T09:04:38")
 		(tool "Eeschema 10.0.3")
 		(sheet
 			(number "1")
@@ -93,7 +93,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5f717791-671b-4121-9b8e-c5db85c0234b")
+			(tstamps "676502d2-7968-46f0-849e-5c1b618d0248")
 			(units
 				(unit
 					(name "A")
@@ -147,7 +147,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "04f6ed5f-3ce4-4a79-832c-2434d272fdcd")
+			(tstamps "eb12d0e8-489f-4560-b3ba-1386f0c8faf4")
 			(units
 				(unit
 					(name "A")
@@ -201,7 +201,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a8a5017a-7ffd-47ec-a3f0-3f7187aca10b")
+			(tstamps "fa571f5a-023a-4db8-bccb-3f9433be8e02")
 			(units
 				(unit
 					(name "A")
@@ -255,7 +255,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1fc37cc8-4587-40c4-9692-c5f61c113a57")
+			(tstamps "1ccb9337-4d97-48f1-920a-31aa5c8cc5e8")
 			(units
 				(unit
 					(name "A")
@@ -309,7 +309,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1add753e-9444-461b-8573-9ad16f3afe9a")
+			(tstamps "ffd5a5d8-201a-4604-a7b4-6e2b541823a7")
 			(units
 				(unit
 					(name "A")
@@ -363,7 +363,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "72f212b6-9455-4c04-9ad6-db9ba60d2386")
+			(tstamps "3fc7ce34-0bcd-4782-a002-5650f8e3b6d9")
 			(units
 				(unit
 					(name "A")
@@ -417,7 +417,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "72ea78a7-8ca7-4319-943e-64231a487723")
+			(tstamps "f216df35-b48b-47ae-a455-cd2f0e6f290f")
 			(units
 				(unit
 					(name "A")
@@ -471,7 +471,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b7964a7c-c687-49ae-ac11-d9a5a1abe9a5")
+			(tstamps "7976d1b2-454d-4b03-88d3-5ec9510da739")
 			(units
 				(unit
 					(name "A")
@@ -525,7 +525,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d58f6fed-9888-4751-8e3e-44361e1b9f58")
+			(tstamps "62d12885-94d9-4cef-9311-bb43df1abb3f")
 			(units
 				(unit
 					(name "A")
@@ -579,7 +579,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e930de03-2669-4e6b-9078-f91e70bad29b")
+			(tstamps "da10065a-1991-4273-9958-e8ecc2a54e35")
 			(units
 				(unit
 					(name "A")
@@ -633,7 +633,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "09e8ab20-468e-4e32-b89e-8b4755d87e16")
+			(tstamps "855a65fb-20fb-46a4-918d-5435fd62e238")
 			(units
 				(unit
 					(name "A")
@@ -687,7 +687,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b36c9edb-9835-4f01-bf03-a5b915aa8db0")
+			(tstamps "19539198-3a66-4a1f-9d6c-17d180769cca")
 			(units
 				(unit
 					(name "A")
@@ -741,7 +741,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "aca62069-269e-46bc-b4be-5a81999e020b")
+			(tstamps "54db6f89-a2c2-4500-a69b-642b4b7cda4c")
 			(units
 				(unit
 					(name "A")
@@ -795,7 +795,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1a7a4d4e-6c72-4e87-b60e-0e3b75ada840")
+			(tstamps "b3ae4c63-a3d2-4227-8da3-7d911800f7fc")
 			(units
 				(unit
 					(name "A")
@@ -849,7 +849,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d9db6d05-3013-487b-ab60-7285ab8410de")
+			(tstamps "8da80adb-79a0-44e2-9e6c-41e4432f1915")
 			(units
 				(unit
 					(name "A")
@@ -903,7 +903,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "62476133-65a9-4d02-ac4c-0f495aa015ce")
+			(tstamps "95523c26-4a74-4460-85d0-253cb1253205")
 			(units
 				(unit
 					(name "A")
@@ -957,7 +957,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5cd17121-bbe3-4104-b949-55056a51068c")
+			(tstamps "f5a948b8-673d-4d0d-9717-8aa751a768d6")
 			(units
 				(unit
 					(name "A")
@@ -1011,7 +1011,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8dac4a08-ceb5-4387-a37d-7b85aad736fa")
+			(tstamps "06fb8f51-4e42-4f3f-98c9-764d90566e1f")
 			(units
 				(unit
 					(name "A")
@@ -1065,7 +1065,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3ef1edb5-6df0-494b-a854-8799d1e8d7bd")
+			(tstamps "393a98eb-f430-4e73-a212-d4cd21451e34")
 			(units
 				(unit
 					(name "A")
@@ -1119,7 +1119,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1fbb9ef9-75ee-4aac-af73-fb1d1cd608d8")
+			(tstamps "c0a780d5-324a-4b2f-86a6-322ba2b7ccff")
 			(units
 				(unit
 					(name "A")
@@ -1173,7 +1173,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6df949be-66fd-4712-b500-ff608640acb1")
+			(tstamps "301c4818-7acb-450c-8c61-0c33eccb9baf")
 			(units
 				(unit
 					(name "A")
@@ -1227,7 +1227,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ec518e38-a468-4a7f-964b-f609cedcdc1a")
+			(tstamps "fb0a0beb-db8d-4e36-b6e4-58e5c6171e15")
 			(units
 				(unit
 					(name "A")
@@ -1281,7 +1281,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4b8affac-2cc8-4160-953b-58e70e3c74b7")
+			(tstamps "ea096af5-c34e-4345-bdc9-05951d4fed82")
 			(units
 				(unit
 					(name "A")
@@ -1335,7 +1335,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "24b8be85-675d-493f-9b24-c71130d68f0c")
+			(tstamps "e7811a85-d474-4bcf-b42e-100d0b1f8cf0")
 			(units
 				(unit
 					(name "A")
@@ -1389,7 +1389,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "71982a74-d976-461d-9957-5ed76e564228")
+			(tstamps "1b9eec58-0157-4c63-8e2a-08a9a03d1844")
 			(units
 				(unit
 					(name "A")
@@ -1443,7 +1443,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d6d5a655-4536-454c-8926-be3f493c7f62")
+			(tstamps "933e8eab-d382-4511-9957-2401893d7b25")
 			(units
 				(unit
 					(name "A")
@@ -1497,7 +1497,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0d02a338-3fd4-478b-a93e-19cd8b71ebed")
+			(tstamps "1f6e4a97-2f8d-4a47-a7b5-ebb6e1470b30")
 			(units
 				(unit
 					(name "A")
@@ -1551,7 +1551,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0167a320-25d2-44f0-bf2b-152298911731")
+			(tstamps "d800e1fc-ce87-4ab6-a11e-f16b3b0e9d22")
 			(units
 				(unit
 					(name "A")
@@ -1605,7 +1605,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "17fb3603-dd96-42e0-843f-106b8d21a3ef")
+			(tstamps "a65a1101-0ac6-4c91-b0d5-d8503728c35a")
 			(units
 				(unit
 					(name "A")
@@ -1659,7 +1659,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "37d1e4c6-2264-4a69-be5d-af18368099ed")
+			(tstamps "42ccdf53-b393-4e35-9a30-bf9515d099e1")
 			(units
 				(unit
 					(name "A")
@@ -1713,7 +1713,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "62e967d2-ade8-4a77-9050-2c07bd9e752e")
+			(tstamps "e57ef4a4-7be1-43e0-9208-9426b099685f")
 			(units
 				(unit
 					(name "A")
@@ -1767,7 +1767,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "aa2956cc-bd7b-4595-aa45-ba8997ff41f3")
+			(tstamps "54e03f13-d313-4e60-aafd-3af1512d8538")
 			(units
 				(unit
 					(name "A")
@@ -1821,7 +1821,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3e6083e9-1a4a-40d7-a01c-6afc20c8beaf")
+			(tstamps "7c1a47a0-b65c-4061-8aee-b0dcf3473de1")
 			(units
 				(unit
 					(name "A")
@@ -1875,7 +1875,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "c0599a79-c265-4dae-9d74-61757dc44731")
+			(tstamps "5fab64d1-03d6-4772-b401-41e3bd8c6b46")
 			(units
 				(unit
 					(name "A")
@@ -1929,7 +1929,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e1c6122e-66c2-4076-ad9d-235422e0f233")
+			(tstamps "d5d9a69e-1959-48a6-a225-d5d06204ebbc")
 			(units
 				(unit
 					(name "A")
@@ -1983,7 +1983,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f5edce97-c36e-4c86-86ea-04a043e7ff99")
+			(tstamps "7f2a6cfb-9afd-4c14-a6ca-94671840561a")
 			(units
 				(unit
 					(name "A")
@@ -2037,7 +2037,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "59690c6c-305a-4ed6-a5f0-9750683c26ad")
+			(tstamps "d1cae2ac-373c-420b-bdeb-6c2595b45195")
 			(units
 				(unit
 					(name "A")
@@ -2091,7 +2091,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7132cfb6-2b05-4471-8b77-313c1eb1fb0f")
+			(tstamps "8f7860fa-f0d7-423a-94c5-6e06aea60d52")
 			(units
 				(unit
 					(name "A")
@@ -2145,7 +2145,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7c3212f3-cd10-49fe-8efc-a6f35c6f4043")
+			(tstamps "81fc637c-9fa5-4528-aa0c-937a6b830bd0")
 			(units
 				(unit
 					(name "A")
@@ -2199,7 +2199,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d74d8198-dbbe-4ad5-bd38-6952cad1691c")
+			(tstamps "4c14284e-86b0-4c64-8bb8-d408bd7bf553")
 			(units
 				(unit
 					(name "A")
@@ -2253,7 +2253,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "40d68614-284a-41d5-a344-36ed126db0c4")
+			(tstamps "a854f957-98bd-4056-a870-6bc7564d2be3")
 			(units
 				(unit
 					(name "A")
@@ -2307,7 +2307,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5cc7427e-cdb2-4178-a973-0ab113817e3e")
+			(tstamps "4d3924e7-fbb7-4553-9ea6-511599fdb5a0")
 			(units
 				(unit
 					(name "A")
@@ -2361,7 +2361,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e1ada3ed-0105-4f93-b38b-6f0e06556414")
+			(tstamps "c55acff9-40ac-458d-8ada-8e58d49c9948")
 			(units
 				(unit
 					(name "A")
@@ -2415,7 +2415,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6dabd218-133a-40d1-9356-91cda373efec")
+			(tstamps "98881fdd-271b-49ae-a763-c8af2555fa8d")
 			(units
 				(unit
 					(name "A")
@@ -2469,7 +2469,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6c9f6491-7111-4640-9f7b-a8bc345673d7")
+			(tstamps "2ba7bb34-c4a8-4d8f-b585-0c1b7041c232")
 			(units
 				(unit
 					(name "A")
@@ -2523,7 +2523,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8ce2d895-bb4c-4a0d-bd36-c90fe6352d4c")
+			(tstamps "93ff61bd-0865-4e4b-8937-e2374fdb9454")
 			(units
 				(unit
 					(name "A")
@@ -2577,7 +2577,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f521b796-6037-4427-abaa-7ba58263b3cd")
+			(tstamps "4f070b75-c588-4ee4-ada2-f7f0f496d02e")
 			(units
 				(unit
 					(name "A")
@@ -2631,7 +2631,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5f523af9-e29f-46cf-a615-fa9974782225")
+			(tstamps "1a05ebd7-78e9-41b9-9c18-64229cc07182")
 			(units
 				(unit
 					(name "A")
@@ -2685,7 +2685,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e9c64bc3-ed47-499d-a739-cd5b17d0008f")
+			(tstamps "7ab5fe5a-67a6-44a2-85c8-a72b5ac88e23")
 			(units
 				(unit
 					(name "A")
@@ -2739,7 +2739,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "84ed2376-ffa8-4308-bc73-ceb6243a2c55")
+			(tstamps "1d8262eb-6431-476c-b899-7955879be38e")
 			(units
 				(unit
 					(name "A")
@@ -2793,7 +2793,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "61581129-ad04-4050-8b1a-de2842d23f2f")
+			(tstamps "6147cfc6-03f9-4415-9502-05bf1d8f5077")
 			(units
 				(unit
 					(name "A")
@@ -2847,7 +2847,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3fb525ee-e5f7-448d-ab3d-fd60552f03dc")
+			(tstamps "03c6a928-91f9-4228-8f9a-569c104d1ce5")
 			(units
 				(unit
 					(name "A")
@@ -2901,7 +2901,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fef6ba78-9e27-4456-81a4-d480b4bc0df3")
+			(tstamps "7e981852-4c05-4e1c-992e-03f9efff88a6")
 			(units
 				(unit
 					(name "A")
@@ -2955,7 +2955,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "513c3cfa-184b-4cd6-b430-90a36c7f605a")
+			(tstamps "5f5798c1-6f1b-4996-82bf-6c7742932167")
 			(units
 				(unit
 					(name "A")
@@ -3009,7 +3009,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "502e5071-56ee-4392-8da6-3bebe85ac389")
+			(tstamps "7790bcf9-b70c-451b-8106-b7d04015fc52")
 			(units
 				(unit
 					(name "A")
@@ -3063,7 +3063,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2dd8be49-ed8c-4969-97db-0e3f8d19ddcd")
+			(tstamps "2dc50570-c487-41b3-b3f3-9b143433415a")
 			(units
 				(unit
 					(name "A")
@@ -3117,7 +3117,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "358ba7a8-16d8-47d1-b28b-f110bfd07b1a")
+			(tstamps "ef86cd59-2c92-4fa9-a7a9-6c2453bf8cce")
 			(units
 				(unit
 					(name "A")
@@ -3171,7 +3171,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "42eaf75c-e35a-4322-9ee4-83730b0d4dd5")
+			(tstamps "e43093ef-2da3-4140-b9c6-2c9462b70d6d")
 			(units
 				(unit
 					(name "A")
@@ -3225,7 +3225,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "f3fe493a-b55b-4d84-a0fd-81255f72b9bc")
+			(tstamps "878a4cc0-32f0-4378-85f9-57d8ecbbee10")
 			(units
 				(unit
 					(name "A")
@@ -3279,7 +3279,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6f906d0f-7400-40d0-bf40-8d51f302f1a6")
+			(tstamps "25b78554-4f97-49c3-8bfd-485ba3f5e91e")
 			(units
 				(unit
 					(name "A")
@@ -3333,7 +3333,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8455a5d7-a246-48f8-8c5d-b9b0ce4d590f")
+			(tstamps "0734c4af-8489-4ff1-aba7-200e37ac4bbf")
 			(units
 				(unit
 					(name "A")
@@ -3387,7 +3387,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "059b2720-e57b-440b-a841-dbfa215fa2f5")
+			(tstamps "2ff96b9b-6eb6-4d78-896d-06ddabe2b4b4")
 			(units
 				(unit
 					(name "A")
@@ -3441,7 +3441,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b27b7d93-e521-46b5-8fca-a04d8e054cbf")
+			(tstamps "b91905dd-5b41-4f5e-8e58-9e47b756b64c")
 			(units
 				(unit
 					(name "A")
@@ -3495,7 +3495,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d2328b17-8ac5-4bc1-90b4-ff723e24349d")
+			(tstamps "aa907663-0c00-4991-9c2d-e9f4d1f9359e")
 			(units
 				(unit
 					(name "A")
@@ -3549,7 +3549,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "06de4cb8-f99c-4488-b2f4-f75dabd65c84")
+			(tstamps "b9821a2c-4dde-45ac-9a43-687d59c81795")
 			(units
 				(unit
 					(name "A")
@@ -3603,7 +3603,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "0cd69438-9a77-41c2-87be-add92003fdcc")
+			(tstamps "d2362542-5def-42b7-a431-79ce4f87f5b7")
 			(units
 				(unit
 					(name "A")
@@ -3657,7 +3657,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1308c87d-42c7-4f0d-9f2e-674cd62a3a09")
+			(tstamps "a7500a47-ce04-4694-a900-e35f42284510")
 			(units
 				(unit
 					(name "A")
@@ -3711,7 +3711,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5253ac18-2bed-4d5a-9cbc-56bc6a86db5e")
+			(tstamps "a23d2b0b-926a-4e1b-ab77-c9f543d53990")
 			(units
 				(unit
 					(name "A")
@@ -3765,7 +3765,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "bd45f49d-2047-4d14-8d1a-26398801f675")
+			(tstamps "25633baf-7d82-46ff-8f41-c04fa177b7ed")
 			(units
 				(unit
 					(name "A")
@@ -3819,7 +3819,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "703b7894-ce65-4359-a55b-85fa3678cf83")
+			(tstamps "eb472e78-576e-4290-ae0e-4f2db2c0ffd2")
 			(units
 				(unit
 					(name "A")
@@ -3873,7 +3873,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "6351a0cf-fc69-4d84-817b-a74789ca4a8e")
+			(tstamps "c89b4052-5558-48bd-84cf-cb0bdf16ca82")
 			(units
 				(unit
 					(name "A")
@@ -3927,7 +3927,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "59166d8f-3885-42c9-aca8-9ddbd4dedfc1")
+			(tstamps "43c5c0d3-ca0c-410c-a47a-af005c2fb182")
 			(units
 				(unit
 					(name "A")
@@ -3981,7 +3981,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "922bfb65-07bc-4cf0-9118-e78611e35922")
+			(tstamps "8c82c581-88a1-4f87-ac75-989995ff3d5f")
 			(units
 				(unit
 					(name "A")
@@ -4035,7 +4035,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "56624514-63ac-4140-a812-611f86666001")
+			(tstamps "d1344b7e-650e-4143-9e7a-75dc9d250ad5")
 			(units
 				(unit
 					(name "A")
@@ -4089,7 +4089,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "cb3ae3d2-595f-43e8-a0fe-37eaa9a65dee")
+			(tstamps "f0cb339f-0ef5-4e65-848e-1842a4009b10")
 			(units
 				(unit
 					(name "A")
@@ -4143,7 +4143,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1dcd76da-8b70-4733-ac11-57f0f7392ef5")
+			(tstamps "e60bce00-7436-4f9f-b266-93ec7ea6ffcd")
 			(units
 				(unit
 					(name "A")
@@ -4197,7 +4197,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "61837f78-91a7-47f0-aae5-ac53ba6b1d7e")
+			(tstamps "879adc72-dd54-4d31-bbfd-953df41ead18")
 			(units
 				(unit
 					(name "A")
@@ -4251,7 +4251,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e699da54-3d61-4688-8c30-b5b20e12ade7")
+			(tstamps "35f9108d-127d-4dfa-afb7-f42c2ad4b687")
 			(units
 				(unit
 					(name "A")
@@ -4305,7 +4305,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "1a2537b3-516f-414e-98b4-9ccb8ddb6b37")
+			(tstamps "4a3daa87-cf4b-41db-a6d1-75df6cfaffe7")
 			(units
 				(unit
 					(name "A")
@@ -4359,7 +4359,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "842a9bcd-66d8-412b-9f9e-586106e50fe8")
+			(tstamps "1fa8a44c-3b8f-497f-916f-0887ae61e42f")
 			(units
 				(unit
 					(name "A")
@@ -4413,7 +4413,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "2e1e5994-f2c6-458a-930f-fba6bdb9caee")
+			(tstamps "94412ce1-7cfc-41ba-9afc-378acc70ff8c")
 			(units
 				(unit
 					(name "A")
@@ -4467,7 +4467,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "cdcf9fc3-233a-4c63-8573-56b5ec3b0f35")
+			(tstamps "f592c5dc-b646-48f0-b54d-adaec154b8aa")
 			(units
 				(unit
 					(name "A")
@@ -4521,7 +4521,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b726fb9a-0e2e-4e34-b922-ac65b3ede3ae")
+			(tstamps "dbfa5666-f7b7-4c52-9659-e78dca4d10b9")
 			(units
 				(unit
 					(name "A")
@@ -4575,7 +4575,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "5329217d-ce85-4bd6-b858-0a98559989b0")
+			(tstamps "ce00befa-2fb5-4529-a6ed-02d208e84afa")
 			(units
 				(unit
 					(name "A")
@@ -4629,7 +4629,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3d6a862f-01a2-4dd3-93af-8056e58f560e")
+			(tstamps "c0ba4e5c-6628-4ffe-abb5-eb7ba863152a")
 			(units
 				(unit
 					(name "A")
@@ -4683,7 +4683,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "752e7abb-c36c-4e54-9c1c-a04fc9a55284")
+			(tstamps "9f28a681-d5ca-41d7-9c73-212e8bf0dde2")
 			(units
 				(unit
 					(name "A")
@@ -4737,7 +4737,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "aa54a1c2-ab7d-4ac4-b333-c4fc3f7891a4")
+			(tstamps "3d99f972-8a35-4692-bca8-7d2e2a488c3f")
 			(units
 				(unit
 					(name "A")
@@ -4791,7 +4791,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "a39468ed-5ca8-473d-a634-798d20d19555")
+			(tstamps "95816881-69be-415d-a163-2a6bf8bba17a")
 			(units
 				(unit
 					(name "A")
@@ -4845,7 +4845,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "548f3169-9214-4070-bcb5-0add55e7dc10")
+			(tstamps "e3ff9501-2071-4568-a119-7ccb7e7640cb")
 			(units
 				(unit
 					(name "A")
@@ -4899,7 +4899,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "74e38dcd-40b4-487a-b581-82515c0ec7bc")
+			(tstamps "5addb62d-29b4-4f4e-a1be-c58d45a4722c")
 			(units
 				(unit
 					(name "A")
@@ -4965,7 +4965,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "7a03e94f-027b-4237-8d47-df1b0e4500c3")
+			(tstamps "62371c53-ab53-4133-af9f-1179be2110e2")
 			(units
 				(unit
 					(name "A")
@@ -5011,7 +5011,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8dafa180-867c-4908-bec3-e9e4f461e000")
+			(tstamps "571891c0-eb38-42b2-96fb-bc7b101c1181")
 			(units
 				(unit
 					(name "A")
@@ -5069,7 +5069,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "b7387df6-9314-441f-b017-444189b90b7d")
+			(tstamps "109e6b31-a434-40b1-82f7-f0dd9f23c5af")
 			(units
 				(unit
 					(name "A")
@@ -5132,7 +5132,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "dcdd4def-3690-4937-8563-f12f1b8785a4")
+			(tstamps "0e0b25b9-46ab-4cb7-abee-ddef3e105ed6")
 			(units
 				(unit
 					(name "A")
@@ -5186,7 +5186,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "8252030e-cb92-41c4-b34d-54e48eae4973")
+			(tstamps "76db275f-54d9-4c9c-91fd-442093fe8d16")
 			(units
 				(unit
 					(name "A")
@@ -5240,7 +5240,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "4cd17f6a-bbf5-4ef0-86fb-9c9d166e4a35")
+			(tstamps "a5195fe2-0d84-4a2a-af85-23b7b3f79cfc")
 			(units
 				(unit
 					(name "A")
@@ -5294,7 +5294,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3fa9764c-3d35-412d-8027-70161ce69ca3")
+			(tstamps "a95d217b-e207-4ca9-ac01-727c6d0b8944")
 			(units
 				(unit
 					(name "A")
@@ -5348,7 +5348,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "81395b1d-ff2a-41da-a6b1-e7a4a6b3ed63")
+			(tstamps "6dffec17-83b8-4e24-b345-acd95f833036")
 			(units
 				(unit
 					(name "A")
@@ -5402,7 +5402,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "44cb79cf-5cab-4679-8f05-559416b595cc")
+			(tstamps "79ef8633-4890-462b-8c31-f7dab337335a")
 			(units
 				(unit
 					(name "A")
@@ -5456,7 +5456,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "89d8723d-d2c3-4e15-8660-e2abbc9db116")
+			(tstamps "4bcc3cdb-8f03-4a5a-8757-cdd2918d9c0f")
 			(units
 				(unit
 					(name "A")
@@ -5510,7 +5510,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fc5f0460-cc88-47ac-b6a3-bf0bd4ad37b7")
+			(tstamps "f9aaa553-f84a-4f9b-81a8-07fbb21b72cb")
 			(units
 				(unit
 					(name "A")
@@ -5564,7 +5564,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "3245a55c-a87d-4b62-9418-7685d5f6972d")
+			(tstamps "6620e1e0-c386-4838-a9db-1123e1b7b45a")
 			(units
 				(unit
 					(name "A")
@@ -5618,7 +5618,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "fe114c40-f3b8-4d38-9676-9b4755b441ed")
+			(tstamps "cf89ee9d-220d-43d0-a938-b1d8bc78f96a")
 			(units
 				(unit
 					(name "A")
@@ -5672,7 +5672,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "db668db8-2cfe-4207-952d-1daf939ef6ee")
+			(tstamps "0da58ab1-74dc-4fd2-882d-68fe7c083ef0")
 			(units
 				(unit
 					(name "A")
@@ -5726,7 +5726,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "d54af711-39c3-44a6-9703-8d6564f536d3")
+			(tstamps "f514307f-38d4-4ee9-829d-4f54d648af82")
 			(units
 				(unit
 					(name "A")
@@ -5780,7 +5780,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "dd4a6c32-623b-4c89-859a-e1f4409d58bc")
+			(tstamps "6536d56f-ce51-4c62-a1b8-4e5f04ab61ef")
 			(units
 				(unit
 					(name "A")
@@ -5834,7 +5834,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "ccbdb929-8b17-46e5-b0e8-9261c2745963")
+			(tstamps "20ba0d6d-cdf8-4df7-9536-94a3f4d4db44")
 			(units
 				(unit
 					(name "A")
@@ -5888,7 +5888,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e8beca3f-a84f-47b3-92b5-1f5ae813ecd3")
+			(tstamps "f7c2bec4-d831-4919-9984-e527149c900c")
 			(units
 				(unit
 					(name "A")
@@ -5942,7 +5942,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "aec0926f-6f2c-4083-a1a4-09e0e2afc4fa")
+			(tstamps "497c52c9-0781-4222-9e2e-633849acad12")
 			(units
 				(unit
 					(name "A")
@@ -5996,7 +5996,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "afd1085f-8d28-4b11-95cd-5b28b26849e1")
+			(tstamps "d8e93752-419a-4686-a6a6-fe3657d6e105")
 			(units
 				(unit
 					(name "A")
@@ -6050,7 +6050,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "64cd5399-775b-420b-943f-4e0808f62d91")
+			(tstamps "3c54587e-6e60-4908-a9fc-53f15b6aef3a")
 			(units
 				(unit
 					(name "A")
@@ -6104,7 +6104,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "695f8822-d677-405d-9eca-7c60489594bc")
+			(tstamps "53585a7f-6fc3-49d7-8874-ef0fc25082ca")
 			(units
 				(unit
 					(name "A")
@@ -6150,11 +6150,11 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "cc4da80e-cfe0-4c64-9d46-8067652d6da3" "3b17df02-899b-483a-a3e7-becdf19fefd5"
-				"af9388fb-21f8-440b-856e-0b9c71a9fb79" "ce492339-8e96-474d-85c1-9a50abc8da2e"
-				"95876247-9916-40f1-bea7-59229cab0542" "c8a762a0-b0f3-4768-89f4-95a929664a92"
-				"c34b4746-3f8e-49d9-843e-d81c8d366a03" "91fadaaa-1f09-4841-8599-069b0d11949f"
-				"4102e017-88cf-4b04-bc4b-e5b1a6236222" "19ba5e5c-e36d-4c5a-84b6-0d7d2d1c0a23"
+			(tstamps "a2cdb9fc-a52f-46cb-aae9-80f58d671253" "51eefe84-480c-4505-8e73-ecd78daa4f5f"
+				"369c42c0-c26a-4831-bbdf-c141993b5d5d" "fd403733-5273-4d17-b302-e41cd4bbd68e"
+				"baa71bca-f616-4131-98ce-c458d596b37b" "6645f457-8542-462b-b253-93e160dcaddc"
+				"b3e5025d-fcd9-4f52-9f84-2d962c728ff2" "9933c03e-81f3-43b6-9338-8592d23c8490"
+				"4e45cd03-3c0a-420c-b0bd-1cfe974256f7" "2fc4ca61-1581-44f0-987c-2336fee80ef1"
 			)
 			(units
 				(unit
@@ -7692,12 +7692,12 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "e6b13a2b-92ce-4682-9086-dd1885d4847a" "feaed5b5-2fb2-4d79-8053-fe2b056477a4"
-				"cd79b4b6-eaa6-4d47-b948-3105386a6ef4" "71c73a1a-f3c7-431e-a345-4979f619d547"
-				"5c22c38d-7ff5-4307-b6da-3804201c135f" "9bf15b01-f560-415d-9322-b899b0618bd1"
-				"4bd653e1-357f-45c4-9ca5-c0c2e8f3f61f" "8e339be8-7451-40a5-bff3-c703775b435f"
-				"ddf4b260-eafb-4796-94ec-3f2b2f7d5096" "d70f82a8-263d-4c64-8e50-c921b31614af"
-				"48174059-785c-4bf6-86b4-bef00356963b"
+			(tstamps "b13ad690-ecb0-4bd6-87a7-438f4d341a91" "5c7eda07-1a5a-491d-8abf-f5464cb437dd"
+				"48de3266-16d9-427e-9ec3-39d4d7e5f365" "5108b7de-9de8-4d53-bf21-42f22229936f"
+				"4726646f-641d-40d1-af47-e629b2694cc4" "38ee1ec1-cd85-49a0-b3bf-e5926c391e38"
+				"db9479b1-1b62-4a18-8c6a-b0f42d107b4a" "8ee9c5dd-036b-486a-b5e9-9af33da7f088"
+				"a74ce560-e55e-4ed3-a37a-3eefe584deac" "3f157643-e635-4a13-a53d-f30a0f8d7e00"
+				"19d6e5bb-45bf-47c0-b4a8-964ac95570c6"
 			)
 			(units
 				(unit
@@ -8676,7 +8676,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "73735f53-58f9-4780-b4b9-cbc489b10180")
+			(tstamps "34b47ce6-e2f5-4f2a-9acf-8de5aacf2497")
 			(units
 				(unit
 					(name "A")
@@ -8734,7 +8734,7 @@
 				(names "/")
 				(tstamps "/")
 			)
-			(tstamps "21df74f2-8f13-466f-bc57-68137c3f96c0")
+			(tstamps "8d8262f9-a30b-420d-9741-209ad6ebe8d5")
 			(units
 				(unit
 					(name "A")
@@ -13197,8 +13197,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AB15")
-				(pinfunction "AB15_AB15")
+				(pin "B7")
+				(pinfunction "B7_B7")
 				(pintype "passive")
 			)
 			(node
@@ -13214,8 +13214,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AB20")
-				(pinfunction "AB20_AB20")
+				(pin "A7")
+				(pinfunction "A7_A7")
 				(pintype "passive")
 			)
 			(node
@@ -13231,8 +13231,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA14")
-				(pinfunction "AA14_AA14")
+				(pin "C9")
+				(pinfunction "C9_C9")
 				(pintype "passive")
 			)
 			(node
@@ -13248,8 +13248,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AB22")
-				(pinfunction "AB22_AB22")
+				(pin "C11")
+				(pinfunction "C11_C11")
 				(pintype "passive")
 			)
 			(node
@@ -13265,8 +13265,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AB13")
-				(pinfunction "AB13_AB13")
+				(pin "E12")
+				(pinfunction "E12_E12")
 				(pintype "passive")
 			)
 			(node
@@ -13282,8 +13282,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AB18")
-				(pinfunction "AB18_AB18")
+				(pin "D12")
+				(pinfunction "D12_D12")
 				(pintype "passive")
 			)
 			(node
@@ -13299,8 +13299,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA13")
-				(pinfunction "AA13_AA13")
+				(pin "F14")
+				(pinfunction "F14_F14")
 				(pintype "passive")
 			)
 			(node
@@ -13316,8 +13316,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AB21")
-				(pinfunction "AB21_AB21")
+				(pin "A10")
+				(pinfunction "A10_A10")
 				(pintype "passive")
 			)
 			(node
@@ -13333,8 +13333,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AB12")
-				(pinfunction "AB12_AB12")
+				(pin "A8")
+				(pinfunction "A8_A8")
 				(pintype "passive")
 			)
 			(node
@@ -13350,8 +13350,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA22")
-				(pinfunction "AA22_AA22")
+				(pin "A9")
+				(pinfunction "A9_A9")
 				(pintype "passive")
 			)
 			(node
@@ -13367,8 +13367,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y22")
-				(pinfunction "Y22_Y22")
+				(pin "B10")
+				(pinfunction "B10_B10")
 				(pintype "passive")
 			)
 			(node
@@ -13384,8 +13384,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA20")
-				(pinfunction "AA20_AA20")
+				(pin "B11")
+				(pinfunction "B11_B11")
 				(pintype "passive")
 			)
 			(node
@@ -13401,8 +13401,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G8")
-				(pinfunction "G8_G8")
+				(pin "D13")
+				(pinfunction "D13_D13")
 				(pintype "passive")
 			)
 			(node
@@ -13418,8 +13418,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J9")
-				(pinfunction "J9_J9")
+				(pin "E14")
+				(pinfunction "E14_E14")
 				(pintype "passive")
 			)
 			(node
@@ -13435,8 +13435,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G6")
-				(pinfunction "G6_G6")
+				(pin "B12")
+				(pinfunction "B12_B12")
 				(pintype "passive")
 			)
 			(node
@@ -13452,8 +13452,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J8")
-				(pinfunction "J8_J8")
+				(pin "C13")
+				(pinfunction "C13_C13")
 				(pintype "passive")
 			)
 			(node
@@ -13469,8 +13469,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "F7")
-				(pinfunction "F7_F7")
+				(pin "A12")
+				(pinfunction "A12_A12")
 				(pintype "passive")
 			)
 			(node
@@ -13486,8 +13486,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J7")
-				(pinfunction "J7_J7")
+				(pin "B13")
+				(pinfunction "B13_B13")
 				(pintype "passive")
 			)
 			(node
@@ -13503,8 +13503,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "E9")
-				(pinfunction "E9_E9")
+				(pin "E16")
+				(pinfunction "E16_E16")
 				(pintype "passive")
 			)
 			(node
@@ -13520,8 +13520,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B7")
-				(pinfunction "B7_B7")
+				(pin "E9")
+				(pinfunction "E9_E9")
 				(pintype "passive")
 			)
 			(node
@@ -13537,8 +13537,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "D6")
-				(pinfunction "D6_D6")
+				(pin "C6")
+				(pinfunction "C6_C6")
 				(pintype "passive")
 			)
 			(node
@@ -13554,8 +13554,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B6")
-				(pinfunction "B6_B6")
+				(pin "D6")
+				(pinfunction "D6_D6")
 				(pintype "passive")
 			)
 			(node
@@ -13571,8 +13571,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "C8")
-				(pinfunction "C8_C8")
+				(pin "D7")
+				(pinfunction "D7_D7")
 				(pintype "passive")
 			)
 			(node
@@ -13605,8 +13605,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "C9")
-				(pinfunction "C9_C9")
+				(pin "B5")
+				(pinfunction "B5_B5")
 				(pintype "passive")
 			)
 			(node
@@ -13627,8 +13627,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "C6")
-				(pinfunction "C6_C6")
+				(pin "F12")
+				(pinfunction "F12_F12")
 				(pintype "passive")
 			)
 			(node
@@ -13644,8 +13644,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "H8")
-				(pinfunction "H8_H8")
+				(pin "B6")
+				(pinfunction "B6_B6")
 				(pintype "passive")
 			)
 			(node
@@ -13661,8 +13661,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "H6")
-				(pinfunction "H6_H6")
+				(pin "A5")
+				(pinfunction "A5_A5")
 				(pintype "passive")
 			)
 			(node
@@ -13678,8 +13678,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "L7")
-				(pinfunction "L7_L7")
+				(pin "F13")
+				(pinfunction "F13_F13")
 				(pintype "passive")
 			)
 			(node
@@ -13695,8 +13695,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "D7")
-				(pinfunction "D7_D7")
+				(pin "C8")
+				(pinfunction "C8_C8")
 				(pintype "passive")
 			)
 			(node
@@ -13712,8 +13712,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "K20")
-				(pinfunction "K20_K20")
+				(pin "C20")
+				(pinfunction "C20_C20")
 				(pintype "passive")
 			)
 			(node
@@ -13729,8 +13729,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "L8")
-				(pinfunction "L8_L8")
+				(pin "C21")
+				(pinfunction "C21_C21")
 				(pintype "passive")
 			)
 			(node
@@ -13746,8 +13746,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "W22")
-				(pinfunction "W22_W22")
+				(pin "K22")
+				(pinfunction "K22_K22")
 				(pintype "passive")
 			)
 			(node
@@ -13763,8 +13763,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y17")
-				(pinfunction "Y17_Y17")
+				(pin "D21")
+				(pinfunction "D21_D21")
 				(pintype "passive")
 			)
 			(node
@@ -13780,8 +13780,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "L18")
-				(pinfunction "L18_L18")
+				(pin "F22")
+				(pinfunction "F22_F22")
 				(pintype "passive")
 			)
 			(node
@@ -13909,8 +13909,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA17")
-				(pinfunction "AA17_AA17")
+				(pin "F15")
+				(pinfunction "F15_F15")
 				(pintype "passive")
 			)
 			(node
@@ -13926,8 +13926,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y20")
-				(pinfunction "Y20_Y20")
+				(pin "B17")
+				(pinfunction "B17_B17")
 				(pintype "passive")
 			)
 			(node
@@ -13943,8 +13943,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA18")
-				(pinfunction "AA18_AA18")
+				(pin "C16")
+				(pinfunction "C16_C16")
 				(pintype "passive")
 			)
 			(node
@@ -13960,8 +13960,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y21")
-				(pinfunction "Y21_Y21")
+				(pin "E15")
+				(pinfunction "E15_E15")
 				(pintype "passive")
 			)
 			(node
@@ -13977,8 +13977,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "N20")
-				(pinfunction "N20_N20")
+				(pin "B16")
+				(pinfunction "B16_B16")
 				(pintype "passive")
 			)
 			(node
@@ -13994,8 +13994,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "M20")
-				(pinfunction "M20_M20")
+				(pin "C15")
+				(pinfunction "C15_C15")
 				(pintype "passive")
 			)
 			(node
@@ -14011,8 +14011,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA19")
-				(pinfunction "AA19_AA19")
+				(pin "B15")
+				(pinfunction "B15_B15")
 				(pintype "passive")
 			)
 			(node
@@ -14028,8 +14028,8 @@
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "M21")
-				(pinfunction "M21_M21")
+				(pin "A15")
+				(pinfunction "A15_A15")
 				(pintype "passive")
 			)
 			(node
@@ -14041,46 +14041,12 @@
 		)
 		(net
 			(code "50")
-			(name "/BF0")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "A10")
-				(pinfunction "A10_A10")
-				(pintype "passive")
-			)
-			(node
-				(ref "U2")
-				(pin "Y33")
-				(pinfunction "BF0_Y33")
-				(pintype "input")
-			)
-		)
-		(net
-			(code "51")
-			(name "/BF1")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "A9")
-				(pinfunction "A9_A9")
-				(pintype "passive")
-			)
-			(node
-				(ref "U2")
-				(pin "X34")
-				(pinfunction "BF1_X34")
-				(pintype "input")
-			)
-		)
-		(net
-			(code "52")
 			(name "/BOFF#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "K19")
-				(pinfunction "K19_K19")
+				(pin "J19")
+				(pinfunction "J19_J19")
 				(pintype "passive")
 			)
 			(node
@@ -14091,7 +14057,7 @@
 			)
 		)
 		(net
-			(code "53")
+			(code "51")
 			(name "/BP2")
 			(class "Default")
 			(node
@@ -14101,8 +14067,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "T10")
-				(pinfunction "T10_T10")
+				(pin "M22")
+				(pinfunction "M22_M22")
 				(pintype "passive")
 			)
 			(node
@@ -14113,7 +14079,7 @@
 			)
 		)
 		(net
-			(code "54")
+			(code "52")
 			(name "/BP3")
 			(class "Default")
 			(node
@@ -14123,8 +14089,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "U10")
-				(pinfunction "U10_U10")
+				(pin "M21")
+				(pinfunction "M21_M21")
 				(pintype "passive")
 			)
 			(node
@@ -14135,13 +14101,13 @@
 			)
 		)
 		(net
-			(code "55")
+			(code "53")
 			(name "/BRDY#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J22")
-				(pinfunction "J22_J22")
+				(pin "K19")
+				(pinfunction "K19_K19")
 				(pintype "passive")
 			)
 			(node
@@ -14152,13 +14118,13 @@
 			)
 		)
 		(net
-			(code "56")
+			(code "54")
 			(name "/BRDYC#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "K9")
-				(pinfunction "K9_K9")
+				(pin "J22")
+				(pinfunction "J22_J22")
 				(pintype "passive")
 			)
 			(node
@@ -14169,7 +14135,7 @@
 			)
 		)
 		(net
-			(code "57")
+			(code "55")
 			(name "/BREQ")
 			(class "Default")
 			(node
@@ -14179,8 +14145,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "M18")
-				(pinfunction "M18_M18")
+				(pin "J17")
+				(pinfunction "J17_J17")
 				(pintype "passive")
 			)
 			(node
@@ -14191,13 +14157,13 @@
 			)
 		)
 		(net
-			(code "58")
+			(code "56")
 			(name "/BUSCHK#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "N19")
-				(pinfunction "N19_N19")
+				(pin "D17")
+				(pinfunction "D17_D17")
 				(pintype "passive")
 			)
 			(node
@@ -14208,13 +14174,13 @@
 			)
 		)
 		(net
-			(code "59")
+			(code "57")
 			(name "/CACHE#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "K21")
-				(pinfunction "K21_K21")
+				(pin "L22")
+				(pinfunction "L22_L22")
 				(pintype "passive")
 			)
 			(node
@@ -14225,7 +14191,7 @@
 			)
 		)
 		(net
-			(code "60")
+			(code "58")
 			(name "/CFG_CLKUSR")
 			(class "Default")
 			(node
@@ -14236,7 +14202,7 @@
 			)
 		)
 		(net
-			(code "61")
+			(code "59")
 			(name "/CFG_CONF_DONE")
 			(class "Default")
 			(node
@@ -14252,7 +14218,7 @@
 			)
 		)
 		(net
-			(code "62")
+			(code "60")
 			(name "/CFG_CRC_ERROR")
 			(class "Default")
 			(node
@@ -14263,7 +14229,7 @@
 			)
 		)
 		(net
-			(code "63")
+			(code "61")
 			(name "/CFG_CvP_CONFDONE")
 			(class "Default")
 			(node
@@ -14274,7 +14240,7 @@
 			)
 		)
 		(net
-			(code "64")
+			(code "62")
 			(name "/CFG_DATA5")
 			(class "Default")
 			(node
@@ -14285,7 +14251,7 @@
 			)
 		)
 		(net
-			(code "65")
+			(code "63")
 			(name "/CFG_DATA6")
 			(class "Default")
 			(node
@@ -14296,7 +14262,7 @@
 			)
 		)
 		(net
-			(code "66")
+			(code "64")
 			(name "/CFG_DATA7")
 			(class "Default")
 			(node
@@ -14307,7 +14273,7 @@
 			)
 		)
 		(net
-			(code "67")
+			(code "65")
 			(name "/CFG_DATA8")
 			(class "Default")
 			(node
@@ -14318,7 +14284,7 @@
 			)
 		)
 		(net
-			(code "68")
+			(code "66")
 			(name "/CFG_DATA9")
 			(class "Default")
 			(node
@@ -14329,7 +14295,7 @@
 			)
 		)
 		(net
-			(code "69")
+			(code "67")
 			(name "/CFG_DATA10")
 			(class "Default")
 			(node
@@ -14340,7 +14306,7 @@
 			)
 		)
 		(net
-			(code "70")
+			(code "68")
 			(name "/CFG_DATA11")
 			(class "Default")
 			(node
@@ -14351,7 +14317,7 @@
 			)
 		)
 		(net
-			(code "71")
+			(code "69")
 			(name "/CFG_DATA12")
 			(class "Default")
 			(node
@@ -14362,7 +14328,7 @@
 			)
 		)
 		(net
-			(code "72")
+			(code "70")
 			(name "/CFG_DATA13")
 			(class "Default")
 			(node
@@ -14373,7 +14339,7 @@
 			)
 		)
 		(net
-			(code "73")
+			(code "71")
 			(name "/CFG_DATA14")
 			(class "Default")
 			(node
@@ -14384,7 +14350,7 @@
 			)
 		)
 		(net
-			(code "74")
+			(code "72")
 			(name "/CFG_DATA15")
 			(class "Default")
 			(node
@@ -14395,7 +14361,7 @@
 			)
 		)
 		(net
-			(code "75")
+			(code "73")
 			(name "/CFG_DEV_CLRn")
 			(class "Default")
 			(node
@@ -14406,7 +14372,7 @@
 			)
 		)
 		(net
-			(code "76")
+			(code "74")
 			(name "/CFG_DEV_OE")
 			(class "Default")
 			(node
@@ -14417,7 +14383,7 @@
 			)
 		)
 		(net
-			(code "77")
+			(code "75")
 			(name "/CFG_INIT_DONE")
 			(class "Default")
 			(node
@@ -14428,7 +14394,7 @@
 			)
 		)
 		(net
-			(code "78")
+			(code "76")
 			(name "/CFG_PR_DONE")
 			(class "Default")
 			(node
@@ -14439,7 +14405,7 @@
 			)
 		)
 		(net
-			(code "79")
+			(code "77")
 			(name "/CFG_PR_ERROR")
 			(class "Default")
 			(node
@@ -14450,7 +14416,7 @@
 			)
 		)
 		(net
-			(code "80")
+			(code "78")
 			(name "/CFG_PR_READY")
 			(class "Default")
 			(node
@@ -14461,7 +14427,7 @@
 			)
 		)
 		(net
-			(code "81")
+			(code "79")
 			(name "/CFG_PR_REQUEST")
 			(class "Default")
 			(node
@@ -14472,7 +14438,7 @@
 			)
 		)
 		(net
-			(code "82")
+			(code "80")
 			(name "/CFG_nCEO")
 			(class "Default")
 			(node
@@ -14483,7 +14449,7 @@
 			)
 		)
 		(net
-			(code "83")
+			(code "81")
 			(name "/CFG_nCONFIG")
 			(class "Default")
 			(node
@@ -14499,7 +14465,7 @@
 			)
 		)
 		(net
-			(code "84")
+			(code "82")
 			(name "/CFG_nSTATUS")
 			(class "Default")
 			(node
@@ -14515,13 +14481,13 @@
 			)
 		)
 		(net
-			(code "85")
+			(code "83")
 			(name "/CLK")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "N9")
-				(pinfunction "N9_N9")
+				(pin "W16")
+				(pinfunction "W16_W16")
 				(pintype "passive")
 			)
 			(node
@@ -14532,13 +14498,13 @@
 			)
 		)
 		(net
-			(code "86")
+			(code "84")
 			(name "/CPUTYP")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "K17")
-				(pinfunction "K17_K17")
+				(pin "L7")
+				(pinfunction "L7_L7")
 				(pintype "passive")
 			)
 			(node
@@ -14549,13 +14515,13 @@
 			)
 		)
 		(net
-			(code "87")
+			(code "85")
 			(name "/D0")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J21")
-				(pinfunction "J21_J21")
+				(pin "T9")
+				(pinfunction "T9_T9")
 				(pintype "passive")
 			)
 			(node
@@ -14566,13 +14532,13 @@
 			)
 		)
 		(net
-			(code "88")
+			(code "86")
 			(name "/D1")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J18")
-				(pinfunction "J18_J18")
+				(pin "U10")
+				(pinfunction "U10_U10")
 				(pintype "passive")
 			)
 			(node
@@ -14583,13 +14549,13 @@
 			)
 		)
 		(net
-			(code "89")
+			(code "87")
 			(name "/D2")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J19")
-				(pinfunction "J19_J19")
+				(pin "T10")
+				(pinfunction "T10_T10")
 				(pintype "passive")
 			)
 			(node
@@ -14600,13 +14566,13 @@
 			)
 		)
 		(net
-			(code "90")
+			(code "88")
 			(name "/D3")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J17")
-				(pinfunction "J17_J17")
+				(pin "V9")
+				(pinfunction "V9_V9")
 				(pintype "passive")
 			)
 			(node
@@ -14617,13 +14583,13 @@
 			)
 		)
 		(net
-			(code "91")
+			(code "89")
 			(name "/D4")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J13")
-				(pinfunction "J13_J13")
+				(pin "T12")
+				(pinfunction "T12_T12")
 				(pintype "passive")
 			)
 			(node
@@ -14634,13 +14600,13 @@
 			)
 		)
 		(net
-			(code "92")
+			(code "90")
 			(name "/D5")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "J11")
-				(pinfunction "J11_J11")
+				(pin "U11")
+				(pinfunction "U11_U11")
 				(pintype "passive")
 			)
 			(node
@@ -14651,13 +14617,13 @@
 			)
 		)
 		(net
-			(code "93")
+			(code "91")
 			(name "/D6")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "H18")
-				(pinfunction "H18_H18")
+				(pin "T13")
+				(pinfunction "T13_T13")
 				(pintype "passive")
 			)
 			(node
@@ -14668,13 +14634,13 @@
 			)
 		)
 		(net
-			(code "94")
+			(code "92")
 			(name "/D7")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "H14")
-				(pinfunction "H14_H14")
+				(pin "T14")
+				(pinfunction "T14_T14")
 				(pintype "passive")
 			)
 			(node
@@ -14685,13 +14651,13 @@
 			)
 		)
 		(net
-			(code "95")
+			(code "93")
 			(name "/D8")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G21")
-				(pinfunction "G21_G21")
+				(pin "AB5")
+				(pinfunction "AB5_AB5")
 				(pintype "passive")
 			)
 			(node
@@ -14702,13 +14668,13 @@
 			)
 		)
 		(net
-			(code "96")
+			(code "94")
 			(name "/D9")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "E15")
-				(pinfunction "E15_E15")
+				(pin "U12")
+				(pinfunction "U12_U12")
 				(pintype "passive")
 			)
 			(node
@@ -14719,13 +14685,13 @@
 			)
 		)
 		(net
-			(code "97")
+			(code "95")
 			(name "/D10")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "E14")
-				(pinfunction "E14_E14")
+				(pin "AA7")
+				(pinfunction "AA7_AA7")
 				(pintype "passive")
 			)
 			(node
@@ -14736,13 +14702,13 @@
 			)
 		)
 		(net
-			(code "98")
+			(code "96")
 			(name "/D11")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B16")
-				(pinfunction "B16_B16")
+				(pin "AB6")
+				(pinfunction "AB6_AB6")
 				(pintype "passive")
 			)
 			(node
@@ -14753,13 +14719,13 @@
 			)
 		)
 		(net
-			(code "99")
+			(code "97")
 			(name "/D12")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G18")
-				(pinfunction "G18_G18")
+				(pin "Y9")
+				(pinfunction "Y9_Y9")
 				(pintype "passive")
 			)
 			(node
@@ -14770,13 +14736,13 @@
 			)
 		)
 		(net
-			(code "100")
+			(code "98")
 			(name "/D13")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B15")
-				(pinfunction "B15_B15")
+				(pin "AA8")
+				(pinfunction "AA8_AA8")
 				(pintype "passive")
 			)
 			(node
@@ -14787,13 +14753,13 @@
 			)
 		)
 		(net
-			(code "101")
+			(code "99")
 			(name "/D14")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "E12")
-				(pinfunction "E12_E12")
+				(pin "U13")
+				(pinfunction "U13_U13")
 				(pintype "passive")
 			)
 			(node
@@ -14804,13 +14770,13 @@
 			)
 		)
 		(net
-			(code "102")
+			(code "100")
 			(name "/D15")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "A15")
-				(pinfunction "A15_A15")
+				(pin "AB7")
+				(pinfunction "AB7_AB7")
 				(pintype "passive")
 			)
 			(node
@@ -14821,13 +14787,13 @@
 			)
 		)
 		(net
-			(code "103")
+			(code "101")
 			(name "/D16")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B13")
-				(pinfunction "B13_B13")
+				(pin "AB8")
+				(pinfunction "AB8_AB8")
 				(pintype "passive")
 			)
 			(node
@@ -14838,13 +14804,13 @@
 			)
 		)
 		(net
-			(code "104")
+			(code "102")
 			(name "/D17")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "D21")
-				(pinfunction "D21_D21")
+				(pin "AA9")
+				(pinfunction "AA9_AA9")
 				(pintype "passive")
 			)
 			(node
@@ -14855,13 +14821,13 @@
 			)
 		)
 		(net
-			(code "105")
+			(code "103")
 			(name "/D18")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "A14")
-				(pinfunction "A14_A14")
+				(pin "T15")
+				(pinfunction "T15_T15")
 				(pintype "passive")
 			)
 			(node
@@ -14872,13 +14838,13 @@
 			)
 		)
 		(net
-			(code "106")
+			(code "104")
 			(name "/D19")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G16")
-				(pinfunction "G16_G16")
+				(pin "V13")
+				(pinfunction "V13_V13")
 				(pintype "passive")
 			)
 			(node
@@ -14889,13 +14855,13 @@
 			)
 		)
 		(net
-			(code "107")
+			(code "105")
 			(name "/D20")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B12")
-				(pinfunction "B12_B12")
+				(pin "AA10")
+				(pinfunction "AA10_AA10")
 				(pintype "passive")
 			)
 			(node
@@ -14906,13 +14872,13 @@
 			)
 		)
 		(net
-			(code "108")
+			(code "106")
 			(name "/D21")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "D19")
-				(pinfunction "D19_D19")
+				(pin "Y11")
+				(pinfunction "Y11_Y11")
 				(pintype "passive")
 			)
 			(node
@@ -14923,13 +14889,13 @@
 			)
 		)
 		(net
-			(code "109")
+			(code "107")
 			(name "/D22")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "A13")
-				(pinfunction "A13_A13")
+				(pin "AB10")
+				(pinfunction "AB10_AB10")
 				(pintype "passive")
 			)
 			(node
@@ -14940,13 +14906,13 @@
 			)
 		)
 		(net
-			(code "110")
+			(code "108")
 			(name "/D23")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G15")
-				(pinfunction "G15_G15")
+				(pin "AB11")
+				(pinfunction "AB11_AB11")
 				(pintype "passive")
 			)
 			(node
@@ -14957,13 +14923,13 @@
 			)
 		)
 		(net
-			(code "111")
+			(code "109")
 			(name "/D24")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "D17")
-				(pinfunction "D17_D17")
+				(pin "U15")
+				(pinfunction "U15_U15")
 				(pintype "passive")
 			)
 			(node
@@ -14974,13 +14940,13 @@
 			)
 		)
 		(net
-			(code "112")
+			(code "110")
 			(name "/D25")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "D12")
-				(pinfunction "D12_D12")
+				(pin "AA13")
+				(pinfunction "AA13_AA13")
 				(pintype "passive")
 			)
 			(node
@@ -14991,13 +14957,13 @@
 			)
 		)
 		(net
-			(code "113")
+			(code "111")
 			(name "/D26")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G12")
-				(pinfunction "G12_G12")
+				(pin "AB12")
+				(pinfunction "AB12_AB12")
 				(pintype "passive")
 			)
 			(node
@@ -15008,13 +14974,13 @@
 			)
 		)
 		(net
-			(code "114")
+			(code "112")
 			(name "/D27")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "C21")
-				(pinfunction "C21_C21")
+				(pin "AB13")
+				(pinfunction "AB13_AB13")
 				(pintype "passive")
 			)
 			(node
@@ -15025,13 +14991,13 @@
 			)
 		)
 		(net
-			(code "115")
+			(code "113")
 			(name "/D28")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G11")
-				(pinfunction "G11_G11")
+				(pin "Y14")
+				(pinfunction "Y14_Y14")
 				(pintype "passive")
 			)
 			(node
@@ -15042,13 +15008,13 @@
 			)
 		)
 		(net
-			(code "116")
+			(code "114")
 			(name "/D29")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "C20")
-				(pinfunction "C20_C20")
+				(pin "Y15")
+				(pinfunction "Y15_Y15")
 				(pintype "passive")
 			)
 			(node
@@ -15059,13 +15025,13 @@
 			)
 		)
 		(net
-			(code "117")
+			(code "115")
 			(name "/D30")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "F22")
-				(pinfunction "F22_F22")
+				(pin "AA14")
+				(pinfunction "AA14_AA14")
 				(pintype "passive")
 			)
 			(node
@@ -15076,13 +15042,13 @@
 			)
 		)
 		(net
-			(code "118")
+			(code "116")
 			(name "/D31")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "C16")
-				(pinfunction "C16_C16")
+				(pin "AB15")
+				(pinfunction "AB15_AB15")
 				(pintype "passive")
 			)
 			(node
@@ -15093,13 +15059,13 @@
 			)
 		)
 		(net
-			(code "119")
+			(code "117")
 			(name "/D32")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "C15")
-				(pinfunction "C15_C15")
+				(pin "Y16")
+				(pinfunction "Y16_Y16")
 				(pintype "passive")
 			)
 			(node
@@ -15110,13 +15076,13 @@
 			)
 		)
 		(net
-			(code "120")
+			(code "118")
 			(name "/D33")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "F14")
-				(pinfunction "F14_F14")
+				(pin "U16")
+				(pinfunction "U16_U16")
 				(pintype "passive")
 			)
 			(node
@@ -15127,13 +15093,13 @@
 			)
 		)
 		(net
-			(code "121")
+			(code "119")
 			(name "/D34")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "C13")
-				(pinfunction "C13_C13")
+				(pin "AA17")
+				(pinfunction "AA17_AA17")
 				(pintype "passive")
 			)
 			(node
@@ -15144,13 +15110,13 @@
 			)
 		)
 		(net
-			(code "122")
+			(code "120")
 			(name "/D35")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "F13")
-				(pinfunction "F13_F13")
+				(pin "AB17")
+				(pinfunction "AB17_AB17")
 				(pintype "passive")
 			)
 			(node
@@ -15161,13 +15127,13 @@
 			)
 		)
 		(net
-			(code "123")
+			(code "121")
 			(name "/D36")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "C11")
-				(pinfunction "C11_C11")
+				(pin "AB18")
+				(pinfunction "AB18_AB18")
 				(pintype "passive")
 			)
 			(node
@@ -15178,13 +15144,13 @@
 			)
 		)
 		(net
-			(code "124")
+			(code "122")
 			(name "/D37")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "F12")
-				(pinfunction "F12_F12")
+				(pin "Y17")
+				(pinfunction "Y17_Y17")
 				(pintype "passive")
 			)
 			(node
@@ -15195,13 +15161,13 @@
 			)
 		)
 		(net
-			(code "125")
+			(code "123")
 			(name "/D38")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B21")
-				(pinfunction "B21_B21")
+				(pin "AA19")
+				(pinfunction "AA19_AA19")
 				(pintype "passive")
 			)
 			(node
@@ -15212,13 +15178,13 @@
 			)
 		)
 		(net
-			(code "126")
+			(code "124")
 			(name "/D39")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "E21")
-				(pinfunction "E21_E21")
+				(pin "AA18")
+				(pinfunction "AA18_AA18")
 				(pintype "passive")
 			)
 			(node
@@ -15229,13 +15195,13 @@
 			)
 		)
 		(net
-			(code "127")
+			(code "125")
 			(name "/D40")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "E19")
-				(pinfunction "E19_E19")
+				(pin "U17")
+				(pinfunction "U17_U17")
 				(pintype "passive")
 			)
 			(node
@@ -15246,13 +15212,13 @@
 			)
 		)
 		(net
-			(code "128")
+			(code "126")
 			(name "/D41")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "A12")
-				(pinfunction "A12_A12")
+				(pin "AA20")
+				(pinfunction "AA20_AA20")
 				(pintype "passive")
 			)
 			(node
@@ -15263,13 +15229,13 @@
 			)
 		)
 		(net
-			(code "129")
+			(code "127")
 			(name "/D42")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "H11")
-				(pinfunction "H11_H11")
+				(pin "AB20")
+				(pinfunction "AB20_AB20")
 				(pintype "passive")
 			)
 			(node
@@ -15280,13 +15246,13 @@
 			)
 		)
 		(net
-			(code "130")
+			(code "128")
 			(name "/D43")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B11")
-				(pinfunction "B11_B11")
+				(pin "Y20")
+				(pinfunction "Y20_Y20")
 				(pintype "passive")
 			)
 			(node
@@ -15297,13 +15263,13 @@
 			)
 		)
 		(net
-			(code "131")
+			(code "129")
 			(name "/D44")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "E16")
-				(pinfunction "E16_E16")
+				(pin "V18")
+				(pinfunction "V18_V18")
 				(pintype "passive")
 			)
 			(node
@@ -15314,13 +15280,13 @@
 			)
 		)
 		(net
-			(code "132")
+			(code "130")
 			(name "/D45")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B18")
-				(pinfunction "B18_B18")
+				(pin "W19")
+				(pinfunction "W19_W19")
 				(pintype "passive")
 			)
 			(node
@@ -15331,13 +15297,13 @@
 			)
 		)
 		(net
-			(code "133")
+			(code "131")
 			(name "/D46")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "H10")
-				(pinfunction "H10_H10")
+				(pin "AB21")
+				(pinfunction "AB21_AB21")
 				(pintype "passive")
 			)
 			(node
@@ -15348,13 +15314,13 @@
 			)
 		)
 		(net
-			(code "134")
+			(code "132")
 			(name "/D47")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B17")
-				(pinfunction "B17_B17")
+				(pin "AA22")
+				(pinfunction "AA22_AA22")
 				(pintype "passive")
 			)
 			(node
@@ -15365,13 +15331,13 @@
 			)
 		)
 		(net
-			(code "135")
+			(code "133")
 			(name "/D48")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "R14")
-				(pinfunction "R14_R14")
+				(pin "Y21")
+				(pinfunction "Y21_Y21")
 				(pintype "passive")
 			)
 			(node
@@ -15382,13 +15348,13 @@
 			)
 		)
 		(net
-			(code "136")
+			(code "134")
 			(name "/D49")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "T14")
-				(pinfunction "T14_T14")
+				(pin "V19")
+				(pinfunction "V19_V19")
 				(pintype "passive")
 			)
 			(node
@@ -15399,13 +15365,13 @@
 			)
 		)
 		(net
-			(code "137")
+			(code "135")
 			(name "/D50")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "P14")
-				(pinfunction "P14_P14")
+				(pin "R16")
+				(pinfunction "R16_R16")
 				(pintype "passive")
 			)
 			(node
@@ -15416,13 +15382,13 @@
 			)
 		)
 		(net
-			(code "138")
+			(code "136")
 			(name "/D51")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "U15")
-				(pinfunction "U15_U15")
+				(pin "W21")
+				(pinfunction "W21_W21")
 				(pintype "passive")
 			)
 			(node
@@ -15433,13 +15399,13 @@
 			)
 		)
 		(net
-			(code "139")
+			(code "137")
 			(name "/D52")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "T13")
-				(pinfunction "T13_T13")
+				(pin "Y22")
+				(pinfunction "Y22_Y22")
 				(pintype "passive")
 			)
 			(node
@@ -15450,13 +15416,13 @@
 			)
 		)
 		(net
-			(code "140")
+			(code "138")
 			(name "/D53")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "U17")
-				(pinfunction "U17_U17")
+				(pin "V20")
+				(pinfunction "V20_V20")
 				(pintype "passive")
 			)
 			(node
@@ -15467,13 +15433,13 @@
 			)
 		)
 		(net
-			(code "141")
+			(code "139")
 			(name "/D54")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "T12")
-				(pinfunction "T12_T12")
+				(pin "R17")
+				(pinfunction "R17_R17")
 				(pintype "passive")
 			)
 			(node
@@ -15484,13 +15450,13 @@
 			)
 		)
 		(net
-			(code "142")
+			(code "140")
 			(name "/D55")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "U16")
-				(pinfunction "U16_U16")
+				(pin "V21")
+				(pinfunction "V21_V21")
 				(pintype "passive")
 			)
 			(node
@@ -15501,7 +15467,7 @@
 			)
 		)
 		(net
-			(code "143")
+			(code "141")
 			(name "/D56")
 			(class "Default")
 			(node
@@ -15518,7 +15484,7 @@
 			)
 		)
 		(net
-			(code "144")
+			(code "142")
 			(name "/D57")
 			(class "Default")
 			(node
@@ -15535,13 +15501,13 @@
 			)
 		)
 		(net
-			(code "145")
+			(code "143")
 			(name "/D58")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "U22")
-				(pinfunction "U22_U22")
+				(pin "T19")
+				(pinfunction "T19_T19")
 				(pintype "passive")
 			)
 			(node
@@ -15552,13 +15518,13 @@
 			)
 		)
 		(net
-			(code "146")
+			(code "144")
 			(name "/D59")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "V13")
-				(pinfunction "V13_V13")
+				(pin "P17")
+				(pinfunction "P17_P17")
 				(pintype "passive")
 			)
 			(node
@@ -15569,13 +15535,13 @@
 			)
 		)
 		(net
-			(code "147")
+			(code "145")
 			(name "/D60")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "V19")
-				(pinfunction "V19_V19")
+				(pin "U22")
+				(pinfunction "U22_U22")
 				(pintype "passive")
 			)
 			(node
@@ -15586,13 +15552,13 @@
 			)
 		)
 		(net
-			(code "148")
+			(code "146")
 			(name "/D61")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "V18")
-				(pinfunction "V18_V18")
+				(pin "P18")
+				(pinfunction "P18_P18")
 				(pintype "passive")
 			)
 			(node
@@ -15603,13 +15569,13 @@
 			)
 		)
 		(net
-			(code "149")
+			(code "147")
 			(name "/D62")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "V20")
-				(pinfunction "V20_V20")
+				(pin "P19")
+				(pinfunction "P19_P19")
 				(pintype "passive")
 			)
 			(node
@@ -15620,13 +15586,13 @@
 			)
 		)
 		(net
-			(code "150")
+			(code "148")
 			(name "/D63")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "V21")
-				(pinfunction "V21_V21")
+				(pin "N20")
+				(pinfunction "N20_N20")
 				(pintype "passive")
 			)
 			(node
@@ -15637,13 +15603,13 @@
 			)
 		)
 		(net
-			(code "151")
+			(code "149")
 			(name "/DP0")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G22")
-				(pinfunction "G22_G22")
+				(pin "V10")
+				(pinfunction "V10_V10")
 				(pintype "passive")
 			)
 			(node
@@ -15654,13 +15620,13 @@
 			)
 		)
 		(net
-			(code "152")
+			(code "150")
 			(name "/DP1")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "G17")
-				(pinfunction "G17_G17")
+				(pin "Y10")
+				(pinfunction "Y10_Y10")
 				(pintype "passive")
 			)
 			(node
@@ -15671,13 +15637,13 @@
 			)
 		)
 		(net
-			(code "153")
+			(code "151")
 			(name "/DP2")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "D13")
-				(pinfunction "D13_D13")
+				(pin "AA12")
+				(pinfunction "AA12_AA12")
 				(pintype "passive")
 			)
 			(node
@@ -15688,13 +15654,13 @@
 			)
 		)
 		(net
-			(code "154")
+			(code "152")
 			(name "/DP3")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "F15")
-				(pinfunction "F15_F15")
+				(pin "AA15")
+				(pinfunction "AA15_AA15")
 				(pintype "passive")
 			)
 			(node
@@ -15705,13 +15671,13 @@
 			)
 		)
 		(net
-			(code "155")
+			(code "153")
 			(name "/DP4")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B20")
-				(pinfunction "B20_B20")
+				(pin "Y19")
+				(pinfunction "Y19_Y19")
 				(pintype "passive")
 			)
 			(node
@@ -15722,13 +15688,13 @@
 			)
 		)
 		(net
-			(code "156")
+			(code "154")
 			(name "/DP5")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "H21")
-				(pinfunction "H21_H21")
+				(pin "AB22")
+				(pinfunction "AB22_AB22")
 				(pintype "passive")
 			)
 			(node
@@ -15739,13 +15705,13 @@
 			)
 		)
 		(net
-			(code "157")
+			(code "155")
 			(name "/DP6")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "U13")
-				(pinfunction "U13_U13")
+				(pin "W22")
+				(pinfunction "W22_W22")
 				(pintype "passive")
 			)
 			(node
@@ -15756,13 +15722,13 @@
 			)
 		)
 		(net
-			(code "158")
+			(code "156")
 			(name "/DP7")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "W19")
-				(pinfunction "W19_W19")
+				(pin "N19")
+				(pinfunction "N19_N19")
 				(pintype "passive")
 			)
 			(node
@@ -15773,13 +15739,13 @@
 			)
 		)
 		(net
-			(code "159")
+			(code "157")
 			(name "/D{slash}C#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "E7")
-				(pinfunction "E7_E7")
+				(pin "B21")
+				(pinfunction "B21_B21")
 				(pintype "passive")
 			)
 			(node
@@ -15790,13 +15756,13 @@
 			)
 		)
 		(net
-			(code "160")
+			(code "158")
 			(name "/EADS#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AB17")
-				(pinfunction "AB17_AB17")
+				(pin "D19")
+				(pinfunction "D19_D19")
 				(pintype "passive")
 			)
 			(node
@@ -15807,13 +15773,13 @@
 			)
 		)
 		(net
-			(code "161")
+			(code "159")
 			(name "/EWBE#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "A8")
-				(pinfunction "A8_A8")
+				(pin "K21")
+				(pinfunction "K21_K21")
 				(pintype "passive")
 			)
 			(node
@@ -15824,13 +15790,13 @@
 			)
 		)
 		(net
-			(code "162")
+			(code "160")
 			(name "/FERR#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "R11")
-				(pinfunction "R11_R11")
+				(pin "N21")
+				(pinfunction "N21_N21")
 				(pintype "passive")
 			)
 			(node
@@ -15841,13 +15807,13 @@
 			)
 		)
 		(net
-			(code "163")
+			(code "161")
 			(name "/FLUSH#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA8")
-				(pinfunction "AA8_AA8")
+				(pin "B18")
+				(pinfunction "B18_B18")
 				(pintype "passive")
 			)
 			(node
@@ -15858,7 +15824,7 @@
 			)
 		)
 		(net
-			(code "164")
+			(code "162")
 			(name "/F_TCK")
 			(class "Default")
 			(node
@@ -15880,7 +15846,7 @@
 			)
 		)
 		(net
-			(code "165")
+			(code "163")
 			(name "/F_TDI")
 			(class "Default")
 			(node
@@ -15902,7 +15868,7 @@
 			)
 		)
 		(net
-			(code "166")
+			(code "164")
 			(name "/F_TDO")
 			(class "Default")
 			(node
@@ -15919,7 +15885,7 @@
 			)
 		)
 		(net
-			(code "167")
+			(code "165")
 			(name "/F_TMS")
 			(class "Default")
 			(node
@@ -15941,7 +15907,7 @@
 			)
 		)
 		(net
-			(code "168")
+			(code "166")
 			(name "/GND")
 			(class "Default")
 			(node
@@ -17467,13 +17433,13 @@
 			)
 		)
 		(net
-			(code "169")
+			(code "167")
 			(name "/HIT#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y19")
-				(pinfunction "Y19_Y19")
+				(pin "B20")
+				(pinfunction "B20_B20")
 				(pintype "passive")
 			)
 			(node
@@ -17484,13 +17450,13 @@
 			)
 		)
 		(net
-			(code "170")
+			(code "168")
 			(name "/HITM#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA15")
-				(pinfunction "AA15_AA15")
+				(pin "G16")
+				(pinfunction "G16_G16")
 				(pintype "passive")
 			)
 			(node
@@ -17501,13 +17467,13 @@
 			)
 		)
 		(net
-			(code "171")
+			(code "169")
 			(name "/HLDA")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y16")
-				(pinfunction "Y16_Y16")
+				(pin "E21")
+				(pinfunction "E21_E21")
 				(pintype "passive")
 			)
 			(node
@@ -17518,13 +17484,13 @@
 			)
 		)
 		(net
-			(code "172")
+			(code "170")
 			(name "/HOLD")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y15")
-				(pinfunction "Y15_Y15")
+				(pin "G22")
+				(pinfunction "G22_G22")
 				(pintype "passive")
 			)
 			(node
@@ -17535,13 +17501,13 @@
 			)
 		)
 		(net
-			(code "173")
+			(code "171")
 			(name "/IERR#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "A5")
-				(pinfunction "A5_A5")
+				(pin "M18")
+				(pinfunction "M18_M18")
 				(pintype "passive")
 			)
 			(node
@@ -17552,13 +17518,13 @@
 			)
 		)
 		(net
-			(code "174")
+			(code "172")
 			(name "/IGNNE#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "U12")
-				(pinfunction "U12_U12")
+				(pin "G8")
+				(pinfunction "G8_G8")
 				(pintype "passive")
 			)
 			(node
@@ -17569,13 +17535,13 @@
 			)
 		)
 		(net
-			(code "175")
+			(code "173")
 			(name "/INIT")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "L17")
-				(pinfunction "L17_L17")
+				(pin "G11")
+				(pinfunction "G11_G11")
 				(pintype "passive")
 			)
 			(node
@@ -17586,13 +17552,13 @@
 			)
 		)
 		(net
-			(code "176")
+			(code "174")
 			(name "/INTR{slash}LINT0")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y10")
-				(pinfunction "Y10_Y10")
+				(pin "E7")
+				(pinfunction "E7_E7")
 				(pintype "passive")
 			)
 			(node
@@ -17603,13 +17569,13 @@
 			)
 		)
 		(net
-			(code "177")
+			(code "175")
 			(name "/INV")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "W21")
-				(pinfunction "W21_W21")
+				(pin "L19")
+				(pinfunction "L19_L19")
 				(pintype "passive")
 			)
 			(node
@@ -17620,13 +17586,13 @@
 			)
 		)
 		(net
-			(code "178")
+			(code "176")
 			(name "/KEN#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y14")
-				(pinfunction "Y14_Y14")
+				(pin "K20")
+				(pinfunction "K20_K20")
 				(pintype "passive")
 			)
 			(node
@@ -17637,13 +17603,13 @@
 			)
 		)
 		(net
-			(code "179")
+			(code "177")
 			(name "/LOCK#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "L22")
-				(pinfunction "L22_L22")
+				(pin "G18")
+				(pinfunction "G18_G18")
 				(pintype "passive")
 			)
 			(node
@@ -17654,13 +17620,13 @@
 			)
 		)
 		(net
-			(code "180")
+			(code "178")
 			(name "/M{slash}IO#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "A7")
-				(pinfunction "A7_A7")
+				(pin "L18")
+				(pinfunction "L18_L18")
 				(pintype "passive")
 			)
 			(node
@@ -17671,13 +17637,13 @@
 			)
 		)
 		(net
-			(code "181")
+			(code "179")
 			(name "/NA#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "K16")
-				(pinfunction "K16_K16")
+				(pin "J21")
+				(pinfunction "J21_J21")
 				(pintype "passive")
 			)
 			(node
@@ -17688,7 +17654,7 @@
 			)
 		)
 		(net
-			(code "182")
+			(code "180")
 			(name "/NC_A17")
 			(class "Default")
 			(node
@@ -17699,7 +17665,7 @@
 			)
 		)
 		(net
-			(code "183")
+			(code "181")
 			(name "/NC_A18")
 			(class "Default")
 			(node
@@ -17710,7 +17676,7 @@
 			)
 		)
 		(net
-			(code "184")
+			(code "182")
 			(name "/NC_A19")
 			(class "Default")
 			(node
@@ -17721,7 +17687,7 @@
 			)
 		)
 		(net
-			(code "185")
+			(code "183")
 			(name "/NC_A20")
 			(class "Default")
 			(node
@@ -17732,7 +17698,7 @@
 			)
 		)
 		(net
-			(code "186")
+			(code "184")
 			(name "/NC_A22")
 			(class "Default")
 			(node
@@ -17743,7 +17709,7 @@
 			)
 		)
 		(net
-			(code "187")
+			(code "185")
 			(name "/NC_AA1")
 			(class "Default")
 			(node
@@ -17754,7 +17720,7 @@
 			)
 		)
 		(net
-			(code "188")
+			(code "186")
 			(name "/NC_AA2")
 			(class "Default")
 			(node
@@ -17765,106 +17731,7 @@
 			)
 		)
 		(net
-			(code "189")
-			(name "/NC_AA9")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AA9")
-				(pinfunction "AA9_AA9")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "190")
-			(name "/NC_AA10")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AA10")
-				(pinfunction "AA10_AA10")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "191")
-			(name "/NC_AA12")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AA12")
-				(pinfunction "AA12_AA12")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "192")
-			(name "/NC_AB5")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AB5")
-				(pinfunction "AB5_AB5")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "193")
-			(name "/NC_AB6")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AB6")
-				(pinfunction "AB6_AB6")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "194")
-			(name "/NC_AB7")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AB7")
-				(pinfunction "AB7_AB7")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "195")
-			(name "/NC_AB8")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AB8")
-				(pinfunction "AB8_AB8")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "196")
-			(name "/NC_AB10")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AB10")
-				(pinfunction "AB10_AB10")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "197")
-			(name "/NC_AB11")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "AB11")
-				(pinfunction "AB11_AB11")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "198")
+			(code "187")
 			(name "/NC_B3")
 			(class "Default")
 			(node
@@ -17875,7 +17742,7 @@
 			)
 		)
 		(net
-			(code "199")
+			(code "188")
 			(name "/NC_B4")
 			(class "Default")
 			(node
@@ -17886,7 +17753,7 @@
 			)
 		)
 		(net
-			(code "200")
+			(code "189")
 			(name "/NC_B22")
 			(class "Default")
 			(node
@@ -17897,7 +17764,7 @@
 			)
 		)
 		(net
-			(code "201")
+			(code "190")
 			(name "/NC_C1")
 			(class "Default")
 			(node
@@ -17908,7 +17775,7 @@
 			)
 		)
 		(net
-			(code "202")
+			(code "191")
 			(name "/NC_C2")
 			(class "Default")
 			(node
@@ -17919,7 +17786,7 @@
 			)
 		)
 		(net
-			(code "203")
+			(code "192")
 			(name "/NC_C18")
 			(class "Default")
 			(node
@@ -17930,7 +17797,7 @@
 			)
 		)
 		(net
-			(code "204")
+			(code "193")
 			(name "/NC_C19")
 			(class "Default")
 			(node
@@ -17941,7 +17808,7 @@
 			)
 		)
 		(net
-			(code "205")
+			(code "194")
 			(name "/NC_D3")
 			(class "Default")
 			(node
@@ -17952,7 +17819,7 @@
 			)
 		)
 		(net
-			(code "206")
+			(code "195")
 			(name "/NC_D4")
 			(class "Default")
 			(node
@@ -17963,7 +17830,7 @@
 			)
 		)
 		(net
-			(code "207")
+			(code "196")
 			(name "/NC_D22")
 			(class "Default")
 			(node
@@ -17974,7 +17841,7 @@
 			)
 		)
 		(net
-			(code "208")
+			(code "197")
 			(name "/NC_E1")
 			(class "Default")
 			(node
@@ -17985,7 +17852,7 @@
 			)
 		)
 		(net
-			(code "209")
+			(code "198")
 			(name "/NC_E2")
 			(class "Default")
 			(node
@@ -17996,7 +17863,7 @@
 			)
 		)
 		(net
-			(code "210")
+			(code "199")
 			(name "/NC_E10")
 			(class "Default")
 			(node
@@ -18007,7 +17874,7 @@
 			)
 		)
 		(net
-			(code "211")
+			(code "200")
 			(name "/NC_E17")
 			(class "Default")
 			(node
@@ -18018,7 +17885,7 @@
 			)
 		)
 		(net
-			(code "212")
+			(code "201")
 			(name "/NC_E20")
 			(class "Default")
 			(node
@@ -18029,7 +17896,7 @@
 			)
 		)
 		(net
-			(code "213")
+			(code "202")
 			(name "/NC_E22")
 			(class "Default")
 			(node
@@ -18040,7 +17907,7 @@
 			)
 		)
 		(net
-			(code "214")
+			(code "203")
 			(name "/NC_F9")
 			(class "Default")
 			(node
@@ -18051,7 +17918,7 @@
 			)
 		)
 		(net
-			(code "215")
+			(code "204")
 			(name "/NC_F10")
 			(class "Default")
 			(node
@@ -18062,7 +17929,7 @@
 			)
 		)
 		(net
-			(code "216")
+			(code "205")
 			(name "/NC_F18")
 			(class "Default")
 			(node
@@ -18073,7 +17940,7 @@
 			)
 		)
 		(net
-			(code "217")
+			(code "206")
 			(name "/NC_F19")
 			(class "Default")
 			(node
@@ -18084,7 +17951,7 @@
 			)
 		)
 		(net
-			(code "218")
+			(code "207")
 			(name "/NC_F20")
 			(class "Default")
 			(node
@@ -18095,7 +17962,7 @@
 			)
 		)
 		(net
-			(code "219")
+			(code "208")
 			(name "/NC_G1")
 			(class "Default")
 			(node
@@ -18106,7 +17973,7 @@
 			)
 		)
 		(net
-			(code "220")
+			(code "209")
 			(name "/NC_G2")
 			(class "Default")
 			(node
@@ -18117,7 +17984,7 @@
 			)
 		)
 		(net
-			(code "221")
+			(code "210")
 			(name "/NC_G10")
 			(class "Default")
 			(node
@@ -18128,7 +17995,7 @@
 			)
 		)
 		(net
-			(code "222")
+			(code "211")
 			(name "/NC_G13")
 			(class "Default")
 			(node
@@ -18139,7 +18006,7 @@
 			)
 		)
 		(net
-			(code "223")
+			(code "212")
 			(name "/NC_G20")
 			(class "Default")
 			(node
@@ -18150,7 +18017,51 @@
 			)
 		)
 		(net
-			(code "224")
+			(code "213")
+			(name "/NC_H8")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "H8")
+				(pinfunction "H8_H8")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "214")
+			(name "/NC_H9")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "H9")
+				(pinfunction "H9_H9")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "215")
+			(name "/NC_H10")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "H10")
+				(pinfunction "H10_H10")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "216")
+			(name "/NC_H11")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "H11")
+				(pinfunction "H11_H11")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "217")
 			(name "/NC_H13")
 			(class "Default")
 			(node
@@ -18161,7 +18072,18 @@
 			)
 		)
 		(net
-			(code "225")
+			(code "218")
+			(name "/NC_H14")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "H14")
+				(pinfunction "H14_H14")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "219")
 			(name "/NC_H15")
 			(class "Default")
 			(node
@@ -18172,7 +18094,7 @@
 			)
 		)
 		(net
-			(code "226")
+			(code "220")
 			(name "/NC_H16")
 			(class "Default")
 			(node
@@ -18183,7 +18105,7 @@
 			)
 		)
 		(net
-			(code "227")
+			(code "221")
 			(name "/NC_H20")
 			(class "Default")
 			(node
@@ -18194,7 +18116,7 @@
 			)
 		)
 		(net
-			(code "228")
+			(code "222")
 			(name "/NC_J1")
 			(class "Default")
 			(node
@@ -18205,13 +18127,79 @@
 			)
 		)
 		(net
-			(code "229")
+			(code "223")
 			(name "/NC_J2")
 			(class "Default")
 			(node
 				(ref "U1")
 				(pin "J2")
 				(pinfunction "J2_J2")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "224")
+			(name "/NC_J8")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "J8")
+				(pinfunction "J8_J8")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "225")
+			(name "/NC_J9")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "J9")
+				(pinfunction "J9_J9")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "226")
+			(name "/NC_J11")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "J11")
+				(pinfunction "J11_J11")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "227")
+			(name "/NC_J13")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "J13")
+				(pinfunction "J13_J13")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "228")
+			(name "/NC_K9")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "K9")
+				(pinfunction "K9_K9")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "229")
+			(name "/NC_K16")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "K16")
+				(pinfunction "K16_K16")
 				(pintype "passive")
 			)
 		)
@@ -18305,23 +18293,23 @@
 		)
 		(net
 			(code "238")
+			(name "/NC_N9")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "N9")
+				(pinfunction "N9_N9")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "239")
 			(name "/NC_N16")
 			(class "Default")
 			(node
 				(ref "U1")
 				(pin "N16")
 				(pinfunction "N16_N16")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "239")
-			(name "/NC_P7")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "P7")
-				(pinfunction "P7_P7")
 				(pintype "passive")
 			)
 		)
@@ -18338,6 +18326,28 @@
 		)
 		(net
 			(code "241")
+			(name "/NC_P12")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "P12")
+				(pinfunction "P12_P12")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "242")
+			(name "/NC_P14")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "P14")
+				(pinfunction "P14_P14")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "243")
 			(name "/NC_P16")
 			(class "Default")
 			(node
@@ -18348,40 +18358,7 @@
 			)
 		)
 		(net
-			(code "242")
-			(name "/NC_P17")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "P17")
-				(pinfunction "P17_P17")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "243")
-			(name "/NC_P18")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "P18")
-				(pinfunction "P18_P18")
-				(pintype "passive")
-			)
-		)
-		(net
 			(code "244")
-			(name "/NC_P19")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "P19")
-				(pinfunction "P19_P19")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "245")
 			(name "/NC_PS2_4")
 			(class "Default")
 			(node
@@ -18392,7 +18369,7 @@
 			)
 		)
 		(net
-			(code "246")
+			(code "245")
 			(name "/NC_R1")
 			(class "Default")
 			(node
@@ -18403,7 +18380,7 @@
 			)
 		)
 		(net
-			(code "247")
+			(code "246")
 			(name "/NC_R2")
 			(class "Default")
 			(node
@@ -18414,7 +18391,51 @@
 			)
 		)
 		(net
+			(code "247")
+			(name "/NC_R10")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "R10")
+				(pinfunction "R10_R10")
+				(pintype "passive")
+			)
+		)
+		(net
 			(code "248")
+			(name "/NC_R11")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "R11")
+				(pinfunction "R11_R11")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "249")
+			(name "/NC_R12")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "R12")
+				(pinfunction "R12_R12")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "250")
+			(name "/NC_R14")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "R14")
+				(pinfunction "R14_R14")
+				(pintype "passive")
+			)
+		)
+		(net
+			(code "251")
 			(name "/NC_R15")
 			(class "Default")
 			(node
@@ -18425,51 +18446,7 @@
 			)
 		)
 		(net
-			(code "249")
-			(name "/NC_R16")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "R16")
-				(pinfunction "R16_R16")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "250")
-			(name "/NC_R17")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "R17")
-				(pinfunction "R17_R17")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "251")
-			(name "/NC_T15")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "T15")
-				(pinfunction "T15_T15")
-				(pintype "passive")
-			)
-		)
-		(net
 			(code "252")
-			(name "/NC_T19")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "T19")
-				(pinfunction "T19_T19")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "253")
 			(name "/NC_U1")
 			(class "Default")
 			(node
@@ -18480,7 +18457,7 @@
 			)
 		)
 		(net
-			(code "254")
+			(code "253")
 			(name "/NC_U2")
 			(class "Default")
 			(node
@@ -18491,7 +18468,7 @@
 			)
 		)
 		(net
-			(code "255")
+			(code "254")
 			(name "/NC_U4_4")
 			(class "Default")
 			(node
@@ -18502,7 +18479,7 @@
 			)
 		)
 		(net
-			(code "256")
+			(code "255")
 			(name "/NC_U4_5")
 			(class "Default")
 			(node
@@ -18513,7 +18490,7 @@
 			)
 		)
 		(net
-			(code "257")
+			(code "256")
 			(name "/NC_U4_6")
 			(class "Default")
 			(node
@@ -18524,7 +18501,7 @@
 			)
 		)
 		(net
-			(code "258")
+			(code "257")
 			(name "/NC_U4_11")
 			(class "Default")
 			(node
@@ -18535,7 +18512,7 @@
 			)
 		)
 		(net
-			(code "259")
+			(code "258")
 			(name "/NC_U4_12")
 			(class "Default")
 			(node
@@ -18546,7 +18523,7 @@
 			)
 		)
 		(net
-			(code "260")
+			(code "259")
 			(name "/NC_U4_13")
 			(class "Default")
 			(node
@@ -18557,7 +18534,7 @@
 			)
 		)
 		(net
-			(code "261")
+			(code "260")
 			(name "/NC_U4_14")
 			(class "Default")
 			(node
@@ -18568,7 +18545,7 @@
 			)
 		)
 		(net
-			(code "262")
+			(code "261")
 			(name "/NC_V11")
 			(class "Default")
 			(node
@@ -18579,7 +18556,7 @@
 			)
 		)
 		(net
-			(code "263")
+			(code "262")
 			(name "/NC_V14")
 			(class "Default")
 			(node
@@ -18590,7 +18567,7 @@
 			)
 		)
 		(net
-			(code "264")
+			(code "263")
 			(name "/NC_V15")
 			(class "Default")
 			(node
@@ -18601,7 +18578,7 @@
 			)
 		)
 		(net
-			(code "265")
+			(code "264")
 			(name "/NC_V16")
 			(class "Default")
 			(node
@@ -18612,7 +18589,7 @@
 			)
 		)
 		(net
-			(code "266")
+			(code "265")
 			(name "/NC_W1")
 			(class "Default")
 			(node
@@ -18623,7 +18600,7 @@
 			)
 		)
 		(net
-			(code "267")
+			(code "266")
 			(name "/NC_W2")
 			(class "Default")
 			(node
@@ -18634,18 +18611,7 @@
 			)
 		)
 		(net
-			(code "268")
-			(name "/NC_W16")
-			(class "Default")
-			(node
-				(ref "U1")
-				(pin "W16")
-				(pinfunction "W16_W16")
-				(pintype "passive")
-			)
-		)
-		(net
-			(code "269")
+			(code "267")
 			(name "/NC_Y3")
 			(class "Default")
 			(node
@@ -18656,7 +18622,7 @@
 			)
 		)
 		(net
-			(code "270")
+			(code "268")
 			(name "/NC_Y4")
 			(class "Default")
 			(node
@@ -18667,7 +18633,7 @@
 			)
 		)
 		(net
-			(code "271")
+			(code "269")
 			(name "/NC_Y6")
 			(class "Default")
 			(node
@@ -18678,13 +18644,13 @@
 			)
 		)
 		(net
-			(code "272")
+			(code "270")
 			(name "/NMI{slash}LINT1")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y9")
-				(pinfunction "Y9_Y9")
+				(pin "G12")
+				(pinfunction "G12_G12")
 				(pintype "passive")
 			)
 			(node
@@ -18695,13 +18661,13 @@
 			)
 		)
 		(net
-			(code "273")
+			(code "271")
 			(name "/PCD")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B10")
-				(pinfunction "B10_B10")
+				(pin "H18")
+				(pinfunction "H18_H18")
 				(pintype "passive")
 			)
 			(node
@@ -18712,13 +18678,13 @@
 			)
 		)
 		(net
-			(code "274")
+			(code "272")
 			(name "/PCHK#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "L19")
-				(pinfunction "L19_L19")
+				(pin "K17")
+				(pinfunction "K17_K17")
 				(pintype "passive")
 			)
 			(node
@@ -18729,13 +18695,13 @@
 			)
 		)
 		(net
-			(code "275")
+			(code "273")
 			(name "/PEN#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "K22")
-				(pinfunction "K22_K22")
+				(pin "G6")
+				(pinfunction "G6_G6")
 				(pintype "passive")
 			)
 			(node
@@ -18746,7 +18712,7 @@
 			)
 		)
 		(net
-			(code "276")
+			(code "274")
 			(name "/PG_1V1")
 			(class "Default")
 			(node
@@ -18774,7 +18740,7 @@
 			)
 		)
 		(net
-			(code "277")
+			(code "275")
 			(name "/PM0{slash}BP0")
 			(class "Default")
 			(node
@@ -18784,8 +18750,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "R10")
-				(pinfunction "R10_R10")
+				(pin "L17")
+				(pinfunction "L17_L17")
 				(pintype "passive")
 			)
 			(node
@@ -18796,7 +18762,7 @@
 			)
 		)
 		(net
-			(code "278")
+			(code "276")
 			(name "/PM1{slash}BP1")
 			(class "Default")
 			(node
@@ -18806,8 +18772,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "T9")
-				(pinfunction "T9_T9")
+				(pin "M20")
+				(pinfunction "M20_M20")
 				(pintype "passive")
 			)
 			(node
@@ -18818,13 +18784,13 @@
 			)
 		)
 		(net
-			(code "279")
+			(code "277")
 			(name "/PRDY")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "V10")
-				(pinfunction "V10_V10")
+				(pin "G21")
+				(pinfunction "G21_G21")
 				(pintype "passive")
 			)
 			(node
@@ -18835,7 +18801,7 @@
 			)
 		)
 		(net
-			(code "280")
+			(code "278")
 			(name "/PS1_FB")
 			(class "Default")
 			(node
@@ -18856,7 +18822,7 @@
 			)
 		)
 		(net
-			(code "281")
+			(code "279")
 			(name "/PS1_SW")
 			(class "Default")
 			(node
@@ -18873,13 +18839,13 @@
 			)
 		)
 		(net
-			(code "282")
+			(code "280")
 			(name "/PWT")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "H9")
-				(pinfunction "H9_H9")
+				(pin "E19")
+				(pinfunction "E19_E19")
 				(pintype "passive")
 			)
 			(node
@@ -18890,13 +18856,13 @@
 			)
 		)
 		(net
-			(code "283")
+			(code "281")
 			(name "/RESET")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "M22")
-				(pinfunction "M22_M22")
+				(pin "A13")
+				(pinfunction "A13_A13")
 				(pintype "passive")
 			)
 			(node
@@ -18907,7 +18873,7 @@
 			)
 		)
 		(net
-			(code "284")
+			(code "282")
 			(name "/RREF_TL")
 			(class "Default")
 			(node
@@ -18923,7 +18889,7 @@
 			)
 		)
 		(net
-			(code "285")
+			(code "283")
 			(name "/SCYC")
 			(class "Default")
 			(node
@@ -18933,8 +18899,8 @@
 			)
 			(node
 				(ref "U1")
-				(pin "N21")
-				(pinfunction "N21_N21")
+				(pin "A14")
+				(pinfunction "A14_A14")
 				(pintype "passive")
 			)
 			(node
@@ -18945,13 +18911,13 @@
 			)
 		)
 		(net
-			(code "286")
+			(code "284")
 			(name "/SMI#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "V9")
-				(pinfunction "V9_V9")
+				(pin "F7")
+				(pinfunction "F7_F7")
 				(pintype "passive")
 			)
 			(node
@@ -18962,13 +18928,13 @@
 			)
 		)
 		(net
-			(code "287")
+			(code "285")
 			(name "/SMIACT#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "Y11")
-				(pinfunction "Y11_Y11")
+				(pin "J18")
+				(pinfunction "J18_J18")
 				(pintype "passive")
 			)
 			(node
@@ -18979,13 +18945,13 @@
 			)
 		)
 		(net
-			(code "288")
+			(code "286")
 			(name "/STPCLK#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "U11")
-				(pinfunction "U11_U11")
+				(pin "K7")
+				(pinfunction "K7_K7")
 				(pintype "passive")
 			)
 			(node
@@ -18996,7 +18962,7 @@
 			)
 		)
 		(net
-			(code "289")
+			(code "287")
 			(name "/S_VCC2")
 			(class "Default")
 			(node
@@ -19173,7 +19139,7 @@
 			)
 		)
 		(net
-			(code "290")
+			(code "288")
 			(name "/S_VCC3")
 			(class "Default")
 			(node
@@ -19368,13 +19334,13 @@
 			)
 		)
 		(net
-			(code "291")
+			(code "289")
 			(name "/TCK")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "N8")
-				(pinfunction "N8_N8")
+				(pin "R9")
+				(pinfunction "R9_R9")
 				(pintype "passive")
 			)
 			(node
@@ -19385,13 +19351,13 @@
 			)
 		)
 		(net
-			(code "292")
+			(code "290")
 			(name "/TDI")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "P12")
-				(pinfunction "P12_P12")
+				(pin "P7")
+				(pinfunction "P7_P7")
 				(pintype "passive")
 			)
 			(node
@@ -19402,7 +19368,7 @@
 			)
 		)
 		(net
-			(code "293")
+			(code "291")
 			(name "/TDO")
 			(class "Default")
 			(node
@@ -19419,13 +19385,13 @@
 			)
 		)
 		(net
-			(code "294")
+			(code "292")
 			(name "/TMS")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "R9")
-				(pinfunction "R9_R9")
+				(pin "N8")
+				(pinfunction "N8_N8")
 				(pintype "passive")
 			)
 			(node
@@ -19436,13 +19402,13 @@
 			)
 		)
 		(net
-			(code "295")
+			(code "293")
 			(name "/TRST#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "R12")
-				(pinfunction "R12_R12")
+				(pin "L8")
+				(pinfunction "L8_L8")
 				(pintype "passive")
 			)
 			(node
@@ -19453,7 +19419,7 @@
 			)
 		)
 		(net
-			(code "296")
+			(code "294")
 			(name "/U3_CT")
 			(class "Default")
 			(node
@@ -19469,13 +19435,13 @@
 			)
 		)
 		(net
-			(code "297")
+			(code "295")
 			(name "/VCC2DET#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "AA7")
-				(pinfunction "AA7_AA7")
+				(pin "G17")
+				(pinfunction "G17_G17")
 				(pintype "passive")
 			)
 			(node
@@ -19486,7 +19452,7 @@
 			)
 		)
 		(net
-			(code "298")
+			(code "296")
 			(name "/VCCA_FPLL25")
 			(class "Default")
 			(node
@@ -19537,7 +19503,7 @@
 			)
 		)
 		(net
-			(code "299")
+			(code "297")
 			(name "/VCCIO33")
 			(class "Default")
 			(node
@@ -20005,7 +19971,7 @@
 			)
 		)
 		(net
-			(code "300")
+			(code "298")
 			(name "/VCC_1V1")
 			(class "Default")
 			(node
@@ -20457,7 +20423,7 @@
 			)
 		)
 		(net
-			(code "301")
+			(code "299")
 			(name "/VCC_AUX25")
 			(class "Default")
 			(node
@@ -20535,13 +20501,13 @@
 			)
 		)
 		(net
-			(code "302")
+			(code "300")
 			(name "/WB{slash}WT#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "B5")
-				(pinfunction "B5_B5")
+				(pin "H21")
+				(pinfunction "H21_H21")
 				(pintype "passive")
 			)
 			(node
@@ -20552,13 +20518,13 @@
 			)
 		)
 		(net
-			(code "303")
+			(code "301")
 			(name "/W{slash}R#")
 			(class "Default")
 			(node
 				(ref "U1")
-				(pin "K7")
-				(pinfunction "K7_K7")
+				(pin "G15")
+				(pinfunction "G15_G15")
 				(pintype "passive")
 			)
 			(node
@@ -20566,6 +20532,40 @@
 				(pin "AM06")
 				(pinfunction "W/R#_AM06")
 				(pintype "output")
+			)
+		)
+		(net
+			(code "302")
+			(name "/[BF0]")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "H6")
+				(pinfunction "H6_H6")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "Y33")
+				(pinfunction "BF0_Y33")
+				(pintype "input")
+			)
+		)
+		(net
+			(code "303")
+			(name "/[BF1]")
+			(class "Default")
+			(node
+				(ref "U1")
+				(pin "J7")
+				(pinfunction "J7_J7")
+				(pintype "passive")
+			)
+			(node
+				(ref "U2")
+				(pin "X34")
+				(pinfunction "BF1_X34")
+				(pintype "input")
 			)
 		)
 		(net

@@ -259,6 +259,11 @@ CLKnp input and takes the fewest crossings with same-face A legs; U1 the
 rotation of the fewest, then the least length: 270 deg, 0 crossings, 5559 ->
 5854 mm. Every bank is 3.3 V, so the old bank plan (byte per bank) is gone;
 `layout.csv` hands U1 and the chip spots to T7.
+socket7-cyclonev (2026-11-05, `gen_socket7_assign.py`): the same on the
+socket 7 T7 layout, one stage (direct nets): socket pin -> ball, least
+total length + 6 mm per ring depth; the bank plan (byte per bank) is
+gone. U1 at 90 deg (5084 mm); CLK on W16 with 1 crossing (the fewest of
+the clock inputs and rotations).
 
 **T6 Schematic and netlist** generated from T3-T5. Check: ERC 0 errors.
 Every Cyclone V generator first checks each supply ball against its band
@@ -348,6 +353,14 @@ the ring stay free for the socket legs; U4 flash in the window at its AS
 balls; jack, regulators and JTAG in the north band. Board 51.4 x 101.8 mm
 (D6: 0.5 mm inside the ZIF body west/south/east), 4 layers, DRC 0 errors,
 1390/1390 netlist pins on pads. 3D view (kicad-cli render): J3 plug opening faces the north edge (front 1.1 mm inside it), FPGA, translator columns and the flash in the window as placed, nothing on the lever band.
+Status socket7-cyclonev (`hw/tools/gen_socket7_t7.py`, 2026-11-05): outline
+0.5 mm inside the ZIF body on all four sides, 51.6 x 62.3 mm (the body is
+ASSUMED from the PGA370 envelope: re-check with M1); U1 in the centre of
+the PGA296 base (F.Cu window 31.3 mm, B.Cu 27.0 mm), the F.Cu window kept
+free for the socket legs, U1 capacitors under it on B.Cu; power tree,
+flash, pulls and JTAG in the 12 mm band between the ring and the
+cam-housing edge. Open: J1's THT tails reach ~3 mm under the board over
+the cam housing, 3.99 mm above the socket top (M1). DRC 0 errors.
 
 **T8 Routing**: layers per D5; Socket 370 per AP-906 (AGTL+, 133 MHz), Socket 7 at
 66 MHz with matched lengths per byte lane. Check: DRC 0 errors, 0 unconnected.
@@ -364,6 +377,6 @@ with `kicad-cli` (gerbers, drill, positions, BOM).
 | Variant | T0 | T1 | T2 | T3 | T4 | T5 | T6 | T7 | T8 | T9 | T10 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | socket3-cyclonev | done | done | done | done | done | done | done | done | | | |
-| socket7-cyclonev | done | done | done | done | done | done | done | | | | |
+| socket7-cyclonev | done | done | done | done | done | done | done | done | | | |
 | socket370-cyclonev | done | done | done | done | done | done | done | | | | |
 | ~~socket370-ti180~~ | dropped (D10) after T6 | | | | | | | | | | |

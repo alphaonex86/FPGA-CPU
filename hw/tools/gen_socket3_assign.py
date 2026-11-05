@@ -33,6 +33,7 @@ from scipy.optimize import linear_sum_assignment
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import gen_socket3_t7 as t7
+import placer
 from assign_common import AS_X4_QSF, write_outputs
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -59,7 +60,7 @@ def assign(u1_rot, signals, balls, clocks):
     chan, c1 = least_length([(n, socket[pin]) for n, pin in signals], b_pins)
     a_pin = {n: xy[k][str(1 + ch)] for n, (k, ch) in chan.items()}
     u1, centre = xy["U1"], t7.U1_AT
-    depth = lambda b: DEPTH_MM * t7.ring_depth(u1[b], centre)
+    depth = lambda b: DEPTH_MM * placer.ring_depth(u1[b], centre)
     # CLK is held to the clock inputs, outside the swap argument: each one tried, the fewest crossings
     # of its A leg with the others of its side first, then the least length
     others = [(n, a_pin[n]) for n in a_pin if n != "CLK"]
