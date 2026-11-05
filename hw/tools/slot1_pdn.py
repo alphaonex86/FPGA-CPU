@@ -82,4 +82,4 @@ def build(net_of_ball, translators):
         for v in DIE_CAPS:
             P.c(v, C0402, "VDDR3", "die", die)
         P.c("100nF", C0402, "VTTREF0675", "die", die)
-    return P.rows
+    return P.done()

@@ -234,7 +234,7 @@ def power(P, net_of_ball, gtl, cb3t, agtl, pcie):
             for s in "PN":
                 P.add("C", "Device:C", "100nF", C0402, [f"PCIE_TX{k}_{s}", f"PCIE_TX{k}_{s}_C"], "pcie", "J6")
         P.r("10k", "PCIE_PERST#", "GND", "pcie", "J6")   # Hard IP held in reset with no cable
-    return P.rows
+    return P.done()
 
 
 def main(board):

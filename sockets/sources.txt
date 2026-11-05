@@ -85,3 +85,6 @@ parts/changjiang_fxl1040.pdf https://datasheet.lcsc.com/datasheet/pdf/40dfb6cb46
 parts/yageo_yc124.pdf https://datasheet.lcsc.com/datasheet/pdf/63385612cd4755da2330a030269c8f6e.pdf
 parts/sctf_sx2m_50m.pdf https://datasheet.lcsc.com/datasheet/pdf/b2ab9bc57b3cb3682e9a86a5a5fb3e86.pdf
 parts/winbond_w25q128jv.pdf https://datasheet.lcsc.com/datasheet/pdf/d009d960f1daec6149edaa35b7dae856.pdf
+parts/ti_tlv62585.pdf https://www.ti.com/lit/ds/symlink/tlv62585.pdf
+parts/ti_tps22918.pdf https://www.ti.com/lit/ds/symlink/tps22918.pdf
+parts/ti_slva463a_tps6213x_output_filter.pdf https://www.ti.com/lit/an/slva463a/slva463a.pdf

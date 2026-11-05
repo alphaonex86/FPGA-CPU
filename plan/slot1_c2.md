@@ -418,10 +418,16 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   the SPI x4 boot needs no setup [winbond_w25q128jv 7.1.4].
 - Parts (2026-11-04, JLCPCB stock for 2 boards: all but one): swapped to
   stocked equivalents W25Q128JVSIQ, SX2M 50 MHz, FXL1040-6R8, YC124 56R,
-  TS-1187A, T520D 330 uF/6.3 V; standoffs Sinhoo SMTSO2066CTJ (M2, 6.6 mm,
+  TS-1187A; standoffs Sinhoo SMTSO2066CTJ (M2, 6.6 mm,
   reflowed). SN74GTL16612DGGR: not at LCSC/JLCPCB; TI lists it ACTIVE and
   in stock (~US$5.9): JLCPCB Global Sourcing or consigned. Parts at JLCPCB
   list prices ~US$463 for 2 boards (2 x XC7A100T-2FGG484I ~US$66).
+- VCC_1V0 bulk (2026-11-05): the UG483 330 uF tantalum is gone, a second
+  100 uF 1210 instead (255 uF on PS2). 485 uF was past the TPS62130's
+  lab-stable 400 uF at 2.2 uH (800 uF unstable) [slva463a Table 1];
+  228 uF of ceramic beats the UG483 network's impedance from 100 kHz up,
+  which UG483 p.13 accepts. `pdn.Parts.done()` refuses a TPS62130 rail
+  over 400 uF.
 - Open: JLCPCB's placement preview (its rotations differ from KiCad's for
   some packages); GTL16612 purchase route.
 

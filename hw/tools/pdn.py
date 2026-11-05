@@ -10,6 +10,7 @@ writes them as pdn.csv for its placement step. Sources:
 import math
 import pathlib
 import re
+import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 U1_FP = ROOT / "hw/lib/Interposer.pretty/FPGA_CycloneV_5CEFA9_F484_BGA.kicad_mod"
@@ -120,6 +121,7 @@ class Parts:
         taken: references the sheet already uses (skipped)"""
         self.rows, self.count, self.lib = [], {}, lib
         self.taken = set(taken)
+        self.cout_max = {}                # converter output net -> proven nominal capacitance (F)
 
     def add(self, prefix, sym, value, fpn, nets, kind, a="", b="", side="F"):
         k = self.count.get(prefix, 0) + 1
@@ -138,6 +140,15 @@ class Parts:
 
     def r(self, value, n1, n2, kind, a=""):
         return self.add("R", "Device:R", value, R0402, [n1, n2], kind, a)
+
+    def done(self):
+        """the rows; exit 1 when a converter output carries more nominal capacitance than proven stable"""
+        for net, cmax in self.cout_max.items():
+            total = sum(farads(r["value"]) for r in self.rows
+                        if r["sym"] == "Device:C" and r["nets"].split("|")[0] == net)
+            if total > cmax:
+                sys.exit(f"FAIL: {net} carries {total * 1e6:.0f} uF, its converter is proven to {cmax * 1e6:.0f} uF")
+        return self.rows
 
 
 def buck54620(P, p, vin, vout_net, vout, iout, cout, en, pg, l_nom, lpart,
@@ -174,6 +185,8 @@ def buck62130(P, p, vout_net, vout, band, en, pg):
     l_check(p, "XFL4020-222", 3.0,              # 3 A max [tps62130 p.1]
             (vin - vout) / 2.2e-6 * vout / (vin * 2.5e6))
     st = ("stage", p)
+    # 2.2 uH: 400 uF nominal lab-stable, 800 uF unstable [slva463a p.1 Table 1]; Table 9-2 p.14 stops at 200 uF
+    P.cout_max[vout_net] = 400e-6
     nets = {"1": f"{p}_SW", "2": f"{p}_SW", "3": f"{p}_SW",
             "4": pg or f"NC_{p}_4", "5": f"{p}_FB", "6": "GND", "7": "GND",
             "8": "GND", "9": f"{p}_SS", "10": "V5", "11": "V5", "12": "V5",

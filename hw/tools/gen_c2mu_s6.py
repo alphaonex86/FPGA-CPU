@@ -63,8 +63,9 @@ SMALL = {                               # UG483 Table 2-2, XC7A100T FGG484: 0.47
     "VCC_1V0": ["470nF"] * 10, "VCC_1V8": ["470nF"] * 9, "VCC_3V3": ["470nF"] * 12,
     "VCC_MGT10": ["100nF"] * 5, "VCC_MGT12": ["100nF"] * 6,
 }
-BULK = ([("VCC_1V0", "330uF/6.3V", "Capacitor_Tantalum_SMD:CP_EIA-7343-31_Kemet-D"),
-         ("VCC_1V0", "100uF/6.3V", C1210)] + [("VCC_1V0", "4.7uF", C0603)] * 6
+# the UG483 330 uF tantalum would take PS2 past its stable 400 uF [slva463a Table 1]: a second 100 uF
+# ceramic instead, lower impedance from 100 kHz to 10 MHz (UG483 p.13 allows any network that low)
+BULK = ([("VCC_1V0", "100uF/6.3V", C1210)] * 2 + [("VCC_1V0", "4.7uF", C0603)] * 6
         + [("VCC_1V8", "47uF/6.3V", C1210)] * 2 + [("VCC_1V8", "4.7uF", C0603)] * 5
         + [("VCC_3V3", "47uF/6.3V", C1210)] * 4 + [("VCC_3V3", "4.7uF", C0603)] * 8
         + [("VCC_MGT10", "4.7uF", C0603), ("VCC_MGT12", "4.7uF", C0603)])
@@ -220,7 +221,7 @@ def power(P, net_of_ball, agtl):
     P.r("10k", "FT_EEDATA", "VCC_3V3", "mu", "U16")
     for n, m in (("FT_TCK", "F_TCK"), ("FT_TDI", "F_TDI"), ("FT_TMS", "F_TMS"), ("F_TDO", "FT_TDO")):
         P.r("33R", n, m, "mu", "U16")
-    return P.rows
+    return P.done()
 
 
 def main():

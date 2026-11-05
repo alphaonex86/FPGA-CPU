@@ -84,7 +84,7 @@ C60,Device:C,100nF,Pwr:C_0402_P1.00,VCC_MGT12|GND,B,u1pair,B7,A7
 C61,Device:C,100nF,Pwr:C_0402_P1.00,VCC_MGT12|GND,B,u1pair,B9,A9
 C62,Device:C,100nF,Pwr:C_0402_P1.00,VCC_MGT12|GND,B,u1pair,C4,D4
 C63,Device:C,100nF,Pwr:C_0402_P1.00,VCC_MGT12|GND,B,u1pair,C8,D8
-C64,Device:C,330uF/6.3V,Capacitor_Tantalum_SMD:CP_EIA-7343-31_Kemet-D,VCC_1V0|GND,F,u1bulk,,
+C64,Device:C,100uF/6.3V,Capacitor_SMD:C_1210_3225Metric,VCC_1V0|GND,F,u1bulk,,
 C65,Device:C,100uF/6.3V,Capacitor_SMD:C_1210_3225Metric,VCC_1V0|GND,F,u1bulk,,
 C66,Device:C,4.7uF,Capacitor_SMD:C_0603_1608Metric,VCC_1V0|GND,F,u1bulk,,
 C67,Device:C,4.7uF,Capacitor_SMD:C_0603_1608Metric,VCC_1V0|GND,F,u1bulk,,
