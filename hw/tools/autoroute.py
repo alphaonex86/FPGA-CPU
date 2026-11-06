@@ -396,11 +396,14 @@ def freeroute(board, path, jobs):
         if n == 0 or n >= best:
             break
         best = n
+    if n == 0:                        # complete: the generated ball vias no route uses go too
+        print(f"dangling copper dropped: {drop_dangling(board, path, keep_locked=False)}", flush=True)
 
 
 def settle(board, path):
     """fill, save; the routers can leave a short or a clearance error: their copper there is dropped
-    (the generated copper is locked), the connection open again: (unrouted, dropped)"""
+    (the generated copper is locked), the connection open again, and dangling copper: (unrouted,
+    dropped)"""
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(path), board)
     rep = drc_report(path)
@@ -411,16 +414,36 @@ def settle(board, path):
     if drop:
         pcbnew.ZONE_FILLER(board).Fill(board.Zones())
         pcbnew.SaveBoard(str(path), board)
+    if drop_dangling(board, path) or drop:
         rep = drc_report(path)
     return len(rep.get("unconnected_items", [])), len(drop)     # the board's connectivity in memory lags
 
-def drc_report(path):
-    out = path.with_suffix(".drc.json")
-    r = subprocess.run(["nice", "-n", "19", "kicad-cli", "pcb", "drc", "--severity-error", "--format", "json",
+def drc_report(path, severity="error"):
+    """kicad-cli DRC; errors into .drc.json, warnings into .warnings.json"""
+    out = path.with_suffix(".drc.json" if severity == "error" else ".warnings.json")
+    out.unlink(missing_ok=True)
+    r = subprocess.run(["nice", "-n", "19", "kicad-cli", "pcb", "drc", f"--severity-{severity}", "--format", "json",
                         "-o", str(out), str(path)], capture_output=True, text=True)
     if r.returncode != 0 or not out.exists():
         sys.exit(f"FAIL: kicad-cli drc: {r.stderr.strip()[:300]}")
     return json.load(open(out))
+
+
+def drop_dangling(board, path, keep_locked=True):
+    """tracks and vias with a free end (KiCad DRC warnings: router leftovers; with keep_locked=False
+    also the generated ball vias no route uses), until none is left: the number dropped"""
+    n = 0
+    while True:
+        ids = {i["uuid"] for v in drc_report(path, "warning").get("violations", [])
+               if v["type"] in ("track_dangling", "via_dangling") for i in v["items"]}
+        drop = [t for t in board.GetTracks() if t.m_Uuid.AsString() in ids and not (keep_locked and t.IsLocked())]
+        if not drop:
+            return n
+        for t in drop:
+            board.Delete(t)
+        n += len(drop)
+        pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+        pcbnew.SaveBoard(str(path), board)
 
 
 def drc(path):

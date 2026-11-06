@@ -65,6 +65,8 @@ def main():
             best = n
             shutil.copy(path, best_path)
     shutil.copy(best_path, path)
+    if best == 0:                     # complete: the generated ball vias no route uses go too
+        note(f"dangling copper dropped: {ar.drop_dangling(pcbnew.LoadBoard(str(path)), path, keep_locked=False)}")
     errors, open_ = ar.drc(path)
     note(f"end: {open_} open, {errors} DRC errors; best board in {path.name}")
     if errors or open_:

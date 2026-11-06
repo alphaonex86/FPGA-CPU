@@ -81,7 +81,15 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   Socket 7 (operator 2026-11-05): 8 layers, JLC08161H-2116 as the C2 Mu (F,
   In2, In5, B signal; In3 VCC_1V1, In4 split rails): its 166 signals need U1
   rings 5-7 (the F484 has 125 user I/O in rings 0-4), which 2 signal layers
-  cannot escape (61 connections left). Socket 3 (114 signals, rings 0-4) stays at 6.
+  cannot escape (61 connections left). Socket 3 too (operator 2026-11-05): on 2
+  signal layers ~100 socket legs to the translators stayed open.
+  Open: heatsink on U1. The F484 in still air is ~13-16 C/W (JESD51 class for a
+  23 mm FBGA; the Cyclone V value is on Intel's thermal resistance page, not
+  yet offline): at 3-5 W FPGA power and 40 C inside a case, Tj reaches
+  80-115 C against 85 C for the C8 grade. A 23 x 23 mm low-profile heatsink
+  on thermal tape over U1 (no PCB change) is likely needed; the Quartus power
+  estimate on the real RTL decides, and the height above U1 depends on M1/M2
+  (D6), most of all on socket 3 where U1 sits beside the ZIF socket.
 - **D1** (decided 2026-10-31 by the operator) Socket 3: external 12 V supply
   on the interposer (barrel jack, FPGAmotherboard power tree); the socket VCC
   pins stay unused (board LDO PQ30RV21: 2 A abs max, `hw/common/socket3_notes.md` R2).
