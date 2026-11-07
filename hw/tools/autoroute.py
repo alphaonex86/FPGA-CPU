@@ -3,6 +3,7 @@
 every netted BGA ball, plane fanout of the SMD pads, freerouting runs alternating with close_route.py,
 KiCad DRC as the judge. Every function takes the board and its .kicad_pcb path: the route/ folder and
 the .drc.json sit next to it."""
+import fcntl
 import json
 import math
 import os
@@ -10,6 +11,7 @@ import pathlib
 import shutil
 import subprocess
 import sys
+import time
 
 import pcbnew
 
@@ -25,12 +27,29 @@ PASSES, ITERATIONS = 2, 20
 # faster) plain and with layer cost variants. The net order of the DSN changes nothing (measured: 6
 # shuffled orders, 6 identical sessions)
 PARALLEL = {"FREEROUTING__ROUTER__PARALLEL_THREADS": "4"}
+HEAP_GB = 8                              # per run; a run's RSS reaches ~7.5 GB
+# freerouting runs of every search on this PC at the same time (each run ~HEAP_GB + 2 GB of RAM)
+SLOTS = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") // ((HEAP_GB + 2) << 30)
+SLOT_LOCK = ROOT / "hw/.freerouting.lock"
 
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
 VIA = (0.45, 0.25)
 TRACK = 0.25                             # pad -> plane via
 CLEARANCE = pcbnew.FromMM(0.1)           # Default net class (the board minimum is 0)
 INSET = 0.3                              # plane pull-back from the board outline
+
+
+def launch(cmd, **kwargs):
+    """Popen of a freerouting run once fewer than SLOTS run on this PC (any board's search)"""
+    with open(SLOT_LOCK, "w") as lock:
+        fcntl.flock(lock, fcntl.LOCK_EX)
+        while True:
+            count = subprocess.run(["pgrep", "-c", "-f", FREEROUTING.stem], capture_output=True, text=True)
+            if count.returncode > 1:
+                sys.exit(f"FAIL: pgrep: {count.stderr}")
+            if int(count.stdout) < SLOTS:
+                return subprocess.Popen(cmd, **kwargs)
+            time.sleep(30)
 
 
 def routers(layer_costs):
@@ -355,12 +374,12 @@ def freerouting(board, path, jobs, passes=PASSES):
         dsn, ses, log = (route / f"{name}-{k}{ext}" for ext in (".dsn", ".ses", ".log"))
         shutil.copy(base, dsn)
         ses.unlink(missing_ok=True)
-        cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, "-Xmx8g", "-Djava.awt.headless=true", "-jar",
+        cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, f"-Xmx{HEAP_GB}g", "-Djava.awt.headless=true", "-jar",
                str(jar), "-de", str(dsn), "-do", str(ses), "-mp", str(passes), "-mt", "1", "-da",
                "--gui.enabled=false"]
         out = open(log, "a")
-        runs.append((label, ses, log, out, subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT,
-                                                            env=dict(env, **extra), cwd=route)))
+        runs.append((label, ses, log, out, launch(cmd, stdout=out, stderr=subprocess.STDOUT,
+                                                  env=dict(env, **extra), cwd=route)))
     best = None
     for label, ses, log, out, proc in runs:
         proc.wait()
