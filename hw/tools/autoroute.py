@@ -18,6 +18,8 @@ import pcbnew
 import close_route
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT.parent / "FPGAcommon/hw"))
+import claude_slice
 FREEROUTING = ROOT.parent / "FPGAcommon/tools/freerouting/freerouting-2.3.0-fpga.jar"
 FREEROUTING_PAR = FREEROUTING.with_name("freerouting-2.3.0-fpga-parallel.jar")
 FREEROUTING_MAIN = FREEROUTING.with_name("freerouting-2.3.0.jar")      # upstream, without the fork's changes
@@ -30,9 +32,8 @@ PASSES, ITERATIONS = 2, 20
 CPUS = 6                                 # operator 2026-11-08: 5-6 CPU per router, one router at a time
 PARALLEL = {"FREEROUTING__ROUTER__PARALLEL_THREADS": str(CPUS)}
 HEAP_GB = 8                              # per run; a run's RSS reaches ~7.5 GB
-# operator 2026-11-08: every routing process together within 25 % of the PC's RAM (systemd takes the
-# percentage of the RAM present), no swap; one routing script at a time, the others wait
-SLICE, RAM_SHARE = "fpgacpu-route.slice", "25%"
+# operator 2026-11-08/09: one routing script at a time, the others wait; everything Claude runs within
+# 25 % of the PC's RAM, no swap (claude_slice: the routing scripts in claude-route.slice)
 ROUTE_LOCK = ROOT / "hw/.route.lock"
 
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
@@ -43,29 +44,20 @@ INSET = 0.3                              # plane pull-back from the board outlin
 
 
 def contain():
-    """first call of a routing script: re-run it in SLICE (MemoryMax RAM_SHARE, no swap, CPUS
-    CPUs), then wait until no other routing script runs: the lock, kept open until exit"""
-    if os.environ.get("FPGACPU_SLICE") != SLICE:
-        unit, text = pathlib.Path.home() / ".config/systemd/user" / SLICE, \
-            f"[Slice]\nMemoryMax={RAM_SHARE}\nMemorySwapMax=0\n"
-        if not unit.exists() or unit.read_text() != text:
-            unit.parent.mkdir(parents=True, exist_ok=True)
-            unit.write_text(text)
-            subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
-        os.execvpe("systemd-run", ["systemd-run", "--user", "--scope", "--quiet", f"--slice={SLICE}",
-                                   f"--property=CPUQuota={CPUS * 100}%", sys.executable] + sys.argv,
-                   dict(os.environ, FPGACPU_SLICE=SLICE))
-    cgroup = pathlib.Path("/sys/fs/cgroup" + open("/proc/self/cgroup").read().split("::")[1].strip())
-    limit = (cgroup.parent / "memory.max").read_text().strip()
-    if SLICE not in str(cgroup) or limit == "max":
-        sys.exit(f"FAIL: not in {SLICE} with a memory limit ({cgroup}: memory.max {limit})")
+    """first call of a routing script: re-run it in claude-route.slice (CPUS CPUs, under claude.slice's
+    RAM cap), then wait until no other routing script runs: the lock, kept open until exit"""
+    if "/claude-route.slice/" not in open("/proc/self/cgroup").read():
+        claude_slice.run_in("route", [sys.executable] + sys.argv, cpus=CPUS)
+    free, limit = claude_slice.budget()
+    if limit is None:
+        sys.exit("FAIL: claude-route.slice has no memory limit above it")
     lock = open(ROUTE_LOCK, "w")
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError:
         print(f"waiting for the other routing script ({ROUTE_LOCK})", flush=True)
         fcntl.flock(lock, fcntl.LOCK_EX)
-    print(f"{SLICE}: memory.max {int(limit) >> 30} GB, {CPUS} CPUs", flush=True)
+    print(f"claude-route.slice: memory limit {limit >> 30} GB ({free >> 30} GB free), {CPUS} CPUs", flush=True)
     return lock
 
 
@@ -426,6 +418,7 @@ def freerouting(board, path, jobs, passes=PASSES, hours=12):
         cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, f"-Xmx{HEAP_GB}g", "-Djava.awt.headless=true", "-jar",
                str(jar), "-de", str(dsn), "-do", str(ses), "-mp", str(passes), "-mt", "1", "-da",
                "--gui.enabled=false"]
+        claude_slice.wait_for((HEAP_GB + 1) << 30, f"router {label}")    # heap + JVM overhead (RSS ~7.5 GB)
         with open(log, "a") as out:
             proc = subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT, env=dict(env, **extra), cwd=route)
         if proc.returncode != 0 or not ses.exists():
