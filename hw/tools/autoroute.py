@@ -8,10 +8,10 @@ import json
 import math
 import os
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
-import time
 
 import pcbnew
 
@@ -20,17 +20,20 @@ import close_route
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 FREEROUTING = ROOT.parent / "FPGAcommon/tools/freerouting/freerouting-2.3.0-fpga.jar"
 FREEROUTING_PAR = FREEROUTING.with_name("freerouting-2.3.0-fpga-parallel.jar")
+FREEROUTING_MAIN = FREEROUTING.with_name("freerouting-2.3.0.jar")      # upstream, without the fork's changes
 JAVA = "/opt/openjdk-bin-25/bin/java"     # the fork is built for Java 25
 PASSES, ITERATIONS = 2, 20
-# freerouting runs per iteration, at the same time, the best kept: the serial fork (deterministic), and
-# the parallel fork (each run differs: thread timing decides which speculative routes it keeps; ~4x
-# faster) plain and with layer cost variants. The net order of the DSN changes nothing (measured: 6
-# shuffled orders, 6 identical sessions)
-PARALLEL = {"FREEROUTING__ROUTER__PARALLEL_THREADS": "4"}
+# freerouting runs per iteration, one after the other, the best kept: upstream, the serial fork
+# (deterministic), and the parallel fork (each run differs: thread timing decides which speculative
+# routes it keeps; ~4x faster) plain and with layer cost variants. The net order of the DSN changes
+# nothing (measured: 6 shuffled orders, 6 identical sessions)
+CPUS = 6                                 # operator 2026-11-08: 5-6 CPU per router, one router at a time
+PARALLEL = {"FREEROUTING__ROUTER__PARALLEL_THREADS": str(CPUS)}
 HEAP_GB = 8                              # per run; a run's RSS reaches ~7.5 GB
-# freerouting runs of every search on this PC at the same time (each run ~HEAP_GB + 2 GB of RAM)
-SLOTS = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") // ((HEAP_GB + 2) << 30)
-SLOT_LOCK = ROOT / "hw/.freerouting.lock"
+# operator 2026-11-08: every routing process together within 25 % of the PC's RAM (systemd takes the
+# percentage of the RAM present), no swap; one routing script at a time, the others wait
+SLICE, RAM_SHARE = "fpgacpu-route.slice", "25%"
+ROUTE_LOCK = ROOT / "hw/.route.lock"
 
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
 VIA = (0.45, 0.25)
@@ -39,22 +42,36 @@ CLEARANCE = pcbnew.FromMM(0.1)           # Default net class (the board minimum 
 INSET = 0.3                              # plane pull-back from the board outline
 
 
-def launch(cmd, **kwargs):
-    """Popen of a freerouting run once fewer than SLOTS run on this PC (any board's search)"""
-    with open(SLOT_LOCK, "w") as lock:
+def contain():
+    """first call of a routing script: re-run it in SLICE (MemoryMax RAM_SHARE, no swap, CPUS
+    CPUs), then wait until no other routing script runs: the lock, kept open until exit"""
+    if os.environ.get("FPGACPU_SLICE") != SLICE:
+        unit, text = pathlib.Path.home() / ".config/systemd/user" / SLICE, \
+            f"[Slice]\nMemoryMax={RAM_SHARE}\nMemorySwapMax=0\n"
+        if not unit.exists() or unit.read_text() != text:
+            unit.parent.mkdir(parents=True, exist_ok=True)
+            unit.write_text(text)
+            subprocess.run(["systemctl", "--user", "daemon-reload"], check=True)
+        os.execvpe("systemd-run", ["systemd-run", "--user", "--scope", "--quiet", f"--slice={SLICE}",
+                                   f"--property=CPUQuota={CPUS * 100}%", sys.executable] + sys.argv,
+                   dict(os.environ, FPGACPU_SLICE=SLICE))
+    cgroup = pathlib.Path("/sys/fs/cgroup" + open("/proc/self/cgroup").read().split("::")[1].strip())
+    limit = (cgroup.parent / "memory.max").read_text().strip()
+    if SLICE not in str(cgroup) or limit == "max":
+        sys.exit(f"FAIL: not in {SLICE} with a memory limit ({cgroup}: memory.max {limit})")
+    lock = open(ROUTE_LOCK, "w")
+    try:
+        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        print(f"waiting for the other routing script ({ROUTE_LOCK})", flush=True)
         fcntl.flock(lock, fcntl.LOCK_EX)
-        while True:
-            count = subprocess.run(["pgrep", "-c", "-f", FREEROUTING.stem], capture_output=True, text=True)
-            if count.returncode > 1:
-                sys.exit(f"FAIL: pgrep: {count.stderr}")
-            if int(count.stdout) < SLOTS:
-                return subprocess.Popen(cmd, **kwargs)
-            time.sleep(30)
+    print(f"{SLICE}: memory.max {int(limit) >> 30} GB, {CPUS} CPUs", flush=True)
+    return lock
 
 
 def routers(layer_costs):
     """{label: freerouting layer cost multipliers (DSN layer index: stack order)} -> the run list"""
-    return [("serial", FREEROUTING, {}), ("parallel", FREEROUTING_PAR, PARALLEL)] + \
+    return [("upstream", FREEROUTING_MAIN, {}), ("serial", FREEROUTING, {}), ("parallel", FREEROUTING_PAR, PARALLEL)] + \
         [(label, FREEROUTING_PAR, dict(PARALLEL, FREEROUTING__ROUTER__LAYER_COST_MULTIPLIERS=c))
          for label, c in layer_costs.items()]
 
@@ -340,9 +357,40 @@ def allow_via_in_pad(dsn):
     dsn.write_text("\n".join(lines))
 
 
-def freerouting(board, path, jobs, passes=PASSES):
-    """the jobs (routers()) of PASSES passes at the same time; the session leaving the fewest
-    connections open is imported into the board"""
+def plane_areas(board, dsn):
+    """the DSN planes as KiCad pours them: each zone outline less the higher priority zones of its
+    layer (KiCad exports the bare outlines: freerouting took a cut-out area as the lower zone's
+    copper, counted its pads joined through it and never routed them)"""
+    zones = [z for z in board.Zones() if not z.GetIsRuleArea() and z.GetNetCode() > 0]
+    text = dsn.read_text()
+    old = re.findall(r"\n *\(plane ([^ ()]+) \(polygon ([^ ()]+) [^()]*\)\)", text)
+    if sorted(old) != sorted((z.GetNetname(), board.GetLayerName(z.GetLayer())) for z in zones):
+        sys.exit(f"FAIL: DSN planes {sorted(old)} are not the board's zones: export format changed")
+    planes = []
+    for z in zones:
+        area = pcbnew.SHAPE_POLY_SET(z.Outline())
+        for o in zones:
+            if o.GetLayer() == z.GetLayer() and o.GetAssignedPriority() > z.GetAssignedPriority():
+                area.BooleanSubtract(o.Outline())
+        area.Fracture()                   # holes into the outline: a DSN polygon has none
+        for i in range(area.OutlineCount()):
+            chain = area.COutline(i)
+            pts = [chain.CPoint(k) for k in range(chain.PointCount())] + [chain.CPoint(0)]
+            planes.append(f"    (plane {z.GetNetname()} (polygon {board.GetLayerName(z.GetLayer())} 0 "
+                          + " ".join(f"{p.x / 1000:g} {-p.y / 1000:g}" for p in pts) + "))")
+    first = True
+
+    def swap(_):
+        nonlocal first
+        new, first = ("\n" + "\n".join(planes)) if first else "", False
+        return new
+    dsn.write_text(re.sub(r"\n *\(plane [^ ()]+ \(polygon [^()]*\)\)", swap, text))
+
+
+def freerouting(board, path, jobs, passes=PASSES, hours=12):
+    """the jobs (routers()) of PASSES passes (at most hours each) one after the other; the session
+    leaving the fewest connections open is imported into the board: its count, None when every run
+    failed"""
     route, name = path.parent / "route", path.stem
     for _, jar, _ in jobs:
         if not jar.exists():
@@ -354,7 +402,7 @@ def freerouting(board, path, jobs, passes=PASSES):
                     board.GetDesignSettings().m_HoleClearance / 1000)),
                 "FREEROUTING__ROUTER__AUTOMATIC_NECKDOWN": "true",     # PWR (0.4) out of 0.25 QFN pads
                 "FREEROUTING__ROUTER__OPTIMIZER__ENABLED": "false",
-                "FREEROUTING__ROUTER__JOB_TIMEOUT": "12:00:00"})
+                "FREEROUTING__ROUTER__JOB_TIMEOUT": f"{int(hours):02d}:{int(hours * 60) % 60:02d}:00"})
     # footprint-only rule areas (cavity, retention bands) leave copper free, but the DSN
     # export makes every rule area a copper keepout: out of the board for the export only
     parts_only = [z for z in board.Zones() if z.GetIsRuleArea() and not z.GetDoNotAllowTracks()
@@ -368,8 +416,9 @@ def freerouting(board, path, jobs, passes=PASSES):
     if not exported:
         sys.exit("FAIL: DSN export")
     allow_via_in_pad(base)
+    plane_areas(board, base)
     pcbnew.SaveBoard(str(path), board)
-    runs = []
+    best = None
     for k, (label, jar, extra) in enumerate(jobs):
         dsn, ses, log = (route / f"{name}-{k}{ext}" for ext in (".dsn", ".ses", ".log"))
         shutil.copy(base, dsn)
@@ -377,13 +426,8 @@ def freerouting(board, path, jobs, passes=PASSES):
         cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, f"-Xmx{HEAP_GB}g", "-Djava.awt.headless=true", "-jar",
                str(jar), "-de", str(dsn), "-do", str(ses), "-mp", str(passes), "-mt", "1", "-da",
                "--gui.enabled=false"]
-        out = open(log, "a")
-        runs.append((label, ses, log, out, launch(cmd, stdout=out, stderr=subprocess.STDOUT,
-                                                  env=dict(env, **extra), cwd=route)))
-    best = None
-    for label, ses, log, out, proc in runs:
-        proc.wait()
-        out.close()
+        with open(log, "a") as out:
+            proc = subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT, env=dict(env, **extra), cwd=route)
         if proc.returncode != 0 or not ses.exists():
             print(f"  router {label}: freerouting exit {proc.returncode}, see {log}", flush=True)
             continue
@@ -395,9 +439,10 @@ def freerouting(board, path, jobs, passes=PASSES):
         if best is None or n < best[0]:
             best = (n, ses)
     if best is None:
-        sys.exit("FAIL: every freerouting run failed")
+        return None
     if not pcbnew.ImportSpecctraSES(board, str(best[1])):
         sys.exit("FAIL: SES import")
+    return best[0]
 
 
 def freeroute(board, path, jobs):
@@ -405,7 +450,8 @@ def freeroute(board, path, jobs):
     best = unrouted(board)
     print(f"unrouted before routing: {best}", flush=True)
     for it in range(1, ITERATIONS + 1):
-        freerouting(board, path, jobs)
+        if freerouting(board, path, jobs) is None:
+            sys.exit("FAIL: every freerouting run failed")
         n, dropped = settle(board, path)
         print(f"iteration {it}: {n} unrouted, {dropped} router items in DRC errors dropped", flush=True)
         if n:                         # the windowed router closes ~30 % per round; freerouting rips up the rest

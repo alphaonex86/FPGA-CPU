@@ -2,7 +2,8 @@
 """Slot 1 C2 Mu cartridge: planes, U1 via-in-pad and autorouting, the S8 step
 for hw/slot1-c2mu.
 
-Usage: python3 hw/tools/gen_c2mu_s8.py   (after gen_c2mu_s7.py; long: freerouting)
+Usage: python3 hw/tools/gen_c2mu_s8.py [--pre]   (after gen_c2mu_s7.py; long: freerouting; --pre
+stops before routing)
 Output: hw/slot1-c2mu/slot1-c2mu.kicad_pcb routed, .drc.json; the
 freerouting DSN / SES / log in hw/slot1-c2mu/route/.
 
@@ -151,6 +152,7 @@ def pcie_skew(board, pairs):
 
 
 def main():
+    lock = ar.contain()
     path = OUT / f"{NAME}.kicad_pcb"
     board = pcbnew.LoadBoard(str(path))
     if len(board.GetTracks()) or len(board.Zones()) > 4:
@@ -164,6 +166,8 @@ def main():
     pcbnew.SaveBoard(str(path), board)
     if ar.drc(path)[0]:
         sys.exit("FAIL: the generated copper has DRC errors: fix them before routing")
+    if "--pre" in sys.argv:
+        return
     ar.freeroute(board, path, ROUTERS)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(path), board)

@@ -40,6 +40,7 @@ PLANES = [("GND", pcbnew.In1_Cu, (None, None, None, None), 0),
 
 
 def main():
+    lock = ar.contain()
     path = OUT / f"{NAME}.kicad_pcb"
     board = pcbnew.LoadBoard(str(path))
     if len(board.GetTracks()) or len(board.Zones()):

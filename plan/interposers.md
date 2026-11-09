@@ -385,6 +385,13 @@ Status (2026-11-05): `hw/tools/gen_socket7_t8.py` and `gen_socket3_t8.py` on the
 `autoroute.py` (planes, via in every netted U1 ball, plane fanout, freerouting + close_route);
 pre-route copper DRC 0 errors on both (socket 3: 342 connections left to the router).
 Routing runs queued after the C2 Mu run.
+Status (2026-11-08): the first route_search runs (rounds from the best board) stalled at 4 open
+(socket 3, socket 7) and 31 (C2 Mu); every freerouting process then died for lack of RAM. Fault
+found (setup, not budget): KiCad exports each plane as its bare outline, so freerouting took the
+cut-out areas (V5 and S_VCC over V3V3 on socket 3, the In4 splits on socket 7) as the lower zone's
+copper and never routed the pads there. `autoroute.plane_areas()` now writes the poured areas.
+route_search now follows the operator's scheme (several routers, each from the unrouted copy, same
+budget, one at a time) inside a systemd slice capped at 25 % of RAM and 6 CPUs.
 
 **T9 Verification**: audit script: every base pad's net is the T1 signal and
 reaches the T5 ball (or its translator); every power pad on its rail. 3D check
