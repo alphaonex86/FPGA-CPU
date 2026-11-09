@@ -152,7 +152,7 @@ def pcie_skew(board, pairs):
 
 
 def main():
-    lock = ar.contain()
+    lock = ar.contain(routing="--pre" not in sys.argv)
     path = OUT / f"{NAME}.kicad_pcb"
     board = pcbnew.LoadBoard(str(path))
     if len(board.GetTracks()) or len(board.Zones()) > 4:

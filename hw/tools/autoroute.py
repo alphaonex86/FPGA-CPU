@@ -43,14 +43,17 @@ CLEARANCE = pcbnew.FromMM(0.1)           # Default net class (the board minimum 
 INSET = 0.3                              # plane pull-back from the board outline
 
 
-def contain():
+def contain(routing=True):
     """first call of a routing script: re-run it in claude-route.slice (CPUS CPUs, under claude.slice's
-    RAM cap), then wait until no other routing script runs: the lock, kept open until exit"""
+    RAM cap), then, when it routes, wait until no other routing script runs: the lock, kept open until
+    exit (None without routing)"""
     if "/claude-route.slice/" not in open("/proc/self/cgroup").read():
         claude_slice.run_in("route", [sys.executable] + sys.argv, cpus=CPUS)
     free, limit = claude_slice.budget()
     if limit is None:
         sys.exit("FAIL: claude-route.slice has no memory limit above it")
+    if not routing:
+        return None
     lock = open(ROUTE_LOCK, "w")
     try:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -108,6 +111,27 @@ def planes(board, spec):
         for x, y in ((x0, y0), (x1, y0), (x1, y1), (x0, y1)):
             ol.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
         board.Add(z)
+    areas = {}
+    for z, area in poured(board):
+        areas.setdefault((z.GetNetname(), board.GetLayerName(z.GetLayer())), pcbnew.SHAPE_POLY_SET()).BooleanAdd(area)
+    whole = {n for (n, L), a in areas.items() if a.OutlineCount() == 1}
+    split = [f"{n} {L}: {a.OutlineCount()}" for (n, L), a in areas.items() if a.OutlineCount() > 1 and n not in whole]
+    if split:                        # freerouting takes all copper touching a net's planes as joined; one
+                                     # whole layer joins a net's islands on the others through their vias
+        sys.exit(f"FAIL: plane net in several islands on one layer (never joined by freerouting): {split}")
+
+
+def poured(board):
+    """[(zone, its area: the outline less the higher priority zones of its layer)]"""
+    zones = [z for z in board.Zones() if not z.GetIsRuleArea() and z.GetNetCode() > 0]
+    out = []
+    for z in zones:
+        area = pcbnew.SHAPE_POLY_SET(z.Outline())
+        for o in zones:
+            if o.GetLayer() == z.GetLayer() and o.GetAssignedPriority() > z.GetAssignedPriority():
+                area.BooleanSubtract(o.Outline())
+        out.append((z, area))
+    return out
 
 def via_in_pad(board, spec, ref="U1"):
     """a locked via in every ball of ref on a net with other pads or a plane (spec as planes())"""
@@ -216,11 +240,13 @@ def pad_frame(pad):
                                                    -lx * math.sin(rot) + ly * math.cos(rot))
 
 
-def on_plane(pt, rects):
-    """a via at pt lands inside one of its net's plane rectangles, PLANE_MARGIN from their edges"""
+def on_plane(pt, spans):
+    """a via at pt lands inside one of its net's plane rectangles and outside the rectangles cut
+    out of it, PLANE_MARGIN from their edges"""
     x, y = pt.x / 1e6, pt.y / 1e6
-    return any(x0 + PLANE_MARGIN <= x <= x1 - PLANE_MARGIN and y0 + PLANE_MARGIN <= y <= y1 - PLANE_MARGIN
-               for x0, y0, x1, y1 in rects)
+    inside = lambda r, m: r[0] + m <= x <= r[2] - m and r[1] + m <= y <= r[3] - m
+    return any(inside(rect, PLANE_MARGIN) and not any(inside(c, -PLANE_MARGIN) for c in cuts)
+               for rect, cuts in spans)
 
 
 def row_ends(pad, fp):
@@ -271,8 +297,9 @@ def plane_vias(board, spec):
     the pad, else a track to a same-net via within 1.5 mm, else a dogbone; an array's common row one via
     past a row end; every via inside its net's plane span; the rest is the router's"""
     spans = {}
-    for n, _, rect, _ in spec:
-        spans.setdefault(net(board, n).GetNetCode(), []).append(plane_rect(board, rect))
+    for n, layer, rect, prio in spec:
+        cuts = [plane_rect(board, r) for m, L, r, q in spec if L == layer and q > prio and m != n]
+        spans.setdefault(net(board, n).GetNetCode(), []).append((plane_rect(board, rect), cuts))
     rules, cu = board.GetDesignSettings(), Copper(board)
     nvia, ntrack, left = 0, 0, []
     row_anchor = {}                      # (footprint, net) -> the via and pads already joined of an array's common row
@@ -353,17 +380,13 @@ def plane_areas(board, dsn):
     """the DSN planes as KiCad pours them: each zone outline less the higher priority zones of its
     layer (KiCad exports the bare outlines: freerouting took a cut-out area as the lower zone's
     copper, counted its pads joined through it and never routed them)"""
-    zones = [z for z in board.Zones() if not z.GetIsRuleArea() and z.GetNetCode() > 0]
+    zones = poured(board)
     text = dsn.read_text()
     old = re.findall(r"\n *\(plane ([^ ()]+) \(polygon ([^ ()]+) [^()]*\)\)", text)
-    if sorted(old) != sorted((z.GetNetname(), board.GetLayerName(z.GetLayer())) for z in zones):
+    if sorted(old) != sorted((z.GetNetname(), board.GetLayerName(z.GetLayer())) for z, _ in zones):
         sys.exit(f"FAIL: DSN planes {sorted(old)} are not the board's zones: export format changed")
     planes = []
-    for z in zones:
-        area = pcbnew.SHAPE_POLY_SET(z.Outline())
-        for o in zones:
-            if o.GetLayer() == z.GetLayer() and o.GetAssignedPriority() > z.GetAssignedPriority():
-                area.BooleanSubtract(o.Outline())
+    for z, area in zones:
         area.Fracture()                   # holes into the outline: a DSN polygon has none
         for i in range(area.OutlineCount()):
             chain = area.COutline(i)

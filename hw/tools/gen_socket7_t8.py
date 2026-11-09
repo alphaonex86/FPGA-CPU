@@ -12,9 +12,10 @@ reached U1 through a split-plane corridor, ~30 mV drop against a ~14 mV margin; 
 the ~40 signals on U1 rings 5-7 cannot leave the ball field, the F484 has 125 user I/O in rings 0-4
 for 166 signals): F.Cu signal, In1 GND, In2 signal, In3 VCC_1V1 whole, In4 split, In5 signal, In6
 GND, B.Cu signal. In4: the
-socket rails over the pin ring, S_VCC2 west of the 2 / 3 boundary of the pin rows (x 31.25 south, 28.73 north)
-(and the band west: PS1's input), S_VCC3 east of it; VCCIO33 in the window inside the ring and in
-the south band east (U3's output, the flash, the pulls; the router joins the two). VCC_AUX25 and
+socket rails, S_VCC2 west of the 2 / 3 boundary of the pin rows (x 31.25 south, 28.73 north) (and
+the band west: PS1's input), S_VCC3 east of it. In6: VCCIO33 in one area inside GND (the window
+inside the ring, the south band east: U3's output, the flash, the pulls, and the strip across the
+south pin rows joining them: freerouting never joins two islands of a plane net). VCC_AUX25 and
 VCCA_FPLL25 (low current) are routed. Vias and socket pins keep no pad on a layer they do not
 connect, so the planes stay whole between the 1.0 mm ball vias.
 Checks (exit 1): every connection routed, kicad-cli DRC 0 errors.
@@ -40,9 +41,10 @@ PLANES = [("GND", pcbnew.In1_Cu, (None, None, None, None), 0),
           ("S_VCC2", pcbnew.In4_Cu, (None, None, SPLIT_S, None), 0),
           ("S_VCC3", pcbnew.In4_Cu, (SPLIT_S, None, None, None), 0),
           ("S_VCC3", pcbnew.In4_Cu, (SPLIT_N, None, SPLIT_S, WINDOW[1]), 1),
-          ("VCCIO33", pcbnew.In4_Cu, WINDOW, 1),
-          ("VCCIO33", pcbnew.In4_Cu, (*BAND, None, None), 1),
-          ("GND", pcbnew.In6_Cu, (None, None, None, None), 0)]
+          ("GND", pcbnew.In6_Cu, (None, None, None, None), 0),
+          ("VCCIO33", pcbnew.In6_Cu, WINDOW, 1),
+          ("VCCIO33", pcbnew.In6_Cu, (BAND[0], WINDOW[3], WINDOW[2], BAND[1]), 2),   # overlapping zones:
+          ("VCCIO33", pcbnew.In6_Cu, (*BAND, None, None), 3)]                       # distinct priorities
 
 
 def thin_pads(board):
@@ -57,7 +59,7 @@ def thin_pads(board):
 
 
 def main():
-    lock = ar.contain()
+    lock = ar.contain(routing="--pre" not in sys.argv)
     path = OUT / f"{NAME}.kicad_pcb"
     board = pcbnew.LoadBoard(str(path))
     if len(board.GetTracks()) or len(board.Zones()):
