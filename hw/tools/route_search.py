@@ -14,7 +14,7 @@ end; the rounds work on route/<board>.kicad_pcb.
 
 Usage: route_search.py <board.kicad_pcb>...            route (claude-route.slice, one script at a time)
        route_search.py --service <board.kicad_pcb>...  the same as the user service fpgacpu-route: goes
-                                                       on after a reboot (journalctl --user -u fpgacpu-route)
+                                                       on after a reboot (output: hw/.route.out)
        route_search.py --status <board.kicad_pcb>...   each tool's state
 Output: the board; route/search-start.kicad_pcb (the unrouted copy), route/tool-<name>.kicad_pcb (each
 tool's best), route/search.log.
@@ -40,6 +40,7 @@ ROUND_S = 3600
 STALL = 3
 CLOSE_MAX = 40                            # close_route.py (A* in Python) only on a board this close
 UNIT = "fpgacpu-route.service"
+OUT = pathlib.Path(__file__).resolve().parents[1] / ".route.out"       # the service's output (each router run's lines)
 # a complete board: its generator's finish step, then its fabrication step (all the checks, the files)
 FINISH = {"socket3-cyclonev": (["gen_socket3_t8.py", "--finish"], ["gen_socket_t9.py", "socket3"]),
           "socket7-cyclonev": (["gen_socket7_t8.py", "--finish"], ["gen_socket_t9.py", "socket7"]),
@@ -170,6 +171,8 @@ StartLimitBurst=5
 [Service]
 Slice={ar.claude_slice.child_slice("route", ar.CPUS)}
 ExecStart={sys.executable} {pathlib.Path(__file__).resolve()} {' '.join(boards)}
+StandardOutput=append:{OUT}
+StandardError=append:{OUT}
 Restart=on-failure
 RestartSec=60
 SuccessExitStatus=2
@@ -179,7 +182,7 @@ WantedBy=default.target
 """)
     for cmd in (["daemon-reload"], ["enable", UNIT], ["restart", UNIT]):
         subprocess.run(["systemctl", "--user"] + cmd, check=True)
-    print(f"started {UNIT}: journalctl --user -u {UNIT}; systemctl --user stop {UNIT}")
+    print(f"started {UNIT}: its output in {OUT}; systemctl --user stop {UNIT}")
 
 
 def status(paths):

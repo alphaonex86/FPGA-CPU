@@ -31,3 +31,4 @@ hw/*/route/
 hw/.route.lock
 # KiCad project locks
 ~*.lck
+hw/.route.out

@@ -74,7 +74,7 @@ chipset, same sockets; source of `sockets/kicad/`).
 - `rtl/` — RTL; `rtl/c2/` C2 bridge (`xilinx/build.tcl`: card bitstream), `rtl/s3/` Socket 3 bus unit +
   board top (`build.sh`), `rtl/tools/vivado.sh`, `rtl/tools/fpga_pins.py` (a build's pins against the board).
 - `hw/tools/route_search.py --service <boards>` — routing as the user service `fpgacpu-route`
-  (resumes after a reboot); `hw/tools/check_board.py` — board against the vendor pin tables, fab gate.
+  (resumes after a reboot; state: `--status`, output: `hw/.route.out`); `hw/tools/check_board.py` — board against the vendor pin tables, fab gate.
 - `fetch.sh <sources.txt>...` — (re)downloads every file listed in a
   `sources.txt` (`sockets/local-sources.txt`: local `file://` copies);
   vendor-login software is listed in each folder's README.
