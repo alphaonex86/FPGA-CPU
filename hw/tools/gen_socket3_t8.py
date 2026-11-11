@@ -17,8 +17,12 @@ Vcc pins, only sensed by the VCORE detector), V12, VCC_AUX25 and VCCA_FPLL25 are
 plane over the pin ring split V3V3 in two islands, which freerouting never joins. Vias and
 socket pins keep no pad on a layer they do not connect, so the planes stay whole between the
 1.0 mm ball vias.
-Checks (exit 1): the generated copper DRC 0 errors; --finish: every connection routed, DRC 0 errors.
+Checks (exit 1): the generated copper DRC 0 errors; --finish: every connection routed, DRC 0 errors,
+every bus signal's copper from socket pin to ball within SKEW_MM of CLK's (rtl/s3/s3_top.sdc counts
+0.6 ns between CLK and a signal: 0.25 ns of switch, the rest track at ~7 ps / mm).
 """
+import collections
+import csv
 import pathlib
 import sys
 
@@ -30,12 +34,29 @@ from gen_socket7_t8 import thin_pads
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT, NAME = ROOT / "hw/socket3-cyclonev", "socket3-cyclonev"
+SKEW_MM = 50.0
 # (net, layer, (x0, y0, x1, y1): None = board edge, priority): a higher priority area is cut out of a lower one
 PLANES = [("GND", pcbnew.In1_Cu, (None, None, None, None), 0),
           ("VCC_1V1", pcbnew.In3_Cu, (None, None, None, None), 0),
           ("V3V3", pcbnew.In4_Cu, (None, None, None, None), 0),
           ("GND", pcbnew.In6_Cu, (None, None, None, None), 0),
           ("V5", pcbnew.In6_Cu, (17.0, 10.0, 47.0, 29.0), 1)]       # V5 pads x 18.0-46.2, y 12.0-28.3
+
+
+def bus_skew(board):
+    """copper length socket pin -> switch -> ball per pins.csv signal (both nets, stubs to pulls
+    included: an upper bound) against CLK's"""
+    length = collections.Counter()
+    for t in board.GetTracks():
+        if t.GetClass() == "PCB_TRACK":
+            length[t.GetNetname().replace("{slash}", "/")] += t.GetLength() / 1e6
+    total = {r["signal"]: length["/" + r["signal"]] + length["/S_" + r["signal"]]
+             for r in csv.DictReader(open(OUT / "pins.csv")) if r["socket_pin"]}
+    worst = max(total, key=lambda s: abs(total[s] - total["CLK"]))
+    print(f"bus copper: CLK {total['CLK']:.1f} mm, others {min(total.values()):.1f}-{max(total.values()):.1f} mm, "
+          f"farthest from CLK: {worst} {total[worst]:.1f} mm")
+    if abs(total[worst] - total["CLK"]) > SKEW_MM:
+        sys.exit(f"FAIL: {worst} is more than {SKEW_MM} mm from CLK's length: rtl/s3/s3_top.sdc skew")
 
 
 def main():
@@ -45,6 +66,7 @@ def main():
     if "--finish" in sys.argv:
         thin_pads(board)
         ar.finish(board, path)
+        bus_skew(board)
         print("PASS  socket3 T8: routed, DRC 0 errors")
         return
     if len(board.GetTracks()) or len(board.Zones()):

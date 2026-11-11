@@ -349,7 +349,13 @@ replicated per read port plus a live-value table.
    BRDY#, BOFF#, HOLD / HLDA, AHOLD + EADS# snoop out, Stop Grant on STPCLK#, parity; a single-cycle
    port for I/O, INTA and special cycles) and the board top `rtl/s3/s3_top.sv` on the pins of
    hw/socket3-cyclonev (`rtl/s3/build.sh`: Quartus on the board's own QSF, 486 AC constraints at
-   33 MHz, the pin report checked against the PCB). Tests: `rtl/tools/s3_test.sh` (every core test
+   33 MHz, the pin report checked against the PCB; `build.sh <out> bus`: the bus unit alone in
+   minutes). Timing: the 486 answers RDY# / BRDY# / BOFF# in the next clock with 5 ns of input setup
+   and 14 ns of output delay; only the state, BLAST#, A3-A2, ADS# and the output enables hang on
+   those pins, the rest leaves from I/O registers loaded in an idle clock before each cycle (a
+   transfer: IDLE, T1, T2; a 16-byte burst 6 clocks), and the board groups the five pins of that
+   loop (plan/interposers.md T5). Two phases of the clock around I/O registers were tried and are
+   worse (their clock-to-pad and pad-to-register delays eat the loop). Tests: `rtl/tools/s3_test.sh` (every core test
    through s3_bus and FPGAcommon's chipset front end `cpu486_bif` at host latencies 0 / 1 / 3,
    traces against Unicorn), `rtl/tools/s3_bus_test.sh` (random operations against a 486 slave with
    RDY#, wait states, BOFF#, HOLD, AHOLD, STPCLK#, parity errors; mutations of the unit fail it).

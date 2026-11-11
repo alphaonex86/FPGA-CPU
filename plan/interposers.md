@@ -276,6 +276,13 @@ CLKnp input and takes the fewest crossings with same-face A legs; U1 the
 rotation of the fewest, then the least length: 270 deg, 0 crossings, 5559 ->
 5854 mm. Every bank is 3.3 V, so the old bank plan (byte per bank) is gone;
 `layout.csv` hands U1 and the chip spots to T7.
+2026-11-11, pins against the FPGA build (rtl/s3): the first Quartus build on this map missed the
+486's 14 ns output delay by 3-11 ns on the pin -> logic -> pin paths: BLAST# (low for a burst's
+fourth transfer right after the third BRDY#) and the burst's A3-A2 sat on U1's opposite edge from
+RDY# / BRDY#. `FAST` in `gen_socket3_assign.py`: those five take balls within 2.3 mm of one ball
+(K20, L22, M22, N20, N21), the ball of the least total length; their legs cross others (RDY# /
+BRDY# 22-24 mm on the FPGA side). U1 now at 180 deg, 0 CLK crossings, 5559 -> 5750 mm; T6-T8
+regenerated. With it the bus-only build meets the 486 timing (+0.34 ns setup, +0.81 ns hold).
 socket7-cyclonev (2026-11-05, `gen_socket7_assign.py`): the same on the
 socket 7 T7 layout, one stage (direct nets): socket pin -> ball, least
 total length + 6 mm per ring depth; the bank plan (byte per bank) is
@@ -413,6 +420,14 @@ time-out, which writes no session, and idled 17 h. Faults found on the way, each
   `.kicad_dru` (`placer.write_rules`), a keepout ring along the outline in the router's DSN.
 - The upstream freerouting jar runs its fanout stage by default (stubs necked below the board
   minimum): off explicitly.
+- Tools (`autoroute.routers`, the quick ones first): freerouting fork parallel, KiCadRoutingTools
+  (`autoroute.krt`, FPGAcommon's wrapper: per net class with that class's width and clearance, only
+  the copper it adds taken over; 363 -> ~137 open in its first round on socket 3), fork serial,
+  upstream 2.3.0, then one layer-cost variant per signal layer.
+- `--finish` on socket 3 also holds every bus signal's copper within 50 mm of CLK's (the 0.6 ns
+  the FPGA constraints count between CLK and a signal).
+- Planes checked on their real fills (`plane_islands`); generated copper keeps no sliver gap to
+  copper of its own net.
 
 **T9 Verification**: audit script: every base pad's net is the T1 signal and
 reaches the T5 ball (or its translator); every power pad on its rail. 3D check
@@ -427,6 +442,11 @@ the FPGA build (`rtl/tools/fpga_pins.py`): a complete build must exist and its p
 place every port on its pins.csv ball and every supply / ground ball on a board net of that
 voltage. Socket 3: 113 signal contacts through 16 switches, 52 supply / ground, 3 open (J1 is
 VCC5 on a DX4: +5 V on its board, never onto the interposer). Mutations of either pin-out fail it.
+Also there: every regulator's output recomputed from its feedback divider (socket 3: 4.98, 1.099,
+2.52, 3.33 V). `jlcfab.check_package` reads the fabrication files back: a Gerber with artwork per
+copper layer, mask and outline, and one drill hit per via and pad hole of the board. Not used: the
+pcb skill's Gerber clearance meter (it draws KiCad's round-rectangle pads too small: its "gaps"
+were overlaps).
 
 **T10 Report** to the operator: what was built, check results, open items, cost.
 
