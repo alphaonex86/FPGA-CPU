@@ -26,6 +26,7 @@ FREEROUTING = ROOT.parent / "FPGAcommon/tools/freerouting/freerouting-2.3.0-fpga
 FREEROUTING_PAR = FREEROUTING.with_name("freerouting-2.3.0-fpga-parallel.jar")
 FREEROUTING_MAIN = FREEROUTING.with_name("freerouting-2.3.0.jar")      # upstream, without the fork's changes
 JAVA = "/opt/openjdk-bin-25/bin/java"     # the fork is built for Java 25
+KRT = ROOT.parent / "FPGAcommon/hw/krt_route.py"   # KiCadRoutingTools behind FPGAcommon's wrapper (its notes)
 # the freerouting builds: upstream, the serial fork (deterministic), and the parallel fork (each run
 # differs: thread timing decides which speculative routes it keeps; ~4x faster) plain and with layer
 # cost variants. The net order of the DSN changes nothing (measured: 6 shuffled orders, 6 identical
@@ -72,8 +73,10 @@ def contain(routing=True):
 
 
 def routers(layer_costs):
-    """{label: freerouting layer cost multipliers (DSN layer index: stack order)} -> the run list"""
-    return [("upstream", FREEROUTING_MAIN, {}), ("serial", FREEROUTING, {}), ("parallel", FREEROUTING_PAR, PARALLEL)] + \
+    """{label: freerouting layer cost multipliers (DSN layer index: stack order)} -> the tool list
+    [(label, freerouting jar or None: KRT, environment)], the quick ones first"""
+    return [("parallel", FREEROUTING_PAR, PARALLEL), ("KRT", None, {}), ("serial", FREEROUTING, {}),
+            ("upstream", FREEROUTING_MAIN, {})] + \
         [(label, FREEROUTING_PAR, dict(PARALLEL, FREEROUTING__ROUTER__LAYER_COST_MULTIPLIERS=c))
          for label, c in layer_costs.items()]
 
@@ -529,6 +532,73 @@ def edge_keepout(board, dsn):
     if at < 0 or not lines:
         sys.exit("FAIL: DSN edge keepout: no (via ...) line in the structure or no ring")
     dsn.write_text(text[:at] + "\n" + "\n".join(lines) + text[at:])
+
+
+def krt(board, path, seconds):
+    """one round of KiCadRoutingTools on the nets with open connections, class by class from the
+    widest track (a run has one width and one clearance): each on a copy whose project holds the
+    class's rules as the board minimum; only the copper a run adds is taken over (unlocked: the
+    board stays the generated one), then the DRC clean-up. The open connections left, None when no
+    run gave a result"""
+    if not KRT.exists():
+        sys.exit(f"FAIL: {KRT} missing")
+    tmp, name = path.parent / "krt", path.stem
+    ns = board.GetDesignSettings().m_NetSettings
+    planes = {z.GetNetname() for z in board.Zones() if not z.GetIsRuleArea()}
+    layers = [board.GetLayerName(L) for L in close_route.copper_layers(board) if board.GetLayerType(L) != pcbnew.LT_POWER]
+    pcbnew.SaveBoard(str(path), board)
+    open_nets = {m for u in drc_report(path).get("unconnected_items", []) for i in u["items"]
+                 for m in re.findall(r"\[(/.*?)\](?= (?:on|of) |$)", i["description"])} - planes
+    classes = {}
+    for name_ in sorted(open_nets):
+        c = ns.GetEffectiveNetClass(name_)
+        classes.setdefault((c.GetTrackWidth(), c.GetClearance()), []).append(name_)
+    key = lambda t: (t.GetClass(), t.GetNetname(), t.GetStart().x, t.GetStart().y, t.GetEnd().x, t.GetEnd().y) + \
+        (() if isinstance(t, pcbnew.PCB_VIA) else (t.GetLayer(), t.GetWidth()))
+    got, deadline = None, time.time() + seconds
+    for (width, clearance), nets in sorted(classes.items(), reverse=True):
+        shutil.rmtree(tmp, ignore_errors=True)
+        tmp.mkdir()
+        shutil.copy(path, tmp / path.name)
+        shutil.copy(path.with_suffix(".kicad_dru"), tmp)
+        pro = json.loads(path.with_suffix(".kicad_pro").read_text())
+        pro["board"]["design_settings"]["rules"].update(
+            min_clearance=clearance / 1e6, min_track_width=width / 1e6, min_copper_edge_clearance=EDGE,
+            min_hole_clearance=PTH)
+        (tmp / f"{name}.kicad_pro").write_text(json.dumps(pro))
+        cmd = ["nice", "-n", "19", sys.executable, str(KRT), str(tmp / path.name), "--track-width", str(width / 1e6),
+               "--layers", *layers, "--keep", str(tmp / "work"), "--nets", *(n.replace("[", "[[]") for n in nets)]
+        with open(path.parent / f"{name}-krt.log", "a") as log:
+            try:
+                subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT, cwd=tmp, timeout=max(deadline - time.time(), 60))
+            except subprocess.TimeoutExpired:
+                print(f"  KRT {width / 1e6} mm: wall clock", flush=True)
+        routed = tmp / "work" / f"{name}-routed.kicad_pcb"
+        if not routed.exists():
+            print(f"  KRT {width / 1e6} mm, {len(nets)} nets: no result, see {name}-krt.log", flush=True)
+            continue
+        have = {key(t) for t in board.GetTracks()}
+        added = 0
+        for t in pcbnew.LoadBoard(str(routed)).GetTracks():
+            if key(t) in have:
+                continue
+            if isinstance(t, pcbnew.PCB_VIA):
+                new = pcbnew.PCB_VIA(board)
+                new.SetPosition(t.GetPosition())
+                new.SetWidth(t.GetWidth(pcbnew.F_Cu))
+                new.SetDrill(t.GetDrillValue())
+            else:
+                new = pcbnew.PCB_TRACK(board)
+                new.SetStart(t.GetStart())
+                new.SetEnd(t.GetEnd())
+                new.SetWidth(t.GetWidth())
+                new.SetLayer(t.GetLayer())
+            new.SetNet(net(board, t.GetNetname().lstrip("/")))
+            board.Add(new)
+            added += 1
+        got = settle(board, path)
+        print(f"  KRT {width / 1e6} mm, {len(nets)} nets: {added} items added, {got[0]} open ({got[1]} dropped)", flush=True)
+    return None if got is None else got[0]
 
 
 def freerouting(board, path, jobs, passes, seconds):

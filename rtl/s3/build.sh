@@ -24,6 +24,9 @@ grep -E "Logic utilization|Total registers|Total pins|Total block memory bits" s
 if grep -q "Timing requirements not met" s3.sta.rpt flow.log; then
     grep -B2 -A12 "Setup Summary" s3.sta.rpt | head -30; echo "FAIL timing"; exit 1; fi
 grep -A8 -E "Setup Summary|Hold Summary" s3.sta.rpt | grep "^; [a-z]" | head -8
+# vectorless estimate (default toggle rates): the heatsink question of plan/interposers.md D5
+nice -n 19 "$QUARTUS/quartus_pow" s3 >> flow.log 2>&1 || { echo "FAIL quartus_pow, see $PWD/flow.log"; exit 1; }
+grep -E "Total Thermal Power|Core Dynamic|Core Static|I/O Thermal" s3.pow.summary
 python3 "$here/../tools/fpga_pins.py" socket3 s3.pin 2>&1 | grep -v "Debug: Adding"
 touch s3.ok                      # a complete build: hw/tools/check_board.py asks for it
 echo "socket 3: $PWD/s3.sof"

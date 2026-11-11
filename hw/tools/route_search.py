@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Routing search (operator 2026-11-08 / 2026-11-11): several routing tools, one after the other, each
-on its own unrouted copy of the board (the generated copper only: locked) with the same budget (HOURS:
-5 days at autoroute.CPUS CPUs); the boards one after the other. A tool works in rounds from its best
+"""Routing search (operator 2026-11-08 / 2026-11-11): several routing tools (autoroute.routers: three
+freerouting builds, layer cost variants of one, KiCadRoutingTools), one after the other, each on its
+own unrouted copy of the board (the generated copper only: locked) with the same budget (HOURS: 5
+days at autoroute.CPUS CPUs); the boards one after the other. A tool works in rounds from its best
 board: a supervised router run sized for ~ROUND_S, the DRC clean-up, close_route.py. It ends at 0 open
 connections, at its budget, or stalled (STALL rounds without a gain: more budget buys nothing). The
 board left with the fewest open connections is kept; a complete one gets its generator's --finish
@@ -15,7 +16,7 @@ Usage: route_search.py <board.kicad_pcb>...            route (claude-route.slice
        route_search.py --service <board.kicad_pcb>...  the same as the user service fpgacpu-route: goes
                                                        on after a reboot (journalctl --user -u fpgacpu-route)
        route_search.py --status <board.kicad_pcb>...   each tool's state
-Output: the board; route/search-start.kicad_pcb (the unrouted copy), route/tool-<k>.kicad_pcb (each
+Output: the board; route/search-start.kicad_pcb (the unrouted copy), route/tool-<name>.kicad_pcb (each
 tool's best), route/search.log.
 Exit 2 when a board keeps open connections.
 """
@@ -63,6 +64,11 @@ def replace(src, dst):
     os.replace(tmp, dst)
 
 
+def best_of(route, job):
+    """the file of a tool's best board"""
+    return route / ("tool-" + "".join(c if c.isalnum() else "-" for c in job[0]) + ".kicad_pcb")
+
+
 def search(path):
     """route one board; True when it is complete"""
     route = path.parent / "route"
@@ -91,15 +97,16 @@ def search(path):
     signal = [k for k, L in enumerate(close_route.copper_layers(board)) if board.GetLayerType(L) != pcbnew.LT_POWER]
     jobs = ar.routers({f"layer {k} x2": f"{k}:2" for k in signal})
     note(f"{path.name}: {len(jobs)} tools x {HOURS} h at most, {ar.CPUS} CPUs, signal layers {signal}")
-    for k, job in enumerate(jobs):
+    for job in jobs:
         tool = state["tools"].setdefault(job[0], {"seconds": 0, "rounds": 0, "idle": 0, "open": None, "passes": 1,
                                                   "end": None})
-        best = route / f"tool-{k}.kicad_pcb"
+        best = best_of(route, job)
         while tool["end"] is None:
             began = time.time()
             shutil.copy(start if tool["open"] is None else best, work)
             board = pcbnew.LoadBoard(str(work))
-            n = ar.freerouting(board, work, [job], tool["passes"], HOURS * 3600 - tool["seconds"])
+            left = HOURS * 3600 - tool["seconds"]
+            n = ar.krt(board, work, left) if job[1] is None else ar.freerouting(board, work, [job], tool["passes"], left)
             if n is None:
                 tool["passes"], text = max(1, tool["passes"] // 2), "no result"
             else:
@@ -108,8 +115,8 @@ def search(path):
                 if 0 < n <= CLOSE_MAX:
                     closed, _ = close_route.close(board, ar.drc_report(work))
                     n, dropped = ar.settle(board, work)
-                per_pass = ar.pass_seconds(route / f"{work.stem}-0.log")
-                text = f"{tool['passes']} passes, {n} open ({dropped} dropped, close_route {closed})"
+                per_pass = ar.pass_seconds(route / f"{work.stem}-0.log") if job[1] else None
+                text = (f"{tool['passes']} passes, " if job[1] else "") + f"{n} open ({dropped} dropped, close_route {closed})"
                 if per_pass:
                     tool["passes"] = max(1, min(1000, int(ROUND_S / per_pass)))
             if n is not None and (tool["open"] is None or n < tool["open"]):
@@ -132,7 +139,7 @@ def search(path):
     if not done:
         sys.exit(f"FAIL: {path.name}: every tool failed")
     k = min(done, key=done.get)
-    replace(route / f"tool-{k}.kicad_pcb", path)
+    replace(best_of(route, jobs[k]), path)
     if done[k]:
         note(f"{path.name}: {done[k]} open; every tool left connections open: a routing-setup or placement "
              "fault, not the budget")

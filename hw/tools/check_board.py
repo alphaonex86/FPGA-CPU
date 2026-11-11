@@ -5,6 +5,7 @@
    of the datasheet's pin table -> its level translator channel (the translator datasheet's pin-out)
    -> the FPGA ball -> the pins.csv row the FPGA constraints are made from; supply, ground and
    no-connect contacts; the translators' own supply and enable pins;
+   every regulator's output from its feedback divider, against the rail it feeds;
 3. c2mu: the LattePanda Mu edge pin-out (supply, ground, PCIe lanes, reset);
 4. the FPGA build: a complete one exists and its pin report agrees (rtl/tools/fpga_pins.py).
 
@@ -26,6 +27,11 @@ CB3T_B_OF_A = {a: 20 - a for a in range(2, 10)}
 GTL_A = [3, 5, 6, 8, 9, 10, 12, 13, 14, 15, 16, 17, 19, 20, 21, 23, 24, 26]
 GTL_B = [54, 52, 51, 49, 48, 47, 45, 44, 43, 42, 41, 40, 38, 37, 36, 34, 33, 31]
 GTL_FIXED = {"GND": (4, 11, 18, 25, 32, 39, 46, 53), "VCC_3V3": (7, 22), "V5": (50,), "VREF_GTL": (35,)}
+
+# rail -> volts; every regulator here regulates its feedback pin to 0.8 V [ti_tps54620, ti_tps62130; TPS74801]
+RAILS = {"V5": 5.0, "V3V3": 3.3, "VCC_3V3": 3.3, "VCC_AUX25": 2.5, "VCC_1V8": 1.8, "VCC_1V1": 1.1, "VCC_1V0": 1.0,
+         "VCC_MGT10": 1.0, "VCC_MGT12": 1.2}
+VFB = 0.8
 
 fails = []
 
@@ -75,6 +81,27 @@ class Board:
         """a pad without a net or alone on it"""
         return not self.net.get(key) or self.pads_on[self.net[key]] == {key}
 
+    def check_regulators(self):
+        """every *_FB net: one resistor to a rail, one to ground, the rail within 2 % of its voltage"""
+        ohms = lambda v: float(re.match(r"[\d.]+", v).group()) * {"k": 1e3, "M": 1e6}.get(re.sub(r"[\d. ]|1%", "", v)[:1], 1)
+        seen = []
+        for net in sorted(n for n in self.pads_on if n.endswith("_FB") and n != "CLK_FB" and n != "ZCLK_FB"):
+            legs = {}
+            for ref, _ in self.pads_on[net]:
+                if ref.startswith("R"):
+                    legs[next(self.net[k] for k in self.net if k[0] == ref and self.net[k] != net)] = ohms(self.value[ref])
+            rail = next((n for n in legs if n in RAILS), None)
+            if rail is None or "GND" not in legs or len(legs) != 2:
+                fail(f"{net}: divider {legs}")
+                continue
+            volts = VFB * (1 + legs[rail] / legs["GND"])
+            seen.append(f"{rail} {volts:.3f} V")
+            if abs(volts / RAILS[rail] - 1) > 0.02:
+                fail(f"{net}: {rail} set to {volts:.3f} V")
+        if set(RAILS) & set(self.pads_on) != {s.split()[0] for s in seen}:
+            fail(f"rails without a feedback divider: {sorted(set(RAILS) & set(self.pads_on) - {s.split()[0] for s in seen})}")
+        print("regulators: " + ", ".join(seen))
+
     def check_netlist(self):
         if not self.netlist:
             sys.exit("FAIL: no net parsed from the .net file: its format changed")
@@ -99,6 +126,7 @@ class Board:
 def socket3():
     b = Board("socket3-cyclonev")
     b.check_netlist()
+    b.check_regulators()
     text = pdf_text("sockets/socket3/intel_dx4_write_back_enhanced.pdf")
     first = text.index("Table 6. Pin Assignment for 168-Pin PGA Package (Sheet 1")
     table = dict(re.findall(r"\b([A-S]\d{1,2})\s+([A-Z][A-Z0-9/#]*)(?=\s|$)", text[first:text.index("Table 7.", first)]))
@@ -148,6 +176,7 @@ def socket3():
 def c2mu():
     b = Board("slot1-c2mu")
     b.check_netlist()
+    b.check_regulators()
     text = pdf_text("sockets/slot1/pentium2_350-450_sc242_24365703.pdf", 58, 61)
     table = {pin: re.sub(r"#\[(\d+)\]", r"[\1]#", name)             # the datasheet writes A#[4]
              for pin, name in re.findall(r"\b([AB]\d{1,3}) {2,}(\S+)",
