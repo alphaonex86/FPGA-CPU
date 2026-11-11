@@ -7,13 +7,15 @@ default 2 boards)
 Output: hw/<socket>-cyclonev/fab/: <name>-gerbers.zip, <name>-bom.csv, <name>-cpl.csv.
 U2 (the base footprint) is the Mill-Max PGA header, ordered from mill-max.com/pga with the base's
 pin pattern and soldered after assembly, not a JLCPCB part.
-Checks (exit 1): kicad-cli DRC 0 errors and 0 unrouted; every part has an LCSC number and every
+Checks (exit 1): socket 3: the board against the vendor pin tables (check_board.py); kicad-cli DRC 0
+errors and 0 unrouted; every part has an LCSC number and every
 number is used; live JLCPCB stock >= quantity x boards, except CONSIGNED parts.
 """
 import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import check_board
 import jlcfab
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -95,6 +97,8 @@ def main():
     socket = sys.argv[1]
     boards = int(sys.argv[2]) if len(sys.argv) > 2 else 2
     name = f"{socket}-cyclonev"
+    if socket in check_board.BOARDS:
+        check_board.run(socket)
     jlcfab.fab(ROOT / "hw" / name / f"{name}.kicad_pcb", COMMON | EXTRA[socket], NO_PART, CONSIGNED, boards,
                ORDER.format(STACK[socket]))
 

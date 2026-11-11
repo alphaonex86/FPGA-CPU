@@ -476,7 +476,9 @@ def freerouting(board, path, jobs, passes, seconds):
                 "FREEROUTING__ROUTER__HOLE_CLEARANCE_UM": str(round(
                     board.GetDesignSettings().m_HoleClearance / 1000)),
                 "FREEROUTING__ROUTER__AUTOMATIC_NECKDOWN": "true",     # PWR (0.4) out of 0.25 QFN pads
-                "FREEROUTING__ROUTER__OPTIMIZER__ENABLED": "false"})   # no JOB_TIMEOUT: it ends without a session
+                "FREEROUTING__ROUTER__OPTIMIZER__ENABLED": "false",
+                "FREEROUTING__ROUTER__FANOUT__ENABLED": "false"})      # the upstream jar's default is on: stubs
+    # necked below the board minimum (FPGAcommon/hw/autoroute.py); no JOB_TIMEOUT: it ends without a session
     # footprint-only rule areas (cavity, retention bands) leave copper free, but the DSN
     # export makes every rule area a copper keepout: out of the board for the export only
     parts_only = [z for z in board.Zones() if z.GetIsRuleArea() and not z.GetDoNotAllowTracks()

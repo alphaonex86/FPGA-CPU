@@ -7,7 +7,8 @@ Output: hw/slot1-c2mu/fab/: slot1-c2mu-gerbers.zip (Gerbers + Excellon drill),
 slot1-c2mu-bom.csv (Comment, Designator, Footprint, LCSC Part #) and
 slot1-c2mu-cpl.csv (Designator, Mid X, Mid Y, Layer, Rotation).
 Order options: ORDER (printed).
-Checks (exit 1): the 3D clearance under the Mu (check_mu_clearance.py);
+Checks (exit 1): the board against the vendor pin tables (check_board.py); the 3D clearance under
+the Mu (check_mu_clearance.py);
 kicad-cli DRC 0 errors and 0 unrouted; every board part
 (U2 = the card edge itself, no part) has an LCSC number and every number is
 used; live JLCPCB stock >= quantity x boards, except CONSIGNED parts (not
@@ -20,6 +21,7 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import check_board
 import check_mu_clearance
 import jlcfab
 
@@ -112,6 +114,7 @@ LCSC = {
 
 def main():
     boards = int(sys.argv[1]) if len(sys.argv) > 1 else 2
+    check_board.run("c2mu")
     check_mu_clearance.check(OUT / f"{NAME}.kicad_pcb")
     jlcfab.fab(OUT / f"{NAME}.kicad_pcb", LCSC, NO_PART, CONSIGNED, boards, ORDER)
 
