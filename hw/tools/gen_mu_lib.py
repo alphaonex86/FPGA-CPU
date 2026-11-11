@@ -17,12 +17,11 @@ with the hold-down pads at the LOTES +-37.75 (hole + 3.35, detail H; the
 vendor footprint has 37.5); the module outline moves to F.Fab and F.CrtYd
 becomes the socket body (rows, latches), so parts may sit under the module
 (height there: gen_c2mu_s7.py); 3D model: the vendor H8.0 module + socket STEP
-(gzip, hw/lib/3dmodels), raised 1.1 mm for the 6.6 mm standoff of the 9.2H;
+(gzip, hw/lib/3dmodels; Y-up, so turned -90 about X), raised 1.1 mm for the 6.6 mm standoff of the 9.2H;
 hw/lib/Slot1.pretty/Standoff_SMT_M2_D5.56_H6.6.kicad_mod: the Mu's M2 standoffs,
 Sinhoo SMTSO2066CTJ (LCSC C2916353, reflowed by JLCPCB; spigot 3.60 x 1.53 in
 a plated 3.70 hole, body 5.56) [xhyj_smtso2066ctj]; the 6.3 land on F.Cu only,
-a 4.3 ring on the inner layers and B.Cu; 3D model: the stock Wuerth
-M2 SMT spacer stretched from 6.0 to 6.6 mm.
+a 4.3 ring on the inner layers and B.Cu; 3D model: gen_standoff_step.py (from the drawing).
 Checks (exit 1): pins 1..260 each once; 260 + 2 pads, 2 holes.
 """
 import csv
@@ -43,10 +42,12 @@ FP_NAME = "LattePanda_Mu_LOTES_ADDR0110_9.2H"
 OUT_FP = ROOT / f"hw/lib/Slot1.pretty/{FP_NAME}.kicad_mod"
 MODEL = "LattePanda_Mu_H8.0_Horizontal.stpZ"
 MOUNT_Z = 1.1                            # 9.2H standoff 6.6 mm - 8.0H 5.5 mm
+MODEL_SEAT = (0, -32.7, 5.5)             # STEP origin -> module over F.Fab (measured in renders), on the 8.0H 5.5 mm standoff
+MODEL_ROTATE = (-90, 0, 180)             # STEP is Y-up; module toward the fan side (+Z)
 STANDOFF = "Standoff_SMT_M2_D5.56_H6.6"
 STANDOFF_R = 3.4                         # F courtyard radius: pad 6.3 + 0.25 each side
 STANDOFF_RING = 4.3                      # inner / B.Cu ring: 0.3 mm annulus, routing room around the hole
-STANDOFF_MODEL = "Mounting_Wuerth.3dshapes/Mounting_Wuerth_WA-SMSI-M2_H6mm_9774060243.step"
+STANDOFF_MODEL = "Standoff_Sinhoo_SMTSO2066CTJ.step"   # gen_standoff_step.py
 FIELDS = ["pin", "signal", "direction", "io_level", "description", "notes"]
 
 
@@ -98,10 +99,8 @@ def main():
 
 
 def write_standoff():
-    model = pathlib.Path("/usr/share/kicad/3dmodels") / STANDOFF_MODEL
-    dst = ROOT / "hw/lib/3dmodels" / model.name
-    if not dst.exists():
-        dst.write_bytes(model.read_bytes())
+    if not (ROOT / "hw/lib/3dmodels" / STANDOFF_MODEL).exists():
+        sys.exit(f"missing hw/lib/3dmodels/{STANDOFF_MODEL}: run hw/tools/gen_standoff_step.py")
     fp = ROOT / f"hw/lib/Slot1.pretty/{STANDOFF}.kicad_mod"
     fp.write_text(f'''(footprint "{STANDOFF}" (version 20241229) (generator "gen_mu_lib.py") (layer "F.Cu")
 	(descr "SMT standoff M2, body 5.56, height 6.6, Sinhoo SMTSO2066CTJ (sockets/parts/xhyj_smtso2066ctj.pdf)")
@@ -115,7 +114,7 @@ def write_standoff():
 		(padstack (mode front_inner_back)
 			(layer "Inner" (shape circle) (size {STANDOFF_RING} {STANDOFF_RING}))
 			(layer "B.Cu" (shape circle) (size {STANDOFF_RING} {STANDOFF_RING}))))
-	(model "${{KIPRJMOD}}/../lib/3dmodels/{model.name}" (offset (xyz 0 0 0)) (scale (xyz 1 1 1.1)) (rotate (xyz 0 0 0)))
+	(model "${{KIPRJMOD}}/../lib/3dmodels/{STANDOFF_MODEL}" (offset (xyz 0 0 0)) (scale (xyz 1 1 1)) (rotate (xyz 0 0 0)))
 )
 ''')
     print(f"wrote {fp.relative_to(ROOT)}")
@@ -140,8 +139,9 @@ def write_footprint():
     if len([p for p in pads if p[0].isdigit()]) != 260 or pads.count(("MP", "smd")) != 2 \
             or pads.count(("", "np_thru_hole")) != 2:
         sys.exit(f"vendor footprint: unexpected pads {len(pads)}")
-    model = (f'\t(model "${{KIPRJMOD}}/../lib/3dmodels/{MODEL}"\n\t\t(offset (xyz 0 0 {MOUNT_Z}))\n'
-             '\t\t(scale (xyz 1 1 1))\n\t\t(rotate (xyz 0 0 0))\n\t)\n)')
+    x, y, z = MODEL_SEAT
+    model = (f'\t(model "${{KIPRJMOD}}/../lib/3dmodels/{MODEL}"\n\t\t(offset (xyz {x:g} {y:g} {z + MOUNT_Z:g}))\n'
+             '\t\t(scale (xyz 1 1 1))\n\t\t(rotate (xyz %g %g %g))\n\t)\n)' % MODEL_ROTATE)
     t = t.rstrip()
     if not t.endswith(")") or "(model " in t:
         sys.exit("vendor footprint: unexpected end or a model already")

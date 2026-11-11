@@ -85,6 +85,9 @@ chipset, same sockets; source of `sockets/kicad/`).
   (board RAM only for DMA) (operator, 2026-11-01).
 - PCB routing is the last step: pins (in a crossing-free order), placement and everything
   else final and verified first; routing never changes the pins (operator, 2026-11-05).
+- Routing runs several routers, each on its own unrouted copy of the PCB with the same CPU
+  budget (5-6 CPU each); all failing = never the budget: a routing-setup fault (e.g.
+  routing order) or a fault outside routing (e.g. placement) (operator, 2026-11-08).
 - CPU goal is maximum performance inside the selected Cyclone V: large rewrites,
   a from-scratch x86 core and a separate RISC-V core are all fine; licence is no
   selection criterion (GitHub code counts as usable; copyrighted parts, avoided

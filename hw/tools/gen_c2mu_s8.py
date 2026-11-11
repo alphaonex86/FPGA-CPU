@@ -2,10 +2,10 @@
 """Slot 1 C2 Mu cartridge: planes, U1 via-in-pad and autorouting, the S8 step
 for hw/slot1-c2mu.
 
-Usage: python3 hw/tools/gen_c2mu_s8.py [--pre]   (after gen_c2mu_s7.py; long: freerouting; --pre
-stops before routing)
-Output: hw/slot1-c2mu/slot1-c2mu.kicad_pcb routed, .drc.json; the
-freerouting DSN / SES / log in hw/slot1-c2mu/route/.
+Usage: python3 hw/tools/gen_c2mu_s8.py            (after gen_c2mu_s7.py) the generated copper
+       python3 hw/tools/route_search.py <board>   the routing (days; --service: in the background)
+       python3 hw/tools/gen_c2mu_s8.py --finish   (route_search.py runs it on a complete board)
+Output: hw/slot1-c2mu/slot1-c2mu.kicad_pcb, .drc.json; the routing files in hw/slot1-c2mu/route/.
 
 Stack (JLCPCB 8-layer, JLC08161H-2116; operator 2026-11-05: 3 signal layers
 did not route): F.Cu signal, In1 GND, In2 signal, In3 VCC_3V3 plane with a
@@ -22,18 +22,15 @@ net a via in / at the pad, a track to a near same-net via or a dogbone
 (plane_vias: freerouting is slow at plane fanout); every transceiver signal
 pad a via under the chip body (chip_fanout); DRC 0 errors is checked on this
 generated copper before routing. The rest is
-routed by freerouting with the net classes of gen_c2mu_s7.py: the FPGAcommon
-fork (freerouting-2.3.0-fpga.jar: serial, same routes as upstream, ~3x faster;
-FPGAcommon/tools/freerouting/README-fpga-jar.md) on Java 25, headless (no
-window, no display), without network (unshare -rn; analytics off), with the
-board's hole clearance (freerouting's default is 0), optimizer off, plane
-layers typed power (not routed). Iterations of the ROUTERS runs of PASSES
-passes at the same time (serial and parallel fork, layer cost variants), the
-session leaving the fewest connections open imported and saved, router copper in DRC errors dropped; when an iteration
-gains nothing, close_route.py (windowed A*) closes what it can; until nothing
-is unrouted or neither gains.
-Checks (exit 1): every connection routed, kicad-cli DRC 0 errors, PCIe
-intra-pair skew (ball to pin, on the board) within c2mu_pcie's limits.
+routed by route_search.py with the net classes of gen_c2mu_s7.py: freerouting
+(upstream and the FPGAcommon fork, FPGAcommon/tools/freerouting/README-fpga-jar.md)
+on Java 25, headless (no window, no display), without network (unshare -rn;
+analytics off), with the board's hole clearance (freerouting's default is 0),
+optimizer off, plane layers typed power (not routed), router copper in DRC
+errors dropped, close_route.py (windowed A*) on the last connections.
+Checks (exit 1): the generated copper DRC 0 errors; --finish: every connection
+routed, kicad-cli DRC 0 errors, PCIe intra-pair skew (ball to pin, on the
+board) within c2mu_pcie's limits.
 """
 import collections
 import math
@@ -48,7 +45,6 @@ from autoroute import Copper, mm, net
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT, NAME = ROOT / "hw/slot1-c2mu", "slot1-c2mu"
-ROUTERS = ar.routers({"outer x2": "0:2,7:2", "inner x2": "2:2,5:2"})    # outer / inner signal layers dearer
 Y_VTT = 10.0                             # VTT15 strip / VCC_3V3 split: below the RN row, above the band chips
 # (net, layer, (x0, y0, x1, y1): None = board edge, priority): a higher priority area is cut out of a lower one
 V5 = [(None, 7.0, None, 12.5),           # under every transceiver's VCC (5 V) pin 50 (y 10.6)
@@ -79,7 +75,7 @@ def chip_fanout(board):
     classes = board.GetDesignSettings().m_NetSettings
     rules, cu = board.GetDesignSettings(), Copper(board)
     placed, left = 0, 0
-    for f in (f for f in board.GetFootprints()
+    for f in (f for f, _ in ar.by_ref(board)
               if f.GetValue() in FAN_PARTS or f.GetFPID().GetLibItemName() == TERM_FP):
         term = f.GetFPID().GetLibItemName() == TERM_FP
         ax = 1 if term and f.GetOrientationDegrees() % 180 else 0    # via columns along x, rows along y
@@ -114,12 +110,23 @@ def chip_fanout(board):
 
 
 
+def pad(f, n):
+    return next(p for p in f.Pads() if p.GetNumber() == n)
+
+
+def xy(p):
+    return p.GetPosition().x / 1e6, p.GetPosition().y / 1e6
+
+
+def pcie_plan(board):
+    u1, j4 = board.FindFootprintByReference("U1"), board.FindFootprintByReference("J4")
+    return c2mu_pcie.plan(lambda b: xy(pad(u1, b)), lambda n: xy(pad(j4, n)))
+
+
 def pcie_pairs(board):
     """draw the PCIe template: each track's ball, AC capacitor and J4 pin checked, tracks and vias locked"""
     u1, j4 = board.FindFootprintByReference("U1"), board.FindFootprintByReference("J4")
-    pad = lambda f, n: next(p for p in f.Pads() if p.GetNumber() == n)
-    xy = lambda p: (p.GetPosition().x / 1e6, p.GetPosition().y / 1e6)
-    pairs = c2mu_pcie.plan(lambda b: xy(pad(u1, b)), lambda n: xy(pad(j4, n)))
+    pairs = pcie_plan(board)
     caps = {frozenset(p.GetNetname() for p in f.Pads()): f for f in board.GetFootprints() if f.GetPadCount() == 2}
     layer = {c2mu_pcie.F: pcbnew.F_Cu, c2mu_pcie.IN2: pcbnew.In2_Cu, c2mu_pcie.IN5: pcbnew.In5_Cu,
              c2mu_pcie.B: pcbnew.B_Cu}
@@ -134,7 +141,6 @@ def pcie_pairs(board):
         for v, past in t.vias():
             cu.via(mm(*v), mu if past else fpga)
     print(f"PCIe: {len(pairs)} pairs drawn from the template")
-    return pairs
 
 
 def pcie_skew(board, pairs):
@@ -144,37 +150,32 @@ def pcie_skew(board, pairs):
         if t.GetClass() == "PCB_TRACK":
             length[t.GetNetname()] += t.GetLength() / 1e6
     u1, j4 = board.FindFootprintByReference("U1"), board.FindFootprintByReference("J4")
-    net = lambda f, n: next(p for p in f.Pads() if p.GetNumber() == n).GetNetname()
-    lines, bad = c2mu_pcie.report(pairs, lambda t: length[net(u1, t.ball)] + length[net(j4, t.pin)])
+    lines, bad = c2mu_pcie.report(pairs, lambda t: length[pad(u1, t.ball).GetNetname()] + length[pad(j4, t.pin).GetNetname()])
     print("PCIe ball -> pin length, west / east track:", *lines, sep="\n")
     if bad:
         sys.exit(f"FAIL: PCIe skew over the limit: {bad}")
 
 
 def main():
-    lock = ar.contain(routing="--pre" not in sys.argv)
+    ar.contain(routing=False)
     path = OUT / f"{NAME}.kicad_pcb"
     board = pcbnew.LoadBoard(str(path))
+    if "--finish" in sys.argv:
+        ar.finish(board, path)
+        pcie_skew(board, pcie_plan(board))
+        print("PASS  c2mu S8: routed, DRC 0 errors")
+        return
     if len(board.GetTracks()) or len(board.Zones()) > 4:
         sys.exit("FAIL: board already routed: rerun gen_c2mu_s7.py first")
     ar.planes(board, PLANES)
     ar.via_in_pad(board, PLANES)
-    pairs = pcie_pairs(board)
+    pcie_pairs(board)
     ar.plane_vias(board, PLANES)
     chip_fanout(board)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(path), board)
     if ar.drc(path)[0]:
         sys.exit("FAIL: the generated copper has DRC errors: fix them before routing")
-    if "--pre" in sys.argv:
-        return
-    ar.freeroute(board, path, ROUTERS)
-    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
-    pcbnew.SaveBoard(str(path), board)
-    pcie_skew(board, pairs)
-    if ar.drc(path) != (0, 0):
-        sys.exit(1)
-    print("PASS  c2mu S8: routed, DRC 0 errors")
 
 
 if __name__ == "__main__":

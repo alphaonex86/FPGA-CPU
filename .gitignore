@@ -25,7 +25,7 @@ rtl/build/
 sw/*/build/
 .Xil/
 clockInfo.txt
-hw/slot1-c2mu/route/
+hw/*/route/
 # kicad-cli DRC warnings (autoroute.drop_dangling)
 *.warnings.json
 hw/.route.lock

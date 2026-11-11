@@ -400,6 +400,7 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   (N305 > 15 W + 50 % margin, fan, FPGA; viability.md), allowed by the CLAUDE.md external-supply rule for
   the C2 gain.
 - Viability (2026-11-04): `sockets/slot1/lattepanda_mu/viability.md`: viable; operator: ~75 mm PCB accepted, buy N305 16 GB + FIT0981 + Lite carrier (bring-up); the PCB grows to ~75 mm high (Mu courtyard 65.4 mm), LOTES 9.2H socket (LCSC), FPGA under the module.
+- Height (operator 2026-11-06): the Mu cartridge may exceed Intel's 32.8 mm primary-side envelope (plan/slot1.md D16); `check_mu_clearance.py` only prints the Mu top.
 - Flow (each step a script, PASS/FAIL): `gen_mu_lib.py` (Mu symbol from
   the vendor xlsx, LOTES 9.2H socket and M2 standoff footprints),
   `gen_c2mu_assign.py` (pins.csv: least-total-length matching of each
@@ -412,7 +413,7 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   under the module, parts <= 4 mm there; connectors, PS1 coil and C1 in
   the free column; DRC 0), `_s8.py` (planes, via in every U1 ball, plane
   fanout, transceiver and termination fanout vias, pre-route DRC 0,
-  freerouting alternating with `close_route.py`), `_s9.py` (DRC gate, JLC
+  freerouting alternating with `close_route.py`), `_s9.py` (3D clearance under the Mu: `check_mu_clearance.py`; DRC gate, JLC
   BOM with LCSC numbers and live stock, CPL, Gerbers). Routing is the last
   step, on final pins (operator 2026-11-05).
 - Stack: 8 layers, JLCPCB JLC08161H-2116 (`sockets/parts/jlcpcb_JLC08161H-2116.json`;

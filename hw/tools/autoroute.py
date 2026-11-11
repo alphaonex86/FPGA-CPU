@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Board routing common to the generated boards (gen_c2mu_s8.py, gen_socket*_t8.py): planes, via in
-every netted BGA ball, plane fanout of the SMD pads, freerouting runs alternating with close_route.py,
-KiCad DRC as the judge. Every function takes the board and its .kicad_pcb path: the route/ folder and
-the .drc.json sit next to it."""
+"""Board routing common to the generated boards (gen_c2mu_s8.py, gen_socket*_t8.py, route_search.py):
+planes, via in every netted BGA ball, plane fanout of the SMD pads, supervised freerouting runs, KiCad
+DRC as the judge. Every function takes the board and its .kicad_pcb path: the .drc.json sits next to
+it."""
 import fcntl
 import json
 import math
@@ -10,8 +10,10 @@ import os
 import pathlib
 import re
 import shutil
+import signal
 import subprocess
 import sys
+import time
 
 import pcbnew
 
@@ -24,31 +26,35 @@ FREEROUTING = ROOT.parent / "FPGAcommon/tools/freerouting/freerouting-2.3.0-fpga
 FREEROUTING_PAR = FREEROUTING.with_name("freerouting-2.3.0-fpga-parallel.jar")
 FREEROUTING_MAIN = FREEROUTING.with_name("freerouting-2.3.0.jar")      # upstream, without the fork's changes
 JAVA = "/opt/openjdk-bin-25/bin/java"     # the fork is built for Java 25
-PASSES, ITERATIONS = 2, 20
-# freerouting runs per iteration, one after the other, the best kept: upstream, the serial fork
-# (deterministic), and the parallel fork (each run differs: thread timing decides which speculative
-# routes it keeps; ~4x faster) plain and with layer cost variants. The net order of the DSN changes
-# nothing (measured: 6 shuffled orders, 6 identical sessions)
-CPUS = 6                                 # operator 2026-11-08: 5-6 CPU per router, one router at a time
+# the freerouting builds: upstream, the serial fork (deterministic), and the parallel fork (each run
+# differs: thread timing decides which speculative routes it keeps; ~4x faster) plain and with layer
+# cost variants. The net order of the DSN changes nothing (measured: 6 shuffled orders, 6 identical
+# sessions)
+CPUS = 4                                 # operator 2026-11-11: never more than 4 CPUs for all of this project's
+                                         # heavy jobs together: the quota of claude-route.slice
 PARALLEL = {"FREEROUTING__ROUTER__PARALLEL_THREADS": str(CPUS)}
 HEAP_GB = 8                              # per run; a run's RSS reaches ~7.5 GB
 # operator 2026-11-08/09: one routing script at a time, the others wait; everything Claude runs within
 # 25 % of the PC's RAM, no swap (claude_slice: the routing scripts in claude-route.slice)
 ROUTE_LOCK = ROOT / "hw/.route.lock"
+POLL = 20                                # watchdog period (s)
+CRASH = re.compile(rb"OutOfMemoryError|StackOverflowError|fatal error has been detected")
+JOB_END = b"finished with state"
 
 PLANE_MARGIN = 0.5                       # a plane via keeps via radius + zone clearance from the split
 VIA = (0.45, 0.25)
 TRACK = 0.25                             # pad -> plane via
 CLEARANCE = pcbnew.FromMM(0.1)           # Default net class (the board minimum is 0)
 INSET = 0.3                              # plane pull-back from the board outline
+POWER_PAD = 0.8                          # a pad this wide (0603 and up, coils) carries a rail's current
 
 
 def contain(routing=True):
-    """first call of a routing script: re-run it in claude-route.slice (CPUS CPUs, under claude.slice's
-    RAM cap), then, when it routes, wait until no other routing script runs: the lock, kept open until
-    exit (None without routing)"""
+    """first call of a routing script: re-run it in claude-route.slice (CPUS CPUs for the whole slice,
+    under claude.slice's RAM cap), then, when it routes, wait until no other routing script runs: the
+    lock, kept open until exit (None without routing)"""
     if "/claude-route.slice/" not in open("/proc/self/cgroup").read():
-        claude_slice.run_in("route", [sys.executable] + sys.argv, cpus=CPUS)
+        claude_slice.run_in("route", [sys.executable] + sys.argv, cpus=CPUS)     # the slice's quota
     free, limit = claude_slice.budget()
     if limit is None:
         sys.exit("FAIL: claude-route.slice has no memory limit above it")
@@ -80,6 +86,13 @@ def net(board, name):
     if n is None:
         sys.exit(f"FAIL: net {name} missing")
     return n
+
+
+def by_ref(board):
+    """the footprints by reference and their pads by number and spot: KiCad saves them by UUID, random
+    at each generation, and a greedy step that follows the file order gives another board each time"""
+    return [(f, sorted(f.Pads(), key=lambda p: (p.GetNumber(), p.GetPosition().x, p.GetPosition().y)))
+            for f in sorted(board.GetFootprints(), key=lambda f: f.GetReference())]
 
 
 def plane_rect(board, rect):
@@ -141,7 +154,7 @@ def via_in_pad(board, spec, ref="U1"):
         for p in f.Pads():
             pads[p.GetNetCode()] = pads.get(p.GetNetCode(), 0) + 1
     n = 0
-    for p in u1.Pads():
+    for p in sorted(u1.Pads(), key=lambda p: p.GetNumber()):
         if p.GetNetCode() <= 0 or (pads[p.GetNetCode()] == 1 and p.GetNetname() not in plane_nets):
             continue                     # an unused IO: a via there only blocks escape channels
         v = pcbnew.PCB_VIA(board)
@@ -295,18 +308,19 @@ def dogbones(pad):
 def plane_vias(board, spec):
     """every SMD pad of a plane net (U1's have their via-in-pad) gets to a plane: a via in or at
     the pad, else a track to a same-net via within 1.5 mm, else a dogbone; an array's common row one via
-    past a row end; every via inside its net's plane span; the rest is the router's"""
+    past a row end; every via inside its net's plane span; the rest is the router's, but no power pad
+    (POWER_PAD): a rail's current never depends on a router track (exit 1)"""
     spans = {}
     for n, layer, rect, prio in spec:
         cuts = [plane_rect(board, r) for m, L, r, q in spec if L == layer and q > prio and m != n]
         spans.setdefault(net(board, n).GetNetCode(), []).append((plane_rect(board, rect), cuts))
     rules, cu = board.GetDesignSettings(), Copper(board)
-    nvia, ntrack, left = 0, 0, []
+    nvia, ntrack, left, power = 0, 0, [], []
     row_anchor = {}                      # (footprint, net) -> the via and pads already joined of an array's common row
     fits = lambda pt, code: on_plane(pt, spans[code]) and cu.via_fits(pt, code, rules)
 
-    for f in board.GetFootprints():
-        for p in f.Pads():
+    for f, pads in by_ref(board):
+        for p in pads:
             code, pos = p.GetNetCode(), p.GetPosition()
             if code not in spans or p.GetAttribute() != pcbnew.PAD_ATTRIB_SMD or \
                     any(isinstance(v, pcbnew.PCB_VIA) and v.GetNetCode() == code and p.HitTest(v.GetPosition())
@@ -345,6 +359,8 @@ def plane_vias(board, spec):
             pt = next((pt for pt in spots if fits(pt, code) and cu.track_fits(pos, pt, layer, code)), None)
             if pt is None:
                 left.append(f"{f.GetReference()}.{p.GetNumber()}")
+                if min(p.GetSize().x, p.GetSize().y) >= pcbnew.FromMM(POWER_PAD):
+                    power.append(f"{left[-1]} {p.GetNetname()}")
                 continue
             cu.via(pt, p.GetNet())
             cu.track(pos, pt, layer, p.GetNet())
@@ -352,6 +368,8 @@ def plane_vias(board, spec):
             if key:
                 row_anchor[key] = [pt, pos]
     print(f"plane connections: {nvia} vias, {ntrack} tracks; pads left to the router: {len(left)} {' '.join(left)}")
+    if power:
+        sys.exit(f"FAIL: power pads off their plane (inside another rail's area?): {power}")
 
 
 
@@ -402,22 +420,63 @@ def plane_areas(board, dsn):
     dsn.write_text(re.sub(r"\n *\(plane [^ ()]+ \(polygon [^()]*\)\)", swap, text))
 
 
-def freerouting(board, path, jobs, passes=PASSES, hours=12):
-    """the jobs (routers()) of PASSES passes (at most hours each) one after the other; the session
-    leaving the fewest connections open is imported into the board: its count, None when every run
-    failed"""
-    route, name = path.parent / "route", path.stem
+def supervised(cmd, env, log, ses, seconds, cwd):
+    """a router run under a watchdog; None once it left a session file, else why not. A run ends four
+    ways and one looks like a failure (pcb skill): session written; a crash signature in the log; the
+    process gone without a session; the wall clock. Fifth, seen 2026-11-09: the job over (TIMED_OUT:
+    no session) with the JVM still up, 17 h idle. The last four kill the process group."""
+    with open(log, "ab") as out:
+        seen = out.tell()
+        proc = subprocess.Popen(cmd, stdout=out, stderr=subprocess.STDOUT, env=env, cwd=cwd, start_new_session=True)
+    start, ended, why = time.time(), None, None
+    while why is None:
+        try:
+            proc.wait(POLL)
+            break
+        except subprocess.TimeoutExpired:
+            pass
+        with open(log, "rb") as f:
+            f.seek(max(seen - 64, 0))
+            new = f.read()
+            seen = f.tell()
+        if CRASH.search(new):
+            why = "crash signature in the log"
+        elif time.time() - start > seconds:
+            why = f"wall clock, {seconds / 3600:.1f} h"
+        elif ended is None and JOB_END in new:
+            ended = time.time()
+        elif ended is not None and time.time() - ended > 120:
+            why = "job over, the JVM still up"
+    if why:
+        os.killpg(proc.pid, signal.SIGKILL)
+        proc.wait()
+    elif proc.returncode != 0:
+        why = f"exit {proc.returncode}"
+    if ses.exists() and ses.stat().st_size and (why is None or ended):
+        return None
+    return why or "no session file"
+
+
+def pass_seconds(log):
+    """mean duration of the passes in a freerouting log, None without a finished pass"""
+    times = [float(s) for s in re.findall(rb"pass #\d+ on board \S+ was completed in ([\d.]+) seconds", log.read_bytes())]
+    return sum(times) / len(times) if times else None
+
+
+def freerouting(board, path, jobs, passes, seconds):
+    """the jobs (routers()) of `passes` passes (each killed after `seconds`) one after the other; the
+    session leaving the fewest connections open is imported into the board: its count, None when every
+    run failed"""
+    route, name = path.parent, path.stem            # route_search.py's working copy, in route/
     for _, jar, _ in jobs:
         if not jar.exists():
             sys.exit(f"FAIL: {jar} missing (built from FPGAcommon/tools/freerouting, README-fpga-jar.md)")
-    route.mkdir(exist_ok=True)
     env = {k: v for k, v in os.environ.items() if k not in ("DISPLAY", "WAYLAND_DISPLAY")}
     env.update({"FREEROUTING__USAGE_AND_DIAGNOSTIC_DATA__DISABLE_ANALYTICS": "true",
                 "FREEROUTING__ROUTER__HOLE_CLEARANCE_UM": str(round(
                     board.GetDesignSettings().m_HoleClearance / 1000)),
                 "FREEROUTING__ROUTER__AUTOMATIC_NECKDOWN": "true",     # PWR (0.4) out of 0.25 QFN pads
-                "FREEROUTING__ROUTER__OPTIMIZER__ENABLED": "false",
-                "FREEROUTING__ROUTER__JOB_TIMEOUT": f"{int(hours):02d}:{int(hours * 60) % 60:02d}:00"})
+                "FREEROUTING__ROUTER__OPTIMIZER__ENABLED": "false"})   # no JOB_TIMEOUT: it ends without a session
     # footprint-only rule areas (cavity, retention bands) leave copper free, but the DSN
     # export makes every rule area a copper keepout: out of the board for the export only
     parts_only = [z for z in board.Zones() if z.GetIsRuleArea() and not z.GetDoNotAllowTracks()
@@ -438,14 +497,14 @@ def freerouting(board, path, jobs, passes=PASSES, hours=12):
         dsn, ses, log = (route / f"{name}-{k}{ext}" for ext in (".dsn", ".ses", ".log"))
         shutil.copy(base, dsn)
         ses.unlink(missing_ok=True)
-        cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, f"-Xmx{HEAP_GB}g", "-Djava.awt.headless=true", "-jar",
-               str(jar), "-de", str(dsn), "-do", str(ses), "-mp", str(passes), "-mt", "1", "-da",
-               "--gui.enabled=false"]
+        log.unlink(missing_ok=True)
+        cmd = ["nice", "-n", "19", "unshare", "-rn", JAVA, f"-Xmx{HEAP_GB}g", f"-XX:ActiveProcessorCount={CPUS}",
+               "-Djava.awt.headless=true", "-jar", str(jar), "-de", str(dsn), "-do", str(ses), "-mp", str(passes),
+               "-mt", "1", "-da", "--gui.enabled=false"]
         claude_slice.wait_for((HEAP_GB + 1) << 30, f"router {label}")    # heap + JVM overhead (RSS ~7.5 GB)
-        with open(log, "a") as out:
-            proc = subprocess.run(cmd, stdout=out, stderr=subprocess.STDOUT, env=dict(env, **extra), cwd=route)
-        if proc.returncode != 0 or not ses.exists():
-            print(f"  router {label}: freerouting exit {proc.returncode}, see {log}", flush=True)
+        why = supervised(cmd, dict(env, **extra), log, ses, seconds, route)
+        if why:
+            print(f"  router {label}: no result ({why}), see {log}", flush=True)
             continue
         trial = pcbnew.LoadBoard(str(path))
         if not pcbnew.ImportSpecctraSES(trial, str(ses)):
@@ -459,26 +518,6 @@ def freerouting(board, path, jobs, passes=PASSES, hours=12):
     if not pcbnew.ImportSpecctraSES(board, str(best[1])):
         sys.exit("FAIL: SES import")
     return best[0]
-
-
-def freeroute(board, path, jobs):
-    """freerouting and close_route.py by turns until nothing is unrouted or a round gains nothing"""
-    best = unrouted(board)
-    print(f"unrouted before routing: {best}", flush=True)
-    for it in range(1, ITERATIONS + 1):
-        if freerouting(board, path, jobs) is None:
-            sys.exit("FAIL: every freerouting run failed")
-        n, dropped = settle(board, path)
-        print(f"iteration {it}: {n} unrouted, {dropped} router items in DRC errors dropped", flush=True)
-        if n:                         # the windowed router closes ~30 % per round; freerouting rips up the rest
-            routed, tried = close_route.close(board, drc_report(path))
-            n, dropped = settle(board, path)
-            print(f"  close_route: {routed} of {tried} routed; {n} unrouted, {dropped} dropped", flush=True)
-        if n == 0 or n >= best:
-            break
-        best = n
-    if n == 0:                        # complete: the generated ball vias no route uses go too
-        print(f"dangling copper dropped: {drop_dangling(board, path, keep_locked=False)}", flush=True)
 
 
 def settle(board, path):
@@ -498,6 +537,16 @@ def settle(board, path):
     if drop_dangling(board, path) or drop:
         rep = drc_report(path)
     return len(rep.get("unconnected_items", [])), len(drop)     # the board's connectivity in memory lags
+
+def finish(board, path):
+    """a complete board: the generated ball vias no route uses go, fill, save; exit 1 unless the DRC
+    has 0 errors and 0 open connections"""
+    print(f"dangling copper dropped: {drop_dangling(board, path, keep_locked=False)}", flush=True)
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    pcbnew.SaveBoard(str(path), board)
+    if drc(path) != (0, 0):
+        sys.exit(1)
+
 
 def drc_report(path, severity="error"):
     """kicad-cli DRC; errors into .drc.json, warnings into .warnings.json"""

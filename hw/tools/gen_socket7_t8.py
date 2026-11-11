@@ -2,10 +2,11 @@
 """Task T8 (plan/interposers.md) for socket7-cyclonev: planes, via in every U1 ball and autorouting
 (autoroute.py, as gen_c2mu_s8.py).
 
-Usage: python3 hw/tools/gen_socket7_t8.py [--pre]   (after gen_socket7_t7.py; long: freerouting;
---pre stops before routing)
-Output: hw/socket7-cyclonev/socket7-cyclonev.kicad_pcb routed, .drc.json; the freerouting DSN /
-SES / log in hw/socket7-cyclonev/route/.
+Usage: python3 hw/tools/gen_socket7_t8.py            (after gen_socket7_t7.py) the generated copper
+       python3 hw/tools/route_search.py <board>     the routing (days; --service: in the background)
+       python3 hw/tools/gen_socket7_t8.py --finish   (route_search.py runs it on a complete board)
+Output: hw/socket7-cyclonev/socket7-cyclonev.kicad_pcb, .drc.json; the routing files in
+hw/socket7-cyclonev/route/.
 
 Stack (JLCPCB 8-layer JLC08161H-2116 as the C2 Mu, operator 2026-11-05: on 4 layers the core current
 reached U1 through a split-plane corridor, ~30 mV drop against a ~14 mV margin; on 2 signal layers
@@ -18,7 +19,7 @@ inside the ring, the south band east: U3's output, the flash, the pulls, and the
 south pin rows joining them: freerouting never joins two islands of a plane net). VCC_AUX25 and
 VCCA_FPLL25 (low current) are routed. Vias and socket pins keep no pad on a layer they do not
 connect, so the planes stay whole between the 1.0 mm ball vias.
-Checks (exit 1): every connection routed, kicad-cli DRC 0 errors.
+Checks (exit 1): the generated copper DRC 0 errors; --finish: every connection routed, DRC 0 errors.
 """
 import pathlib
 import sys
@@ -30,7 +31,6 @@ import autoroute as ar
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUT, NAME = ROOT / "hw/socket7-cyclonev", "socket7-cyclonev"
-ROUTERS = ar.routers({"outer x2": "0:2,7:2", "inner x2": "2:2,5:2"})    # outer / inner signal layers dearer
 SPLIT_S = 31.25                          # south pin row: last VCC2 pin x 30.0, first VCC3 pin x 32.54
 SPLIT_N = 28.73                          # north pin row: last VCC2 pin x 27.46, first VCC3 pin x 30.0
 WINDOW = (14.0, 14.0, 46.0, 46.0)        # inside the pin ring (inner rows x / y 12.2 and 47.8)
@@ -59,9 +59,14 @@ def thin_pads(board):
 
 
 def main():
-    lock = ar.contain(routing="--pre" not in sys.argv)
+    ar.contain(routing=False)
     path = OUT / f"{NAME}.kicad_pcb"
     board = pcbnew.LoadBoard(str(path))
+    if "--finish" in sys.argv:
+        thin_pads(board)
+        ar.finish(board, path)
+        print("PASS  socket7 T8: routed, DRC 0 errors")
+        return
     if len(board.GetTracks()) or len(board.Zones()):
         sys.exit("FAIL: board already routed: rerun gen_socket7_t7.py first")
     if board.GetCopperLayerCount() != 8:
@@ -74,15 +79,6 @@ def main():
     pcbnew.SaveBoard(str(path), board)
     if ar.drc(path)[0]:
         sys.exit("FAIL: the generated copper has DRC errors: fix them before routing")
-    if "--pre" in sys.argv:
-        return
-    ar.freeroute(board, path, ROUTERS)
-    thin_pads(board)
-    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
-    pcbnew.SaveBoard(str(path), board)
-    if ar.drc(path) != (0, 0):
-        sys.exit(1)
-    print("PASS  socket7 T8: routed, DRC 0 errors")
 
 
 if __name__ == "__main__":

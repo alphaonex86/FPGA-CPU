@@ -2084,8 +2084,8 @@
 	(fp_poly (pts (xy -38.75 -5.25) (xy 38.75 -5.25) (xy 38.75 14) (xy 35 14) (xy 35 5.25) (xy -35 5.25) (xy -35 14) (xy -38.75 14))
 		(stroke (width 0.05) (type solid)) (fill no) (layer "F.CrtYd"))
 	(model "${KIPRJMOD}/../lib/3dmodels/LattePanda_Mu_H8.0_Horizontal.stpZ"
-		(offset (xyz 0 0 1.1))
+		(offset (xyz 0 -32.7 6.6))
 		(scale (xyz 1 1 1))
-		(rotate (xyz 0 0 0))
+		(rotate (xyz -90 0 180))
 	)
 )

@@ -10,5 +10,5 @@
 		(padstack (mode front_inner_back)
 			(layer "Inner" (shape circle) (size 4.3 4.3))
 			(layer "B.Cu" (shape circle) (size 4.3 4.3))))
-	(model "${KIPRJMOD}/../lib/3dmodels/Mounting_Wuerth_WA-SMSI-M2_H6mm_9774060243.step" (offset (xyz 0 0 0)) (scale (xyz 1 1 1.1)) (rotate (xyz 0 0 0)))
+	(model "${KIPRJMOD}/../lib/3dmodels/Standoff_Sinhoo_SMTSO2066CTJ.step" (offset (xyz 0 0 0)) (scale (xyz 1 1 1)) (rotate (xyz 0 0 0)))
 )

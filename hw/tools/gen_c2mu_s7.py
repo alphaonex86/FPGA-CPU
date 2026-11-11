@@ -213,9 +213,8 @@ def main():
                 break
         else:
             sys.exit(f"FAIL: {ref} pads do not land on the PCIe template")
-        for layer, p, q, _ in t.segments():
-            keep_off(P, "F" if layer == c2mu_pcie.F else "B" if layer == c2mu_pcie.B else "", p, q,
-                     c2mu_pcie.W / 2 + KEEP)
+        for _, p, q, _ in t.segments():       # on any layer: a part over a pair gets no via to its planes
+            keep_off(P, "FB", p, q, c2mu_pcie.W / 2 + KEEP)
         for v, _ in t.vias():
             keep_off(P, "FB", v, v, c2mu_pcie.VIA[0] / 2 + KEEP)
 
