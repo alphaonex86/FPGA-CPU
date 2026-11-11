@@ -19,6 +19,7 @@ LAYERS, LAYER_COST = (), ()             # the board's signal layers, outer ones 
 OUTER_COST = 1.3
 VIA_D, VIA_DRILL, VIA_COST = 0.45, 0.25, 30          # via cost in grid steps
 HOLE_CLR, HOLE_TO_HOLE, EDGE, MARGIN = 0.2, 0.25, 0.3, G     # MARGIN: raster offset and staircase
+PTH_CLR = 0.3                            # a plated component hole (placer.write_rules)
 MAX_EXPAND = 1500000
 MM = 1e6
 STEPS = [(1, 0, 1.0), (-1, 0, 1.0), (0, 1, 1.0), (0, -1, 1.0),
@@ -58,8 +59,10 @@ class Window:
                 x, y, d = it.GetPosition().x / MM, it.GetPosition().y / MM, drill / MM / 2
                 self.circle(via, x, y, d + max(HOLE_TO_HOLE + VIA_DRILL / 2, HOLE_CLR + r) + MARGIN)
                 if not same:
+                    clr = PTH_CLR if isinstance(it, pcbnew.PAD) else HOLE_CLR
                     for t in track:
-                        self.circle(t, x, y, d + HOLE_CLR + w + MARGIN)
+                        self.circle(t, x, y, d + clr + w + MARGIN)
+                    self.circle(via, x, y, d + clr + r + MARGIN)
         for z in board.Zones():
             if z.GetIsRuleArea():
                 for k, L in enumerate(LAYERS):

@@ -286,7 +286,7 @@ def write_rules():
         ("VIN", 0.2, 1.0),       # Mu ~2 A at 12 V
         # 0.2 mm on F.Cu over In1 (0.116 mm 2116 prepreg, er 4.16): ~47 ohm, ~90 ohm loosely coupled
         # clearance 0.15: the pair escapes between U1's via-in-pads (0.2 + 2 x 0.15 <= 0.55 mm)
-        ("PCIE", 0.15, 0.2)], NET_CLASSES)
+        ("PCIE", 0.15, 0.2)], NET_CLASSES, edge_parts=("U2",))      # the Slot 1 fingers
 
 
 if __name__ == "__main__":

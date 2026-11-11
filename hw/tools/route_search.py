@@ -86,7 +86,8 @@ def search(path):
         pcbnew.SaveBoard(str(start), board)
         state = {"signature": signature(board), "tools": {}}
         note(f"start: {path.name} from its unrouted copy")
-    shutil.copy(path.with_suffix(".kicad_pro"), work.with_suffix(".kicad_pro"))     # the DRC rules
+    for ext in (".kicad_pro", ".kicad_dru"):                                       # the DRC rules
+        shutil.copy(path.with_suffix(ext), work.with_suffix(ext))
     signal = [k for k, L in enumerate(close_route.copper_layers(board)) if board.GetLayerType(L) != pcbnew.LT_POWER]
     jobs = ar.routers({f"layer {k} x2": f"{k}:2" for k in signal})
     note(f"{path.name}: {len(jobs)} tools x {HOURS} h at most, {ar.CPUS} CPUs, signal layers {signal}")

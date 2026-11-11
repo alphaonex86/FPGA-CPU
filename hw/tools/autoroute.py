@@ -46,6 +46,7 @@ VIA = (0.45, 0.25)
 TRACK = 0.25                             # pad -> plane via
 CLEARANCE = pcbnew.FromMM(0.1)           # Default net class (the board minimum is 0)
 INSET = 0.3                              # plane pull-back from the board outline
+EDGE, PTH = 0.3, 0.3                     # copper to the outline / to a plated component hole (placer.write_rules)
 POWER_PAD = 0.8                          # a pad this wide (0603 and up, coils) carries a rail's current
 
 
@@ -201,6 +202,9 @@ class Copper:
         for it in self.near(at):
             if hole and it.HasHole() and it.GetEffectiveHoleShape().Collide(hole, rules.m_HoleToHoleMin):
                 return False
+            if isinstance(it, pcbnew.PAD) and it.HasHole() and it.GetNetCode() != code and \
+                    it.GetEffectiveHoleShape().Collide(shape, pcbnew.FromMM(PTH)):
+                return False
             if it.GetNetCode() == code:
                 continue
             for layer in layers:
@@ -216,7 +220,7 @@ class Copper:
         hole = pcbnew.SHAPE_CIRCLE(pt, pcbnew.FromMM(VIA[1] / 2))
         return self.clear_of(copper, pt, self.layers, code, hole, rules) and \
             not any(k.Contains(pt) or k.Collide(copper) for k in self.keepouts) and \
-            not any(e.Collide(copper, pcbnew.FromMM(0.3)) for e in self.edges)
+            not any(e.Collide(copper, pcbnew.FromMM(EDGE)) for e in self.edges)
 
     def via(self, pt, net):
         v = pcbnew.PCB_VIA(self.board)
@@ -463,6 +467,40 @@ def pass_seconds(log):
     return sum(times) / len(times) if times else None
 
 
+def edge_keepout(board, dsn):
+    """a keepout ring along the outline on every routed layer: freerouting keeps only the net class
+    clearance (>= CLEARANCE) from the boundary, the board rule is EDGE; less the pads that reach the
+    edge (card-edge fingers), which stay reachable"""
+    outline = pcbnew.SHAPE_POLY_SET()
+    if not board.GetBoardPolygonOutlines(outline, False):
+        sys.exit("FAIL: no closed board outline")
+    inner = pcbnew.SHAPE_POLY_SET(outline)
+    inner.Deflate(pcbnew.FromMM(EDGE) - CLEARANCE, pcbnew.CORNER_STRATEGY_ROUND_ALL_CORNERS, pcbnew.FromMM(0.005))
+    lines = []
+    for layer in close_route.copper_layers(board):
+        if board.GetLayerType(layer) == pcbnew.LT_POWER:
+            continue
+        ring = pcbnew.SHAPE_POLY_SET(outline)
+        ring.BooleanSubtract(inner)
+        for f in board.GetFootprints():
+            for p in f.Pads():
+                if p.IsOnLayer(layer) and ring.Collide(p.GetEffectiveShape(layer), 0):
+                    pad = pcbnew.SHAPE_POLY_SET()
+                    p.TransformShapeToPolygon(pad, layer, 2 * CLEARANCE, 2000, pcbnew.ERROR_OUTSIDE)
+                    ring.BooleanSubtract(pad)
+        ring.Fracture()
+        for i in range(ring.OutlineCount()):
+            chain = ring.COutline(i)
+            pts = [chain.CPoint(k) for k in range(chain.PointCount())] + [chain.CPoint(0)]
+            lines.append(f'    (keepout "" (polygon {board.GetLayerName(layer)} 0 '
+                         + " ".join(f"{p.x / 1000:g} {-p.y / 1000:g}" for p in pts) + "))")
+    text = dsn.read_text()
+    at = text.find("\n    (via ")
+    if at < 0 or not lines:
+        sys.exit("FAIL: DSN edge keepout: no (via ...) line in the structure or no ring")
+    dsn.write_text(text[:at] + "\n" + "\n".join(lines) + text[at:])
+
+
 def freerouting(board, path, jobs, passes, seconds):
     """the jobs (routers()) of `passes` passes (each killed after `seconds`) one after the other; the
     session leaving the fewest connections open is imported into the board: its count, None when every
@@ -493,6 +531,7 @@ def freerouting(board, path, jobs, passes, seconds):
         sys.exit("FAIL: DSN export")
     allow_via_in_pad(base)
     plane_areas(board, base)
+    edge_keepout(board, base)
     pcbnew.SaveBoard(str(path), board)
     best = None
     for k, (label, jar, extra) in enumerate(jobs):

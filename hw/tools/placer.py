@@ -206,10 +206,24 @@ class Placer:
         return p.GetPosition().x / 1e6, p.GetPosition().y / 1e6
 
 
-def write_rules(pro_path, classes, patterns):
+EDGE = 0.3                               # copper to the routed outline
+PTH = 0.3                                # copper to a plated component hole
+
+
+def write_rules(pro_path, classes, patterns, edge_parts=()):
     """the board rules into the .kicad_pro: 0.1 mm track / space, vias 0.45 / 0.25, copper 0.2 mm from a
     hole; classes [(name, clearance, track width)] beside Default (0.1 / 0.1); patterns {class: [net
-    glob]}"""
+    glob]}. The fab rules KiCad's board setup cannot tell apart go in the .kicad_dru next to it
+    [sockets/parts/jlcpcb_pcb_capabilities.html]: copper EDGE from the outline (JLCPCB: >= 0.2 mm
+    from a routed edge, the edge itself +-0.2 mm), except the pads of edge_parts (card-edge fingers);
+    copper PTH from a plated component hole (JLCPCB: PTH to track 0.28 mm min, 0.35 recommended; via
+    hole to track 0.2 mm)"""
+    rules = [f'(rule "copper to the routed outline"\n  (constraint edge_clearance (min {EDGE}mm)))',
+             f'(rule "copper to a plated component hole"\n  (condition "A.Pad_Type == \'Through-hole\'")\n'
+             f'  (constraint hole_clearance (min {PTH}mm)))']
+    rules += [f'(rule "{ref}: pads up to the outline"\n  (condition "A.memberOfFootprint(\'{ref}\')")\n'
+              '  (constraint edge_clearance (min 0mm)))' for ref in edge_parts]
+    pro_path.with_suffix(".kicad_dru").write_text("(version 1)\n" + "\n".join(rules) + "\n")
     pro = json.loads(pro_path.read_text())
     tmpl = json.loads(pathlib.Path("/usr/share/kicad/template/Edgeberry_Cartridge/"
                                    "Edgeberry_cartridge_template.kicad_pro").read_text())
