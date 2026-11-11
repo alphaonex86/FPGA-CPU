@@ -135,6 +135,33 @@ def planes(board, spec):
         sys.exit(f"FAIL: plane net in several islands on one layer (never joined by freerouting): {split}")
 
 
+def generated(board, path):
+    """the generated copper is complete: fill, save; exit 1 unless the planes are whole and the DRC has
+    0 errors"""
+    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
+    pcbnew.SaveBoard(str(path), board)
+    plane_islands(board)
+    if drc(path)[0]:
+        sys.exit("FAIL: the generated copper has DRC errors: fix them before routing")
+
+
+def plane_islands(board):
+    """the planes as filled (vias and their clearances cut them): a net in several islands on a layer
+    needs a layer where it is one island, which joins them through the vias; else exit 1 (the router
+    never joins two islands of a plane net)"""
+    fills = {}
+    for z in board.Zones():
+        if not z.GetIsRuleArea() and z.GetNetCode() > 0:
+            fills.setdefault((z.GetNetname(), board.GetLayerName(z.GetLayer())), pcbnew.SHAPE_POLY_SET()).BooleanAdd(
+                z.GetFilledPolysList(z.GetLayer()))            # a net's zones of one layer abut
+    count = {key: area.OutlineCount() for key, area in fills.items()}
+    whole = {n for (n, _), k in count.items() if k == 1}
+    split = [f"{n} {L}: {k}" for (n, L), k in count.items() if k != 1 and n not in whole]
+    print("plane islands: " + ", ".join(f"{n} {L} {k}" for (n, L), k in sorted(count.items())))
+    if split:
+        sys.exit(f"FAIL: plane net in several (or no) filled islands and whole on no layer: {split}")
+
+
 def poured(board):
     """[(zone, its area: the outline less the higher priority zones of its layer)]"""
     zones = [z for z in board.Zones() if not z.GetIsRuleArea() and z.GetNetCode() > 0]
@@ -205,7 +232,10 @@ class Copper:
             if isinstance(it, pcbnew.PAD) and it.HasHole() and it.GetNetCode() != code and \
                     it.GetEffectiveHoleShape().Collide(shape, pcbnew.FromMM(PTH)):
                 return False
-            if it.GetNetCode() == code:
+            if it.GetNetCode() == code:          # its own net: joined or apart, no sliver gap in the artwork
+                if any(it.IsOnLayer(L) and it.GetEffectiveShape(L).Collide(shape, CLEARANCE)
+                       and not it.GetEffectiveShape(L).Collide(shape, 0) for L in layers):
+                    return False
                 continue
             for layer in layers:
                 if it.IsOnLayer(layer):
@@ -585,6 +615,7 @@ def finish(board, path):
     print(f"dangling copper dropped: {drop_dangling(board, path, keep_locked=False)}", flush=True)
     pcbnew.ZONE_FILLER(board).Fill(board.Zones())
     pcbnew.SaveBoard(str(path), board)
+    plane_islands(board)
     if drc(path) != (0, 0):
         sys.exit(1)
 

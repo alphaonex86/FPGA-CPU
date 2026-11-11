@@ -55,10 +55,7 @@ def main():
     ar.via_in_pad(board, PLANES)
     ar.plane_vias(board, PLANES)
     thin_pads(board)
-    pcbnew.ZONE_FILLER(board).Fill(board.Zones())
-    pcbnew.SaveBoard(str(path), board)
-    if ar.drc(path)[0]:
-        sys.exit("FAIL: the generated copper has DRC errors: fix them before routing")
+    ar.generated(board, path)
 
 
 if __name__ == "__main__":
