@@ -6,7 +6,7 @@ days at autoroute.CPUS CPUs); the boards one after the other. A tool works in ro
 board: a supervised router run sized for ~ROUND_S, the DRC clean-up, close_route.py. It ends at 0 open
 connections, at its budget, or stalled (STALL rounds without a gain: more budget buys nothing). The
 board left with the fewest open connections is kept; a complete one gets its generator's --finish
-step (FINISH). Every tool ending above 0 is never the budget: look for a routing-setup fault (e.g.
+step and its fabrication step (FINISH; their output in route/<script>.log). Every tool ending above 0 is never the budget: look for a routing-setup fault (e.g.
 the routing order) or a fault outside routing (e.g. placement).
 The state is saved after every round (route/search.json): a restart goes on where it stopped; a board
 whose pads, planes or generated copper changed starts afresh. The board itself is only written at the
@@ -40,8 +40,10 @@ ROUND_S = 3600
 STALL = 3
 CLOSE_MAX = 40                            # close_route.py (A* in Python) only on a board this close
 UNIT = "fpgacpu-route.service"
-FINISH = {"socket3-cyclonev": "gen_socket3_t8.py", "socket7-cyclonev": "gen_socket7_t8.py",
-          "slot1-c2mu": "gen_c2mu_s8.py"}
+# a complete board: its generator's finish step, then its fabrication step (all the checks, the files)
+FINISH = {"socket3-cyclonev": (["gen_socket3_t8.py", "--finish"], ["gen_socket_t9.py", "socket3"]),
+          "socket7-cyclonev": (["gen_socket7_t8.py", "--finish"], ["gen_socket_t9.py", "socket7"]),
+          "slot1-c2mu": (["gen_c2mu_s8.py", "--finish"], ["gen_c2mu_s9.py"])}
 
 
 def signature(board):
@@ -144,11 +146,16 @@ def search(path):
         note(f"{path.name}: {done[k]} open; every tool left connections open: a routing-setup or placement "
              "fault, not the budget")
         return False
-    r = subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name(FINISH[path.stem])), "--finish"],
-                       capture_output=True, text=True)
-    note(f"{path.name}: complete ({jobs[k][0]}); {FINISH[path.stem]} --finish exit {r.returncode}: "
-         + (r.stdout + r.stderr).strip().splitlines()[-1])
-    return r.returncode == 0
+    note(f"{path.name}: complete ({jobs[k][0]})")
+    for step in FINISH[path.stem]:
+        r = subprocess.run([sys.executable, str(pathlib.Path(__file__).with_name(step[0])), *step[1:]],
+                           capture_output=True, text=True)
+        (route / f"{step[0]}.log").write_text(r.stdout + r.stderr)
+        tail = [line for line in (r.stdout + r.stderr).splitlines() if line.strip() and "Debug:" not in line][-3:]
+        note(f"{' '.join(step)}: exit {r.returncode}: " + " | ".join(tail))
+        if r.returncode:
+            return False
+    return True
 
 
 def service(boards):

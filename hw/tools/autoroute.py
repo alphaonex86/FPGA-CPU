@@ -39,6 +39,7 @@ HEAP_GB = 8                              # per run; a run's RSS reaches ~7.5 GB
 # 25 % of the PC's RAM, no swap (claude_slice: the routing scripts in claude-route.slice)
 ROUTE_LOCK = ROOT / "hw/.route.lock"
 POLL = 20                                # watchdog period (s)
+ROUND_UM = 3
 CRASH = re.compile(rb"OutOfMemoryError|StackOverflowError|fatal error has been detected")
 JOB_END = b"finished with state"
 
@@ -500,6 +501,17 @@ def pass_seconds(log):
     return sum(times) / len(times) if times else None
 
 
+def clearance_margin(dsn):
+    """the router asked for ROUND_UM more than each clearance rule: it works in whole units and lands on
+    the rule itself, a fraction of a micrometre short for KiCad's DRC (pcb skill; seen here: ~24
+    tracks dropped per round)"""
+    text, n = re.subn(r"\(clearance (\d+(?:\.\d+)?)\)", lambda m: f"(clearance {float(m.group(1)) + ROUND_UM:g})",
+                      dsn.read_text())
+    if not n:
+        sys.exit("FAIL: no clearance rule found in the DSN: export format changed")
+    dsn.write_text(text)
+
+
 def edge_keepout(board, dsn):
     """a keepout ring along the outline on every routed layer: freerouting keeps only the net class
     clearance (>= CLEARANCE) from the boundary, the board rule is EDGE; less the pads that reach the
@@ -632,6 +644,7 @@ def freerouting(board, path, jobs, passes, seconds):
     allow_via_in_pad(base)
     plane_areas(board, base)
     edge_keepout(board, base)
+    clearance_margin(base)
     pcbnew.SaveBoard(str(path), board)
     best = None
     for k, (label, jar, extra) in enumerate(jobs):
@@ -670,6 +683,11 @@ def settle(board, path):
     rep = drc_report(path)
     bad = {i["uuid"] for v in rep.get("violations", []) for i in v["items"]}
     drop = [t for t in board.GetTracks() if not t.IsLocked() and t.m_Uuid.AsString() in bad]
+    if drop:
+        kinds = {}
+        for v in rep["violations"]:
+            kinds[v["type"]] = kinds.get(v["type"], 0) + 1
+        print(f"  DRC errors of the router's copper: {kinds}", flush=True)
     for t in drop:
         board.Delete(t)
     if drop:
