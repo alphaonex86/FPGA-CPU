@@ -27,7 +27,8 @@ module bus_tb (
     logic [31:0]  sc_wdata, sc_rdata, d_o, d_pin;
     logic         stopped, snoop, err_bs, a_oe, ads_n, mio, dc, wr, blast_n, lock_n, cache_n, ctl_oe, d_oe;
     logic [31:4]  snoop_addr;
-    logic         pchk_n, hlda, breq;
+    logic         pchk_n, hlda, breq, ads_r;
+    assign ads_n = a_oe ? ads_r : 1'b1;           // the pad: floated with the address, pulled up on the board
     logic         rdy_n, brdy_n, ken_n, hold, ahold, boff_n, eads_n, stpclk_n;
 
     // slave
@@ -52,7 +53,7 @@ module bus_tb (
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(sc_lock), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
                 .quiet(1'b1), .stopped(stopped), .snoop(snoop), .snoop_addr(snoop_addr), .err_bs(err_bs),
-                .a_o(a_o), .a_oe(a_oe), .a_i(28'h123_4567), .be_n(be_n), .ads_n(ads_n), .mio(mio), .dc(dc), .wr(wr),
+                .a_o(a_o), .a_oe(a_oe), .a_i(28'h123_4567), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_n), .lock_n(lock_n), .cache_n(cache_n), .ctl_oe(ctl_oe),
                 .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe), .d_i(d_pin),
                 .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]} ^ {3'd0, bad_parity}),

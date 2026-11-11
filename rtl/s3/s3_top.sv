@@ -113,7 +113,7 @@ module s3_top #(
     assign dp      = d_oe ? dp_o : 'z;
     // floated with the bus under HLDA and BOFF#
     assign be_n    = ctl_oe ? be_o : 'z;
-    assign ads_n   = ctl_oe ? ads_o : 1'bz;
+    assign ads_n   = a_oe ? ads_o : 1'bz;             // with the address (s3_bus.sv)
     assign m_io_n  = ctl_oe ? mio : 1'bz;
     assign d_c_n   = ctl_oe ? dc : 1'bz;
     assign w_r_n   = ctl_oe ? wr : 1'bz;

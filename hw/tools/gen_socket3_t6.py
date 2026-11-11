@@ -67,6 +67,9 @@ PULLS = [
     # FPGAmotherboard: RESET high-Z, held by 8.2k to VCORE during the ramp
     ("100k", "S_RESET", "GND", "socket3_notes R4 (C16, NM2)"),
     ("4k7", "HOLD", "GND", "socket3_notes R6 (FPGA side)"),
+    # the CPU's internal pull-downs [dx4 Table 12]: a board may leave these pins open (the UMC bridge
+    # has no AHOLD pin), the FPGA has no pull-down, and a floating AHOLD floats the address for good
+    *[("10k", n, "GND", "dx4 Table 12 p.25 (internal pull-down, FPGA side)") for n in ("AHOLD", "SRESET", "WB/WT#")],
     ("10k", "UP#", "V3V3", "socket3_notes R4"),
     *[("10k", f"DP{k}", "V3V3", "socket3_notes R4, dx4 p.16")
       for k in range(4)],

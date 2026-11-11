@@ -283,6 +283,11 @@ RDY# / BRDY#. `FAST` in `gen_socket3_assign.py`: those five take balls within 2.
 (K20, L22, M22, N20, N21), the ball of the least total length; their legs cross others (RDY# /
 BRDY# 22-24 mm on the FPGA side). U1 now at 180 deg, 0 CLK crossings, 5559 -> 5750 mm; T6-T8
 regenerated. With it the bus-only build meets the 486 timing (+0.34 ns setup, +0.81 ns hold).
+2026-11-11, the CPU's internal pulls [dx4 Table 12 p.25]: a board may leave those pins open (the
+UMC bridge has no AHOLD pin: a floating AHOLD floats the address for good). Pull-downs as 10k on
+the FPGA side (AHOLD, SRESET, WB/WT#: the FPGA has none), pull-ups as FPGA weak pull-ups in the
+.qsf (EADS#, BOFF#, FLUSH#, A20M#, BS16#, BS8#, KEN#, BRDY#, IGNNE#, SMI#, STPCLK#, INV, CLKMUL,
+TCK, TDI, TMS; UP# keeps its resistor). 21 resistors now, 190 footprints.
 socket7-cyclonev (2026-11-05, `gen_socket7_assign.py`): the same on the
 socket 7 T7 layout, one stage (direct nets): socket pin -> ball, least
 total length + 6 mm per ring depth; the bank plan (byte per bank) is

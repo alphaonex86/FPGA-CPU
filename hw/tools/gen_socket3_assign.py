@@ -48,6 +48,10 @@ OUT = ROOT / "hw/socket3-cyclonev"
 DEPTH_MM = 6.0                           # a ring deeper costs as much as 6 mm of trace
 CHANNELS = 8
 FAST = ("RDY#", "BRDY#", "BLAST#", "A2", "A3")
+# the CPU's internal pull-ups [dx4 Table 12 p.25]: a board may leave these inputs open; UP# (RESERVED#)
+# has its resistor, the pull-downs (AHOLD, SRESET, WB/WT#) are resistors too (gen_socket3_t6.py)
+WEAK_UP = ["CLKMUL", "EADS#", "BOFF#", "FLUSH#", "A20M#", "BS16#", "BS8#", "KEN#", "BRDY#", "IGNNE#", "SMI#",
+           "STPCLK#", "INV", "TCK", "TDI", "TMS"]
 FAST_RADIUS = 2.3                        # mm between ball centres (1.0 mm pitch: two balls away)
 BARRED = 1e6
 
@@ -144,7 +148,7 @@ def main():
                      f"{math.dist(u1[b], xy[k][str(1 + ch)]):.1f}", pin, src[n]])
     b = ball["VCORE_OK"]
     rows.append(["VCORE_OK", b, bank[b], "3.3 V", "3.3-V LVTTL", "", "", "", "board-local"])
-    write_outputs(OUT, rows, ["CLKMUL"], AS_X4_QSF)
+    write_outputs(OUT, rows, WEAK_UP, AS_X4_QSF)
     with open(OUT / "layout.csv", "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["ref", "x", "y", "rot", "side"])

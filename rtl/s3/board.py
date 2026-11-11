@@ -17,9 +17,9 @@ SOURCES = ["rtl/c2/cyclonev/c2_bclk_pll.sv", "rtl/s3/s3_bus.sv", "rtl/s3/s3_top.
 # the registers fed from RDY# / BRDY# / BOFF# / AHOLD (FAST_OUT, the output enables) stay in the
 # fabric next to those pins
 REGISTERED_IN = ("a", "d", "dp", "ken_n", "hold", "eads_n", "reset")
-FAST_OUT = ("a[2]", "a[3]", "blast_n", "ads_n")
-REGISTERED_OUT = ("a", "d", "dp", "be_n", "m_io_n", "d_c_n", "w_r_n", "lock_n", "cache_n", "hlda", "breq", "pchk_n")
-OUTPUTS = REGISTERED_OUT + ("blast_n", "ads_n", "plock_n", "pcd", "pwt", "ferr_n", "hitm_n", "smiact_n", "tdo")
+FAST_OUT = ("a[2]", "a[3]", "blast_n")
+REGISTERED_OUT = ("a", "d", "dp", "be_n", "ads_n", "m_io_n", "d_c_n", "w_r_n", "lock_n", "cache_n", "hlda", "breq", "pchk_n")
+OUTPUTS = REGISTERED_OUT + ("blast_n", "plock_n", "pcd", "pwt", "ferr_n", "hitm_n", "smiact_n", "tdo")
 
 
 def port(signal):

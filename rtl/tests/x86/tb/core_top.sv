@@ -62,7 +62,7 @@ module core_top (
     logic [31:2]  a_o;
     logic [31:0]  d_o, d_pin, chip_d;
     logic [3:0]   be_n, dp_o;
-    logic         a_oe, ads_n, mio, dc, wr, blast_n, d_oe, chip_d_oe, brdy_n, ken_n, cpu_reset, rdy_n;
+    logic         a_oe, ads_n, ads_r, mio, dc, wr, blast_n, d_oe, chip_d_oe, brdy_n, ken_n, cpu_reset, rdy_n;
     logic         wbwt_n, ahold, hold, eads_n, inv, boff_n;
     logic         host_req, host_we, host_ready, host_ack;
     logic [31:1]  host_addr;
@@ -72,6 +72,7 @@ module core_top (
     logic         s3_rst;
 
     assign s3_rst = rst || cpu_reset;
+    assign ads_n  = a_oe ? ads_r : 1'b1;            // the pad: floated with the address, pulled up
     assign d_pin  = d_oe ? d_o : chip_d_oe ? chip_d : 32'hffff_ffff;
     s3_bus bus (.clk(clk), .rst(s3_rst),
                 .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
@@ -79,7 +80,7 @@ module core_top (
                 .sc_req(1'b0), .sc_status(3'd0), .sc_lock(1'b0), .sc_addr(30'd0), .sc_be(4'd0), .sc_wdata(32'd0),
                 .sc_ready(), .sc_done(), .sc_rdata(),
                 .quiet(1'b1), .stopped(), .snoop(), .snoop_addr(), .err_bs(),
-                .a_o(a_o), .a_oe(a_oe), .a_i(a_o[31:4]), .be_n(be_n), .ads_n(ads_n), .mio(mio), .dc(dc), .wr(wr),
+                .a_o(a_o), .a_oe(a_oe), .a_i(a_o[31:4]), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_n), .lock_n(), .cache_n(), .ctl_oe(), .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe),
                 .d_i(d_pin), .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]}), .pchk_n(),
                 .hlda(), .breq(), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n), .hold(hold), .ahold(ahold),

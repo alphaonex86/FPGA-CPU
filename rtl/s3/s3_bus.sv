@@ -5,7 +5,8 @@
 // RDY# / BRDY# / KEN# / BOFF# / AHOLD / HOLD / read data stable from 5 ns before to 3 ns after it.
 // What must follow RDY# / BRDY# / BOFF# / AHOLD in the very next clock is kept to a few registers
 // fed straight from those pins: the state, BLAST# (low for a burst's fourth transfer right after
-// the third BRDY#), the burst's A3-A2, ADS# (held back by AHOLD) and the three output enables. A
+// the third BRDY#), the burst's A3-A2, and the three output enables (ADS# floats
+// with the address: AHOLD or BOFF# sampled as a cycle would start keep it off the bus, ads_go tells the state). A
 // pin -> logic -> pin loop across the FPGA misses that timing, so BLAST#, A3 and A2 sit on balls
 // next to RDY# / BRDY# (hw/tools/gen_socket3_assign.py FAST). Everything else leaves from registers
 // loaded in the idle clock before each cycle (I/O cells) and the other inputs come in through
@@ -108,7 +109,7 @@ module s3_bus (
     logic         take, take_last, take_mem;
     logic [2:0]   take_beat;
     logic [3:0]   take_be;
-    logic         ready, ends, burst, write, job_done, prep, start;
+    logic         ready, ends, burst, write, job_done, prep, start, try, ads_go;
 
     function automatic logic [3:0] parity(input logic [31:0] d);
         return {^d[31:24], ^d[23:16], ^d[15:8], ^d[7:0]};
@@ -126,14 +127,16 @@ module s3_bus (
     assign mem_ready = st == IDLE && job == J_NONE && !stopped && !sc_req && stp_s[1];
     assign sc_ready  = st == IDLE && job == J_NONE && !stopped && (stp_s[1] || lock_on);
 
+    assign try = prep && !ahold_q && !(hold_q && !lock_on && !(job == J_SINGLE && sc_lock && !grant));
+
     always_comb begin
         st_n  = st;
         start = 1'b0;
         unique case (st)
             IDLE:
                 if (hold_q && !lock_on && !(job == J_SINGLE && sc_lock && !grant)) st_n = HELD;
-                else if (prep && !ahold_q) start = 1'b1;
-            T1: st_n = ads_n ? IDLE : T2;                 // ADS# held back by AHOLD: again
+                else start = try;
+            T1: st_n = ads_go ? T2 : IDLE;                // ADS# floated by AHOLD: again
             T2: if (ready && ends) st_n = IDLE;
             HELD: if (!hold_q) st_n = IDLE;
             default: st_n = IDLE;                         // BACKOFF: released
@@ -160,7 +163,7 @@ module s3_bus (
         snoop      <= !a_oe && eads_q;
         snoop_addr <= a_q;
         // the registers fed from the pins
-        ads_n   <= !(start && !ahold);
+        ads_go  <= start && !ahold;
         ctl_oe  <= st_n != HELD && st_n != BACKOFF;
         a_oe    <= st_n != HELD && st_n != BACKOFF && !ahold;
         d_oe    <= (st_n == T1 || st_n == T2) && write;
@@ -169,6 +172,7 @@ module s3_bus (
         else if (ready) blast_n <= beat_n[1:0] != 2'd3;   // the burst goes on
         if (ready && !ends) a_o[3:2] <= beat_n[1:0];
         // the registers of the idle clock
+        ads_n <= !try;
         hlda <= st_n == HELD;
         breq <= job != J_NONE;
         if (prep) begin
