@@ -29,3 +29,5 @@ hw/*/route/
 # kicad-cli DRC warnings (autoroute.drop_dangling)
 *.warnings.json
 hw/.route.lock
+# KiCad project locks
+~*.lck
