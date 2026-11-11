@@ -22,7 +22,9 @@ UNUSED = {"socket3": set(),
           "c2mu": {("cmos", "FLUSH#"), ("cmos", "IGNNE#"), ("cmos", "PWRGOOD"), ("cmos", "SLP#"), ("cmos", "THERMTRIP#"),
                    ("rx", "DEFER#"), ("rx", "LOCK#"), ("rx", "HIT#"), ("rx", "HITM#"), ("rx", "BR0#")}}
 # board net of each supply voltage [hw/socket3-cyclonev/power.md, plan/slot1_c2.md Artix cartridge]
-RAILS = {"socket3": {"1.1V": {"VCC_1V1"}, "2.5V": {"VCC_AUX25", "VCCA_FPLL25"}, "3.3V": {"V3V3"}},
+RAILS = {"socket3": {"1.1V": {"VCC_1V1"}, "2.5V": {"VCC_AUX25", "VCCA_FPLL25"}, "3.3V": {"V3V3"},
+                     "3.0V/3.3V": {"V3V3"},               # VCCPGM, VCCPD at a 3.3 V bank
+                     "VCCBAT": {"VCC_AUX25"}},            # 1.2-3.0 V [cv_51002 Table 4]
          "c2mu": {"VCCINT": {"VCC_1V0"}, "VCCBRAM": {"VCC_1V0"}, "VCCAUX": {"VCC_1V8"}, "VCCADC": {"VCC_1V8"},
                   "MGTAVCC": {"VCC_MGT10"}, "MGTAVTT": {"VCC_MGT12"}, "3.30": {"VCC_3V3"}, "any**": {"VCC_1V8"}}}
 BOARD = {"socket3": "socket3-cyclonev", "c2mu": "slot1-c2mu"}
@@ -55,7 +57,8 @@ def quartus(report):
     for line in pathlib.Path(report).read_text().splitlines():
         if re.match(r"^\S.* : [A-Z]+\d+ +:", line):
             use, ball, _dir, _std, volt, _bank, assigned = [c.strip() for c in line.split(":")][:7]
-            out.append((ball, use if assigned == "Y" else None, volt if use.startswith("VCC") else None, use == "GND"))
+            supply = "VCCBAT" if use == "VCCBAT" else volt if use.startswith("VCC") else None
+            out.append((ball, use if assigned == "Y" else None, supply, use == "GND"))
     return out
 
 

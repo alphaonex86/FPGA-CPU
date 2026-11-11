@@ -110,6 +110,7 @@ def write_gerbers(pcb, board, fab_dir):
         if r.returncode != 0:
             sys.exit(f"FAIL: kicad-cli export {cmd[0]}: {r.stderr.strip()[:300]}")
     files = sorted(p for p in tmp.iterdir() if p.is_file())
+    check_package(board, pcb.stem, {p.name: p for p in files}, copper)
     with zipfile.ZipFile(fab_dir / f"{pcb.stem}-gerbers.zip", "w", zipfile.ZIP_DEFLATED) as z:
         for p in files:
             z.write(p, p.name)
@@ -117,6 +118,32 @@ def write_gerbers(pcb, board, fab_dir):
         p.unlink()
     tmp.rmdir()
     print(f"gerbers: {len(files)} files")
+
+
+def check_package(board, stem, files, copper):
+    """the files as the fab reads them, not as the export was asked: a Gerber with artwork per copper
+    layer, mask and the outline, 7 non-copper layers in all; the drill files hold one hit per via and
+    plated pad hole (PTH) and per unplated hole (NPTH); exit 1 otherwise"""
+    drawn = lambda name: name in files and any(c in files[name].read_text() for c in ("D01*", "D03*", "G36*"))
+    bad = [name for name in (f"{stem}-{layer.replace('.', '_')}.gbr" for layer in copper + ["F.Mask", "B.Mask", "Edge.Cuts"])
+           if not drawn(name)]
+    gerbers = [n for n in files if n.endswith(".gbr") and not n.endswith("-drl_map.gbr")]
+    if len(gerbers) != len(copper) + 7:
+        bad.append(f"{len(gerbers)} Gerber layers, not {len(copper)} copper + 7")
+    holes = {"PTH": sum(isinstance(t, pcbnew.PCB_VIA) for t in board.GetTracks()), "NPTH": 0}
+    for f in board.GetFootprints():
+        for p in f.Pads():
+            if p.GetDrillSizeX():
+                holes["NPTH" if p.GetAttribute() == pcbnew.PAD_ATTRIB_NPTH else "PTH"] += 1
+    for kind, n in holes.items():
+        name = f"{stem}-{kind}.drl"
+        got = sum(line.startswith("X") for line in files[name].read_text().splitlines()) if name in files else -1
+        if got != n:
+            bad.append(f"{name}: {got} holes, the board has {n}")
+    if bad:
+        sys.exit(f"FAIL: fabrication package: {bad}")
+    print(f"package: {len(gerbers)} Gerber layers ({len(copper)} copper), {holes['PTH']} plated and {holes['NPTH']} "
+          "unplated holes, as on the board")
 
 
 def fab(pcb, lcsc, no_part, consigned, boards, order):

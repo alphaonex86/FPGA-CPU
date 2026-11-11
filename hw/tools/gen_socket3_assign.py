@@ -15,6 +15,11 @@ crossing lines (swap argument; a per spot term survives it):
    configuration or clock function; CLK first, on the clock input (CLKnp)
    (notes R5) with the fewest crossings, then the least length. U1 takes the
    rotation of the fewest CLK crossings, then the least total length.
+FAST (2026-11-11): RDY# / BRDY# and the outputs that answer them within the clock (BLAST#, the
+burst's A3-A2: rtl/s3/s3_bus.sv) take balls FAST_RADIUS around one ball, the ball of the least
+total length (their legs cross others: the price): the Quartus build of the first map
+(RDY# / BRDY# on U1's east edge, BLAST# / A2 / A3 on its south edge) missed the 486's 14 ns by 3 to
+11 ns on these pin -> logic -> pin paths across the die.
 VCORE_OK (board-local, the VCORE-present detector output) takes the free ball
 nearest the U1 edge middle facing the ring; CLKMUL has only the FPGA weak
 pull-up (the FPGAmotherboard ties R17 to GND).
@@ -42,11 +47,15 @@ FCSV = ROOT / "FPGAlist/CycloneV_A9/pins/5ceba9_f484.csv"
 OUT = ROOT / "hw/socket3-cyclonev"
 DEPTH_MM = 6.0                           # a ring deeper costs as much as 6 mm of trace
 CHANNELS = 8
+FAST = ("RDY#", "BRDY#", "BLAST#", "A2", "A3")
+FAST_RADIUS = 2.3                        # mm between ball centres (1.0 mm pitch: two balls away)
+BARRED = 1e6
 
 
-def least_length(targets, spots, extra=lambda spot: 0.0):
-    """[(key, xy)], [(spot, xy)] -> ({key: spot}, total cost)"""
-    cost = np.array([[math.dist(t, xy) + extra(sp) for sp, xy in spots] for _, t in targets])
+def least_length(targets, spots, extra=lambda spot: 0.0, fast=lambda spot: True):
+    """[(key, xy)], [(spot, xy)] -> ({key: spot}, total cost); the FAST keys only on fast(spot) spots"""
+    cost = np.array([[math.dist(t, xy) + extra(sp) + (BARRED if key in FAST and not fast(sp) else 0.0)
+                      for sp, xy in spots] for key, t in targets])
     rows, cols = linear_sum_assignment(cost)
     return {targets[r][0]: spots[c][0] for r, c in zip(rows, cols)}, cost[rows, cols].sum()
 
@@ -57,16 +66,19 @@ def assign(u1_rot, signals, balls, clocks):
     slots = [k for k in at if isinstance(k, int)]
     socket = xy["U2"]
     b_pins = [((k, ch), xy[k][str(19 - ch)]) for k in slots for ch in range(1, CHANNELS + 1)]
+    u1, centre = xy["U1"], t7.U1_AT
     chan, c1 = least_length([(n, socket[pin]) for n, pin in signals], b_pins)
     a_pin = {n: xy[k][str(1 + ch)] for n, (k, ch) in chan.items()}
-    u1, centre = xy["U1"], t7.U1_AT
     depth = lambda b: DEPTH_MM * placer.ring_depth(u1[b], centre)
     # CLK is held to the clock inputs, outside the swap argument: each one tried, the fewest crossings
     # of its A leg with the others of its side first, then the least length
     others = [(n, a_pin[n]) for n in a_pin if n != "CLK"]
     best = None
     for c in clocks:
-        ball, c2 = least_length(others, [(b, u1[b]) for b in balls if b != c], depth)
+        spots = [(b, u1[b]) for b in balls if b != c]
+        near = {b: {q for q, at_q in spots if math.dist(at_b, at_q) <= FAST_RADIUS} for b, at_b in spots}
+        ball, c2 = min((least_length(others, spots, depth, fast=near[b].__contains__)
+                        for b in near if len(near[b]) >= len(FAST)), key=lambda m: m[1])
         leg = (a_pin["CLK"], u1[c])
         face = lambda n: at[chan[n][0]][3]             # B.Cu chips reach their balls on B.Cu, through the via in pad
         n_cross = sum(crossing(leg, (a_pin[n], u1[b])) for n, b in ball.items() if face(n) == face("CLK"))
@@ -116,6 +128,9 @@ def main():
     missing = [n for n, _ in signals if n not in ball]
     if missing:
         fails.append(f"unassigned: {missing}")
+    spread = max(math.dist(u1[ball[a]], u1[ball[b]]) for a in FAST for b in FAST)
+    if spread > 2 * FAST_RADIUS:
+        fails.append(f"FAST group: balls {spread:.1f} mm apart")
     if fails:
         print("FAIL", *fails, sep="\n  ")
         sys.exit(1)

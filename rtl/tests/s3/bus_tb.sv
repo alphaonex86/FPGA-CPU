@@ -171,7 +171,7 @@ module bus_tb (
                 pending <= 1'b0;
                 n_ops <= n_ops + 1;
             end
-            if (op == O_WRITE && !mem_req && !breq && pending) begin      // the bus unit finished the line
+            if (op == O_WRITE && !mem_req && dut.job == 2'd0 && pending) begin      // the bus unit finished the line
                 op <= O_IDLE;
                 pending <= 1'b0;
                 n_ops <= n_ops + 1;
@@ -186,7 +186,7 @@ module bus_tb (
                 sc_lock <= 1'b0;
                 n_ops <= n_ops + 1;
             end
-            if (n_ops == ops && op == O_IDLE && !breq) begin
+            if (n_ops == ops && op == O_IDLE && dut.job == 2'd0) begin
                 for (int i = 0; i < WORDS; i++)
                     if (mem[i] != shadow[i]) begin
                         $display("FAIL: memory[%0d] %08x, expected %08x", i, mem[i], shadow[i]);

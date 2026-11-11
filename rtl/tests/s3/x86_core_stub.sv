@@ -1,0 +1,49 @@
+// Stand-in for x86_core in a bus-only Quartus build (rtl/s3/build.sh <out> bus): line reads and
+// writes from a counter and an LFSR, every read bit folded back so nothing is optimised away.
+module x86_core (
+    input  logic         clk,
+    input  logic         rst,
+    input  logic [31:0]  reset_eip,
+    output logic         mem_req,
+    output logic         mem_we,
+    output logic [31:5]  mem_addr,
+    output logic [255:0] mem_wdata,
+    input  logic         mem_ready,
+    input  logic         mem_rvalid,
+    input  logic [255:0] mem_rdata,
+    output logic [2:0]   ret_valid,
+    output logic [2:0]   ret_eop,
+    output logic [2:0][31:0] ret_next_eip,
+    output logic [2:0]   ret_wdst,
+    output logic [2:0][3:0] ret_dst,
+    output logic [2:0][31:0] ret_value,
+    output logic [2:0]   ret_wflags,
+    output logic [2:0][6:0] ret_flags,
+    output logic         halted,
+    output logic         illegal
+);
+    logic busy;
+    always_ff @(posedge clk) begin
+        if (mem_req && mem_ready) begin
+            mem_req <= 1'b0;
+            busy    <= !mem_we;
+        end
+        if (mem_rvalid) begin
+            busy      <= 1'b0;
+            mem_wdata <= mem_wdata ^ mem_rdata;
+        end
+        if (!mem_req && !busy) begin
+            mem_req   <= 1'b1;
+            mem_we    <= mem_wdata[0];
+            mem_addr  <= mem_addr + 27'd1 + mem_wdata[27:1];
+            mem_wdata <= {mem_wdata[254:0], mem_wdata[255] ^ mem_wdata[250] ^ mem_wdata[245] ^ mem_wdata[9]};
+        end
+        if (rst) begin
+            mem_req   <= 1'b0;
+            busy      <= 1'b0;
+            mem_addr  <= reset_eip[31:5];
+            mem_wdata <= 256'd1;
+        end
+    end
+    assign {ret_valid, ret_eop, ret_next_eip, ret_wdst, ret_dst, ret_value, ret_wflags, ret_flags, halted, illegal} = '0;
+endmodule

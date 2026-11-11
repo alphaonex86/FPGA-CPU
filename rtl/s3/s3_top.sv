@@ -1,14 +1,16 @@
 // socket3-cyclonev board top (hw/socket3-cyclonev, 5CEFA9F23C8): x86_core behind the Socket 3 bus
 // unit, one port per pins.csv signal (board.py: A20M# -> a20m_n, M/IO# -> m_io_n, D7 -> d[7]).
 // Everything runs on the socket's CLK through a PLL in normal mode (the clock at the I/O registers
-// = the clock at the pin; the raw pin -> clock tree path would break input hold). The CPU stays in
-// reset while RESET is high, the PLL is unlocked or VCORE_OK is low (the bus switches are open
-// then: BUS_OE# of the same detector, plan/interposers.md FPGAmotherboard compatibility).
+// = the clock at the pin; the raw pin -> clock tree path would break input hold); PHASE moves it
+// against the pin clock (later: more input setup, later outputs; 700 ps splits the margin of the
+// RDY# / BRDY# -> BLAST# loop evenly on the 5CEFA9F23C8). The CPU stays in reset while
+// RESET is high, the PLL is unlocked or VCORE_OK is low (the bus switches are open then: BUS_OE# of
+// the same detector, plan/interposers.md FPGAmotherboard compatibility).
 // Inputs the core has no use for yet (plan/x86_core.md M5): INTR, NMI, SMI#, IGNNE#, FLUSH#,
 // SRESET, INV, WB/WT#, UP#, CLKMUL, the CPU JTAG pins.
 module s3_top #(
     parameter string FREQ  = "33.333333 MHz",
-    parameter string PHASE = "0 ps"
+    parameter string PHASE = "700 ps"    // > 0: s3_top.sdc takes the inputs at the next edge
 ) (
     input  wire        clk,
     input  wire        reset,
