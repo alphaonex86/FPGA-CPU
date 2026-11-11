@@ -81,9 +81,10 @@ report_utilization -file $out/utilization.rpt
 report_power -file $out/power.rpt
 report_drc -file $out/drc.rpt
 report_io -file $out/io.rpt
-write_bitstream -force $out/c2mu.bit
-write_cfgmem -force -format bin -interface SPIx4 -size 16 -loadbit "up 0x0 $out/c2mu.bit" $out/c2mu_flash.bin
 set wns [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -setup]]
 set whs [get_property SLACK [get_timing_paths -max_paths 1 -nworst 1 -hold]]
 puts "C2 Mu: WNS $wns ns, WHS $whs ns"
 if {$wns < 0 || $whs < 0} { error "timing not met" }
+# after the timing check: a .bit is a complete build (hw/tools/check_board.py asks for it)
+write_bitstream -force $out/c2mu.bit
+write_cfgmem -force -format bin -interface SPIx4 -size 16 -loadbit "up 0x0 $out/c2mu.bit" $out/c2mu_flash.bin

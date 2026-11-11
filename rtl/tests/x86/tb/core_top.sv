@@ -4,6 +4,9 @@
 // instruction, x86_trace_check format) to +trace=<file>; +debug prints the
 // frontend redirects, the extracted instructions, mul/div starts and results
 // and the retired uops; +stats a cycle breakdown at the end.
+// With S3_BUS defined (rtl/tools/s3_test.sh) the memory sits behind the Socket 3 bus instead: s3_bus,
+// the pins, FPGAcommon's chipset front end cpu486_bif (its protocol rules) and a 16-bit host port
+// slave answering +host_lat=<cycles> after the request (default 0); bus contention stops the run.
 module core_top (
     input  logic clk,
     input  logic rst,
@@ -43,7 +46,11 @@ module core_top (
     logic        refill;
     logic [31:0] st_x [4], st_rn [4];   // instructions extracted, uops renamed per cycle
 
+`ifdef S3_BUS
+    x86_core core (.clk(clk), .rst(s3_rst), .reset_eip(32'h1000),
+`else
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000),
+`endif
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
                    .ret_valid(ret_valid), .ret_eop(ret_eop), .ret_next_eip(ret_next_eip),
@@ -51,11 +58,68 @@ module core_top (
                    .ret_wflags(ret_wflags), .ret_flags(ret_flags),
                    .halted(halted), .illegal(illegal));
 
+`ifdef S3_BUS
+    logic [31:2]  a_o;
+    logic [31:0]  d_o, d_pin, chip_d;
+    logic [3:0]   be_n, dp_o;
+    logic         a_oe, ads_n, mio, dc, wr, blast_n, d_oe, chip_d_oe, brdy_n, ken_n, cpu_reset, rdy_n;
+    logic         wbwt_n, ahold, hold, eads_n, inv, boff_n;
+    logic         host_req, host_we, host_ready, host_ack;
+    logic [31:1]  host_addr;
+    logic [15:0]  host_wdata, host_rdata;
+    logic [1:0]   host_be;
+    int           host_lat, host_cnt;
+    logic         s3_rst;
+
+    assign s3_rst = rst || cpu_reset;
+    assign d_pin  = d_oe ? d_o : chip_d_oe ? chip_d : 32'hffff_ffff;
+    s3_bus bus (.clk(clk), .rst(s3_rst),
+                .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
+                .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(),
+                .sc_req(1'b0), .sc_status(3'd0), .sc_lock(1'b0), .sc_addr(30'd0), .sc_be(4'd0), .sc_wdata(32'd0),
+                .sc_ready(), .sc_done(), .sc_rdata(),
+                .quiet(1'b1), .stopped(), .snoop(), .snoop_addr(), .err_bs(),
+                .a_o(a_o), .a_oe(a_oe), .a_i(a_o[31:4]), .be_n(be_n), .ads_n(ads_n), .mio(mio), .dc(dc), .wr(wr),
+                .blast_n(blast_n), .lock_n(), .cache_n(), .ctl_oe(), .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe),
+                .d_i(d_pin), .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]}), .pchk_n(),
+                .hlda(), .breq(), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n), .hold(hold), .ahold(ahold),
+                .boff_n(boff_n), .eads_n(eads_n), .a20m_n(1'b1), .stpclk_n(1'b1), .bs8_n(1'b1), .bs16_n(1'b1));
+    cpu486_bif #(.MEM_TOP(32'h0010_0000)) chipset (
+                .clk(clk), .rst_n(!rst), .cpu_a(a_o), .cpu_be_n(be_n), .cpu_ads_n(ads_n), .cpu_mio_n(mio),
+                .cpu_dc_n(dc), .cpu_wr_n(wr), .cpu_blast_n(blast_n), .cpu_d_i(d_pin), .cpu_d_o(chip_d),
+                .cpu_d_oe(chip_d_oe), .cpu_brdy_n(brdy_n), .cpu_ken_n(ken_n), .cpu_reset(cpu_reset),
+                .cpu_rdy_n(rdy_n), .cpu_wbwt_n(wbwt_n), .cpu_ahold(ahold), .cpu_hold(hold), .cpu_eads_n(eads_n),
+                .cpu_inv(inv), .cpu_boff_n(boff_n),
+                .host_req(host_req), .host_we(host_we), .host_mio(), .host_dc(), .host_addr(host_addr),
+                .host_wdata(host_wdata), .host_be(host_be), .host_ready(host_ready), .host_rdata(host_rdata),
+                .host_rvalid(host_ready && !host_we),
+                .spc_stb(), .spc_a(), .spc_be(), .err_burst_write());
+    assign host_ready = host_req && !host_ack && host_cnt >= host_lat;      // HOSTPORT.md C4
+    assign host_rdata = {mem[20'({host_addr, 1'b1})], mem[20'({host_addr, 1'b0})]};
+    always_ff @(posedge clk) begin
+        host_ack <= host_ready;
+        host_cnt <= host_req && !host_ready && !host_ack ? host_cnt + 1 : 0;
+        if (host_ready && host_we) begin
+            if (host_be[0]) mem[20'({host_addr, 1'b0})] <= host_wdata[7:0];
+            if (host_be[1]) mem[20'({host_addr, 1'b1})] <= host_wdata[15:8];
+        end
+        if (!rst && d_oe && chip_d_oe) begin
+            $display("FAIL: both ends drive the data bus (cycle %0d)", cycles);
+            $finish;
+        end
+        if (!rst && chipset.err_burst_write) begin
+            $display("FAIL: the chipset saw a burst write (cycle %0d)", cycles);
+            $finish;
+        end
+    end
+    initial if (!$value$plusargs("host_lat=%d", host_lat)) host_lat = 0;
+`else
     always_comb begin
         for (int i = 0; i < 32; i++) mem_rdata[8*i +: 8] = mem[20'({rd_line, 5'd0} + 32'(i))];
     end
     assign mem_ready = !rd_pend;
     assign mem_rvalid = rd_pend && rd_cnt == 0;
+`endif
 
     initial begin
         string image, tname;
@@ -171,19 +235,23 @@ module core_top (
             if (core.im_ready) st_imiss <= st_imiss + 32'd1;
             if (core.dm_req && core.dm_ready && !core.dm_we) st_dmiss <= st_dmiss + 32'd1;
             if (core.dm_req && core.dm_ready && core.dm_we) st_dwb <= st_dwb + 32'd1;
+            if (mem_req && mem_ready) begin
+                if (mem_we) st_wb <= st_wb + 32'd1;
+                else st_miss <= st_miss + 32'd1;
+            end
+`ifndef S3_BUS
             if (mem_rvalid) rd_pend <= 1'b0;
             else if (rd_pend) rd_cnt <= rd_cnt - 1;
             if (mem_req && mem_ready) begin
                 if (mem_we) begin
                     for (int i = 0; i < 32; i++) mem[20'({mem_addr, 5'd0} + 32'(i))] <= mem_wdata[8*i +: 8];
-                    st_wb <= st_wb + 32'd1;
                 end else begin
                     rd_pend <= 1'b1;
                     rd_cnt <= mem_lat - 1;
                     rd_line <= mem_addr;
-                    st_miss <= st_miss + 32'd1;
                 end
             end
+`endif
             for (int k = 0; k < 3; k++)
                 if (ret_valid[k]) begin
                     if (ret_wdst[k] && ret_dst[k] < 4'd8) r[ret_dst[k][2:0]] = ret_value[k];

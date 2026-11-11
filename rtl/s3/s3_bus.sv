@@ -1,0 +1,263 @@
+// Socket 3 bus unit (plan/x86_core.md M8): the 486 local bus as a master, behind the core's 32-byte
+// line port, plus a single-cycle port (I/O, interrupt acknowledge, special cycles, uncached memory).
+// One clock, the socket's CLK; every pin is launched and sampled on its rising edge [Intel DX4
+// write-back enhanced datasheet, bus operation; AMD 19751C AC table: outputs valid 3-14 ns, RDY# /
+// BRDY# / KEN# / read data setup 5 ns, hold 3 ns].
+// - A cycle: T1 (ADS# low, address and status), then T2 until RDY# or BRDY#; BRDY# with BLAST# high
+//   goes on with the next transfer of the burst, RDY# ends the cycle. RDY# / BRDY# / BOFF# / HOLD /
+//   AHOLD steer the next state in the clock they are sampled (BLAST# of a burst's last transfer must
+//   follow the third BRDY# at once); read data goes through input registers and is stored one clock
+//   later.
+// - Line read: per 16-byte block one burst from offset 0 (486 order 0-4-8-C); after a transfer ended
+//   by RDY# or a back-off the rest of the block as single cycles (a burst from another offset has
+//   another order). Line write: 8 single cycles (write-through towards the board: no burst write).
+// - BOFF#: floats the bus in the next clock, the transfer starts again when it is released. HOLD:
+//   granted between cycles (not under LOCK#). AHOLD: the address floats, no new cycle. EADS# on a
+//   floated address: `snoop` with the line address (invalidation, for the caches).
+// - STPCLK# with the core quiet and no job: Stop Grant special cycle (address 10h, BE2# low), then
+//   no job until it is released.
+// - Even parity out on DP, PCHK# the clock after a read's data is stored.
+// Not yet: dynamic bus sizing (BS8# / BS16#: err_bs), the write-back protocol (HITM#, INV, the
+// write-back of a line the snoop hits: the core's L2 holds dirty lines), FLUSH#, SRESET.
+module s3_bus (
+    input  logic         clk,
+    input  logic         rst,
+    // line port
+    input  logic         mem_req,
+    input  logic         mem_we,
+    input  logic [31:5]  mem_addr,
+    input  logic [255:0] mem_wdata,
+    output logic         mem_ready,
+    output logic         mem_rvalid,
+    output logic [255:0] mem_rdata,
+    output logic         mem_cacheable,   // with mem_rvalid: KEN# made both blocks line fills
+    // single-cycle port: one transfer; sc_lock held from the first request to the last done
+    input  logic         sc_req,
+    input  logic [2:0]   sc_status,       // {M/IO#, D/C#, W/R#}
+    input  logic         sc_lock,
+    input  logic [31:2]  sc_addr,
+    input  logic [3:0]   sc_be,           // active high
+    input  logic [31:0]  sc_wdata,
+    output logic         sc_ready,
+    output logic         sc_done,
+    output logic [31:0]  sc_rdata,
+    // to the core
+    input  logic         quiet,           // at an instruction boundary: Stop Grant may be issued
+    output logic         stopped,
+    output logic         snoop,
+    output logic [31:4]  snoop_addr,
+    output logic         err_bs,
+    // pins; *_oe: the group is driven
+    output logic [31:2]  a_o,
+    output logic         a_oe,
+    input  logic [31:4]  a_i,
+    output logic [3:0]   be_n,
+    output logic         ads_n,
+    output logic         mio,
+    output logic         dc,
+    output logic         wr,
+    output logic         blast_n,
+    output logic         lock_n,
+    output logic         cache_n,
+    output logic         ctl_oe,
+    output logic [31:0]  d_o,
+    output logic [3:0]   dp_o,
+    output logic         d_oe,
+    input  logic [31:0]  d_i,
+    input  logic [3:0]   dp_i,
+    output logic         pchk_n,
+    output logic         hlda,
+    output logic         breq,
+    input  logic         rdy_n,
+    input  logic         brdy_n,
+    input  logic         ken_n,
+    input  logic         hold,
+    input  logic         ahold,
+    input  logic         boff_n,
+    input  logic         eads_n,
+    input  logic         a20m_n,          // asynchronous
+    input  logic         stpclk_n,        // asynchronous
+    input  logic         bs8_n,
+    input  logic         bs16_n
+);
+    typedef enum logic [2:0] {IDLE, T1, T2, HELD, BACKOFF} state_t;
+    typedef enum logic [1:0] {J_NONE, J_READ, J_WRITE, J_SINGLE} job_t;
+    localparam logic [2:0] MEM_READ = 3'b110, MEM_WRITE = 3'b111, SPECIAL = 3'b001;
+
+    state_t       st, st_n;
+    job_t         job;
+    logic [31:5]  line;
+    logic [255:0] wline;
+    logic [2:0]   beat, beat_n;    // dword of the line
+    logic         single;          // the rest of this 16-byte block as single cycles
+    logic         grant;           // the job is the Stop Grant cycle
+    logic [2:0]   status;
+    logic [31:2]  s_addr, addr;
+    logic [3:0]   s_be;
+    logic [31:0]  s_wdata, wdata;
+    logic         ken_q, ken_first, ken_all, lock_on;
+    logic [1:0]   a20m_s, stp_s;
+    logic [31:0]  d_q;
+    logic [3:0]   dp_q;
+    logic         take, take_last, take_mem;
+    logic [2:0]   take_beat;
+    logic [3:0]   take_be;
+    logic         ready, ends, burst, write, job_done, free, start;
+
+    function automatic logic [3:0] parity(input logic [31:0] d);
+        return {^d[31:24], ^d[23:16], ^d[15:8], ^d[7:0]};
+    endfunction
+
+    assign write    = job == J_WRITE || (job == J_SINGLE && status[0]);
+    assign burst    = job == J_READ && !single;
+    assign ready    = st == T2 && boff_n && (!rdy_n || !brdy_n);
+    assign ends     = !rdy_n || !blast_n;                 // with RDY#, BRDY# is ignored
+    assign beat_n   = beat + 3'd1;
+    assign job_done = job == J_SINGLE || beat == 3'd7;
+    assign free     = !ahold && !(hold && !lock_on);      // a cycle may start
+    assign wdata    = job == J_WRITE ? wline[32*beat +: 32] : s_wdata;
+    assign mem_ready = st == IDLE && job == J_NONE && !stopped && !sc_req && stp_s[1];
+    assign sc_ready  = st == IDLE && job == J_NONE && !stopped && (stp_s[1] || lock_on);
+    assign breq      = job != J_NONE;
+
+    always_comb begin
+        st_n  = st;
+        start = 1'b0;
+        addr  = job == J_SINGLE ? s_addr : {line, beat};
+        unique case (st)
+            IDLE:
+                if (hold && !lock_on) st_n = HELD;
+                else if (job != J_NONE && free) start = 1'b1;
+            T1: st_n = T2;
+            T2:
+                if (ready && ends) begin
+                    st_n = IDLE;
+                    if (!job_done && free) begin          // the job's next transfer at once
+                        start = 1'b1;
+                        addr  = {line, beat_n};
+                    end
+                end
+            HELD: if (!hold) st_n = IDLE;
+            default: st_n = IDLE;                         // BACKOFF: released
+        endcase
+        if (start) st_n = T1;
+        if (!boff_n && st_n != HELD) begin
+            st_n  = BACKOFF;
+            start = 1'b0;
+        end
+    end
+
+    always_ff @(posedge clk) begin
+        st         <= st_n;
+        a20m_s     <= {a20m_s[0], a20m_n};
+        stp_s      <= {stp_s[0], stpclk_n};
+        d_q        <= d_i;
+        dp_q       <= dp_i;
+        ken_q      <= !ken_n;
+        snoop      <= !a_oe && !eads_n;
+        snoop_addr <= a_i;
+        // pins
+        ads_n   <= !start;
+        hlda    <= st_n == HELD;
+        ctl_oe  <= st_n != HELD && st_n != BACKOFF;
+        a_oe    <= st_n != HELD && st_n != BACKOFF && !ahold;
+        d_oe    <= st_n == T2 && write;
+        cache_n <= !(st_n == T2 && burst);
+        if (start) begin
+            a_o  <= {addr[31:21], addr[20] & a20m_s[1], addr[19:2]};
+            be_n <= job == J_SINGLE ? ~s_be : 4'b0000;
+            {mio, dc, wr} <= job == J_READ ? MEM_READ : job == J_WRITE ? MEM_WRITE : status;
+            if (job == J_SINGLE && sc_lock && !grant) begin
+                lock_n  <= 1'b0;
+                lock_on <= 1'b1;
+            end
+        end
+        if (!sc_lock) begin
+            lock_n  <= 1'b1;
+            lock_on <= 1'b0;
+        end
+        if (st_n != T2) blast_n <= 1'b1;
+        else if (st == T1) blast_n <= burst;              // a single transfer: the last one
+        else if (ready) blast_n <= beat_n[1:0] != 2'd3;   // the burst goes on
+        if (st == T1) begin
+            d_o  <= wdata;
+            dp_o <= parity(wdata);
+        end
+        // transfers
+        if (ready) begin
+            beat <= beat_n;
+            if (!ends) a_o[3:2] <= beat_n[1:0];
+            if (beat[1:0] == 2'd3) single <= 1'b0;
+            else if (ends) single <= 1'b1;
+            if (beat[1:0] == 2'd0) ken_first <= ken_q;
+            if (beat[1:0] == 2'd3 && !(ken_first && ken_q && !single)) ken_all <= 1'b0;
+            if (job_done) begin
+                job     <= J_NONE;
+                grant   <= 1'b0;
+                stopped <= grant;
+            end
+        end
+        if (st_n == BACKOFF && st != IDLE && st != BACKOFF && beat[1:0] != 2'd0) single <= 1'b1;
+        if (st == T2 && (!bs8_n || !bs16_n)) err_bs <= 1'b1;
+        if (stopped && stp_s[1]) stopped <= 1'b0;
+        // a read's data and done one clock after its ready (the input registers)
+        take       <= ready && !write;
+        take_last  <= ready && job_done && !grant;
+        take_mem   <= job != J_SINGLE;
+        take_beat  <= job == J_SINGLE ? 3'd0 : beat;
+        take_be    <= ~be_n;
+        mem_rvalid <= take && take_last && take_mem;
+        sc_done    <= take ? take_last && !take_mem : ready && write && job == J_SINGLE && !grant;
+        pchk_n     <= !(take && |(take_be & (parity(d_q) ^ dp_q)));
+        if (take && take_mem) mem_rdata[32*take_beat +: 32] <= d_q;
+        if (take && !take_mem) sc_rdata <= d_q;
+        if (take && take_last) mem_cacheable <= ken_all;
+        // jobs
+        if (!stp_s[1] && st == IDLE && job == J_NONE && !stopped && quiet && !lock_on) begin
+            job     <= J_SINGLE;                          // Stop Grant
+            grant   <= 1'b1;
+            status  <= SPECIAL;
+            s_addr  <= 30'h0000_0004;
+            s_be    <= 4'b0100;
+            s_wdata <= 32'd0;
+        end else if (sc_req && sc_ready) begin
+            job     <= J_SINGLE;
+            status  <= sc_status;
+            s_addr  <= sc_addr;
+            s_be    <= sc_be;
+            s_wdata <= sc_wdata;
+        end else if (mem_req && mem_ready) begin
+            job     <= mem_we ? J_WRITE : J_READ;
+            line    <= mem_addr;
+            wline   <= mem_wdata;
+            beat    <= 3'd0;
+            single  <= 1'b0;
+            ken_all <= 1'b1;
+        end
+        if (rst) begin
+            st      <= IDLE;
+            job     <= J_NONE;
+            grant   <= 1'b0;
+            stopped <= 1'b0;
+            lock_on <= 1'b0;
+            err_bs  <= 1'b0;
+            ads_n   <= 1'b1;
+            blast_n <= 1'b1;
+            lock_n  <= 1'b1;
+            cache_n <= 1'b1;
+            pchk_n  <= 1'b1;
+            hlda    <= 1'b0;
+            a_oe    <= 1'b1;
+            ctl_oe  <= 1'b1;
+            d_oe    <= 1'b0;
+            {mio, dc, wr} <= MEM_READ;
+            be_n    <= 4'b1111;
+            a_o     <= '1;
+            mem_rvalid <= 1'b0;
+            sc_done    <= 1'b0;
+            take       <= 1'b0;
+            a20m_s     <= 2'b11;
+            stp_s      <= 2'b11;
+        end
+    end
+endmodule

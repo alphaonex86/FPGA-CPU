@@ -5,7 +5,8 @@
    of the datasheet's pin table -> its level translator channel (the translator datasheet's pin-out)
    -> the FPGA ball -> the pins.csv row the FPGA constraints are made from; supply, ground and
    no-connect contacts; the translators' own supply and enable pins;
-3. c2mu: the LattePanda Mu edge pin-out (supply, ground, PCIe lanes, reset).
+3. c2mu: the LattePanda Mu edge pin-out (supply, ground, PCIe lanes, reset);
+4. the FPGA build: a complete one exists and its pin report agrees (rtl/tools/fpga_pins.py).
 
 Usage: python3 hw/tools/check_board.py socket3|c2mu   (exit 1 on any difference)
 """
@@ -221,11 +222,21 @@ def c2mu():
 
 
 BOARDS = {"socket3": socket3, "c2mu": c2mu}
+# the FPGA build of each board: (what a complete build leaves, its pin report)
+FPGA = {"socket3": ("rtl/build/s3/s3.ok", "rtl/build/s3/s3.pin", "rtl/s3/build.sh rtl/build/s3"),
+        "c2mu": ("rtl/build/c2mu/c2mu.bit", "rtl/build/c2mu/io.rpt",
+                 "rtl/tools/vivado.sh rtl/c2/xilinx/build_c2mu.tcl rtl/build/c2mu")}
 
 
 def run(name):
-    """the fab steps (gen_socket_t9.py, gen_c2mu_s9.py) call it first"""
+    """the fab steps (gen_socket_t9.py, gen_c2mu_s9.py) call it first: the board against the vendor
+    tables, then against the FPGA build (rtl/tools/fpga_pins.py)"""
     BOARDS[name]()
+    done, report, how = FPGA[name]
+    if not (ROOT / done).exists():
+        fail(f"no complete FPGA build ({done}): run {how}")
+    elif subprocess.run([sys.executable, str(ROOT / "rtl/tools/fpga_pins.py"), name, str(ROOT / report)]).returncode:
+        fail("the FPGA build's pins are not the board's (above)")
     if fails:
         print(f"FAIL: {len(fails)} differences")
         for f in fails[:40]:
