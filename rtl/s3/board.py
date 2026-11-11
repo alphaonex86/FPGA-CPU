@@ -12,7 +12,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 BOARD = ROOT / "hw/socket3-cyclonev"
 BANKS = ("3A", "3B", "4A", "5A", "5B", "7A", "8A")
-SOURCES = ["rtl/c2/cyclonev/c2_bclk_pll.sv", "rtl/s3/s3_bus.sv", "rtl/s3/s3_top.sv"]
+SOURCES = ["rtl/c2/cyclonev/c2_bclk_pll.sv", "rtl/c2/cyclonev/c2_clk_gate.sv", "rtl/s3/s3_bus.sv", "rtl/s3/s3_top.sv"]
 # s3_bus.sv: I/O cell registers on the inputs and outputs that pass through a register of their own;
 # the registers fed from RDY# / BRDY# / BOFF# / AHOLD (FAST_OUT, the output enables) stay in the
 # fabric next to those pins

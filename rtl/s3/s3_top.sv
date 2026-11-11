@@ -2,15 +2,20 @@
 // unit, one port per pins.csv signal (board.py: A20M# -> a20m_n, M/IO# -> m_io_n, D7 -> d[7]).
 // Everything runs on the socket's CLK through a PLL in normal mode (the clock at the I/O registers
 // = the clock at the pin; the raw pin -> clock tree path would break input hold); PHASE moves it
-// against the pin clock (later: more input setup, later outputs; 700 ps splits the margin of the
-// RDY# / BRDY# -> BLAST# loop evenly on the 5CEFA9F23C8). The CPU stays in reset while
-// RESET is high, the PLL is unlocked or VCORE_OK is low (the bus switches are open then: BUS_OE# of
-// the same detector, plan/interposers.md FPGAmotherboard compatibility).
+// against the pin clock (later: more input setup, later outputs; 691 ps, 7 VCO / 8 steps, splits the margin of the
+// RDY# / BRDY# -> BLAST# loop evenly on the 5CEFA9F23C8). VCO fixes the PLL at 38 x CLK, so it
+// locks from 15.8 to 34.2 MHz (VCO 600-1300 MHz): the 25 / 33 MHz jumpers and the FPGAmotherboard's
+// Stop Grant steps 16.67-33.33 MHz. The core's clock stops while the PLL is unlocked (CLK stopped
+// or changed in Stop Grant): it keeps its state. The bus unit (idle then) stays on the PLL clock
+// itself: a gate in front of its I/O registers costs the RDY# / BRDY# loop ~0.4 ns. The CPU stays in reset while RESET is high or
+// VCORE_OK is low (the bus switches are open then: BUS_OE# of the same detector, plan/interposers.md
+// FPGAmotherboard compatibility).
 // Inputs the core has no use for yet (plan/x86_core.md M5): INTR, NMI, SMI#, IGNNE#, FLUSH#,
 // SRESET, INV, WB/WT#, UP#, CLKMUL, the CPU JTAG pins.
 module s3_top #(
     parameter string FREQ  = "33.333333 MHz",
-    parameter string PHASE = "700 ps"    // > 0: s3_top.sdc takes the inputs at the next edge
+    parameter string PHASE = "691 ps",   // > 0: s3_top.sdc takes the inputs at the next edge
+    parameter string VCO   = "422.222222 MHz"   // 38 / 3 x FREQ
 ) (
     input  wire        clk,
     input  wire        reset,
@@ -61,8 +66,9 @@ module s3_top #(
     input  wire        tms,
     input  wire        vcore_ok
 );
-    logic         clk_p, locked, rst, pll_rst;
-    logic [1:0]   reset_s, ok_s, lock_s, locked_r;
+    logic         clk_pll, clk_p, locked, pll_rst;
+    logic         rst = 1'b1;
+    logic [1:0]   reset_s = 2'b11, ok_s = 2'b00, locked_r;
     logic [15:0]  relock;
     logic         mem_req, mem_we, mem_ready, mem_rvalid;
     logic [31:5]  mem_addr;
@@ -72,7 +78,9 @@ module s3_top #(
     logic [3:0]   dp_o, be_o;
     logic         a_oe, ctl_oe, d_oe, ads_o, mio, dc, wr, blast_o, lock_o, cache_o;
 
-    c2_bclk_pll #(.FREQ(FREQ), .PHASE(PHASE)) pll (.refclk(clk), .rst(pll_rst), .clk(clk_p), .clk_in(), .locked(locked));
+    c2_bclk_pll #(.FREQ(FREQ), .PHASE(PHASE), .VCO(VCO)) pll (.refclk(clk), .rst(pll_rst), .clk(clk_pll), .clk_in(),
+                                                       .locked(locked));
+    c2_clk_gate gate (.clk(clk_pll), .ena(locked), .gclk(clk_p));
 
     // on the pin clock itself: no lock for 2^16 clocks (the socket clock stopped in Stop Grant, or
     // its frequency changed) -> the PLL is reset for 16 clocks and locks again
@@ -85,8 +93,7 @@ module s3_top #(
     always_ff @(posedge clk_p) begin
         reset_s <= {reset_s[0], reset};
         ok_s    <= {ok_s[0], vcore_ok};
-        lock_s  <= {lock_s[0], locked};
-        rst     <= reset_s[1] || !ok_s[1] || !lock_s[1];
+        rst     <= reset_s[1] || !ok_s[1];
     end
 
     x86_core core (.clk(clk_p), .rst(rst), .reset_eip(32'hffff_fff0),
@@ -95,7 +102,7 @@ module s3_top #(
                    .ret_valid(), .ret_eop(), .ret_next_eip(), .ret_wdst(), .ret_dst(), .ret_value(),
                    .ret_wflags(), .ret_flags(), .halted(), .illegal());
 
-    s3_bus bus (.clk(clk_p), .rst(rst),
+    s3_bus bus (.clk(clk_pll), .rst(rst),
                 .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(),
                 .sc_req(1'b0), .sc_status(3'd0), .sc_lock(1'b0), .sc_addr(30'd0), .sc_be(4'd0), .sc_wdata(32'd0),

@@ -342,6 +342,22 @@ replicated per read port plus a live-value table.
 5. M5 system: real/protected mode, segmentation, paging + TLBs, exceptions,
    interrupts, I/O ports, CPUID/MSRs; test386 and the single-step datasets
    (z486 repo, reference only).
+   Memory system for a real board (2026-11-11 review of rtl/s3; each is a fault on the UMC
+   board, none changes the PCB):
+   - RESET invalidates L1I / L1D / L2 (today only the FPGA configuration clears them); SRESET
+     keeps them (DX4 WB datasheet).
+   - A20M# masks bit 20 before the caches (today s3_bus masks it at the pins: the caches alias
+     1 MB apart).
+   - Uncached accesses (KEN# inactive, CR0.CD, PCD, the VGA window A0000-BFFFF from reset): exact
+     size, in order, not speculative, through the bus unit's single-cycle port (today every miss
+     is a 32-byte read and every line is cached and written back: text mode writes never reach the
+     screen, VGA latches see extra reads).
+   - FLUSH# / WBINVD (write back + invalidate all), INVD, and the snoop: EADS# looks the line up in
+     L1D / L2 dirty tags within a clock (HITM# is due 2 clocks after EADS#), then the line is
+     handed to the bus unit (snoop write-back, 0-4-8-C burst with CACHE#, HITM# until its last
+     BRDY#) and kept clean or invalidated (INV). The UMC board runs this enhanced bus mode with its
+     jumpers set for a write-back P24D; in standard mode (WB/WT# low at RESET: FPGAmotherboard,
+     no DMA) a snoop hit on a dirty line cannot be answered and is flagged.
 6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
 7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
    Socket 7 and Socket 370.
