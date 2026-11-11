@@ -53,14 +53,16 @@ with every gate passing. Read AGENTS.md first; details in plan/interposers.md (T
    earlier best was 31 open with a faulty plane setup. Then `python3 hw/tools/gen_c2mu_s9.py`.
 5. Commit and push after each step (operator: no need to ask).
 
-## Open, for the operator (do not decide alone)
+## Operator decisions 2026-11-11
 
-- CPU core: `rtl/x86` is at M3 (no real mode, interrupts, I/O: M5). The socket 3 bitstream proves
-  pins, timing and the bus protocol; it does not boot a BIOS yet.
-- Bus unit: BS8# / BS16#, write-back snoop (HITM# / INV) with the caches, FLUSH#, SRESET (the UMC
-  board resets the CPU through it), clock stop in Stop Grant.
-- Timing margin of the 486 loop on the C8 part is a few tenths of a ns: a C7 part would widen it.
-- Socket 7: `gen_socket7_t8.py` fails on purpose (S_VCC3 feed of PS2 / U3 lies in the S_VCC2
-  area of In4); its T5 has no FAST group and no internal-pull emulation yet (same review needed).
+- Bus unit before fab: SRESET, BS8# / BS16#, write-back snoop (HITM# / INV) + FLUSH#, clock stop
+  in Stop Grant. Each needs its pin on the board (check `gen_socket3_assign.py` first: a missing
+  pin is a board change, see "Rules that bite").
+- CPU core: advance `rtl/x86` from M3 to M5 (real mode, interrupts, I/O) until it boots the BIOS
+  in simulation, while routing runs.
+- Speed grade C8 vs C7: decide after the full Quartus build (step 1), ask the operator with the
+  slack numbers.
+- Socket 7 (`gen_socket7_t8.py` fails on purpose: S_VCC3 feed of PS2 / U3 in the S_VCC2 area of
+  In4; no FAST group, no internal-pull emulation): after socket 3 and the C2 Mu are fabricated.
 - Bench items: AS x4 boot from the 1 Gbit flash, JLCPCB placement preview by eye, GTL16612
   purchase route, Mill-Max header order.
