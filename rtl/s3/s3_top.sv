@@ -61,8 +61,9 @@ module s3_top #(
     input  wire        tms,
     input  wire        vcore_ok
 );
-    logic         clk_p, locked, rst;
-    logic [1:0]   reset_s, ok_s, lock_s;
+    logic         clk_p, locked, rst, pll_rst;
+    logic [1:0]   reset_s, ok_s, lock_s, locked_r;
+    logic [15:0]  relock;
     logic         mem_req, mem_we, mem_ready, mem_rvalid;
     logic [31:5]  mem_addr;
     logic [255:0] mem_wdata, mem_rdata;
@@ -71,7 +72,15 @@ module s3_top #(
     logic [3:0]   dp_o, be_o;
     logic         a_oe, ctl_oe, d_oe, ads_o, mio, dc, wr, blast_o, lock_o, cache_o;
 
-    c2_bclk_pll #(.FREQ(FREQ), .PHASE(PHASE)) pll (.refclk(clk), .rst(1'b0), .clk(clk_p), .clk_in(), .locked(locked));
+    c2_bclk_pll #(.FREQ(FREQ), .PHASE(PHASE)) pll (.refclk(clk), .rst(pll_rst), .clk(clk_p), .clk_in(), .locked(locked));
+
+    // on the pin clock itself: no lock for 2^16 clocks (the socket clock stopped in Stop Grant, or
+    // its frequency changed) -> the PLL is reset for 16 clocks and locks again
+    always_ff @(posedge clk) begin
+        locked_r <= {locked_r[0], locked};
+        relock   <= locked_r[1] ? 16'd0 : relock + 16'd1;
+        pll_rst  <= !locked_r[1] && relock[15:4] == '1;
+    end
 
     always_ff @(posedge clk_p) begin
         reset_s <= {reset_s[0], reset};

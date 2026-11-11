@@ -22,4 +22,6 @@ set_multicycle_path -setup -from [get_clocks clk] -to [get_clocks {*pll*}] 2
 set_max_delay -from [get_registers {*bus|a_oe* *bus|d_oe* *bus|ctl_oe*}] -to [get_ports {a[*] d[*] dp[*] be_n[*] ads_n m_io_n d_c_n w_r_n blast_n lock_n plock_n pcd pwt cache_n}] [expr {$period + 6.0}]
 # asynchronous or static pins
 set_false_path -from [get_ports {a20m_n stpclk_n vcore_ok}]
+set_false_path -to [get_registers {*locked_r[0] *lock_s[0]}]
+set_false_path -from [get_registers {*pll_rst}]
 set_false_path -to [get_ports {ferr_n hitm_n smiact_n tdo}]
