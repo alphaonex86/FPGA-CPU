@@ -71,7 +71,10 @@ chipset, same sockets; source of `sockets/kicad/`).
 - `plan/` — `interposers.md` (4 interposer boards, tasks, status), `slot1.md`, `slot1_variants.md` (A/B/C1/C2 study), `x86_core.md` (x86 core architecture),
   `cpu_core.md` (base core evaluation), `slot1_c2.md` (C2: N100 + FPGA bridge) and `prompt.md`.
 - `sw/c2-vmm/` — Slot 1 C2 VMM (KVM); `test.sh` runs its test ROM.
-- `rtl/` — RTL; `rtl/c2/` C2 bridge (`xilinx/build.tcl`: card bitstream), `rtl/tools/vivado.sh`.
+- `rtl/` — RTL; `rtl/c2/` C2 bridge (`xilinx/build.tcl`: card bitstream), `rtl/s3/` Socket 3 bus unit +
+  board top (`build.sh`), `rtl/tools/vivado.sh`, `rtl/tools/fpga_pins.py` (a build's pins against the board).
+- `hw/tools/route_search.py --service <boards>` — routing as the user service `fpgacpu-route`
+  (resumes after a reboot); `hw/tools/check_board.py` — board against the vendor pin tables, fab gate.
 - `fetch.sh <sources.txt>...` — (re)downloads every file listed in a
   `sources.txt` (`sockets/local-sources.txt`: local `file://` copies);
   vendor-login software is listed in each folder's README.
@@ -85,9 +88,11 @@ chipset, same sockets; source of `sockets/kicad/`).
   (board RAM only for DMA) (operator, 2026-11-01).
 - PCB routing is the last step: pins (in a crossing-free order), placement and everything
   else final and verified first; routing never changes the pins (operator, 2026-11-05).
-- Routing runs several routers, each on its own unrouted copy of the PCB with the same CPU
-  budget (5-6 CPU each); all failing = never the budget: a routing-setup fault (e.g.
-  routing order) or a fault outside routing (e.g. placement) (operator, 2026-11-08).
+- Routing runs several routers one after the other, each on its own unrouted copy of the PCB,
+  5 days at most per tool and board; all failing = never the budget: a routing-setup fault (e.g.
+  routing order) or a fault outside routing (e.g. placement) (operator, 2026-11-08 / 11-11).
+- Never more than 4 CPUs for all of this project's heavy jobs together: they run in
+  `claude-route.slice` (operator, 2026-11-11).
 - CPU goal is maximum performance inside the selected Cyclone V: large rewrites,
   a from-scratch x86 core and a separate RISC-V core are all fine; licence is no
   selection criterion (GitHub code counts as usable; copyrighted parts, avoided

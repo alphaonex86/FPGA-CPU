@@ -4,7 +4,7 @@
 # states, BOFF#, HOLD, AHOLD + EADS# and STPCLK#; then one run per mix: no RDY#, RDY# only, heavy interference, undisturbed.
 set -eu
 cd "$(dirname "$0")/.."
-out=build/s3/bus
+out=build/s3sim/bus
 mkdir -p "$out"
 nice -n 19 verilator --cc --exe --build -j 4 -Wall -Wno-UNUSEDSIGNAL --assert --top-module bus_tb --Mdir "$out/obj" \
     s3/s3_bus.sv tests/s3/bus_tb.sv tests/s3/bus_tb.cpp -o bus_tb > "$out/build.log" 2>&1 || { grep -m20 -A3 "%Error\|%Warning" "$out/build.log"; exit 1; }

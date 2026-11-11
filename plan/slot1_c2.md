@@ -412,10 +412,14 @@ dimension drawing, module STEP, Lite / Mini carrier schematics, BIOS notes.
   (schematic, ERC 0), `_s7.py` (placement: FPGA and the transceiver band
   under the module, parts <= 4 mm there; connectors, PS1 coil and C1 in
   the free column; DRC 0), `_s8.py` (planes, via in every U1 ball, plane
-  fanout, transceiver and termination fanout vias, pre-route DRC 0,
-  freerouting alternating with `close_route.py`), `_s9.py` (3D clearance under the Mu: `check_mu_clearance.py`; DRC gate, JLC
+  fanout, transceiver and termination fanout vias, pre-route DRC 0), `route_search.py` (the routing:
+  plan/interposers.md T8 status 2026-11-11), `_s8.py --finish` (DRC 0 / 0, PCIe skew), `_s9.py`
+  (`check_board.py c2mu`: the board against Pentium II Table 35, the GTL16612 pin-out, the Mu edge
+  pin-out and the Vivado pin report of `rtl/build/c2mu`: 153 ports, 71 supply, 87 ground balls;
+  3D clearance under the Mu: `check_mu_clearance.py`; DRC gate, JLC
   BOM with LCSC numbers and live stock, CPL, Gerbers). Routing is the last
-  step, on final pins (operator 2026-11-05).
+  step, on final pins (operator 2026-11-05). Parts keep off the PCIe pairs on every layer (2026-11-11:
+  C83 / C69 sat over the RX pairs and got no ground via).
 - Stack: 8 layers, JLCPCB JLC08161H-2116 (`sockets/parts/jlcpcb_JLC08161H-2116.json`;
   operator 2026-11-05, 6 layers left ~90 connections open): F sig, In1
   GND, In2 sig, In3 VCC_3V3 + VTT15 strip, In4 GND + V5 strip, In5 sig,

@@ -345,6 +345,17 @@ replicated per read port plus a live-value table.
 6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
 7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
    Socket 7 and Socket 370.
+   Socket 3 v0 (2026-11-11): `rtl/s3/s3_bus.sv` (line port -> bursts of four from offset 0, RDY# /
+   BRDY#, BOFF#, HOLD / HLDA, AHOLD + EADS# snoop out, Stop Grant on STPCLK#, parity; a single-cycle
+   port for I/O, INTA and special cycles) and the board top `rtl/s3/s3_top.sv` on the pins of
+   hw/socket3-cyclonev (`rtl/s3/build.sh`: Quartus on the board's own QSF, 486 AC constraints at
+   33 MHz, the pin report checked against the PCB). Tests: `rtl/tools/s3_test.sh` (every core test
+   through s3_bus and FPGAcommon's chipset front end `cpu486_bif` at host latencies 0 / 1 / 3,
+   traces against Unicorn), `rtl/tools/s3_bus_test.sh` (random operations against a 486 slave with
+   RDY#, wait states, BOFF#, HOLD, AHOLD, STPCLK#, parity errors; mutations of the unit fail it).
+   Open in the bus unit: BS8# / BS16# (err_bs), the write-back snoop protocol (HITM#, INV: the L2
+   holds dirty lines, so board DMA / bus masters need the snoop wired into the caches), FLUSH#,
+   SRESET, INTR / NMI / SMI# / IGNNE# (M5), the clock stop of Stop Grant behind the PLL.
    Socket 3 must honour STPCLK# (Am5x86 contract, AMD 19751C sec.
    5.2-5.5.3; the FPGAmotherboard chipset uses it for DVFS): at an
    instruction boundary issue the Stop Grant special cycle (M/IO#=0, D/C#=0,

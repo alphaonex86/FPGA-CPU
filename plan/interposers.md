@@ -392,11 +392,41 @@ cut-out areas (V5 and S_VCC over V3V3 on socket 3, the In4 splits on socket 7) a
 copper and never routed the pads there. `autoroute.plane_areas()` now writes the poured areas.
 route_search now follows the operator's scheme (several routers, each from the unrouted copy, same
 budget, one at a time) inside a systemd slice capped at 25 % of RAM and 6 CPUs.
+Status (2026-11-11, operator: several tools in sequence, 5 days at most per tool and board, never
+more than 4 CPUs): `gen_*_t8.py` lays the generated copper only; `route_search.py --service
+<boards>` routes as the user service `fpgacpu-route` (claude-route.slice: 4 CPUs for all of this
+project's heavy jobs), a tool working in rounds from its best board (router run sized for ~1 h, DRC
+clean-up, close_route.py) until 0 open, 5 days or 3 rounds without a gain; the state is saved every
+round (a reboot killed the 2026-11-09 searches) and the board file only written at the end; then
+`gen_*_t8.py --finish`. Every router run is supervised (session / crash signature / process gone /
+wall clock / job over with the JVM up): the 2026-11-09 C2 Mu run had hit freerouting's own
+time-out, which writes no session, and idled 17 h. Faults found on the way, each now a check:
+- Socket 3: PS4's output (L4, C17) lay inside the V5 cut-out of In4, the whole 3.3 V current on a
+  router track; V5 is now an area of In6 and `plane_vias` fails on any pad >= 0.8 mm left off its
+  plane. Socket 7 fails this check (C5: the S_VCC3 feed of PS2 / U3 lies in the S_VCC2 area of
+  In4): open, its T8 does not pass until the In4 split takes the south band.
+- The generated copper followed KiCad's UUID file order, another board at every generation: by
+  reference now (two runs, same board; `route_search` restarts on a changed signature).
+- Fab rules the DRC did not hold [sockets/parts/jlcpcb_pcb_capabilities.html]: copper to the routed
+  outline (0.001 mm, the Slot 1 fingers' floor; JLCPCB >= 0.2 mm, edge +-0.2 mm) and copper to a
+  plated component hole (0.2 mm; JLCPCB PTH to track 0.28 mm min): both 0.3 mm in each board's
+  `.kicad_dru` (`placer.write_rules`), a keepout ring along the outline in the router's DSN.
+- The upstream freerouting jar runs its fanout stage by default (stubs necked below the board
+  minimum): off explicitly.
 
 **T9 Verification**: audit script: every base pad's net is the T1 signal and
 reaches the T5 ball (or its translator); every power pad on its rail. 3D check
 against the ZIF and M2. BOM with authorized stock (Digi-Key / LCSC). Fab outputs
 with `kicad-cli` (gerbers, drill, positions, BOM).
+Status (2026-11-11): `hw/tools/check_board.py socket3|c2mu`, the first step of the fab scripts,
+independent of the generators' tables: the board's pad nets against the schematic netlist, then
+every CPU contact of the datasheet's pin table read again from the PDF (DX4 Table 6: 168 pins;
+Pentium II Table 35: 242 contacts) through its translator channel (CB3T3245 / GTL16612 pin-outs
+from their datasheets) to its FPGA ball and pins.csv row; supply, ground and open contacts; then
+the FPGA build (`rtl/tools/fpga_pins.py`): a complete build must exist and its pin report must
+place every port on its pins.csv ball and every supply / ground ball on a board net of that
+voltage. Socket 3: 113 signal contacts through 16 switches, 52 supply / ground, 3 open (J1 is
+VCC5 on a DX4: +5 V on its board, never onto the interposer). Mutations of either pin-out fail it.
 
 **T10 Report** to the operator: what was built, check results, open items, cost.
 

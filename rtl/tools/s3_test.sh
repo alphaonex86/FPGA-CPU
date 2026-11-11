@@ -7,7 +7,7 @@ set -eu
 tests=()
 for t; do tests+=("$(realpath "$t")"); done
 cd "$(dirname "$0")/.."
-out=build/s3
+out=build/s3sim
 mkdir -p "$out"
 . tools/x86_files.sh
 echo '`verilator_config' > "$out/waive.vlt"

@@ -15,6 +15,7 @@ SOURCES = ["rtl/c2/cyclonev/c2_bclk_pll.sv", "rtl/s3/s3_bus.sv", "rtl/s3/s3_top.
 REGISTERED_IN = ("a", "d", "dp")
 REGISTERED_OUT = ("a", "d", "dp", "be_n", "ads_n", "m_io_n", "d_c_n", "w_r_n", "blast_n", "lock_n", "cache_n", "hlda",
                   "breq", "pchk_n")
+OUTPUTS = REGISTERED_OUT + ("plock_n", "pcd", "pwt", "ferr_n", "hitm_n", "smiact_n", "tdo")
 
 
 def port(signal):
@@ -46,6 +47,9 @@ def qsf(out):
             lines.append(f"set_instance_assignment -name FAST_INPUT_REGISTER ON -to {p}")
         if base in REGISTERED_OUT:
             lines.append(f"set_instance_assignment -name FAST_OUTPUT_REGISTER ON -to {p}")
+        if base in OUTPUTS:              # a bus of several loads behind the switch: 12 mA, fast edges
+            lines.append(f"set_instance_assignment -name CURRENT_STRENGTH_NEW 12MA -to {p}")
+            lines.append(f"set_instance_assignment -name SLEW_RATE 1 -to {p}")
     pathlib.Path(out).write_text("\n".join(lines) + "\n")
     print(f"board.py: {len(ports)} ports")
 
