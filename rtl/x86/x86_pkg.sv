@@ -11,8 +11,9 @@ package x86_pkg;
     localparam logic [3:0] R_ESP = 4'd4, R_TMP = 4'd8, R_TMP2 = 4'd9;
     localparam int NREG = 10;
 
-    // K_MD: x86_muldiv; K_DF: DF = dst[0] at retire, then a flush (decode reads DF)
-    typedef enum logic [2:0] {K_ALU, K_LD, K_ST, K_BR, K_HLT, K_ILL, K_MD, K_DF} kind_t;
+    // K_MD: x86_muldiv; K_DF: DF = dst[0] at retire, then a flush (decode reads DF);
+    // K_WBINVD: WBINVD, or INVD with dst[0] (written back too), at retire, then a flush
+    typedef enum logic [3:0] {K_ALU, K_LD, K_ST, K_BR, K_HLT, K_ILL, K_MD, K_DF, K_WBINVD} kind_t;
     // A_LEA: s1 + s2 << scale + imm, no flags; A_ZX8..A_SX16: zero / sign
     // extend b from 8 / 16 bits, no flags; shifts / rotates: a by b[4:0];
     // A_SETCC: cond (uop.cond) as 0/1; A_CMOV: cond ? b : a; A_SIGN: the

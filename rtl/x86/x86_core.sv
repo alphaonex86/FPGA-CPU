@@ -30,7 +30,10 @@
 //   non-branch instruction boundary flushes for it (a20_q follows a20m).
 // - cache_flush (FLUSH#): the L1D and L1I first (the L1D writes its dirty lines
 //   back into the L2), then the L2 (into memory), then the learned UC
-//   regions; each cache stays blocked until the last is done (flush_done). Held: again.
+//   regions; each cache stays blocked until the last is done (flush_done). Held, or
+//   asserted anew during a flush: again. WBINVD / INVD (INVD writes back too, as AMD's
+//   HWCR.INVDWBINVD): the same flush once it is the ROB head with every older store
+//   drained, then it retires and the pipeline flushes (flush_sw, flush_wb: their special cycles).
 // - snoop (EADS#: a bus master wrote snoop_line; enhanced mode: only with
 //   INV): queued (SN_N), each line invalidated in the L2 first, then in the
 //   L1D / L1I (a line those fill from the L2 meanwhile is caught there). A
@@ -61,6 +64,8 @@ module x86_core
     input  logic                  enhanced,     // WB/WT# high at RESET
     output logic                  snoop_err,
     output logic                  flush_done,   // a FLUSH# write-back + invalidation ended (pulse)
+    output logic                  flush_sw,     // ... it was WBINVD / INVD, not FLUSH#
+    output logic                  flush_wb,     // ... it was WBINVD (Write-Back special cycle, then Flush)
     input  logic                  hm_look,      // EADS# sampled this clock (address floated), a clock before snoop
     input  logic [31:5]           hm_line,
     input  logic                  hm_inv,
@@ -164,14 +169,26 @@ module x86_core
     logic [255:0] l2_wdata, l2_rdata;
     logic         l2_rcache;
     logic [31:16] mem_rd_region;     // of the memory read in flight (x86_uc learns it)
-    logic         fl_l1, fl_l2, l1i_fl_done, l1d_fl_done, l2_fl_done;
+    logic         fl_l1, fl_l2, fl_pend, fl_q, l1i_fl_done, l1d_fl_done, l2_fl_done;
+    logic         cf_start, cf_wb;   // the WBINVD (cf_wb) / INVD at the ROB head starts its flush
+    typedef enum logic [1:0] {CF_IDLE, CF_RUN, CF_DONE} cf_t;
+    cf_t          cf_st;
     assign flush_done = fl_l2 && l2_fl_done;
     always_ff @(posedge clk)
-        if (rst) {fl_l1, fl_l2} <= '0;
-        else if (fl_l2) begin
-            if (l2_fl_done) {fl_l1, fl_l2} <= '0;
-        end else if (fl_l1) fl_l2 <= l1i_fl_done && l1d_fl_done;
-        else fl_l1 <= cache_flush;
+        if (rst) {fl_l1, fl_l2, fl_pend, fl_q, flush_sw, flush_wb} <= '0;
+        else begin
+            fl_q <= cache_flush;
+            // FLUSH# asserted anew during a flush: one more (held through its end: again, below)
+            fl_pend <= (fl_pend || cache_flush && !fl_q) && (fl_l1 || fl_l2);
+            if (fl_l2) begin
+                if (l2_fl_done) {fl_l1, fl_l2} <= '0;
+            end else if (fl_l1) fl_l2 <= l1i_fl_done && l1d_fl_done;
+            else begin
+                fl_l1 <= cache_flush || fl_pend || cf_start;
+                flush_sw <= cf_start;
+                flush_wb <= cf_start && cf_wb;
+            end
+        end
 
     // external snoops: a queue of lines, L2 then L1D + L1I per line
     localparam int SN_N = 8;
@@ -539,14 +556,15 @@ module x86_core
             rob_t e;
             e = rob[TAG_W'(rob_head + TAG_W'(k))];
             ret_valid[k] = 1'b0;
-            if (!stop && (TAG_W + 1)'(k) < rob_count && e.done && !(e.kind == K_ST && r_store)) begin
+            if (!stop && (TAG_W + 1)'(k) < rob_count && e.done && !(e.kind == K_ST && r_store)
+                && !(e.kind == K_WBINVD && cf_st != CF_DONE)) begin
                 ret_valid[k] = 1'b1;
                 r_n = 2'(k + 1);
                 if (e.kind == K_ST) r_store = 1'b1;
                 if (e.kind == K_HLT) begin r_halt = 1'b1; stop = 1'b1; end
                 if (e.kind == K_ILL || e.fault) begin r_halt = 1'b1; r_ill = 1'b1; stop = 1'b1; end
                 if (e.kind == K_ST && e.smc) smc = 1'b1;
-                if (e.kind == K_BR && e.mispred || e.kind == K_DF || smc && e.eop
+                if (e.kind == K_BR && e.mispred || e.kind == K_DF || e.kind == K_WBINVD || smc && e.eop
                     || (a20m != a20_q || code_snooped) && e.eop && e.kind != K_BR) begin
                     r_flush = 1'b1;
                     r_flush_pc = e.kind == K_BR && e.mispred ? e.redirect_pc : e.next_eip;
@@ -565,6 +583,13 @@ module x86_core
         end
         r_smc = smc && !r_flush;
     end
+    assign cf_start = rob_count != '0 && rob[rob_head].kind == K_WBINVD && rob[rob_head].done && cf_st == CF_IDLE
+                      && sq_head == sq_cmt && !halted && !flush && !cache_flush && !fl_pend && !fl_l1 && !fl_l2;
+    assign cf_wb = !rob[rob_head].dst[0];
+    always_ff @(posedge clk)
+        if (rst || flush) cf_st <= CF_IDLE;
+        else if (cf_start) cf_st <= CF_RUN;
+        else if (flush_done && flush_sw) cf_st <= CF_DONE;
     // retired stores drain into the L1D one per cycle at most, in order;
     // until then loads still see them in the queue (forwarding / overlap replay)
 
@@ -642,7 +667,7 @@ module x86_core
     endfunction
 
     function automatic logic needs_rs(input kind_t k);
-        return !(k == K_HLT || k == K_ILL || k == K_DF);
+        return !(k == K_HLT || k == K_ILL || k == K_DF || k == K_WBINVD);
     endfunction
 
     always_comb begin

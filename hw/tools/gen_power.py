@@ -152,7 +152,7 @@ S3_BUDGET = """D1 is an external supply, so the DX4's 4.3 W socket budget no lon
 
 FILES = {
  "socket3-cyclonev": {
-    "name": "Socket 3 + Cyclone V E A9 (5CEBA9/5CEFA9F23C8N) interposer",
+    "name": "Socket 3 + Cyclone V E A9 (5CEFA9F23C7N) interposer",
     "intro": S3_INTRO, "notes": "hw/common/socket3_notes.md",
     "est_ref": "Quartus power estimate once T6 compiles",
     "rails": S3_CV_RAILS, "core": "1.1", "topo": S3_CV_TOPO,

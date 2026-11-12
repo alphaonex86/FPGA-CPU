@@ -211,7 +211,7 @@ module x86_l2 #(
         f_pend = (st == S_TAG || st == S_HOLD) && r_we && r_addr == hm_line;
         e_vic = (en == E_VRD || en == E_WB) && !e_vdrop && {v_tag, e_addr[5 +: SW]} == hm_line;
         hm_dirty = h_hit || f_pend;
-        sr_rd = sr_req && !f_pend && !e_vic && h_hit && !sr_q && st != S_TAG && en != E_VRD && en != E_WB;
+        sr_rd = sr_req && !f_pend && !e_vic && h_hit && !sr_q && st != S_TAG && en != E_VRD;
         sr_hit = f_pend || e_vic && en == E_WB || sr_q;
         sr_done = sr_req && (sr_hit || !h_hit);
         sr_data = f_pend ? r_wdata : d_rd;
@@ -259,8 +259,9 @@ module x86_l2 #(
             w_set = h_line[5 +: SW];
             w_way = k_way;
         end
-        d_ra = en == E_VRD || en == E_WB ? {e_addr[5 +: SW], e_way}   // the victim, kept for mem_wdata
-             : sr_rd ? {hm_line[5 +: SW], h_way} : {r_addr[5 +: SW], st == S_TAG ? hway : r_way};
+        d_ra = sr_rd ? {hm_line[5 +: SW], h_way}
+             : en == E_VRD || en == E_WB ? {e_addr[5 +: SW], e_way}   // the victim, kept for mem_wdata
+             : {r_addr[5 +: SW], st == S_TAG ? hway : r_way};
     end
 
     always_ff @(posedge clk) begin
@@ -362,7 +363,10 @@ module x86_l2 #(
                         en <= start_dirty ? E_VRD : E_MREQ;
                     end
                 E_VRD: en <= E_WB;      // d_ra: the victim, d_rd next cycle
+                // a snoop read takes the port (the bus may hold every job until it has that line):
+                // the victim is read again; a bus taking the job now has latched mem_wdata
                 E_WB: if (mem_ready || e_vdrop) en <= e_we || e_sw ? E_IDLE : E_MREQ;
+                      else if (sr_rd) en <= E_VRD;
                 E_MREQ: if (mem_ready) en <= E_MWAIT;
                 E_MWAIT: if (mem_rvalid) en <= E_IDLE;
                 default: en <= E_IDLE;

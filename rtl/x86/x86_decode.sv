@@ -9,7 +9,7 @@
 // MUL/IMUL/DIV/IDIV F6/F7 /4-/7 (x86_muldiv), LEA, PUSH
 // r32/imm/r/m, POP r32, CALL rel32/r32, RET [imm16], LEAVE, JMP rel/r/m, Jcc
 // rel8/rel32, LOOP/LOOPE/LOOPNE/JECXZ, NOP, HLT, CLD/STD (K_DF when DF
-// changes), [REP] MOVS/STOS/LODS, CMPS, [REPE/REPNE] SCAS (not REP CMPS:
+// changes), INVD / WBINVD, [REP] MOVS/STOS/LODS, CMPS, [REPE/REPNE] SCAS (not REP CMPS:
 // 7 uops), up to 6 uops: uop then uop_b. Anything else is one K_ILL uop.
 // 8/16-bit results merge into the old register (s1, or s3 for loads).
 // Memory destinations: LD TMP; ALU TMP; ST TMP. Static prediction: direct
@@ -522,6 +522,10 @@ module x86_decode
                 uop[0].pred_taken = uop[0].uncond || rel[31];
             end
             8'h0F: casez (op2)
+                8'h08, 8'h09: begin   // INVD / WBINVD
+                    uop[0].kind = K_WBINVD;
+                    uop[0].dst = {3'd0, !op2[0]};
+                end
                 8'b1000????: if (!p66) begin   // Jcc rel32
                     uop[0] = u; uop[0].kind = K_BR;
                     uop[0].cond = op2[3:0];

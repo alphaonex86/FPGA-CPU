@@ -25,8 +25,10 @@
 //   floated address: `snoop` with the line address and INV (for the caches). `enhanced`: WB/WT# as
 //   RESET falls.
 // - STPCLK# with the core quiet and no job: Stop Grant special cycle (address 10h, BE2# low), then
-//   no job until it is released. Enhanced mode, after the core's FLUSH# (flush_done): the First and
-//   Second Flush Acknowledge cycles (BE3# / BE1# low, A4-A2 = 001) [Intel486 Table 10-9].
+//   no job until it is released. After the core's flush (flush_done) [Intel486 Table 10-9, 9.2.18.2;
+//   AMD 19751C Table 8]: enhanced mode, FLUSH#: First / Second Flush Acknowledge (BE3# / BE1# low,
+//   address 4: A2 = 1); WBINVD: Write-Back then Flush (the same at address 0); INVD, or WBINVD in
+//   standard mode: Flush only.
 // - Even parity out on DP, PCHK# the clock after a read's data is stored.
 // - BS8# / BS16# (as sampled the clock before the ready, Intel486 10.1.2): a transfer moves the lowest
 //   enabled byte / the enabled bytes of the lowest enabled half; the rest of the dword follows in a
@@ -69,7 +71,9 @@ module s3_bus (
     output logic [31:0]  sc_rdata,
     // to the core
     input  logic         quiet,           // at an instruction boundary: Stop Grant may be issued
-    input  logic         flush_done,      // the caches finished a FLUSH#
+    input  logic         flush_done,      // the caches finished a flush
+    input  logic         flush_sw,        // ... of WBINVD / INVD (else FLUSH#)
+    input  logic         flush_wb,        // ... of WBINVD
     output logic         stopped,
     output logic         snoop,
     output logic [31:4]  snoop_addr,
@@ -130,8 +134,9 @@ module s3_bus (
     logic [2:0]   beat, beat_n;    // dword of the line
     logic         single;          // the rest of this 16-byte block as single cycles
     logic         grant;           // the job is the Stop Grant cycle
-    logic         ack;             // the job is a flush acknowledge cycle
-    logic [1:0]   ack_due;         // flush acknowledge cycles still to run
+    logic         ack;             // the job is a flush special cycle
+    logic [1:0]   ack_due;         // flush special cycles still to run: 2 BE3# low, then 1 BE1# low
+    logic         ack_a2;          // their A2: after FLUSH#
     logic [2:0]   status;
     logic [31:2]  s_addr, addr;
     logic [31:0]  s_wdata, wdata;
@@ -349,10 +354,9 @@ module s3_bus (
         if (ready) begin
             if (!sw_on && beat[1:0] == 2'd0) ken_first <= ken_q;
             if (!sw_on && beat[1:0] == 2'd3 && !(ken_first && ken_q && !single)) ken_all <= 1'b0;
-            if (job_done && sw_on) begin
+            if (job_done && sw_on) begin               // sw_rdy stays: hm_q gates it, the next hm_set reloads it
                 sw_on   <= 1'b0;
                 hm_q    <= 1'b0;
-                sw_rdy  <= 1'b0;
                 sw_rest <= 1'b1;
             end else if (job_done) begin
                 job     <= J_NONE;
@@ -384,11 +388,11 @@ module s3_bus (
             s_addr  <= 30'h0000_0004;
             s_wdata <= 32'd0;
         end else if (j_ack) begin
-            job     <= J_SINGLE;                          // flush acknowledge
+            job     <= J_SINGLE;                          // flush special cycle
             ack     <= 1'b1;
             ack_due <= ack_due - 2'd1;
             status  <= SPECIAL;
-            s_addr  <= 30'h0000_0004;
+            s_addr  <= {29'd0, ack_a2};
             s_wdata <= 32'd0;
         end else if (j_sc) begin
             job     <= J_SINGLE;
@@ -401,7 +405,10 @@ module s3_bus (
             wline   <= mem_wdata;
             ken_all <= 1'b1;
         end
-        if (flush_done && enhanced) ack_due <= 2'd2;
+        if (flush_done && (enhanced || flush_sw)) begin
+            ack_due <= flush_sw && !(enhanced && flush_wb) ? 2'd1 : 2'd2;
+            ack_a2  <= !flush_sw;
+        end
         if (rst) begin
             st      <= IDLE;
             job     <= J_NONE;

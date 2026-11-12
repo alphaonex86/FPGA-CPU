@@ -31,7 +31,7 @@ def port(signal):
 
 
 def qsf(out, bus_only=False):
-    lines = ["set_global_assignment -name DEVICE 5CEFA9F23C8", "set_global_assignment -name TOP_LEVEL_ENTITY s3_top",
+    lines = ["set_global_assignment -name DEVICE 5CEFA9F23C7", "set_global_assignment -name TOP_LEVEL_ENTITY s3_top",
              f"set_global_assignment -name SDC_FILE {ROOT / 'rtl/s3/s3_top.sdc'}",
              "set_global_assignment -name NUM_PARALLEL_PROCESSORS 4",
              # the RDY# / BRDY# / BOFF# input paths sit within ~0.2 ns of the clock: placement noise

@@ -1,4 +1,4 @@
-// socket3-cyclonev board top (hw/socket3-cyclonev, 5CEFA9F23C8): x86_core behind the Socket 3 bus
+// socket3-cyclonev board top (hw/socket3-cyclonev, 5CEFA9F23C7): x86_core behind the Socket 3 bus
 // unit, one port per pins.csv signal (board.py: A20M# -> a20m_n, M/IO# -> m_io_n, D7 -> d[7]).
 // Everything runs on the socket's CLK through a PLL in normal mode (the clock at the I/O registers
 // = the clock at the pin; the raw pin -> clock tree path would break input hold); PHASE moves it
@@ -84,7 +84,7 @@ module s3_top #(
     logic [31:0]  d_o;
     logic [3:0]   dp_o, be_o;
     logic         a_oe, ctl_oe, d_oe, ads_o, mio, dc, wr, blast_o, lock_o, cache_o;
-    logic         snoop, snoop_inv, enhanced, flush_done;
+    logic         snoop, snoop_inv, enhanced, flush_done, flush_sw, flush_wb;
     logic [31:4]  snoop_line;
     logic         hm_look, hm_inv, hm_dirty, hw_valid, hw_none, hw_take;
     logic [31:5]  hm_line;
@@ -112,7 +112,7 @@ module s3_top #(
 
     x86_core core (.clk(clk_p), .rst(rst), .reset_eip(32'hffff_fff0), .a20m(!a20m_s[1]), .cache_flush(!flush_s[1]),
                    .snoop(snoop), .snoop_line(snoop_line), .snoop_inv(snoop_inv), .enhanced(enhanced), .snoop_err(),
-                   .flush_done(flush_done), .hm_look(hm_look), .hm_line(hm_line), .hm_inv(hm_inv), .hm_dirty(hm_dirty),
+                   .flush_done(flush_done), .flush_sw(flush_sw), .flush_wb(flush_wb), .hm_look(hm_look), .hm_line(hm_line), .hm_inv(hm_inv), .hm_dirty(hm_dirty),
                    .hw_valid(hw_valid), .hw_none(hw_none), .hw_data(hw_data), .hw_take(hw_take),
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
@@ -127,7 +127,7 @@ module s3_top #(
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(1'b0), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
                 .quiet(1'b1), .stopped(), .snoop(snoop), .snoop_addr(snoop_line), .snoop_inv(snoop_inv),
-                .enhanced(enhanced), .flush_done(flush_done),
+                .enhanced(enhanced), .flush_done(flush_done), .flush_sw(flush_sw), .flush_wb(flush_wb),
                 .hm_look(hm_look), .hm_line(hm_line), .hm_inv(hm_inv), .hm_dirty(hm_dirty), .hw_valid(hw_valid),
                 .hw_none(hw_none), .hw_data(hw_data), .hw_take(hw_take),
                 .a_o(a_o), .a_oe(a_oe), .a_i(a[31:4]), .be_n(be_o), .ads_n(ads_o), .mio(mio), .dc(dc), .wr(wr),

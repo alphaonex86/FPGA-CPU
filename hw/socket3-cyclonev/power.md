@@ -1,4 +1,4 @@
-# Socket 3 + Cyclone V E A9 (5CEBA9/5CEFA9F23C8N) interposer power (plan/interposers.md task T3)
+# Socket 3 + Cyclone V E A9 (5CEFA9F23C7N) interposer power (plan/interposers.md task T3)
 
 Source per D1 (decided 2026-10-31, `plan/interposers.md`): external 12 V
 supply on the interposer. The socket's 23 VCC pins feed only the

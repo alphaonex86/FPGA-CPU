@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: rtl/s3/build.sh <out_dir> [bus]   (bus: the pin timing of s3_bus alone in minutes, the core
 #        replaced by rtl/tests/s3/x86_core_stub.sv; never a complete build)
-# Compiles the socket3-cyclonev bitstream (s3_top.sv, 5CEFA9F23C8) with Quartus Lite on the board's
+# Compiles the socket3-cyclonev bitstream (s3_top.sv, 5CEFA9F23C7) with Quartus Lite on the board's
 # own pin assignment (board.py qsf), the perf recipe (the core does not route without it); fails on a
 # critical warning, an unplaced, ignored or incomplete pin assignment, an inferred latch, a timing
 # violation, or a ball the board wires to something else than the fitter's pin report says

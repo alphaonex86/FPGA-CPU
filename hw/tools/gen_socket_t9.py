@@ -20,7 +20,8 @@ import jlcfab
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 NO_PART = {"U2"}
-CONSIGNED = {"C1550735": "Digi-Key / Mouser (5CEBA9F23C8N or 5CEFA9F23C8N; JLCPCB stock 0 on 2026-11-05)"}
+CONSIGNED = {"C1550735": "Digi-Key / Mouser (5CEBA9F23C8N or 5CEFA9F23C8N; JLCPCB stock 0 on 2026-11-05)",
+             "C1550819": "broker (5CEFA9F23C7N: NTEMALL 159 at ~$274-310, Octopart ~$443; LCSC 0 on 2026-11-12)"}
 STACK = {"socket3": "8 layers, stack JLC08161H-2116", "socket7": "8 layers, stack JLC08161H-2116"}
 ORDER = ("JLCPCB order: {}, 1.6 mm, ENIG, via-in-pad (POFV: U1), PCBA both sides incl. BGA; U2: Mill-Max "
          "PGA header (551 socket 3 / 550 socket 7), soldered afterwards")
@@ -51,11 +52,12 @@ COMMON = {
     ("4k7", "R_0402_1005Metric"): "C25900",
     ("BLM18AG601SN1D", "L_0603_1608Metric"): "C19330",
     ("Conn_02x03_Odd_Even", "PinHeader_2x03_P2.54mm_Vertical"): "C492420",
-    ("FPGA_CycloneV_5CEFA9_F484", "FPGA_CycloneV_5CEFA9_F484_BGA"): "C1550735",
     ("MT25QL01GBBB8ESF-0SIT", "SOIC-16W_7.5x10.3mm_P1.27mm"): "C2061920",
 }
 EXTRA = {
     "socket3": {
+        # C7 (operator 2026-11-12): the bus pin loop misses timing on C8
+        ("FPGA_CycloneV_5CEFA9_F484", "FPGA_CycloneV_5CEFA9_F484_BGA"): "C1550819",
         ("1.33k", "R_0402_1005Metric"): "C2974006",
         ("100uF/6.3V", "C_1210_3225Metric"): "C49066",
         ("10k 1%", "R_0402_1005Metric"): "C25744",
@@ -79,6 +81,7 @@ EXTRA = {
         ("TPS62130RGT", "VQFN-16-1EP_3x3mm_P0.5mm_EP1.68x1.68mm"): "C43590",
     },
     "socket7": {
+        ("FPGA_CycloneV_5CEFA9_F484", "FPGA_CycloneV_5CEFA9_F484_BGA"): "C1550735",
         ("10uF/10V", "C_0805_2012Metric"): "C15850",
         ("1nF", "C_0402_1005Metric"): "C1523",
         ("1uH XFL4020-102", "L_Coilcraft_XxL4020"): "C5355380",

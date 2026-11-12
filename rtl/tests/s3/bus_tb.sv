@@ -9,7 +9,8 @@
 // Undisturbed (every rate 0), every line read must be two full bursts. +seed=<n> +ops=<n>; +rdy=<percent of transfers ended by RDY#> +boff= +hold= +ahold= +stp= (per mille
 // of clocks); +bs=<percent of narrow pages>; +wb=1: WB/WT# high at RESET (enhanced mode: line writes are
 // write-backs: CACHE# low, every BE#, BS8# / BS16# ignored [Intel486 databook 241731-002]: driven anyway;
-// after a FLUSH# (flush_done) the First then Second Flush Acknowledge cycles).
+// after a FLUSH# (flush_done) the First then Second Flush Acknowledge cycles). After WBINVD / INVD (flush_sw,
+// flush_wb), either mode: Write-Back (WBINVD, enhanced) then Flush, at address 0.
 // Snoops: every EADS# (address floated) must give its snoop pulse, address and INV. Enhanced mode,
 // HITM#: a stand-in core holds some snooped lines dirty (new data for the snooped 16 bytes) or
 // leaves a line write of the bus unit's own job; then HITM# low two clocks after EADS#, no ADS# in
@@ -42,7 +43,7 @@ module bus_tb (
     logic         stopped, snoop, a_oe, ads_n, mio, dc, wr, blast_n, lock_n, cache_n, ctl_oe, d_oe;
     logic [31:4]  snoop_addr;
     logic         snoop_inv, enhanced, inv, inv_1, inv_2;   // INV, and as the snoop pulse sees it
-    logic         pchk_n, hlda, breq, ads_r, fl_done;
+    logic         pchk_n, hlda, breq, ads_r, fl_done, fl_sw, fl_wb, ack_a2;
     logic         hm_look, hm_inv, hw_valid, hw_none, hw_take, hitm_n;
     logic [31:5]  hm_line;
     logic [255:0] hw_data;
@@ -103,7 +104,7 @@ module bus_tb (
                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(sc_lock), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
-                .quiet(1'b1), .flush_done(fl_done), .stopped(stopped), .snoop(snoop), .snoop_addr(snoop_addr), .snoop_inv(snoop_inv), .enhanced(enhanced),
+                .quiet(1'b1), .flush_done(fl_done), .flush_sw(fl_sw), .flush_wb(fl_wb), .stopped(stopped), .snoop(snoop), .snoop_addr(snoop_addr), .snoop_inv(snoop_inv), .enhanced(enhanced),
                 .hm_look(hm_look), .hm_line(hm_line), .hm_inv(hm_inv), .hm_dirty(tb_dirty), .hw_valid(hw_valid),
                 .hw_none(hw_none), .hw_data(hw_data), .hw_take(hw_take),
                 .a_o(a_o), .a_oe(a_oe), .a_i(sn_a), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
@@ -166,7 +167,7 @@ module bus_tb (
         rst   <= cycle < 4;
         if (cycle < 4) begin
             ss <= S_IDLE;
-            {mem_req, sc_req, sc_lock, pending, s_drive, hold, ahold, bad_parity, fl_done} <= '0;
+            {mem_req, sc_req, sc_lock, pending, s_drive, hold, ahold, bad_parity, fl_done, fl_sw, fl_wb, ack_a2} <= '0;
             {rdy_n, brdy_n, ken_n, boff_n, eads_n, stpclk_n} <= '1;
             op <= O_IDLE;
             {done, failed, float_due, bad_q, bad_qq} <= '0;
@@ -229,7 +230,11 @@ module bus_tb (
                 if (op != O_READ) fail("mem_rvalid without a read");
                 n_reads <= n_reads + 1;
                 for (int i = 0; i < 8; i++)
-                    if (mem_rdata[32*i +: 32] != shadow[{op_line[15:5], 3'(i)}]) fail("line read data");
+                    if (mem_rdata[32*i +: 32] != shadow[{op_line[15:5], 3'(i)}]) begin
+                        $display("line %h dword %0d: read %h, memory %h", {op_line, 5'd0}, i, mem_rdata[32*i +: 32],
+                                 shadow[{op_line[15:5], 3'(i)}]);
+                        fail("line read data");
+                    end
                 op <= O_IDLE;
                 pending <= 1'b0;
                 n_ops <= n_ops + 1;
@@ -249,8 +254,13 @@ module bus_tb (
                 sc_lock <= 1'b0;
                 n_ops <= n_ops + 1;
             end
-            fl_done <= !fl_done && ack_owed == 0 && roll(2) != 0;         // a FLUSH# ended; the next only after its acknowledges
-            if (fl_done && p_wb != 0) ack_owed <= 2;
+            fl_done <= !fl_done && ack_owed == 0 && roll(2) != 0;         // a flush ended; the next only after its special cycles
+            fl_sw <= roll(500) != 0;                                     // WBINVD / INVD, else FLUSH#
+            fl_wb <= roll(500) != 0;                                     // WBINVD
+            if (fl_done) begin
+                ack_owed <= fl_sw ? (p_wb != 0 && fl_wb ? 2 : 1) : p_wb != 0 ? 2 : 0;
+                ack_a2 <= !fl_sw;
+            end
             if (n_ops == ops && op == O_IDLE && dut.job == 2'd0 && ack_owed == 0 && !wb_due && !mw_due && !hm_low && hitm_n) begin
                 for (int i = 0; i < WORDS; i++)
                     if (mem[i] != shadow[i]) begin
@@ -350,14 +360,17 @@ module bus_tb (
             end
             if (cycle == hm_cycle + 1 && hm_low && hitm_n) fail("HITM# not low two clocks after EADS#");
             if (!hitm_n && !hm_low) fail("HITM# without a hit");
-            if (mw_due) begin                                    // the bus master's write of the snooped 16 bytes
+            // the bus master's write of the snooped 16 bytes; not while the stand-in core still has a line
+            // write of that line in flight (random stimulus only: a real core cannot write back a line INV took)
+            if (mw_due) begin
                 mw_due <= 1'b0;
-                for (int i = 0; i < 4; i++) begin
-                    logic [31:0] w;
-                    w = $urandom;
-                    mem[{wb_a[15:4], 2'(i)}] <= w;
-                    shadow[{wb_a[15:4], 2'(i)}] <= w;
-                end
+                if (!(op == O_WRITE && (mem_req ? mem_addr : op_line) == wb_a[31:5]))
+                    for (int i = 0; i < 4; i++) begin
+                        logic [31:0] w;
+                        w = $urandom;
+                        mem[{wb_a[15:4], 2'(i)}] <= w;
+                        shadow[{wb_a[15:4], 2'(i)}] <= w;
+                    end
             end
             if (!rst && enhanced != (p_wb != 0)) fail("bus mode against WB/WT# at RESET");
             stp_gap <= stpclk_n ? stp_gap + 1 : 0;            // high >= 8 clocks between assertions [19751C]
@@ -417,11 +430,15 @@ module bus_tb (
                     end
                     if (sc_lock && op == O_SINGLE && !wb_due && {mio, dc, wr} != 3'b001 && lock_n) fail("LOCK# high in a locked cycle");
                     if ({mio, dc, wr} == 3'b001) begin
-                        if (a_o != 30'd4) fail("special cycle address");
                         if (be_n == 4'b1011) begin
                             n_grant <= n_grant + 1;
                             if (stpclk_n) fail("Stop Grant without STPCLK#");
-                        end else if (be_n != (ack_owed == 2 ? 4'b0111 : 4'b1101)) fail("flush acknowledge BE# / order / without FLUSH#");
+                            if (a_o != 30'd4) fail("Stop Grant address");
+                        end else begin
+                            if (ack_owed == 0) fail("a flush special cycle without a flush");
+                            if (be_n != (ack_owed == 2 ? 4'b0111 : 4'b1101)) fail("flush special cycle BE# / order");
+                            if (a_o != {29'd0, ack_a2}) fail("flush special cycle address");
+                        end
                     end
                 end
                 default: begin

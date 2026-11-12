@@ -20,7 +20,8 @@ module core_top #(
     output logic halted,
     output logic illegal,
     output logic [31:0] cycles,
-    output logic [31:0] insns
+    output logic [31:0] insns,
+    output logic marked          // +mark=<hex>: a second instruction retired into that EIP (x86_bench.sh)
 );
     import x86_pkg::*;
     localparam int MEM = 1 << 22;
@@ -46,7 +47,7 @@ module core_top #(
     // +stats: cycles that retire nothing (ROB empty / head not done), uop
     // queue empty, decode redirects, retire flushes
     logic [31:0] st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush;
-    logic [31:0] st_wait_kind [8];   // head waits by the head uop kind (kind_t)
+    logic [31:0] st_wait_kind [16];   // head waits by the head uop kind (kind_t)
     logic [31:0] st_dr [4];          // decode redirects: not followed, falsely taken, target, cut
     logic [31:0] st_mp_wait, st_refill;   // flushing branch: result -> retire; flush -> next retire
     logic [31:0] st_fl [6];               // flushes: P-predicted Jcc, indirect, RET, other branch, K_DF, store to code
@@ -67,7 +68,7 @@ module core_top #(
     // snoops: from the bus unit with S3_BUS, else +snoop=<n>: an invalidation every n clocks of the
     // L1s' last L2 request, the drain's line, the fetch line or a line anywhere in the 1 MB (dirty ones are kept:
     // the trace must not change)
-    logic         bus_snoop, bus_snoop_inv, bus_enhanced, snoop_err, flush_done;
+    logic         bus_snoop, bus_snoop_inv, bus_enhanced, snoop_err, flush_done, flush_sw, flush_wb;
     logic [31:4]  bus_snoop_line;
     logic         hm_look, hm_inv, hw_take, hm_dirty, hw_valid, hw_none;
     logic [31:4]  hm_line;
@@ -113,13 +114,13 @@ module core_top #(
 `ifdef S3_BUS
     x86_core #(.L1I_KB(L1I_KB), .L1D_KB(L1D_KB), .L2_KB(L2_KB)) core (.clk(clk), .rst(s3_rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
                    .snoop(bus_snoop), .snoop_line(bus_snoop_line), .snoop_inv(bus_snoop_inv), .enhanced(bus_enhanced),
-                   .snoop_err(snoop_err), .flush_done(flush_done),
+                   .snoop_err(snoop_err), .flush_done(flush_done), .flush_sw(flush_sw), .flush_wb(flush_wb),
                    .hm_look(hm_look), .hm_line(hm_line[31:5]), .hm_inv(hm_inv), .hm_dirty(hm_dirty), .hw_valid(hw_valid), .hw_none(hw_none), .hw_data(hw_data),
                    .hw_take(hw_take),
 `else
     x86_core #(.L1I_KB(L1I_KB), .L1D_KB(L1D_KB), .L2_KB(L2_KB)) core (.clk(clk), .rst(rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
                    .snoop(bus_snoop), .snoop_line(bus_snoop_line), .snoop_inv(bus_snoop_inv), .enhanced(bus_enhanced),
-                   .snoop_err(snoop_err), .flush_done(flush_done),
+                   .snoop_err(snoop_err), .flush_done(flush_done), .flush_sw(flush_sw), .flush_wb(flush_wb),
                    .hm_look(hm_look), .hm_line(hm_line[31:5]), .hm_inv(hm_inv), .hm_dirty(hm_dirty), .hw_valid(hw_valid), .hw_none(hw_none), .hw_data(hw_data),
                    .hw_take(hw_take),
 `endif
@@ -186,7 +187,7 @@ module core_top #(
                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(1'b0), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
-                .quiet(1'b1), .flush_done(flush_done), .stopped(), .snoop(bus_snoop), .snoop_addr(bus_snoop_line), .snoop_inv(bus_snoop_inv),
+                .quiet(1'b1), .flush_done(flush_done), .flush_sw(flush_sw), .flush_wb(flush_wb), .stopped(), .snoop(bus_snoop), .snoop_addr(bus_snoop_line), .snoop_inv(bus_snoop_inv),
                 .enhanced(bus_enhanced),
                 .hm_look(hm_look), .hm_line(hm_line[31:5]), .hm_inv(hm_inv), .hm_dirty(hm_dirty), .hw_valid(hw_valid),
                 .hw_none(hw_none), .hw_data(hw_data), .hw_take(hw_take), .a_o(a_o), .a_oe(a_oe), .a_i(a_oe ? a_o[31:4] : sn_a), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
@@ -267,6 +268,15 @@ module core_top #(
         end
     end
 
+    logic [31:0] mark_eip;
+    logic [1:0]  mark_n;
+    initial if (!$value$plusargs("mark=%h", mark_eip)) mark_eip = 32'd0;
+    assign marked = mark_eip == 32'd0 || mark_n == 2'd2;
+    always_ff @(posedge clk)
+        if (rst) mark_n <= 2'd0;
+        else if (mark_n != 2'd2 && (ret_valid[0] && ret_next_eip[0] == mark_eip || ret_valid[1] && ret_next_eip[1] == mark_eip
+                                    || ret_valid[2] && ret_next_eip[2] == mark_eip)) mark_n <= mark_n + 2'd1;
+
     always_ff @(posedge clk) begin
         if (rst) begin
             for (int r = 0; r < 8; r++) regs[r] <= 32'd0;
@@ -284,7 +294,7 @@ module core_top #(
 `endif
             refill <= 1'b0;
             for (int i = 0; i < 6; i++) st_fl[i] <= 32'd0;
-            for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
+            for (int i = 0; i < 16; i++) st_wait_kind[i] <= 32'd0;
             for (int i = 0; i < 4; i++) st_dr[i] <= 32'd0;
             for (int i = 0; i < 4; i++) {st_x[i], st_rn[i]} <= '0;
         end else begin

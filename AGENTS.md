@@ -60,6 +60,8 @@ chipset, same sockets; source of `sockets/kicad/`).
 - Selected (authorized stock end of 2026): Altera Cyclone V E A9
   5CEBA9/5CEFA9F23C8N (preferred: 1.0 mm pitch, more logic); the Efinix
   Ti180 TI180G400C3 is dropped (rule above). Survey in `FPGAlist/README.md`.
+- Socket 3 board: speed grade C7, 5CEFA9F23C7N, same balls (operator, 2026-11-12: its bus
+  pin loop misses timing on C8).
 
 ## Layout
 
@@ -71,6 +73,8 @@ chipset, same sockets; source of `sockets/kicad/`).
 - `plan/` — `interposers.md` (4 interposer boards, tasks, status), `slot1.md`, `slot1_variants.md` (A/B/C1/C2 study), `x86_core.md` (x86 core architecture),
   `cpu_core.md` (base core evaluation), `slot1_c2.md` (C2: N100 + FPGA bridge), `next.md` (what to do next) and `prompt.md`.
 - `sw/c2-vmm/` — Slot 1 C2 VMM (KVM); `test.sh` runs its test ROM.
+- `rtl/tools/x86_bench.sh` — the core's benchmark set (`plan/bench_history.md`); `x86_power.sh` — its
+  power per workload from a full build (`plan/power_history.md`).
 - `rtl/` — RTL; `rtl/c2/` C2 bridge (`xilinx/build.tcl`: card bitstream), `rtl/s3/` Socket 3 bus unit +
   board top (`build.sh`), `rtl/tools/vivado.sh`, `rtl/tools/fpga_pins.py` (a build's pins against the board).
 - `hw/tools/route_search.py --service <boards>` — routing as the user service `fpgacpu-route`
@@ -92,8 +96,8 @@ chipset, same sockets; source of `sockets/kicad/`).
   5 days at most per tool and board; all failing = never the budget: a routing-setup fault (e.g.
   routing order) or a fault outside routing (e.g. placement) (operator, 2026-11-08 / 11-11).
 - Every architectural change or optimisation of rtl/x86: run `rtl/tools/x86_bench.sh "<note>"`
-  (row in `plan/bench_history.md`; own core only, not the Mu; L1I_KB / L1D_KB / L2_KB select the
-  cache sizes to compare) (operator, 2026-11-12).
+  (row in `plan/bench_history.md`; own core only, not the Mu; one fixed set for every architecture:
+  `X86_PARAMS` / `CONFIG` select and name the configuration compared) (operator, 2026-11-12).
 - Never more than 4 CPUs for all of this project's heavy jobs together: they run in
   `claude-route.slice` (operator, 2026-11-11).
 - CPU goal is maximum performance inside the selected Cyclone V: large rewrites,

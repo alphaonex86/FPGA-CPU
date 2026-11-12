@@ -370,7 +370,13 @@ replicated per read port plus a live-value table.
    20011), trace unchanged; an L1D sweep without its write-backs fails it.
    Enhanced mode: the core's `flush_done` makes s3_bus run the First / Second Flush Acknowledge
    cycles after the write-backs (bus_tb +wb=1 checks order and BE#; done 2026-11-12).
-   Open: WBINVD / INVD (the same engine, plus their special cycles: M5 ISA).
+   WBINVD / INVD done 2026-11-12: the same engine, started when the instruction is the ROB head with
+   every older store drained; it retires after the flush and the pipeline refetches. INVD writes back
+   too (as AMD's HWCR.INVDWBINVD; a discard would lose data the 486 keeps nowhere else, and no BIOS
+   needs it). s3_bus then runs Write-Back (enhanced mode, WBINVD) and Flush at address 0; FLUSH#'s
+   acknowledges are at address 4 (A2 = 1, Intel486 9.2.18.2, AMD 19751C Table 8; they were at 10h,
+   fixed). A FLUSH# during a flush is latched and runs after it. Test: `x7_wbinvd.S`; bus_tb draws
+   the three kinds.
    - The snoop: EADS# looks the line up in
      L1D / L2 dirty tags within a clock (HITM# is due 2 clocks after EADS#), then the line is
      handed to the bus unit (snoop write-back with CACHE#, 0-4-8-C, HITM# until its last
@@ -423,6 +429,9 @@ replicated per read port plus a live-value table.
      chipset model). Open: a fill snooped with INV is not used and is read again, so a master writing
      one line faster than a fill takes (~40 clocks through the chipset) starves the reader; the 486
      uses that data once without keeping it [Table 10-12]. Not seen in real DMA; do it if needed.
+     Fixed with WBINVD (x7, +hitm=1): the L2 engine waiting in E_WB for a bus that holds every job
+     under HITM# kept the data port, so the snoop read never came. The snoop read now takes the
+     port in E_WB and the victim is read again (the bus latches mem_wdata when it takes a job).
 6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
 7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
    Socket 7 and Socket 370.

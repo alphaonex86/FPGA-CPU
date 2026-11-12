@@ -93,6 +93,9 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   Estimate 2026-11-12 (full socket 3 build, 5CEFA9F23C8, core and bus at 33 MHz, vectorless 12.5 %
   toggle): 1.10 W (core static 0.54, dynamic 0.52, I/O 0.04), Tj ~ 40 + 1.1 x 14-16 = 55-58 C: no
   heatsink at this clock; to be redone when the core gets its own faster clock.
+  With CoreMark's real activity (`rtl/tools/x86_power.sh`: the core's VCD into quartus_pow, same
+  build): 2.36 W (core dynamic 1.76 W), Tj ~ 40 + 2.36 x 14-16 = 73-78 C: under 85 C but thin in a
+  warm case; the heatsink stays advisable. Socket 3 is C7 since 2026-11-12 (same balls).
 - **D1** (decided 2026-10-31 by the operator) Socket 3: external 12 V supply
   on the interposer (barrel jack, FPGAmotherboard power tree); the socket VCC
   pins stay unused (board LDO PQ30RV21: 2 A abs max, `hw/common/socket3_notes.md` R2).

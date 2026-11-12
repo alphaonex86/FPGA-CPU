@@ -67,9 +67,11 @@ with every gate passing. Read AGENTS.md first; details in plan/interposers.md (T
   clock stop, RESET cache clear, A20M# in the core, uncached accesses + KEN#, FLUSH# (write back +
   invalidate), the RDY# / BRDY# / BOFF# loop in one LUT level (bus-only build +0.985 / +0.968 ns).
   Snoop done 2026-11-12 (EADS# invalidation both modes, HITM# and the snoop write-back, plan/x86_core.md).
-  Next: write-back bursts with CACHE#, WBINVD / INVD with M5, SRESET with the M5 interrupt machinery. Every RTL change needs a new full build (`s3.ok`).
-- Speed grade C8 vs C7: decide after the full Quartus build (step 1), ask the operator with the
-  slack numbers.
+  WBINVD / INVD done 2026-11-12. Next: write-back bursts with CACHE#, SRESET with the M5 interrupt machinery. Every RTL change needs a new full build (`s3.ok`).
+- Speed grade: C7 (5CEFA9F23C7N) for socket 3 (operator 2026-11-12). The full C8 build with HITM#
+  missed only the BRDY# / BOFF# pin loop (inputs -0.507 ns, outputs +0.907 ns); the first full C7
+  build meets every clock (setup +1.214 ns, hold +0.237 ns; 80,712 ALMs, 71 %). The BOM takes LCSC
+  C1550819, consigned (broker stock).
 - Socket 7 (`gen_socket7_t8.py` fails on purpose: S_VCC3 feed of PS2 / U3 in the S_VCC2 area of
   In4; no FAST group, no internal-pull emulation): after socket 3 and the C2 Mu are fabricated.
 - Bench items: AS x4 boot from the 1 Gbit flash, JLCPCB placement preview by eye, GTL16612
