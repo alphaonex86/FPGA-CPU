@@ -34,6 +34,8 @@ def qsf(out, bus_only=False):
     lines = ["set_global_assignment -name DEVICE 5CEFA9F23C8", "set_global_assignment -name TOP_LEVEL_ENTITY s3_top",
              f"set_global_assignment -name SDC_FILE {ROOT / 'rtl/s3/s3_top.sdc'}",
              "set_global_assignment -name NUM_PARALLEL_PROCESSORS 4",
+             # the RDY# / BRDY# / BOFF# input paths sit within ~0.2 ns of the clock: placement noise
+             'set_global_assignment -name OPTIMIZATION_MODE "HIGH PERFORMANCE EFFORT"',
              'set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED"']
     # the board feeds every bank 3.3 V, the unused ones too (Quartus assumes 2.5 V there)
     lines += [f"set_global_assignment -name IOBANK_VCCIO 3.3V -section_id {bank}" for bank in BANKS]

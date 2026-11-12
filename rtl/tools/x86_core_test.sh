@@ -20,10 +20,13 @@ for t in "${tests[@]}"; do
         "build/x86/$name.bin" "$out/$name.hex"
     echo "== $name"
     # shellcheck disable=SC2086   # X86_TB_ARGS: extra plusargs, e.g. "+stats +mem_lat=20"
-    if "$out/obj/core_tb" "+image=$out/$name.hex" "+trace=$out/$name.trace" ${X86_TB_ARGS:-}; then
-        tools/x86_test.sh "$t" "$out/$name.trace" || rc=1
-    else
-        rc=1
-    fi
+    # second pass: FLUSH# every 20011 clocks must not change the trace
+    for extra in "" "+flush=20011"; do
+        if "$out/obj/core_tb" "+image=$out/$name.hex" "+trace=$out/$name.trace" ${X86_TB_ARGS:-} $extra; then
+            tools/x86_test.sh "$t" "$out/$name.trace" || rc=1
+        else
+            rc=1
+        fi
+    done
 done
 exit $rc

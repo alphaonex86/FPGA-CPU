@@ -2,7 +2,7 @@
 // unit, one port per pins.csv signal (board.py: A20M# -> a20m_n, M/IO# -> m_io_n, D7 -> d[7]).
 // Everything runs on the socket's CLK through a PLL in normal mode (the clock at the I/O registers
 // = the clock at the pin; the raw pin -> clock tree path would break input hold); PHASE moves it
-// against the pin clock (later: more input setup, later outputs; 691 ps, 7 VCO / 8 steps, splits the margin of the
+// against the pin clock (later: more input setup, later outputs; 987 ps, 10 VCO / 8 steps, splits the margin of the
 // RDY# / BRDY# -> BLAST# loop evenly on the 5CEFA9F23C8). VCO fixes the PLL at 38 x CLK, so it
 // locks from 15.8 to 34.2 MHz (VCO 600-1300 MHz): the 25 / 33 MHz jumpers and the FPGAmotherboard's
 // Stop Grant steps 16.67-33.33 MHz. The core's clock stops while the PLL is unlocked (CLK stopped
@@ -10,11 +10,12 @@
 // itself: a gate in front of its I/O registers costs the RDY# / BRDY# loop ~0.4 ns. The CPU stays in reset while RESET is high or
 // VCORE_OK is low (the bus switches are open then: BUS_OE# of the same detector, plan/interposers.md
 // FPGAmotherboard compatibility).
-// Inputs the core has no use for yet (plan/x86_core.md M5): INTR, NMI, SMI#, IGNNE#, FLUSH#,
+// FLUSH#: the core writes its caches back and invalidates them (standard mode: no special cycle).
+// Inputs the core has no use for yet (plan/x86_core.md M5): INTR, NMI, SMI#, IGNNE#,
 // SRESET, INV, WB/WT#, UP#, CLKMUL, the CPU JTAG pins.
 module s3_top #(
     parameter string FREQ  = "33.333333 MHz",
-    parameter string PHASE = "691 ps",   // > 0: s3_top.sdc takes the inputs at the next edge
+    parameter string PHASE = "987 ps",   // > 0: s3_top.sdc takes the inputs at the next edge
     parameter string VCO   = "422.222222 MHz"   // 38 / 3 x FREQ
 ) (
     input  wire        clk,
@@ -68,11 +69,16 @@ module s3_top #(
 );
     logic         clk_pll, clk_p, locked, pll_rst;
     logic         rst = 1'b1;
-    logic [1:0]   reset_s = 2'b11, ok_s = 2'b00, locked_r;
+    logic [1:0]   reset_s = 2'b11, ok_s = 2'b00, a20m_s = 2'b11, flush_s = 2'b11, locked_r;
     logic [15:0]  relock;
     logic         mem_req, mem_we, mem_ready, mem_rvalid;
     logic [31:5]  mem_addr;
     logic [255:0] mem_wdata, mem_rdata;
+    logic         sc_req, sc_ready, sc_done, mem_cacheable;
+    logic [2:0]   sc_status;
+    logic [31:2]  sc_addr;
+    logic [3:0]   sc_be;
+    logic [31:0]  sc_wdata, sc_rdata;
     logic [31:2]  a_o;
     logic [31:0]  d_o;
     logic [3:0]   dp_o, be_o;
@@ -93,26 +99,30 @@ module s3_top #(
     always_ff @(posedge clk_p) begin
         reset_s <= {reset_s[0], reset};
         ok_s    <= {ok_s[0], vcore_ok};
+        a20m_s  <= {a20m_s[0], a20m_n};
+        flush_s <= {flush_s[0], flush_n};
         rst     <= reset_s[1] || !ok_s[1];
     end
 
-    x86_core core (.clk(clk_p), .rst(rst), .reset_eip(32'hffff_fff0),
+    x86_core core (.clk(clk_p), .rst(rst), .reset_eip(32'hffff_fff0), .a20m(!a20m_s[1]), .cache_flush(!flush_s[1]),
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
+                   .mem_cacheable(mem_cacheable), .sc_req(sc_req), .sc_status(sc_status), .sc_addr(sc_addr), .sc_be(sc_be), .sc_wdata(sc_wdata),
+                   .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
                    .ret_valid(), .ret_eop(), .ret_next_eip(), .ret_wdst(), .ret_dst(), .ret_value(),
                    .ret_wflags(), .ret_flags(), .halted(), .illegal());
 
     s3_bus bus (.clk(clk_pll), .rst(rst),
                 .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
-                .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(),
-                .sc_req(1'b0), .sc_status(3'd0), .sc_lock(1'b0), .sc_addr(30'd0), .sc_be(4'd0), .sc_wdata(32'd0),
-                .sc_ready(), .sc_done(), .sc_rdata(),
-                .quiet(1'b1), .stopped(), .snoop(), .snoop_addr(), .err_bs(),
+                .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
+                .sc_req(sc_req), .sc_status(sc_status), .sc_lock(1'b0), .sc_addr(sc_addr), .sc_be(sc_be),
+                .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
+                .quiet(1'b1), .stopped(), .snoop(), .snoop_addr(),
                 .a_o(a_o), .a_oe(a_oe), .a_i(a[31:4]), .be_n(be_o), .ads_n(ads_o), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_o), .lock_n(lock_o), .cache_n(cache_o), .ctl_oe(ctl_oe),
                 .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe), .d_i(d), .dp_i(dp), .pchk_n(pchk_n),
                 .hlda(hlda), .breq(breq), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n), .hold(hold),
-                .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .a20m_n(a20m_n), .stpclk_n(stpclk_n),
+                .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .stpclk_n(stpclk_n),
                 .bs8_n(bs8_n), .bs16_n(bs16_n));
 
     assign a       = a_oe ? a_o : 'z;

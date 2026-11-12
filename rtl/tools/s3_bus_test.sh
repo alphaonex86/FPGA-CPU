@@ -1,7 +1,7 @@
 #!/bin/bash
 # Usage: rtl/tools/s3_bus_test.sh [seeds, default 8]
 # s3_bus unit test (rtl/tests/s3/bus_tb.sv): random operations against a 486 slave with RDY#, wait
-# states, BOFF#, HOLD, AHOLD + EADS# and STPCLK#; then one run per mix: no RDY#, RDY# only, heavy interference, undisturbed.
+# states, BOFF#, HOLD, AHOLD + EADS#, STPCLK# and BS8# / BS16#; then one run per mix: no RDY#, RDY# only, heavy interference, undisturbed, every page narrow.
 set -eu
 cd "$(dirname "$0")/.."
 out=build/s3sim/bus
@@ -14,5 +14,6 @@ done
 "$out/obj/bus_tb" +seed=101 +rdy=0
 "$out/obj/bus_tb" +seed=102 +rdy=100 +boff=0 +hold=0 +ahold=0 +stp=0
 "$out/obj/bus_tb" +seed=103 +boff=200 +hold=100 +ahold=100 +stp=50
-"$out/obj/bus_tb" +seed=104 +rdy=0 +boff=0 +hold=0 +ahold=0 +stp=0
+"$out/obj/bus_tb" +seed=104 +rdy=0 +boff=0 +hold=0 +ahold=0 +stp=0 +bs=0
+"$out/obj/bus_tb" +seed=105 +bs=100
 echo "PASS  s3_bus"

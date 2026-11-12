@@ -58,8 +58,15 @@ with every gate passing. Read AGENTS.md first; details in plan/interposers.md (T
 - Bus unit before fab: SRESET, BS8# / BS16#, write-back snoop (HITM# / INV) + FLUSH#, clock stop
   in Stop Grant. Each needs its pin on the board (check `gen_socket3_assign.py` first: a missing
   pin is a board change, see "Rules that bite").
+  All pins are on the board. BS8# / BS16#: in full (Intel486 Table 10-3, bursts too), although
+  neither chipset drives them (operator, after being told). SRESET, FLUSH# and the snoop need the
+  core: they are part of the memory-system step of M5 (plan/x86_core.md).
 - CPU core: advance `rtl/x86` from M3 to M5 (real mode, interrupts, I/O) until it boots the BIOS
-  in simulation, while routing runs.
+  in simulation, while routing runs; memory system first (plan/x86_core.md M5 list), then the ISA.
+  KEN#: learned per 64 KB region (operator). Done 2026-11-11: BS8# / BS16#, PLL lock range and
+  clock stop, RESET cache clear, A20M# in the core, uncached accesses + KEN#. Next: FLUSH# /
+  WBINVD sweep, the snoop (HITM# / INV, write-back bursts with CACHE# in enhanced mode), SRESET
+  with the M5 interrupt machinery. Every RTL change needs a new full build (`s3.ok`).
 - Speed grade C8 vs C7: decide after the full Quartus build (step 1), ask the operator with the
   slack numbers.
 - Socket 7 (`gen_socket7_t8.py` fails on purpose: S_VCC3 feed of PS2 / U3 in the S_VCC2 area of

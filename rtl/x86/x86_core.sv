@@ -20,12 +20,23 @@
 //   retires, the pipeline flushes, fetch waits for the store's drain (which
 //   invalidates the L1I set) and restarts after it.
 //   A mispredicted branch retires, the pipeline flushes the next cycle.
+// - Uncached loads / stores (x86_uc: the VGA window) go through the
+//   single-cycle port, exact size, in order; a UC load replays until it is
+//   the ROB head with every older store drained.
+// - A20M# masks address bit 20 of fetches, loads and stores before the
+//   caches (the 486 rule); a change takes effect at a flush: the next
+//   non-branch instruction boundary flushes for it (a20_q follows a20m).
+// - cache_flush (FLUSH#): the L1D and L1I first (the L1D writes its dirty lines
+//   back into the L2), then the L2 (into memory), then the learned UC
+//   regions; each cache stays blocked until the last is done. Held: again.
 module x86_core
     import x86_pkg::*;
 (
     input  logic                  clk,
     input  logic                  rst,
     input  logic [31:0]           reset_eip,
+    input  logic                  a20m,         // A20M# asserted, synchronous
+    input  logic                  cache_flush,  // FLUSH# asserted, synchronous
     // memory (L2 lines): a read answered later, writes posted
     output logic                  mem_req,
     output logic                  mem_we,
@@ -34,6 +45,16 @@ module x86_core
     input  logic                  mem_ready,
     input  logic                  mem_rvalid,
     input  logic [255:0]          mem_rdata,
+    input  logic                  mem_cacheable,  // with mem_rvalid: KEN# made it a line fill
+    // single cycles (uncached memory; I/O later): one at a time
+    output logic                  sc_req,
+    output logic [2:0]            sc_status,    // {M/IO#, D/C#, W/R#}
+    output logic [31:2]           sc_addr,
+    output logic [3:0]            sc_be,        // active high
+    output logic [31:0]           sc_wdata,
+    input  logic                  sc_ready,     // takes the request this cycle
+    input  logic                  sc_done,      // the cycle ended (read: sc_rdata)
+    input  logic [31:0]           sc_rdata,
     // retire trace: up to 3 uops per cycle, in order
     output logic [2:0]            ret_valid,
     output logic [2:0]            ret_eop,
@@ -109,6 +130,16 @@ module x86_core
     logic         l2_req, l2_we, l2_ready, l2_rvalid;
     logic [31:5]  l2_addr;
     logic [255:0] l2_wdata, l2_rdata;
+    logic         l2_rcache;
+    logic [31:16] mem_rd_region;     // of the memory read in flight (x86_uc learns it)
+    logic         fl_l1, fl_l2, l1i_fl_done, l1d_fl_done, l2_fl_done;
+    always_ff @(posedge clk)
+        if (rst) {fl_l1, fl_l2} <= '0;
+        else if (fl_l2) begin
+            if (l2_fl_done) {fl_l1, fl_l2} <= '0;
+        end else if (fl_l1) fl_l2 <= l1i_fl_done && l1d_fl_done;
+        else fl_l1 <= cache_flush;
+    always_ff @(posedge clk) if (mem_req && mem_ready && !mem_we) mem_rd_region <= mem_addr[31:16];
     assign l2_req = (im_req || dm_req) && !rd_busy;
     assign l2_we = !im_req && dm_we;
     assign l2_addr = im_req ? im_addr : dm_addr;
@@ -128,9 +159,10 @@ module x86_core
 `endif
     end
     x86_l2 u_l2 (.clk(clk), .rst(rst), .req(l2_req), .we(l2_we), .addr(l2_addr), .wdata(l2_wdata),
-                 .ready(l2_ready), .rvalid(l2_rvalid), .rdata(l2_rdata),
+                 .ready(l2_ready), .rvalid(l2_rvalid), .rdata(l2_rdata), .rcacheable(l2_rcache),
                  .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
-                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata));
+                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
+                 .fl_req(fl_l2), .fl_done(l2_fl_done));
 
     // L1I; stores to code (snoop, invalidation, fetch hold), its misses
     // after the older stores to the line (sq_busy) and the L1D probe
@@ -141,13 +173,16 @@ module x86_core
     logic [8*30-1:0]   ic_bytes;
     logic [1:0][31:5]  sn_line;
     logic [31:5]       ic_miss_line, d_line;
-    x86_l1i u_l1i (.clk(clk), .rst(rst), .pc_n(fetch_next), .pc_f(fetch_pc),
+    logic a20_q;                     // the A20 mask in effect
+    x86_l1i u_l1i (.clk(clk), .rst(rst), .pc_n({fetch_next[31:21], fetch_next[20] & !a20_q, fetch_next[19:4]}),
+                   .pc_f({fetch_pc[31:21], fetch_pc[20] & !a20_q, fetch_pc[19:4]}),
                    .hold(code_pend || code_pend_q), .hit(ic_hit), .bytes(ic_bytes),
                    .sn_line(sn_line), .sn_hit(ic_sn_hit),
                    .inv(ic_inv), .inv_line(d_line),
                    .miss_line(ic_miss_line), .sq_busy(ic_sq_busy), .pr_req(pr_req), .pr_done(pr_done),
                    .mem_req(im_req), .mem_addr(im_addr), .mem_ready(im_ready),
-                   .mem_rvalid(im_rvalid), .mem_rdata(l2_rdata));
+                   .mem_rvalid(im_rvalid), .mem_rdata(l2_rdata), .mem_rcacheable(l2_rcache),
+                   .fl_req(fl_l1), .fl_done(l1i_fl_done));
 
     x86_frontend fe (.clk(clk), .rst(rst), .redirect(fe_redirect), .redirect_pc(fe_redirect_pc),
                      .take(dec_take), .fetch_next(fetch_next), .fetch_pc(fetch_pc),
@@ -400,7 +435,8 @@ module x86_core
                 if (e.kind == K_HLT) begin r_halt = 1'b1; stop = 1'b1; end
                 if (e.kind == K_ILL || e.fault) begin r_halt = 1'b1; r_ill = 1'b1; stop = 1'b1; end
                 if (e.kind == K_ST && e.smc) smc = 1'b1;
-                if (e.kind == K_BR && e.mispred || e.kind == K_DF || smc && e.eop) begin
+                if (e.kind == K_BR && e.mispred || e.kind == K_DF || smc && e.eop
+                    || a20m != a20_q && e.eop && e.kind != K_BR) begin
                     r_flush = 1'b1;
                     r_flush_pc = e.kind == K_BR && e.mispred ? e.redirect_pc : e.next_eip;
                     r_btb = e.btbi;
@@ -710,6 +746,12 @@ module x86_core
         return (r.u.us1 ? r.src[0].value : 32'd0)
              + (r.u.us2 ? r.src[1].value << r.u.scale : 32'd0) + r.u.imm;
     endfunction
+    // the memory address of a load / store: A20 masked
+    function automatic logic [31:0] maddr(input rs_t r);
+        logic [31:0] a;
+        a = agu(r);
+        return {a[31:21], a[20] & !a20_q, a[19:0]};
+    endfunction
 
     rs_t [NP-1:0]     xr;    // issue registers with resolved operands
     logic [NA-1:0][31:0] alu_y;
@@ -806,19 +848,33 @@ module x86_core
 
     logic        a_ok, a_fwd, a_hit;
     logic [31:0] a_fdata, load_data;
-    always_comb a_ok = load_ok(ix[2].sq_snap, agu(xr[2]), ix[2].u.osz, a_fwd, a_fdata) && (a_fwd || a_hit);
+    logic        uc_l, uc_hit, uc_s, uc_sdone, l1_drain;
+    logic [31:0] uc_data;
+    always_comb a_ok = load_ok(ix[2].sq_snap, maddr(xr[2]), ix[2].u.osz, a_fwd, a_fdata)
+                       && (uc_l ? uc_hit : a_fwd || a_hit);
+    assign drain = l1_drain || uc_sdone;
+    x86_uc u_uc (.clk(clk), .rst(rst), .forget(fl_l2 && l2_fl_done), .learn(mem_rvalid && !mem_cacheable), .learn_region(mem_rd_region),
+                 .l_addr(maddr(xr[2])), .l_size(ix[2].u.osz),
+                 .l_go(ix_valid[2] && uc_l && ix[2].tag == rob_head && sq_head == sq_cmt),
+                 .l_uc(uc_l), .l_hit(uc_hit), .l_data(uc_data), .retire(ret_valid[0]),
+                 .s_valid(sq_head != sq_cmt), .s_addr(sq[sq_head[SQ_W-1:0]].addr),
+                 .s_size(sq[sq_head[SQ_W-1:0]].size), .s_data(sq[sq_head[SQ_W-1:0]].data),
+                 .s_uc(uc_s), .s_done(uc_sdone),
+                 .sc_req(sc_req), .sc_status(sc_status), .sc_addr(sc_addr), .sc_be(sc_be), .sc_wdata(sc_wdata),
+                 .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata));
 
     // ---------------- M: L1D data ----------------
     logic        m_ok;
     x86_l1d u_l1d (.clk(clk), .rst(rst),
-                   .a_valid(ix_valid[2]), .a_addr(agu(xr[2])), .a_size(ix[2].u.osz), .a_hit(a_hit),
+                   .a_valid(ix_valid[2] && !uc_l), .a_addr(maddr(xr[2])), .a_size(ix[2].u.osz), .a_hit(a_hit),
                    .m_addr(am_addr), .m_data(load_data),
-                   .d_valid(sq_head != sq_cmt), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
+                   .d_valid(sq_head != sq_cmt && !uc_s), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
                    .d_size(sq[sq_head[SQ_W-1:0]].size), .d_data(sq[sq_head[SQ_W-1:0]].data),
-                   .d_done(drain), .d_step(d_step), .d_line(d_line),
+                   .d_done(l1_drain), .d_step(d_step), .d_line(d_line),
                    .pr_req(pr_req), .pr_line(ic_miss_line), .pr_done(pr_done),
                    .mem_req(dm_req), .mem_we(dm_we), .mem_addr(dm_addr), .mem_wdata(l2_wdata),
-                   .mem_ready(dm_ready), .mem_rvalid(dm_rvalid), .mem_rdata(l2_rdata));
+                   .mem_ready(dm_ready), .mem_rvalid(dm_rvalid), .mem_rdata(l2_rdata), .mem_rcacheable(l2_rcache),
+                   .fl_req(fl_l1), .fl_done(l1d_fl_done));
     assign m_ok = am_ok && !md_done;   // bus 2 taken by mul/div: replay
 
     // ---------------- stores to code ----------------
@@ -826,7 +882,7 @@ module x86_core
     logic st_cross;
     always_comb begin
         logic [31:0] a;
-        a = agu(xr[4]);
+        a = maddr(xr[4]);
         st_cross = 6'(a[4:0]) + 6'((1 << ix[4].u.osz) - 1) > 6'd31;
         sn_line[0] = a[31:5];
         sn_line[1] = a[31:5] + 27'(st_cross);
@@ -955,20 +1011,22 @@ module x86_core
         ix_on2 <= on2_n;
         ix_slot <= slot_of(grant[2]);
         am_tag <= ix[2].tag;
-        am_addr <= agu(xr[2]);
+        am_addr <= maddr(xr[2]);
         am_data <= ix[2].u.us3 ? byte_hi(xr[2].src[2].value, ix[2].u.hi3) : ix[2].u.imm2;
         am_osz <= ix[2].u.osz;
         am_lext <= ix[2].u.lext;
         am_dhi <= ix[2].u.dhi;
         am_ok <= a_ok;
-        am_fwd <= a_fwd;
-        am_fdata <= a_fdata;
+        am_fwd <= a_fwd || uc_l;
+        am_fdata <= uc_l ? uc_data : a_fdata;
         am_slot <= ix_slot;
     end
 
     // ---------------- state update ----------------
     always_ff @(posedge clk) begin
         flush <= r_flush && !rst;
+        if (rst) a20_q <= 1'b0;
+        else if (r_flush) a20_q <= a20m;
         smc_q <= r_smc && !rst;
         code_pend_q <= code_pend;
         flush_pc <= r_flush_pc;
@@ -1058,7 +1116,7 @@ module x86_core
                 if (ix_valid[4] && !ix[4].issued) begin
                     sq[ix[4].sq_idx].addr_valid <= 1'b1;
                     sq[ix[4].sq_idx].size <= ix[4].u.osz;
-                    sq[ix[4].sq_idx].addr <= agu(xr[4]);
+                    sq[ix[4].sq_idx].addr <= maddr(xr[4]);
                     sq[ix[4].sq_idx].code <= ic_sn_hit;
                     sq[ix[4].sq_idx].two_lines <= st_cross;
                     rob[ix[4].tag].smc <= ic_sn_hit;

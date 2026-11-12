@@ -9,6 +9,13 @@
 // flagged store invalidates every way of its set (the core holds fetch
 // meanwhile). A miss waits while an older store to its line is queued,
 // then the L1D writes the line back if dirty (probe), then it reads L2.
+// Reset clears the tags, a set per clock (S_CLR), before the first lookup.
+// A line that came without KEN# (uncached code: a ROM before shadowing) is
+// not installed; the last two (a block may need two lines) are kept in a
+// buffer of their own (nc_*) and hit from there, until a store to code
+// drains into one.
+// Flush: fl_req held; a miss not yet at L2 is dropped, one at L2 finishes,
+// then S_CLR (and the buffer); fl_done until fl_req drops, no hit or miss.
 module x86_l1i
     import x86_pkg::*;
 (
@@ -34,7 +41,11 @@ module x86_l1i
     output logic [31:5]     mem_addr,
     input  logic            mem_ready, // takes the request this cycle
     input  logic            mem_rvalid,
-    input  logic [255:0]    mem_rdata
+    input  logic [255:0]    mem_rdata,
+    input  logic            mem_rcacheable,
+    // flush
+    input  logic            fl_req,
+    output logic            fl_done
 );
     localparam int SETS = 128, WAYS = 4, SW = $clog2(SETS), TW = 32 - 5 - SW;
 
@@ -48,8 +59,9 @@ module x86_l1i
         return pc[4] && b == 0 ? pc[31:5] + 27'd1 : pc[31:5];
     endfunction
 
-    typedef enum logic [2:0] {S_IDLE, S_SQ, S_PROBE, S_REQ, S_WAIT} st_t;
+    typedef enum logic [2:0] {S_IDLE, S_SQ, S_PROBE, S_REQ, S_WAIT, S_CLR} st_t;
     st_t                         st;
+    logic [SW-1:0]               clr;      // S_CLR: the set cleared this clock
     logic                        fill;     // line f_line into way f_way
     logic                        f_stale;  // a store to code drained into its set meanwhile
     logic [31:5]                 f_line;
@@ -57,11 +69,16 @@ module x86_l1i
     logic [1:0][SW-1:0]          n_set;
     tg_t  [1:0][WAYS-1:0]        t_rd, s_rd;
     logic [1:0][WAYS-1:0][127:0] d_rd;
+    logic [1:0]                  nc_valid;
+    logic [1:0][31:5]            nc_line;
+    logic [1:0][255:0]           nc_data;
+    logic                        nc_rr;      // the entry the next uncached fill takes
+    logic                        flushing;
     // tag writes: an invalidation (every way of its set) first, else the fill
     logic [SW-1:0]               t_wa;
     tg_t                         t_wd;
-    assign t_wa = inv ? inv_line[5 +: SW] : f_line[5 +: SW];
-    assign t_wd = '{v: !inv && !f_stale, tag: f_line[31 -: TW]};
+    assign t_wa = st == S_CLR ? clr : inv ? inv_line[5 +: SW] : f_line[5 +: SW];
+    assign t_wd = '{v: !inv && !f_stale && st != S_CLR, tag: f_line[31 -: TW]};
     always_comb
         for (int b = 0; b < 2; b++) begin
             logic [31:5] l;
@@ -75,7 +92,7 @@ module x86_l1i
             (* ramstyle = "no_rw_check" *) tg_t t [SETS];
             (* ramstyle = "no_rw_check" *) logic [127:0] d [SETS];
             initial for (int i = 0; i < SETS; i++) t[i] = '0;
-            assign t_we = inv || fill && f_way == 2'(gw);
+            assign t_we = st == S_CLR || inv || fill && mem_rcacheable && f_way == 2'(gw);
             always_ff @(posedge clk) begin
                 if (t_we) t[t_wa] <= t_wd;
                 if (fill && f_way == 2'(gw)) d[f_line[5 +: SW]] <= mem_rdata[128 * gb +: 128];
@@ -97,13 +114,18 @@ module x86_l1i
             l = bank_line(pc_f, b);
             b_hit[b] = 1'b0;
             b_data[b] = d_rd[b][0];
+            for (int e = 0; e < 2; e++)
+                if (nc_valid[e] && nc_line[e] == l) begin
+                    b_hit[b] = 1'b1;
+                    b_data[b] = nc_data[e][128 * b +: 128];
+                end
             for (int w = 0; w < WAYS; w++)
                 if (t_rd[b][w].v && t_rd[b][w].tag == l[31 -: TW]) begin
                     b_hit[b] = 1'b1;
                     b_data[b] = d_rd[b][w];
                 end
         end
-        hit = b_hit == 2'b11 && !filled && !hold;
+        hit = b_hit == 2'b11 && !filled && !hold && !fl_req && st != S_CLR;
         bytes = 240'(pc_f[4] ? {b_data[0], b_data[1]} : {b_data[1], b_data[0]});
     end
 
@@ -112,6 +134,7 @@ module x86_l1i
         sn_hit = 1'b0;
         for (int b = 0; b < 2; b++) begin
             if (st != S_IDLE && sn_line[b] == f_line) sn_hit = 1'b1;
+            for (int e = 0; e < 2; e++) if (nc_valid[e] && sn_line[b] == nc_line[e]) sn_hit = 1'b1;
             for (int w = 0; w < WAYS; w++)
                 if (s_rd[b][w].v && s_rd[b][w].tag == sn_line[b][31 -: TW]) sn_hit = 1'b1;
         end
@@ -126,15 +149,35 @@ module x86_l1i
     assign fill = st == S_WAIT && mem_rvalid;
     always_ff @(posedge clk) begin
         if (rst) begin
-            st <= S_IDLE;
+            st <= S_CLR;
+            clr <= '0;
             filled <= 1'b0;
+            nc_valid <= '0;
+            nc_rr <= 1'b0;
             rr <= 2'd0;
+            flushing <= 1'b0;
+            fl_done <= 1'b0;
         end else begin
+            if (!fl_req) fl_done <= 1'b0;
             filled <= fill || inv;
+            for (int e = 0; e < 2; e++) if (inv && nc_line[e] == inv_line) nc_valid[e] <= 1'b0;
+            if (fill && !mem_rcacheable) begin
+                nc_valid[nc_rr] <= !f_stale;
+                nc_line[nc_rr] <= f_line;
+                nc_data[nc_rr] <= mem_rdata;
+                nc_rr <= !nc_rr;
+            end
             if (inv && st != S_IDLE && inv_line[5 +: SW] == f_line[5 +: SW]) f_stale <= 1'b1;
             case (st)
                 S_IDLE:
-                    if (b_hit != 2'b11 && !filled && !hold) begin
+                    if (fl_req) begin
+                        if (!fl_done) begin
+                            flushing <= 1'b1;
+                            nc_valid <= '0;
+                            clr <= '0;
+                            st <= S_CLR;
+                        end
+                    end else if (b_hit != 2'b11 && !filled && !hold) begin
                         logic mb;
                         mb = b_hit[pc_f[4]] ? !pc_f[4] : pc_f[4];
                         f_line <= bank_line(pc_f, int'(mb));
@@ -143,10 +186,19 @@ module x86_l1i
                         rr <= rr + 2'd1;
                         st <= S_SQ;
                     end
-                S_SQ: if (!sq_busy) st <= S_PROBE;
-                S_PROBE: if (pr_done) st <= S_REQ;
+                // the drain waits for the flush: a miss behind a store is dropped
+                S_SQ: if (fl_req) st <= S_IDLE; else if (!sq_busy) st <= S_PROBE;
+                S_PROBE: if (fl_req) st <= S_IDLE; else if (pr_done) st <= S_REQ;
                 S_REQ: if (mem_ready) st <= S_WAIT;
                 S_WAIT: if (mem_rvalid) st <= S_IDLE;
+                S_CLR: begin
+                    clr <= clr + 1'd1;
+                    if (clr == '1) begin
+                        st <= S_IDLE;
+                        fl_done <= flushing;
+                        flushing <= 1'b0;
+                    end
+                end
                 default: st <= S_IDLE;
             endcase
         end

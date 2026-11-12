@@ -16,6 +16,12 @@
 //   written back, then the line is read and written with its tag.
 // - Probe (an L1I miss): the line, if dirty, is written back the same way
 //   and stays, clean.
+// - Reset clears the tags, a set per clock (S_CLR), before the first lookup.
+// - Flush (FLUSH#, WBINVD): fl_req held; every dirty line is written back
+//   (S_SWP, a way per clock, the probe's write-back), then S_CLR; fl_done
+//   until fl_req drops. No hit, miss or drain meanwhile.
+// - A line that came without KEN# is not installed (the victim stays): the
+//   access replays and goes uncached (x86_uc has learned its region).
 module x86_l1d
     import x86_pkg::*;
 (
@@ -47,7 +53,11 @@ module x86_l1d
     output logic [255:0]  mem_wdata,
     input  logic          mem_ready,   // takes the request this cycle
     input  logic          mem_rvalid,
-    input  logic [255:0]  mem_rdata
+    input  logic [255:0]  mem_rdata,
+    input  logic          mem_rcacheable,
+    // flush
+    input  logic          fl_req,
+    output logic          fl_done
 );
     localparam int SETS = 128, WAYS = 4, SW = $clog2(SETS), TW = 32 - 5 - SW;
 
@@ -77,7 +87,7 @@ module x86_l1d
     genvar gc, gw;
     generate for (gc = 0; gc < 3; gc = gc + 1) begin : tc
         for (gw = 0; gw < WAYS; gw = gw + 1) begin : tw
-            x86_ram_async #(.W($bits(tg_t)), .N(SETS)) t (.clk(clk), .we(t_we && t_way == 2'(gw)),
+            x86_ram_async #(.W($bits(tg_t)), .N(SETS)) t (.clk(clk), .we(t_we && (st == S_CLR || t_way == 2'(gw))),
                                                           .wa(t_set), .wd(t_wd), .ra(t_ra[gc]),
                                                           .q(t_rd[gc][gw]));
         end
@@ -99,8 +109,12 @@ module x86_l1d
     end endgenerate
 
     // ---------------- miss handling
-    typedef enum logic [2:0] {S_IDLE, S_EVRD, S_EVDATA, S_WB, S_REQ, S_WAIT, S_FILL} st_t;
+    typedef enum logic [3:0] {S_IDLE, S_EVRD, S_EVDATA, S_WB, S_REQ, S_WAIT, S_FILL, S_CLR, S_SWP} st_t;
     st_t            st;
+    logic [SW-1:0]  clr;           // S_CLR: the set cleared this clock
+    logic [SW+1:0]  sw;            // S_SWP: {set, way} looked at this clock
+    logic           sweeping, swept;
+    tg_t            sw_tg;
     logic [31:5]    f_line;        // the line being filled
     logic [1:0]     f_way;
     logic [TW-1:0]  v_tag;         // its victim
@@ -133,7 +147,9 @@ module x86_l1d
         a_need[1] = (a_dw[0] ? m8[3:0] : m8[7:4]) != 4'd0;
     end
     assign probing = st == S_IDLE && pr_req;
-    assign t_ra = {probing ? pr_line[5 +: SW] : d_line[5 +: SW], set_of(a_bdw[1]), set_of(a_bdw[0])};
+    assign t_ra = {st == S_SWP ? sw[2 +: SW] : probing ? pr_line[5 +: SW] : d_line[5 +: SW], set_of(a_bdw[1]), set_of(a_bdw[0])};
+    assign sw_tg = t_rd[2][sw[1:0]];
+    assign fl_done = swept;
     always_comb begin
         for (int b = 0; b < 2; b++) begin
             a_bhit[b] = 1'b0;
@@ -146,7 +162,7 @@ module x86_l1d
         end
         // the load port is taken by a victim read in S_EVRD, the fill may
         // write the row the load reads in S_FILL
-        a_hit = st != S_EVRD && st != S_FILL && (!a_need[0] || a_bhit[0]) && (!a_need[1] || a_bhit[1]);
+        a_hit = st != S_EVRD && st != S_FILL && st != S_CLR && !fl_req && (!a_need[0] || a_bhit[0]) && (!a_need[1] || a_bhit[1]);
     end
 
     // M: the 8-byte window from the address's dword, then its 4 bytes
@@ -188,7 +204,7 @@ module x86_l1d
             end
         // not into the line being evicted / filled (its data is captured),
         // nor while a probe uses the tag port
-        d_write = d_valid && d_hit && st != S_FILL && !probing && !(st == S_WB && probe)
+        d_write = d_valid && d_hit && !fl_req && st != S_FILL && st != S_CLR && st != S_SWP && !probing && !(st == S_WB && probe)
                   && !(st != S_IDLE && d_line[5 +: SW] == f_line[5 +: SW] && d_way == f_way);
         d_done = d_write && (d_second || !d_cross);
     end
@@ -226,7 +242,10 @@ module x86_l1d
         t_set = '0;
         t_way = '0;
         t_wd = '0;
-        if (st == S_FILL) begin
+        if (st == S_CLR) begin
+            t_we = 1'b1;
+            t_set = clr;
+        end else if (st == S_FILL) begin
             for (int b = 0; b < 2; b++) begin
                 b_wa[b] = {f_line[5 +: SW], f_way};
                 b_be[b] = '1;
@@ -261,7 +280,7 @@ module x86_l1d
         end
         // a miss (a load in A first, else the drain) when the MSHR is free
         miss_a = a_valid && st == S_IDLE && !pr_req && (a_need[0] && !a_bhit[0] || a_need[1] && !a_bhit[1]);
-        miss = st == S_IDLE && !pr_req && (miss_a || d_valid && !d_hit);
+        miss = st == S_IDLE && !pr_req && !fl_req && (miss_a || d_valid && !d_hit);
         miss_b = !(a_need[0] && !a_bhit[0]);   // the load's missing line
         miss_line = miss_a ? a_bdw[miss_b][29:3] : d_line;
         miss_ways = miss_a ? t_rd[miss_b] : t_rd[2];
@@ -269,11 +288,15 @@ module x86_l1d
 
     always_ff @(posedge clk) begin
         if (rst) begin
-            st <= S_IDLE;
+            st <= S_CLR;
+            clr <= '0;
             d_second <= 1'b0;
             rr <= 2'd0;
+            sweeping <= 1'b0;
+            swept <= 1'b0;
         end else begin
             if (d_write) d_second <= !d_done;
+            if (!fl_req) swept <= 1'b0;
             case (st)
                 S_IDLE:
                     if (probing) begin
@@ -284,6 +307,10 @@ module x86_l1d
                             probe <= 1'b1;
                             st <= S_EVRD;
                         end
+                    end else if (fl_req && !swept) begin
+                        sweeping <= 1'b1;
+                        sw <= '0;
+                        st <= S_SWP;
                     end else if (miss) begin
                         logic [1:0] w;
                         logic dirty;
@@ -306,14 +333,36 @@ module x86_l1d
                     end
                     st <= S_WB;
                 end
-                S_WB: if (mem_ready) st <= probe ? S_IDLE : S_REQ;
+                S_WB: if (mem_ready) st <= !probe ? S_REQ : sweeping ? S_SWP : S_IDLE;
+                S_SWP:
+                    if (sw_tg.v && sw_tg.d) begin   // written back, then looked at again (clean)
+                        f_line <= {sw_tg.tag, sw[2 +: SW]};
+                        f_way <= sw[1:0];
+                        v_tag <= sw_tg.tag;
+                        probe <= 1'b1;
+                        st <= S_EVRD;
+                    end else begin
+                        sw <= sw + 1'd1;
+                        if (sw == '1) begin
+                            clr <= '0;
+                            st <= S_CLR;
+                        end
+                    end
                 S_REQ: if (mem_ready) st <= S_WAIT;
                 S_WAIT:
                     if (mem_rvalid) begin
                         f_buf <= mem_rdata;
-                        st <= S_FILL;
+                        st <= mem_rcacheable ? S_FILL : S_IDLE;
                     end
                 S_FILL: st <= S_IDLE;
+                S_CLR: begin
+                    clr <= clr + 1'd1;
+                    if (clr == '1) begin
+                        st <= S_IDLE;
+                        swept <= sweeping;
+                        sweeping <= 1'b0;
+                    end
+                end
                 default: st <= S_IDLE;
             endcase
         end

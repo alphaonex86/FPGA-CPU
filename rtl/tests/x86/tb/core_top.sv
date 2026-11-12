@@ -7,6 +7,9 @@
 // With S3_BUS defined (rtl/tools/s3_test.sh) the memory sits behind the Socket 3 bus instead: s3_bus,
 // the pins, FPGAcommon's chipset front end cpu486_bif (its protocol rules) and a 16-bit host port
 // slave answering +host_lat=<cycles> after the request (default 0); bus contention stops the run.
+// Single cycles (uncached: the VGA window) take one clock without S3_BUS; a line access to that
+// window stops the run. Without S3_BUS the 64 KB at 0x80000 come without KEN#: an L1D or L2 line
+// installed from there stops the run (the core must learn the region and go uncached).
 module core_top (
     input  logic clk,
     input  logic rst,
@@ -23,6 +26,11 @@ module core_top (
     logic [31:5] mem_addr, rd_line;
     logic [255:0] mem_wdata, mem_rdata;
     int          mem_lat, rd_cnt;
+    logic        sc_req, sc_ready, sc_done, mem_cacheable;
+    logic [2:0]  sc_status;
+    logic [31:2] sc_addr;
+    logic [3:0]  sc_be;
+    logic [31:0] sc_wdata, sc_rdata;
     logic [2:0]  ret_valid, ret_eop, ret_wdst, ret_wflags;
     logic [2:0][31:0] ret_next_eip, ret_value;
     logic [2:0][3:0]  ret_dst;
@@ -46,13 +54,21 @@ module core_top (
     logic        refill;
     logic [31:0] st_x [4], st_rn [4];   // instructions extracted, uops renamed per cycle
 
+    // +flush=<n>: FLUSH# for two clocks every n clocks (the trace must not change)
+    int   flush_n;
+    logic flush_tb;
+    initial if (!$value$plusargs("flush=%d", flush_n)) flush_n = 0;
+    assign flush_tb = flush_n > 0 && cycles % flush_n < 2;
+
 `ifdef S3_BUS
-    x86_core core (.clk(clk), .rst(s3_rst), .reset_eip(32'h1000),
+    x86_core core (.clk(clk), .rst(s3_rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
 `else
-    x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000),
+    x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
 `endif
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
+                   .mem_cacheable(mem_cacheable), .sc_req(sc_req), .sc_status(sc_status), .sc_addr(sc_addr), .sc_be(sc_be), .sc_wdata(sc_wdata),
+                   .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
                    .ret_valid(ret_valid), .ret_eop(ret_eop), .ret_next_eip(ret_next_eip),
                    .ret_wdst(ret_wdst), .ret_dst(ret_dst), .ret_value(ret_value),
                    .ret_wflags(ret_wflags), .ret_flags(ret_flags),
@@ -76,15 +92,15 @@ module core_top (
     assign d_pin  = d_oe ? d_o : chip_d_oe ? chip_d : 32'hffff_ffff;
     s3_bus bus (.clk(clk), .rst(s3_rst),
                 .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
-                .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(),
-                .sc_req(1'b0), .sc_status(3'd0), .sc_lock(1'b0), .sc_addr(30'd0), .sc_be(4'd0), .sc_wdata(32'd0),
-                .sc_ready(), .sc_done(), .sc_rdata(),
-                .quiet(1'b1), .stopped(), .snoop(), .snoop_addr(), .err_bs(),
+                .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
+                .sc_req(sc_req), .sc_status(sc_status), .sc_lock(1'b0), .sc_addr(sc_addr), .sc_be(sc_be),
+                .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
+                .quiet(1'b1), .stopped(), .snoop(), .snoop_addr(),
                 .a_o(a_o), .a_oe(a_oe), .a_i(a_o[31:4]), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_n), .lock_n(), .cache_n(), .ctl_oe(), .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe),
                 .d_i(d_pin), .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]}), .pchk_n(),
                 .hlda(), .breq(), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n), .hold(hold), .ahold(ahold),
-                .boff_n(boff_n), .eads_n(eads_n), .a20m_n(1'b1), .stpclk_n(1'b1), .bs8_n(1'b1), .bs16_n(1'b1));
+                .boff_n(boff_n), .eads_n(eads_n), .stpclk_n(1'b1), .bs8_n(1'b1), .bs16_n(1'b1));
     cpu486_bif #(.MEM_TOP(32'h0010_0000)) chipset (
                 .clk(clk), .rst_n(!rst), .cpu_a(a_o), .cpu_be_n(be_n), .cpu_ads_n(ads_n), .cpu_mio_n(mio),
                 .cpu_dc_n(dc), .cpu_wr_n(wr), .cpu_blast_n(blast_n), .cpu_d_i(d_pin), .cpu_d_o(chip_d),
@@ -120,7 +136,20 @@ module core_top (
     end
     assign mem_ready = !rd_pend;
     assign mem_rvalid = rd_pend && rd_cnt == 0;
+    assign sc_ready = !sc_done;
+    assign mem_cacheable = rd_line[31:16] != 16'h0008;
+    always_ff @(posedge clk)
+        if (!rst && (core.u_l1d.st == core.u_l1d.S_FILL && core.u_l1d.f_line[31:16] == 16'h0008
+                     || core.u_l2.fill && core.u_l2.t_wd.v && core.u_l2.e_addr[31:16] == 16'h0008)) begin
+            $display("FAIL: a line without KEN# installed (cycle %0d)", cycles);
+            $finish;
+        end
 `endif
+    always_ff @(posedge clk)
+        if (!rst && mem_req && mem_ready && mem_addr[31:17] == 15'h0005) begin
+            $display("FAIL: a line access to the uncached window, %08x (cycle %0d)", {mem_addr, 5'd0}, cycles);
+            $finish;
+        end
 
     initial begin
         string image, tname;
@@ -155,6 +184,9 @@ module core_top (
             {st_skew, st_alu3, st_mem2, st_replay, st_replay_md, st_miss, st_wb} <= '0;
             {st_imiss, st_dmiss, st_dwb} <= '0;
             rd_pend <= 1'b0;
+`ifndef S3_BUS
+            sc_done <= 1'b0;
+`endif
             refill <= 1'b0;
             for (int i = 0; i < 6; i++) st_fl[i] <= 32'd0;
             for (int i = 0; i < 8; i++) st_wait_kind[i] <= 32'd0;
@@ -241,6 +273,12 @@ module core_top (
                 else st_miss <= st_miss + 32'd1;
             end
 `ifndef S3_BUS
+            sc_done <= sc_req && sc_ready;
+            if (sc_req && sc_ready)
+                for (int b = 0; b < 4; b++) begin
+                    if (!sc_status[0]) sc_rdata[8*b +: 8] <= mem[20'({sc_addr, 2'(b)})];
+                    else if (sc_be[b]) mem[20'({sc_addr, 2'(b)})] <= sc_wdata[8*b +: 8];
+                end
             if (mem_rvalid) rd_pend <= 1'b0;
             else if (rd_pend) rd_cnt <= rd_cnt - 1;
             if (mem_req && mem_ready) begin

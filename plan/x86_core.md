@@ -344,15 +344,33 @@ replicated per read port plus a live-value table.
    (z486 repo, reference only).
    Memory system for a real board (2026-11-11 review of rtl/s3; each is a fault on the UMC
    board, none changes the PCB):
-   - RESET invalidates L1I / L1D / L2 (today only the FPGA configuration clears them); SRESET
-     keeps them (DX4 WB datasheet).
-   - A20M# masks bit 20 before the caches (today s3_bus masks it at the pins: the caches alias
-     1 MB apart).
+   - SRESET keeps the caches (DX4 WB datasheet): a reset at an instruction boundary without the
+     clear.
    - Uncached accesses (KEN# inactive, CR0.CD, PCD, the VGA window A0000-BFFFF from reset): exact
      size, in order, not speculative, through the bus unit's single-cycle port (today every miss
      is a 32-byte read and every line is cached and written back: text mode writes never reach the
      screen, VGA latches see extra reads).
-   - FLUSH# / WBINVD (write back + invalidate all), INVD, and the snoop: EADS# looks the line up in
+   Done 2026-11-11: RESET clears L1I / L1D / L2 (a set per clock); A20M# in the core (fetch, load,
+   store addresses; a change flushes at the next non-branch instruction boundary), s3_bus no
+   longer masks. Uncached (`x86_uc`): the VGA window, and 64 KB regions learned from a line that
+   came without KEN# (operator: learn per region; 8 entries, the oldest forgotten and learned
+   again by one line read). L1D / L2 never install such a line (a line in the caches is cacheable
+   by construction, so the table only answers for misses); the access replays and goes uncached:
+   a load once it is the ROB head with every older store drained (one or two single cycles into a
+   one-entry buffer it forwards from), a store from the store queue head as single writes. Code
+   from such a region runs from a two-line buffer in the L1I. Costs: one speculative line read of
+   an unknown MMIO region; a region that turns cacheable (shadowing) stays UC until reset.
+   Tests: `x5_uc.S`, `x6_ken.S` (core_top: 0x80000-0x8FFFF without KEN#, stops on a line
+   installed from there or a line access to the VGA window).
+   FLUSH# done 2026-11-11 (`cache_flush`): L1D (dirty lines back into L2, a way per clock, then
+   the clear) and L1I (an L1I miss not yet at L2 dropped) first, then L2 (a set per 2 clocks, dirty
+   ways to memory, then the clear), then the learned UC regions; every cache blocked until the L2
+   is done; held: again. ~7000 clocks with 256 KB. Standard mode: no special cycle. Test:
+   `x86_core_test.sh` runs every test a second time with `+flush=20011` (FLUSH# for 2 clocks every
+   20011), trace unchanged; an L1D sweep without its write-backs fails it.
+   Open: WBINVD / INVD (the same engine, plus their special cycles: M5 ISA), the flush acknowledge
+   cycles in enhanced mode.
+   - The snoop: EADS# looks the line up in
      L1D / L2 dirty tags within a clock (HITM# is due 2 clocks after EADS#), then the line is
      handed to the bus unit (snoop write-back, 0-4-8-C burst with CACHE#, HITM# until its last
      BRDY#) and kept clean or invalidated (INV). The UMC board runs this enhanced bus mode with its
