@@ -46,3 +46,9 @@ cycles per program after its warm-up, +mem_lat=10.
 | date | commit | config | change | coremark | mix | core | string | bits | lat_8k | lat_64k | lat_256k | lat_1m | bw_8k | bw_64k | bw_256k | bw_1m | copy_256k | code_11k | code_87k | codedata_27k | phase | fpu | geomean |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 2026-11-12 | f42f776 + bench | default | baseline of set 2 (f42f776 RTL) | 1.681 | 1.700 | 1.418 | 1.163 | 1.266 | 1.279 | 0.486 | 0.454 | 0.231 | 2.710 | 1.787 | 1.711 | 1.671 | 1.124 | 0.781 | 0.602 | 0.955 | 1.911 | n/a | 1.096 |
+
+Set 79786ccb: 1000000 cycles per program after its warm-up, +mem_lat=10, generic -march=i386, full -march=pentiumpro; 42 programs.
+
+| date | commit | config | change | lat | bw | code | phase | core | app_i386 | app_full | fp | all |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 2026-11-12 | 4379a20-dirty | default | baseline of set 3 | 0.504 | 1.602 | 1.030 | 1.739 | 1.205 | 1.105 | 1.136 | n/a | 1.096 |
