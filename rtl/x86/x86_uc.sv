@@ -98,7 +98,7 @@ module x86_uc
                         u_we <= 1'b0;
                         u_addr <= l_addr;
                         u_m <= bmask(l_addr[1:0], l_size);
-                        second <= bmask(l_addr[1:0], l_size)[3:0] == 4'd0;
+                        second <= 1'b0;
                         buf_addr <= l_addr;
                         buf_size <= l_size;
                         st <= U_REQ;
@@ -106,7 +106,7 @@ module x86_uc
                         u_we <= 1'b1;
                         u_addr <= s_addr;
                         u_m <= bmask(s_addr[1:0], s_size);
-                        second <= bmask(s_addr[1:0], s_size)[3:0] == 4'd0;
+                        second <= 1'b0;
                         u_win <= 64'(s_data) << (8 * s_addr[1:0]);
                         st <= U_REQ;
                     end
