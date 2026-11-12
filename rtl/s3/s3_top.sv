@@ -2,8 +2,8 @@
 // unit, one port per pins.csv signal (board.py: A20M# -> a20m_n, M/IO# -> m_io_n, D7 -> d[7]).
 // Everything runs on the socket's CLK through a PLL in normal mode (the clock at the I/O registers
 // = the clock at the pin; the raw pin -> clock tree path would break input hold); PHASE moves it
-// against the pin clock (later: more input setup, later outputs; 987 ps, 10 VCO / 8 steps, splits the margin of the
-// RDY# / BRDY# -> BLAST# loop evenly on the 5CEFA9F23C8). VCO fixes the PLL at 38 x CLK, so it
+// against the pin clock (later: more input setup, later outputs; 790 ps, 8 VCO / 8 steps, splits the margin of the
+// RDY# / BRDY# -> BLAST# loop evenly on the 5CEFA9F23C8: full build 2026-11-12 at 987 ps, BLAST# out -0.139 ns, RDY# in +0.752). VCO fixes the PLL at 38 x CLK, so it
 // locks from 15.8 to 34.2 MHz (VCO 600-1300 MHz): the 25 / 33 MHz jumpers and the FPGAmotherboard's
 // Stop Grant steps 16.67-33.33 MHz. The core's clock stops while the PLL is unlocked (CLK stopped
 // or changed in Stop Grant): it keeps its state. The bus unit (idle then) stays on the PLL clock
@@ -16,7 +16,7 @@
 // no pin: internal until the JTAG readout.
 module s3_top #(
     parameter string FREQ  = "33.333333 MHz",
-    parameter string PHASE = "987 ps",   // > 0: s3_top.sdc takes the inputs at the next edge
+    parameter string PHASE = "790 ps",   // > 0: s3_top.sdc takes the inputs at the next edge
     parameter string VCO   = "422.222222 MHz"   // 38 / 3 x FREQ
 ) (
     input  wire        clk,
