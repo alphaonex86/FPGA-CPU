@@ -112,13 +112,17 @@ module x86_l2 #(
         (* ramstyle = "no_rw_check" *) tg_t t [SETS];
         (* ramstyle = "no_rw_check" *) tg_t x [SETS];   // the snoop's copy
         initial for (int i = 0; i < SETS; i++) {t[i], x[i]} = '0;
+        // one write port (two write addresses would not map to M10K)
+        logic          tw_e;
+        logic [SW-1:0] tw_a;
+        tg_t           tw_d;
+        assign tw_e = clearing || t_we && w_way == 2'(gw);
+        assign tw_a = clearing ? clr : w_set;
+        assign tw_d = clearing ? '0 : t_wd;
         always_ff @(posedge clk) begin
-            if (clearing) begin
-                t[clr] <= '0;
-                x[clr] <= '0;
-            end else if (t_we && w_way == 2'(gw)) begin
-                t[w_set] <= t_wd;
-                x[w_set] <= t_wd;
+            if (tw_e) begin
+                t[tw_a] <= tw_d;
+                x[tw_a] <= tw_d;
             end
             t_rd[gw] <= t[t_ra];
             x_rd[gw] <= x[ext_line[5 +: SW]];
