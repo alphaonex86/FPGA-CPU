@@ -8,7 +8,8 @@
 // carry exactly the remaining BE# at the same address; a narrow burst must end at its next transfer.
 // Undisturbed (every rate 0), every line read must be two full bursts. +seed=<n> +ops=<n>; +rdy=<percent of transfers ended by RDY#> +boff= +hold= +ahold= +stp= (per mille
 // of clocks); +bs=<percent of narrow pages>; +wb=1: WB/WT# high at RESET (enhanced mode: line writes are
-// write-backs: CACHE# low, every BE#, BS8# / BS16# ignored [Intel486 databook 241731-002]: driven anyway).
+// write-backs: CACHE# low, every BE#, BS8# / BS16# ignored [Intel486 databook 241731-002]: driven anyway;
+// after a FLUSH# (flush_done) the First then Second Flush Acknowledge cycles).
 module bus_tb (
     input  logic clk,
     output logic done,
@@ -18,7 +19,7 @@ module bus_tb (
     logic [31:0] mem [WORDS], shadow [WORDS];
     logic        rst;
     int          seed, ops, p_rdy, p_boff, p_hold, p_ahold, p_stp, p_bs, p_wb;
-    int          n_ops, n_reads, n_burst, n_single, n_boff, n_hold, n_grant, n_snoop, n_narrow, cycle, stp_gap;
+    int          n_ops, n_reads, n_ack, ack_owed, n_burst, n_single, n_boff, n_hold, n_grant, n_snoop, n_narrow, cycle, stp_gap;
     logic [1:0]  width [16];                        // per 4 KB page: 0 32-bit, 1 16-bit, 2 8-bit
 
     // DUT ports
@@ -33,7 +34,7 @@ module bus_tb (
     logic         stopped, snoop, a_oe, ads_n, mio, dc, wr, blast_n, lock_n, cache_n, ctl_oe, d_oe;
     logic [31:4]  snoop_addr;
     logic         snoop_inv, enhanced, inv, inv_1, inv_2;   // INV, and as the snoop pulse sees it
-    logic         pchk_n, hlda, breq, ads_r;
+    logic         pchk_n, hlda, breq, ads_r, fl_done;
     assign ads_n = a_oe ? ads_r : 1'b1;           // the pad: floated with the address, pulled up on the board
     logic         rdy_n, brdy_n, ken_n, hold, ahold, boff_n, eads_n, stpclk_n, bs8_n, bs16_n;
 
@@ -79,7 +80,7 @@ module bus_tb (
                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(sc_lock), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
-                .quiet(1'b1), .stopped(stopped), .snoop(snoop), .snoop_addr(snoop_addr), .snoop_inv(snoop_inv), .enhanced(enhanced),
+                .quiet(1'b1), .flush_done(fl_done), .stopped(stopped), .snoop(snoop), .snoop_addr(snoop_addr), .snoop_inv(snoop_inv), .enhanced(enhanced),
                 .a_o(a_o), .a_oe(a_oe), .a_i(28'h123_4567), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_n), .lock_n(lock_n), .cache_n(cache_n), .ctl_oe(ctl_oe),
                 .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe), .d_i(d_pin),
@@ -140,11 +141,11 @@ module bus_tb (
         rst   <= cycle < 4;
         if (cycle < 4) begin
             ss <= S_IDLE;
-            {mem_req, sc_req, sc_lock, pending, s_drive, hold, ahold, bad_parity} <= '0;
+            {mem_req, sc_req, sc_lock, pending, s_drive, hold, ahold, bad_parity, fl_done} <= '0;
             {rdy_n, brdy_n, ken_n, boff_n, eads_n, stpclk_n} <= '1;
             op <= O_IDLE;
             {done, failed, float_due, bad_q, bad_qq} <= '0;
-            {n_ops, n_reads, n_burst, n_single, n_boff, n_hold, n_grant, n_snoop, n_narrow} <= '0;
+            {n_ops, n_reads, n_ack, ack_owed, n_burst, n_single, n_boff, n_hold, n_grant, n_snoop, n_narrow} <= '0;
             {s_drop, exp_valid} <= '0;
         end else if (!done) begin
             // ---- stimulus
@@ -220,14 +221,16 @@ module bus_tb (
                 sc_lock <= 1'b0;
                 n_ops <= n_ops + 1;
             end
-            if (n_ops == ops && op == O_IDLE && dut.job == 2'd0) begin
+            fl_done <= !fl_done && ack_owed == 0 && roll(2) != 0;         // a FLUSH# ended; the next only after its acknowledges
+            if (fl_done && p_wb != 0) ack_owed <= 2;
+            if (n_ops == ops && op == O_IDLE && dut.job == 2'd0 && ack_owed == 0) begin
                 for (int i = 0; i < WORDS; i++)
                     if (mem[i] != shadow[i]) begin
                         $display("FAIL: memory[%0d] %08x, expected %08x", i, mem[i], shadow[i]);
                         failed <= 1'b1;
                     end
                 if ((p_rdy != 100 && n_burst == 0) || (p_rdy != 0 && n_single == 0) || (p_boff != 0 && n_boff == 0) || (p_hold != 0 && n_hold == 0)
-                    || (p_stp != 0 && n_grant == 0) || (p_ahold != 0 && n_snoop == 0) || (p_bs != 0 && n_narrow == 0))
+                    || (p_stp != 0 && n_grant == 0) || (p_wb != 0 && n_ack == 0) || (p_ahold != 0 && n_snoop == 0) || (p_bs != 0 && n_narrow == 0))
                     fail("a path was never exercised");
                 // undisturbed: every line read is two bursts of four (three continued transfers each)
                 if (p_rdy + p_boff + p_hold + p_ahold + p_stp + p_bs == 0 && n_burst != 6 * n_reads) fail("a burst was cut short");
@@ -305,9 +308,11 @@ module bus_tb (
                     end
                     if (sc_lock && op == O_SINGLE && {mio, dc, wr} != 3'b001 && lock_n) fail("LOCK# high in a locked cycle");
                     if ({mio, dc, wr} == 3'b001) begin
-                        n_grant <= n_grant + 1;
-                        if (a_o != 30'd4 || be_n != 4'b1011) fail("Stop Grant address / BE#");
-                        if (stpclk_n) fail("Stop Grant without STPCLK#");
+                        if (a_o != 30'd4) fail("special cycle address");
+                        if (be_n == 4'b1011) begin
+                            n_grant <= n_grant + 1;
+                            if (stpclk_n) fail("Stop Grant without STPCLK#");
+                        end else if (be_n != (ack_owed == 2 ? 4'b0111 : 4'b1101)) fail("flush acknowledge BE# / order / without FLUSH#");
                     end
                 end
                 default: begin
@@ -330,6 +335,10 @@ module bus_tb (
                         end
                         if (!rdy_n || !blast_n) begin
                             ss <= S_IDLE;
+                            if (s_status == 3'b001 && s_be != 4'b0100) begin    // a flush acknowledge done (a back-off repeats it)
+                                n_ack <= n_ack + 1;
+                                ack_owed <= ack_owed - 1;
+                            end
                             s_drop <= 1'b0;
                             if (!rdy_n && blast_n) n_single <= n_single + 1;
                             if (!s_drop && left != 4'd0 || s_drop && s_left != 4'd0) begin

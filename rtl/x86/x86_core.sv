@@ -28,7 +28,7 @@
 //   non-branch instruction boundary flushes for it (a20_q follows a20m).
 // - cache_flush (FLUSH#): the L1D and L1I first (the L1D writes its dirty lines
 //   back into the L2), then the L2 (into memory), then the learned UC
-//   regions; each cache stays blocked until the last is done. Held: again.
+//   regions; each cache stays blocked until the last is done (flush_done). Held: again.
 // - snoop (EADS#: a bus master wrote snoop_line; enhanced mode: only with
 //   INV): queued (SN_N), each line invalidated in the L2 first, then in the
 //   L1D / L1I (a line those fill from the L2 meanwhile is caught there). A
@@ -48,6 +48,7 @@ module x86_core
     input  logic                  snoop_inv,    // INV (enhanced mode)
     input  logic                  enhanced,     // WB/WT# high at RESET
     output logic                  snoop_err,
+    output logic                  flush_done,   // a FLUSH# write-back + invalidation ended (pulse)
     // memory (L2 lines): a read answered later, writes posted
     output logic                  mem_req,
     output logic                  mem_we,
@@ -144,6 +145,7 @@ module x86_core
     logic         l2_rcache;
     logic [31:16] mem_rd_region;     // of the memory read in flight (x86_uc learns it)
     logic         fl_l1, fl_l2, l1i_fl_done, l1d_fl_done, l2_fl_done;
+    assign flush_done = fl_l2 && l2_fl_done;
     always_ff @(posedge clk)
         if (rst) {fl_l1, fl_l2} <= '0;
         else if (fl_l2) begin

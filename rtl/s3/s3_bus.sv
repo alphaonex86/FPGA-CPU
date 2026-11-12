@@ -25,7 +25,8 @@
 //   floated address: `snoop` with the line address and INV (for the caches). `enhanced`: WB/WT# as
 //   RESET falls.
 // - STPCLK# with the core quiet and no job: Stop Grant special cycle (address 10h, BE2# low), then
-//   no job until it is released.
+//   no job until it is released. Enhanced mode, after the core's FLUSH# (flush_done): the First and
+//   Second Flush Acknowledge cycles (BE3# / BE1# low, A4-A2 = 001) [Intel486 Table 10-9].
 // - Even parity out on DP, PCHK# the clock after a read's data is stored.
 // - BS8# / BS16# (as sampled the clock before the ready, Intel486 10.1.2): a transfer moves the lowest
 //   enabled byte / the enabled bytes of the lowest enabled half; the rest of the dword follows in a
@@ -33,7 +34,7 @@
 //   BLAST# low, so the board ended it anyway; in a burst the next transfer is made the last one
 //   (BLAST# low, its data ignored: BE# cannot follow RDY# within a clock, they are not on the fast
 //   balls) and the rest of the 16-byte block goes as single cycles, not cached.
-// Not yet: HITM# and the snoop write-back, the flush acknowledge cycles, SRESET (plan/x86_core.md M5).
+// Not yet: HITM# and the snoop write-back, SRESET (plan/x86_core.md M5).
 module s3_bus (
     input  logic         clk,
     input  logic         rst,
@@ -58,6 +59,7 @@ module s3_bus (
     output logic [31:0]  sc_rdata,
     // to the core
     input  logic         quiet,           // at an instruction boundary: Stop Grant may be issued
+    input  logic         flush_done,      // the caches finished a FLUSH#
     output logic         stopped,
     output logic         snoop,
     output logic [31:4]  snoop_addr,
@@ -108,6 +110,8 @@ module s3_bus (
     logic [2:0]   beat, beat_n;    // dword of the line
     logic         single;          // the rest of this 16-byte block as single cycles
     logic         grant;           // the job is the Stop Grant cycle
+    logic         ack;             // the job is a flush acknowledge cycle
+    logic [1:0]   ack_due;         // flush acknowledge cycles still to run
     logic [2:0]   status;
     logic [31:2]  s_addr, addr;
     logic [31:0]  s_wdata, wdata;
@@ -124,7 +128,7 @@ module s3_bus (
     logic         ready, ends, burst, write, wback, job_done, prep, start, try, ads_go;
     logic [3:0]   moved, rem_left;
     logic         partial, dw_done;
-    logic         j_grant, j_sc, j_mem;      // a job is taken this clock
+    logic         j_grant, j_ack, j_sc, j_mem;   // a job is taken this clock
     logic         mid_q, bo_entry;           // the first BACKOFF clock of a cycle under way
     // The RDY# / BRDY# / BOFF# loop: these registers meet the pins in one LUT (pin_next). Their next
     // values for "RDY#", "BRDY# only" and "neither / BOFF#" come from registers alone, kept as nodes
@@ -161,17 +165,17 @@ module s3_bus (
     assign prep     = st == IDLE && job != J_NONE;        // the idle clock before a cycle: its registers load
     assign addr     = job == J_SINGLE ? s_addr : {line, beat};
     assign wdata    = job == J_WRITE ? wline[32*beat +: 32] : s_wdata;
-    assign mem_ready = st == IDLE && job == J_NONE && !stopped && !sc_req && stp_s[1];
-    assign sc_ready  = st == IDLE && job == J_NONE && !stopped && (stp_s[1] || lock_on);
+    assign mem_ready = st == IDLE && job == J_NONE && !stopped && !sc_req && stp_s[1] && ack_due == 2'd0;
+    assign sc_ready  = st == IDLE && job == J_NONE && !stopped && (stp_s[1] && ack_due == 2'd0 || lock_on);
 
-    assign try = prep && !ahold_q && !(hold_q && !lock_on && !(job == J_SINGLE && sc_lock && !grant));
+    assign try = prep && !ahold_q && !(hold_q && !lock_on && !(job == J_SINGLE && sc_lock && !grant && !ack));
 
     always_comb begin
         st_n  = st;
         start = 1'b0;
         unique case (st)
             IDLE:
-                if (hold_q && !lock_on && !(job == J_SINGLE && sc_lock && !grant)) st_n = HELD;
+                if (hold_q && !lock_on && !(job == J_SINGLE && sc_lock && !grant && !ack)) st_n = HELD;
                 else start = try;
             T1: st_n = ads_go ? T2 : IDLE;                // ADS# floated by AHOLD: again
             T2: if (ready && ends) st_n = IDLE;
@@ -186,8 +190,9 @@ module s3_bus (
     end
 
     assign j_grant  = !stp_s[1] && st == IDLE && job == J_NONE && !stopped && quiet && !lock_on;
-    assign j_sc     = !j_grant && sc_req && sc_ready;
-    assign j_mem    = !j_grant && !j_sc && mem_req && mem_ready;
+    assign j_ack    = !j_grant && ack_due != 2'd0 && st == IDLE && job == J_NONE && !stopped && !lock_on;
+    assign j_sc     = !j_grant && !j_ack && sc_req && sc_ready;
+    assign j_mem    = !j_grant && !j_ack && !j_sc && mem_req && mem_ready;
     assign bo_entry = st == BACKOFF && mid_q;
     always_comb begin
         logic t2, x_cont, blk_end;
@@ -202,7 +207,7 @@ module s3_bus (
         ao_y = !rst && t2 && blast_n && !partial ? beat_n[1:0] : ao_n;
         bt_n = j_mem ? 3'd0 : beat;
         bt_t = t2 && dw_done ? beat_n : bt_n;
-        rm_n = j_grant ? 4'b0100 : j_sc ? sc_be : j_mem ? 4'hF : rem;
+        rm_n = j_grant ? 4'b0100 : j_ack ? (ack_due == 2'd2 ? 4'b1000 : 4'b0010) : j_sc ? sc_be : j_mem ? 4'hF : rem;
         rm_t = !t2 ? rm_n : dw_done ? 4'hF : partial ? rem_left : rem;
         dr_n = !rst && !bo_entry && drop;
         dr_r = !t2 && dr_n;
@@ -214,7 +219,7 @@ module s3_bus (
         do_r = !t2 && do_n;
         do_y = t2 ? !rst && write && blast_n : do_n;
         tk_t = !rst && t2 && !write;
-        tl_t = t2 && job_done && !grant;
+        tl_t = t2 && job_done && !grant && !ack;
     end
 
     always_ff @(posedge clk) begin
@@ -260,7 +265,7 @@ module s3_bus (
             cache_n <= !(burst || wback);
             d_o  <= wdata;
             dp_o <= parity(wdata);
-            if (job == J_SINGLE && sc_lock && !grant) begin
+            if (job == J_SINGLE && sc_lock && !grant && !ack) begin
                 lock_n  <= 1'b0;
                 lock_on <= 1'b1;
             end
@@ -276,6 +281,7 @@ module s3_bus (
             if (job_done) begin
                 job     <= J_NONE;
                 grant   <= 1'b0;
+                ack     <= 1'b0;
                 stopped <= grant;
             end
         end
@@ -285,7 +291,7 @@ module s3_bus (
         take_beat  <= job == J_SINGLE ? 3'd0 : beat;
         take_be    <= moved;
         mem_rvalid <= take && take_last && take_mem;
-        sc_done    <= take ? take_last && !take_mem : ready && write && job_done && job == J_SINGLE && !grant;
+        sc_done    <= take ? take_last && !take_mem : ready && write && job_done && job == J_SINGLE && !grant && !ack;
         pchk_n     <= !(take && |(take_be & (parity(d_q) ^ dp_q)));
         for (int b = 0; b < 4; b++)
             if (take && take_be[b]) begin
@@ -301,6 +307,13 @@ module s3_bus (
             status  <= SPECIAL;
             s_addr  <= 30'h0000_0004;
             s_wdata <= 32'd0;
+        end else if (j_ack) begin
+            job     <= J_SINGLE;                          // flush acknowledge
+            ack     <= 1'b1;
+            ack_due <= ack_due - 2'd1;
+            status  <= SPECIAL;
+            s_addr  <= 30'h0000_0004;
+            s_wdata <= 32'd0;
         end else if (j_sc) begin
             job     <= J_SINGLE;
             status  <= sc_status;
@@ -312,10 +325,13 @@ module s3_bus (
             wline   <= mem_wdata;
             ken_all <= 1'b1;
         end
+        if (flush_done && enhanced) ack_due <= 2'd2;
         if (rst) begin
             st      <= IDLE;
             job     <= J_NONE;
             grant   <= 1'b0;
+            ack     <= 1'b0;
+            ack_due <= 2'd0;
             stopped <= 1'b0;
             lock_on <= 1'b0;
             ads_n   <= 1'b1;

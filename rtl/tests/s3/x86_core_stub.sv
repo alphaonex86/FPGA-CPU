@@ -11,6 +11,7 @@ module x86_core (
     input  logic         snoop_inv,
     input  logic         enhanced,
     output logic         snoop_err,
+    output logic         flush_done,
     output logic         mem_req,
     output logic         mem_we,
     output logic [31:5]  mem_addr,
@@ -80,4 +81,5 @@ module x86_core (
     end
     assign {ret_valid, ret_eop, ret_next_eip, ret_wdst, ret_dst, ret_value, ret_wflags, ret_flags, halted, illegal} = '0;
     assign snoop_err = snoop ^ snoop_inv ^ enhanced ^ ^snoop_line;   // keeps the bus unit's snoop outputs
+    assign flush_done = cache_flush && mem_rvalid;                    // drives the flush acknowledge path
 endmodule

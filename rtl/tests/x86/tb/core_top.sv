@@ -63,7 +63,7 @@ module core_top (
     // snoops: from the bus unit with S3_BUS, else +snoop=<n>: an invalidation every n clocks of the
     // L1s' last L2 request, the drain's line, the fetch line or a line anywhere in the 1 MB (dirty ones are kept:
     // the trace must not change)
-    logic         bus_snoop, bus_snoop_inv, bus_enhanced, snoop_err;
+    logic         bus_snoop, bus_snoop_inv, bus_enhanced, snoop_err, flush_done;
     logic [31:4]  bus_snoop_line;
 `ifndef S3_BUS
     int           snoop_n;
@@ -86,11 +86,11 @@ module core_top (
 `ifdef S3_BUS
     x86_core core (.clk(clk), .rst(s3_rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
                    .snoop(bus_snoop), .snoop_line(bus_snoop_line), .snoop_inv(bus_snoop_inv), .enhanced(bus_enhanced),
-                   .snoop_err(snoop_err),
+                   .snoop_err(snoop_err), .flush_done(flush_done),
 `else
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
                    .snoop(bus_snoop), .snoop_line(bus_snoop_line), .snoop_inv(bus_snoop_inv), .enhanced(bus_enhanced),
-                   .snoop_err(snoop_err),
+                   .snoop_err(snoop_err), .flush_done(flush_done),
 `endif
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
@@ -122,7 +122,7 @@ module core_top (
                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(1'b0), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
-                .quiet(1'b1), .stopped(), .snoop(bus_snoop), .snoop_addr(bus_snoop_line), .snoop_inv(bus_snoop_inv),
+                .quiet(1'b1), .flush_done(flush_done), .stopped(), .snoop(bus_snoop), .snoop_addr(bus_snoop_line), .snoop_inv(bus_snoop_inv),
                 .enhanced(bus_enhanced), .a_o(a_o), .a_oe(a_oe), .a_i(a_o[31:4]), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_n), .lock_n(), .cache_n(), .ctl_oe(), .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe),
                 .d_i(d_pin), .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]}), .pchk_n(),

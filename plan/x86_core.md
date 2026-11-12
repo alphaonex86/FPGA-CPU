@@ -368,8 +368,9 @@ replicated per read port plus a live-value table.
    is done; held: again. ~7000 clocks with 256 KB. Standard mode: no special cycle. Test:
    `x86_core_test.sh` runs every test a second time with `+flush=20011` (FLUSH# for 2 clocks every
    20011), trace unchanged; an L1D sweep without its write-backs fails it.
-   Open: WBINVD / INVD (the same engine, plus their special cycles: M5 ISA), the flush acknowledge
-   cycles in enhanced mode.
+   Enhanced mode: the core's `flush_done` makes s3_bus run the First / Second Flush Acknowledge
+   cycles after the write-backs (bus_tb +wb=1 checks order and BE#; done 2026-11-12).
+   Open: WBINVD / INVD (the same engine, plus their special cycles: M5 ISA).
    - The snoop: EADS# looks the line up in
      L1D / L2 dirty tags within a clock (HITM# is due 2 clocks after EADS#), then the line is
      handed to the bus unit (snoop write-back with CACHE#, 0-4-8-C, HITM# until its last
