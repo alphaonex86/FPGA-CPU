@@ -392,6 +392,21 @@ replicated per read port plus a live-value table.
      in the clock after BRDY#, and BRDY# (die top, X88 Y115) is a die height away from D (Y0); the
      pins are fixed. Burst write-backs are a later optimization (a 0-4-8-C shift register next to
      the D pads, measured first). Next: HITM# and the snoop write-back.
+     HITM# design (operator 2026-11-12: L1D and L2 stay write-back in enhanced mode). Figure 10-35:
+     EADS# sampled at edge E, HITM# low from edge E+1, so the dirty lookup has one clock from the
+     input registers (eads_q, a_q). Lookup: an MLAB tag copy per way in the L1D and the L2 (async
+     read by a_q; the L2 one ~3.5K ALMs at 256 KB), plus the line's carriers outside the tags: the
+     L2 front holding an L1D write-back (r_wdata) and the bus job writing the line (wline).
+     Then: the drain waits from eads_q on; the bus takes no new job; the core fetches the newest
+     data (L1D read through its load port, else the L2 front's r_wdata, the L2 engine's victim
+     d_rd or the L2 data RAM, else the bus job itself) and hands it to the bus, which writes the
+     snooped 16-byte half first (4 single cycles, CACHE# low, HITM# up after the 4th ready, a clock
+     late: the pin is not in the RDY# / BRDY# loop) and then the other half, before resuming any
+     pending or fractured job (its registers saved). INV high: every copy of the 32-byte line is
+     invalidated, dirty or not, and every carrier dropped (the L1D victim in S_EVRD..S_WB, the L2
+     front write, the L2 engine's victim write-back, the bus job), else memory gets older data
+     after the bus master's write. INV low: nothing changes state (a later snoop may write the
+     same data again).
 6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
 7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
    Socket 7 and Socket 370.
