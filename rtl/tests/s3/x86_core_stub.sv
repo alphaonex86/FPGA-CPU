@@ -12,6 +12,14 @@ module x86_core (
     input  logic         enhanced,
     output logic         snoop_err,
     output logic         flush_done,
+    input  logic         hm_look,
+    input  logic [31:5]  hm_line,
+    input  logic         hm_inv,
+    output logic         hm_dirty,
+    output logic         hw_valid,
+    output logic         hw_none,
+    output logic [255:0] hw_data,
+    input  logic         hw_take,
     output logic         mem_req,
     output logic         mem_we,
     output logic [31:5]  mem_addr,
@@ -82,4 +90,7 @@ module x86_core (
     assign {ret_valid, ret_eop, ret_next_eip, ret_wdst, ret_dst, ret_value, ret_wflags, ret_flags, halted, illegal} = '0;
     assign snoop_err = snoop ^ snoop_inv ^ enhanced ^ ^snoop_line;   // keeps the bus unit's snoop outputs
     assign flush_done = cache_flush && mem_rvalid;                    // drives the flush acknowledge path
+    assign hm_dirty = hm_look && ^hm_line ^ hm_inv;                    // the HITM# path: a stand-in
+    always_ff @(posedge clk) hw_valid <= !rst && (hw_valid ? !hw_take : hm_look && hm_dirty);
+    assign {hw_none, hw_data} = {1'b0, mem_wdata};
 endmodule

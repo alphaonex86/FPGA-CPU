@@ -407,6 +407,22 @@ replicated per read port plus a live-value table.
      front write, the L2 engine's victim write-back, the bus job), else memory gets older data
      after the bus master's write. INV low: nothing changes state (a later snoop may write the
      same data again).
+     Done 2026-11-12: core (L1D fifth tag copy, L2 {dirty, tag} MLAB copy per way, read through the
+     load port / data port, INV drops tags and write-backs in flight; an L1I snoop hit now flushes
+     the pipeline at the next boundary, else a store's SMC check missed a line the snoop took) and
+     s3_bus. Differences from the design above: no EADS# is taken under HITM# [10.3.3], so with INV
+     (the core drops the 32-byte line) or with the data from the bus job, HITM# stays low over all 8
+     dwords (snooped half first) instead of rising after 4; INV low writes the snooped 16 bytes only.
+     The bus reads the core's hw_data in place (it stays until the next lookup), no copy. No job is
+     taken or started in a lookup's clock (a job taken then could overwrite the line write the
+     write-back needs). EADS# now counts when the address floated in the clock it was sampled (the
+     old check used the next clock's enable and missed EADS# with AHOLD released at once). Tests:
+     core_top +hitm=1 (22 / 22), bus_tb +wb=1 checks HITM# timing, write-back order / data, the
+     dropped line write (a bus master writes after INV) and a snoop pulse per EADS#. s3_test.sh adds a
+     pass with core_top +snoop=37 +hitm=1 (AHOLD + EADS# at the pins: HITM# write-backs through the
+     chipset model). Open: a fill snooped with INV is not used and is read again, so a master writing
+     one line faster than a fill takes (~40 clocks through the chipset) starves the reader; the 486
+     uses that data once without keeping it [Table 10-12]. Not seen in real DMA; do it if needed.
 6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
 7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
    Socket 7 and Socket 370.

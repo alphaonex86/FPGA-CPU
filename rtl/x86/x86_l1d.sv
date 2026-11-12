@@ -1,4 +1,4 @@
-// L1 data cache (plan/x86_core.md M3): 16 KB, 4-way, 32-byte lines,
+// L1 data cache (plan/x86_core.md M3): KB kilobytes (default 16), 4-way, 32-byte lines,
 // write-back, write-allocate, one miss in flight.
 // - Data: two M10K banks, even and odd dwords of each line; a row is the
 //   bank's half line (4 dwords) of one {set, way}. An access reads the
@@ -25,9 +25,15 @@
 //   (ext_dirty). A fill of that line in flight is not installed (f_stale).
 // - A line that came without KEN# is not installed (the victim stays): the
 //   access replays and goes uncached (x86_uc has learned its region).
+// - HITM# (enhanced bus mode): a fifth tag copy tells within the clock whether hm_line is dirty
+//   here (hm_dirty); sr_req reads it through the load port (sr_done, sr_hit, sr_data). sr_kill
+//   (INV, the line written back): its write-back in flight (a victim or a probe) is dropped and its
+//   tag invalidated as soon as the tag port is free (k_line); no eviction starts until then.
 module x86_l1d
     import x86_pkg::*;
-(
+#(
+    parameter int KB = 16
+) (
     input  logic          clk,
     input  logic          rst,
     // A: load lookup, data in M (the cycle after)
@@ -65,9 +71,17 @@ module x86_l1d
     input  logic          ext_req,
     input  logic [31:5]   ext_line,
     output logic          ext_done,
-    output logic          ext_dirty    // with ext_done
+    output logic          ext_dirty,   // with ext_done
+    // HITM#: hm_line is held from sr_req to sr_kill (no new lookup while a kill waits)
+    input  logic [31:5]   hm_line,
+    output logic          hm_dirty,
+    input  logic          sr_req,      // held until sr_done
+    output logic          sr_done,
+    output logic          sr_hit,      // with sr_done: dirty here, its data in sr_data
+    output logic [255:0]  sr_data,
+    input  logic          sr_kill
 );
-    localparam int SETS = 128, WAYS = 4, SW = $clog2(SETS), TW = 32 - 5 - SW;
+    localparam int WAYS = 4, SETS = KB * 1024 / 32 / WAYS, SW = $clog2(SETS), TW = 32 - 5 - SW;
 
     typedef struct packed {
         logic          v, d;
@@ -85,15 +99,15 @@ module x86_l1d
         return sz == SZ8 ? 4'h1 : sz == SZ16 ? 4'h3 : 4'hF;
     endfunction
 
-    // ---------------- tags: [copy][way], copy 0 even / 1 odd load line, 2 drain, 3 snoop
+    // ---------------- tags: [copy][way], copy 0 even / 1 odd load line, 2 drain, 3 snoop, 4 HITM#
     logic          t_we;
     logic [SW-1:0] t_set;
     logic [1:0]    t_way;
     tg_t           t_wd;
-    logic [3:0][SW-1:0]       t_ra;
-    tg_t  [3:0][WAYS-1:0]     t_rd;
+    logic [4:0][SW-1:0]       t_ra;
+    tg_t  [4:0][WAYS-1:0]     t_rd;
     genvar gc, gw;
-    generate for (gc = 0; gc < 4; gc = gc + 1) begin : tc
+    generate for (gc = 0; gc < 5; gc = gc + 1) begin : tc
         for (gw = 0; gw < WAYS; gw = gw + 1) begin : tw
             x86_ram_async #(.W($bits(tg_t)), .N(SETS)) t (.clk(clk), .we(t_we && (st == S_CLR || t_way == 2'(gw))),
                                                           .wa(t_set), .wd(t_wd), .ra(t_ra[gc]),
@@ -136,6 +150,13 @@ module x86_l1d
     logic           probe;         // the eviction is a probe's
     logic [31:5]    miss_line;
     tg_t  [WAYS-1:0] miss_ways;    // the set of the missing line
+    logic           h_hit;         // hm_line dirty here (copy 4)
+    logic [1:0]     h_way;
+    logic           sr_rd, sr_q;   // the load port reads hm_line this cycle; its data next cycle
+    logic           k_pend, k_wr;  // sr_kill: the tag invalidation waits for the port
+    logic [31:5]    k_line, h_line;   // the killed line; the line copy 4 looks up
+    logic           c_drop;        // sr_kill drops the write-back of hm_line in flight
+    logic           hold_ev;       // no eviction starts (sr_kill pending)
 
     function automatic logic [1:0] victim(input tg_t [WAYS-1:0] w, input logic [1:0] r);
         for (int i = WAYS - 1; i >= 0; i--) if (!w[i].v) return 2'(i);
@@ -157,8 +178,10 @@ module x86_l1d
         a_need[0] = (a_dw[0] ? m8[7:4] : m8[3:0]) != 4'd0;
         a_need[1] = (a_dw[0] ? m8[3:0] : m8[7:4]) != 4'd0;
     end
-    assign probing = st == S_IDLE && pr_req;
-    assign t_ra = {ext_line[5 +: SW], st == S_SWP ? sw[2 +: SW] : probing ? pr_line[5 +: SW] : d_line[5 +: SW], set_of(a_bdw[1]), set_of(a_bdw[0])};
+    assign hold_ev = sr_kill || k_pend;
+    assign probing = st == S_IDLE && pr_req && !hold_ev;
+    assign h_line = k_pend ? k_line : hm_line;
+    assign t_ra = {h_line[5 +: SW], ext_line[5 +: SW], st == S_SWP ? sw[2 +: SW] : probing ? pr_line[5 +: SW] : d_line[5 +: SW], set_of(a_bdw[1]), set_of(a_bdw[0])};
     assign sw_tg = t_rd[2][sw[1:0]];
     assign fl_done = swept;
     always_comb begin
@@ -173,8 +196,28 @@ module x86_l1d
         end
         // the load port is taken by a victim read in S_EVRD, the fill may
         // write the row the load reads in S_FILL
-        a_hit = st != S_EVRD && st != S_FILL && st != S_CLR && !fl_req && (!a_need[0] || a_bhit[0]) && (!a_need[1] || a_bhit[1]);
+        a_hit = st != S_EVRD && st != S_FILL && st != S_CLR && !fl_req && !sr_rd && (!a_need[0] || a_bhit[0]) && (!a_need[1] || a_bhit[1]);
     end
+
+    // HITM#: the dirty lookup, the read of the line (the load port, when no eviction holds it)
+    always_comb begin
+        h_hit = 1'b0;
+        h_way = 2'd0;
+        for (int w = 0; w < WAYS; w++)
+            if (t_rd[4][w].v && t_rd[4][w].d && t_rd[4][w].tag == h_line[31 -: TW]) begin
+                h_hit = 1'b1;
+                h_way = 2'(w);
+            end
+        sr_rd = sr_req && h_hit && !sr_q && (st == S_IDLE || st == S_REQ || st == S_WAIT || st == S_WB);
+        sr_done = sr_req && (sr_q || !h_hit);
+        sr_hit = sr_q;
+        for (int j = 0; j < 4; j++) begin
+            sr_data[32 * (2 * j) +: 32] = b_rd[0][32*j +: 32];
+            sr_data[32 * (2 * j + 1) +: 32] = b_rd[1][32*j +: 32];
+        end
+        c_drop = sr_kill && (st == S_EVRD || st == S_EVDATA || st == S_WB) && {v_tag, f_line[5 +: SW]} == hm_line;
+    end
+    assign hm_dirty = h_hit;
 
     // M: the 8-byte window from the address's dword, then its 4 bytes
     always_comb begin
@@ -232,7 +275,8 @@ module x86_l1d
                 p_hit = 1'b1;
                 p_way = 2'(w);
             end
-        pr_done = probing && !(p_hit && t_rd[2][p_way].d) || st == S_WB && probe && mem_ready;
+        pr_done = probing && !(p_hit && t_rd[2][p_way].d) || st == S_WB && probe && mem_ready && !c_drop
+                  || c_drop && probe && !sweeping;
     end
 
     // external snoop: a clean hit is written invalid when the tag port is free
@@ -257,7 +301,7 @@ module x86_l1d
         {bdw, m4, w4} = '0;
         // reads: the load (rows of its hit ways), or the victim
         for (int b = 0; b < 2; b++)
-            b_ra[b] = st == S_EVRD ? {f_line[5 +: SW], f_way} : {set_of(a_bdw[b]), a_bway[b]};
+            b_ra[b] = st == S_EVRD ? {f_line[5 +: SW], f_way} : sr_rd ? {hm_line[5 +: SW], h_way} : {set_of(a_bdw[b]), a_bway[b]};
         // writes: the fill, else the drain
         b_wa = '0;
         b_be = '0;
@@ -280,7 +324,7 @@ module x86_l1d
             t_way = f_way;
             t_wd = '{v: 1'b1, d: 1'b0, tag: f_line[31 -: TW]};
         end else if (st == S_WB && probe) begin   // the probed line, clean
-            t_we = mem_ready;
+            t_we = mem_ready && !c_drop;
             t_set = f_line[5 +: SW];
             t_way = f_way;
             t_wd = '{v: 1'b1, d: 1'b0, tag: v_tag};
@@ -302,17 +346,24 @@ module x86_l1d
                 t_wd = '{v: 1'b1, d: 1'b1, tag: d_line[31 -: TW]};
             end
         end
-        x_wr = ext_req && x_hit && !ext_dirty && !t_we && st != S_CLR;
+        k_wr = k_pend && !t_we && st != S_CLR;
+        if (k_wr && h_hit) begin
+            t_we = 1'b1;
+            t_set = h_line[5 +: SW];
+            t_way = h_way;
+            t_wd = '0;
+        end
+        x_wr = ext_req && !hold_ev && x_hit && !ext_dirty && !t_we && st != S_CLR;
         if (x_wr) begin
             t_we = 1'b1;
             t_set = ext_line[5 +: SW];
             t_way = x_way;
             t_wd = '0;
         end
-        ext_done = ext_req && (st == S_CLR || !x_hit || ext_dirty || x_wr);
+        ext_done = ext_req && !hold_ev && (st == S_CLR || !x_hit || ext_dirty || x_wr);
         // a miss (a load in A first, else the drain) when the MSHR is free
         miss_a = a_valid && st == S_IDLE && !pr_req && (a_need[0] && !a_bhit[0] || a_need[1] && !a_bhit[1]);
-        miss = st == S_IDLE && !pr_req && !fl_req && (miss_a || d_valid && !d_hit);
+        miss = st == S_IDLE && !pr_req && !fl_req && !hold_ev && (miss_a || d_valid && !d_hit);
         miss_b = !(a_need[0] && !a_bhit[0]);   // the load's missing line
         miss_line = miss_a ? a_bdw[miss_b][29:3] : d_line;
         miss_ways = miss_a ? t_rd[miss_b] : t_rd[2];
@@ -326,7 +377,15 @@ module x86_l1d
             rr <= 2'd0;
             sweeping <= 1'b0;
             swept <= 1'b0;
+            sr_q <= 1'b0;
+            k_pend <= 1'b0;
         end else begin
+            sr_q <= sr_rd;
+            if (sr_kill) begin
+                k_pend <= 1'b1;
+                k_line <= hm_line;
+            end
+            else if (k_wr) k_pend <= 1'b0;
             if (d_write) d_second <= !d_done;
             if (!fl_req) swept <= 1'b0;
             if (x_fill) f_stale <= 1'b1;
@@ -369,7 +428,8 @@ module x86_l1d
                 end
                 S_WB: if (mem_ready) st <= !probe ? S_REQ : sweeping ? S_SWP : S_IDLE;
                 S_SWP:
-                    if (sw_tg.v && sw_tg.d) begin   // written back, then looked at again (clean)
+                    if (hold_ev) ;
+                    else if (sw_tg.v && sw_tg.d) begin   // written back, then looked at again (clean)
                         f_line <= {sw_tg.tag, sw[2 +: SW]};
                         f_way <= sw[1:0];
                         v_tag <= sw_tg.tag;
@@ -399,10 +459,12 @@ module x86_l1d
                 end
                 default: st <= S_IDLE;
             endcase
+            // the write-back of the snooped line is dropped (written back by the snoop already)
+            if (c_drop) st <= !probe ? S_REQ : sweeping ? S_SWP : S_IDLE;
         end
     end
 
-    assign mem_req = st == S_WB || st == S_REQ;
+    assign mem_req = st == S_WB && !c_drop || st == S_REQ;
     assign mem_we = st == S_WB;
     assign mem_addr = st == S_WB ? {v_tag, f_line[5 +: SW]} : f_line;
     assign mem_wdata = f_buf;

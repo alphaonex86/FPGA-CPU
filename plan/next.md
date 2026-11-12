@@ -66,9 +66,8 @@ with every gate passing. Read AGENTS.md first; details in plan/interposers.md (T
   KEN#: learned per 64 KB region (operator). Done 2026-11-11: BS8# / BS16#, PLL lock range and
   clock stop, RESET cache clear, A20M# in the core, uncached accesses + KEN#, FLUSH# (write back +
   invalidate), the RDY# / BRDY# / BOFF# loop in one LUT level (bus-only build +0.985 / +0.968 ns).
-  Next: the snoop (EADS# invalidation in both modes; enhanced mode: HITM#, the snoop write-back
-  ahead of any pending cycle, write-back bursts with CACHE#), WBINVD / INVD with M5, SRESET with
-  the M5 interrupt machinery. Every RTL change needs a new full build (`s3.ok`).
+  Snoop done 2026-11-12 (EADS# invalidation both modes, HITM# and the snoop write-back, plan/x86_core.md).
+  Next: write-back bursts with CACHE#, WBINVD / INVD with M5, SRESET with the M5 interrupt machinery. Every RTL change needs a new full build (`s3.ok`).
 - Speed grade C8 vs C7: decide after the full Quartus build (step 1), ask the operator with the
   slack numbers.
 - Socket 7 (`gen_socket7_t8.py` fails on purpose: S_VCC3 feed of PS2 / U3 in the S_VCC2 area of

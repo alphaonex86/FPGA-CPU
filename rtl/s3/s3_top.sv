@@ -86,6 +86,9 @@ module s3_top #(
     logic         a_oe, ctl_oe, d_oe, ads_o, mio, dc, wr, blast_o, lock_o, cache_o;
     logic         snoop, snoop_inv, enhanced, flush_done;
     logic [31:4]  snoop_line;
+    logic         hm_look, hm_inv, hm_dirty, hw_valid, hw_none, hw_take;
+    logic [31:5]  hm_line;
+    logic [255:0] hw_data;
 
     c2_bclk_pll #(.FREQ(FREQ), .PHASE(PHASE), .VCO(VCO)) pll (.refclk(clk), .rst(pll_rst), .clk(clk_pll), .clk_in(),
                                                        .locked(locked));
@@ -109,7 +112,8 @@ module s3_top #(
 
     x86_core core (.clk(clk_p), .rst(rst), .reset_eip(32'hffff_fff0), .a20m(!a20m_s[1]), .cache_flush(!flush_s[1]),
                    .snoop(snoop), .snoop_line(snoop_line), .snoop_inv(snoop_inv), .enhanced(enhanced), .snoop_err(),
-                   .flush_done(flush_done),
+                   .flush_done(flush_done), .hm_look(hm_look), .hm_line(hm_line), .hm_inv(hm_inv), .hm_dirty(hm_dirty),
+                   .hw_valid(hw_valid), .hw_none(hw_none), .hw_data(hw_data), .hw_take(hw_take),
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
                    .mem_cacheable(mem_cacheable), .sc_req(sc_req), .sc_status(sc_status), .sc_addr(sc_addr), .sc_be(sc_be), .sc_wdata(sc_wdata),
@@ -124,8 +128,10 @@ module s3_top #(
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
                 .quiet(1'b1), .stopped(), .snoop(snoop), .snoop_addr(snoop_line), .snoop_inv(snoop_inv),
                 .enhanced(enhanced), .flush_done(flush_done),
+                .hm_look(hm_look), .hm_line(hm_line), .hm_inv(hm_inv), .hm_dirty(hm_dirty), .hw_valid(hw_valid),
+                .hw_none(hw_none), .hw_data(hw_data), .hw_take(hw_take),
                 .a_o(a_o), .a_oe(a_oe), .a_i(a[31:4]), .be_n(be_o), .ads_n(ads_o), .mio(mio), .dc(dc), .wr(wr),
-                .blast_n(blast_o), .lock_n(lock_o), .cache_n(cache_o), .ctl_oe(ctl_oe),
+                .blast_n(blast_o), .lock_n(lock_o), .cache_n(cache_o), .hitm_n(hitm_n), .ctl_oe(ctl_oe),
                 .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe), .d_i(d), .dp_i(dp), .pchk_n(pchk_n),
                 .hlda(hlda), .breq(breq), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n), .hold(hold),
                 .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .inv(inv), .wb_wt_n(wb_wt_n), .stpclk_n(stpclk_n),
@@ -147,7 +153,6 @@ module s3_top #(
     assign pcd     = ctl_oe ? 1'b0 : 1'bz;
     assign pwt     = ctl_oe ? 1'b0 : 1'bz;
     assign ferr_n   = 1'b1;
-    assign hitm_n   = 1'b1;
     assign smiact_n = 1'b1;
     assign tdo      = 1'bz;
 endmodule

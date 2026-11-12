@@ -10,6 +10,14 @@
 // of clocks); +bs=<percent of narrow pages>; +wb=1: WB/WT# high at RESET (enhanced mode: line writes are
 // write-backs: CACHE# low, every BE#, BS8# / BS16# ignored [Intel486 databook 241731-002]: driven anyway;
 // after a FLUSH# (flush_done) the First then Second Flush Acknowledge cycles).
+// Snoops: every EADS# (address floated) must give its snoop pulse, address and INV. Enhanced mode,
+// HITM#: a stand-in core holds some snooped lines dirty (new data for the snooped 16 bytes) or
+// leaves a line write of the bus unit's own job; then HITM# low two clocks after EADS#, no ADS# in
+// the clock after, the next cycles the write-back of the snooped 16 bytes (with INV or from the
+// job: the whole 32-byte line, snooped half first) with the newest data, under HITM# until a clock
+// after its last ready. With INV a bus master then writes those 16 bytes: a line write the
+// write-back made void must be dropped (memory check). EADS# at most every third clock, never
+// under HITM#.
 module bus_tb (
     input  logic clk,
     output logic done,
@@ -35,6 +43,21 @@ module bus_tb (
     logic [31:4]  snoop_addr;
     logic         snoop_inv, enhanced, inv, inv_1, inv_2;   // INV, and as the snoop pulse sees it
     logic         pchk_n, hlda, breq, ads_r, fl_done;
+    logic         hm_look, hm_inv, hw_valid, hw_none, hw_take, hitm_n;
+    logic [31:5]  hm_line;
+    logic [255:0] hw_data;
+    // snoops and HITM#
+    logic [31:4]  sn_a, sn_a1, sn_a2;               // the snooped address, as the pulse sees it
+    logic         e_1, e_2;                         // EADS# driven 1 / 2 clocks ago
+    int           eads_gap, hw_wait, n_hitm, hm_cycle;
+    logic         tb_dirty, tb_none;                // the stand-in core's answer to this snoop
+    logic [255:0] tb_data, tb_w;                    // its copy; the line write in flight (mem_wdata)
+    logic         wb_due, wb_full, wb_inv, hm_low, mw_due, s_isw;   // s_isw: the cycle is a snoop write-back
+    int           wb_end;
+    logic [31:4]  wb_a;
+    logic [2:0]   wb_beat;
+    int           wb_left;
+    logic [255:0] wb_data;
     assign ads_n = a_oe ? ads_r : 1'b1;           // the pad: floated with the address, pulled up on the board
     logic         rdy_n, brdy_n, ken_n, hold, ahold, boff_n, eads_n, stpclk_n, bs8_n, bs16_n;
 
@@ -81,8 +104,10 @@ module bus_tb (
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(sc_lock), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
                 .quiet(1'b1), .flush_done(fl_done), .stopped(stopped), .snoop(snoop), .snoop_addr(snoop_addr), .snoop_inv(snoop_inv), .enhanced(enhanced),
-                .a_o(a_o), .a_oe(a_oe), .a_i(28'h123_4567), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
-                .blast_n(blast_n), .lock_n(lock_n), .cache_n(cache_n), .ctl_oe(ctl_oe),
+                .hm_look(hm_look), .hm_line(hm_line), .hm_inv(hm_inv), .hm_dirty(tb_dirty), .hw_valid(hw_valid),
+                .hw_none(hw_none), .hw_data(hw_data), .hw_take(hw_take),
+                .a_o(a_o), .a_oe(a_oe), .a_i(sn_a), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
+                .blast_n(blast_n), .lock_n(lock_n), .cache_n(cache_n), .hitm_n(hitm_n), .ctl_oe(ctl_oe),
                 .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe), .d_i(d_pin),
                 .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]} ^ {3'd0, bad_parity}),
                 .pchk_n(pchk_n), .hlda(hlda), .breq(breq), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n),
@@ -147,6 +172,9 @@ module bus_tb (
             {done, failed, float_due, bad_q, bad_qq} <= '0;
             {n_ops, n_reads, n_ack, ack_owed, n_burst, n_single, n_boff, n_hold, n_grant, n_snoop, n_narrow} <= '0;
             {s_drop, exp_valid} <= '0;
+            {e_1, e_2, tb_dirty, tb_none, hw_valid, wb_due, hm_low, mw_due, s_isw} <= '0;
+            {eads_gap, hw_wait, n_hitm} <= '0;
+            sn_a <= '0;
         end else if (!done) begin
             // ---- stimulus
             if (mem_req && mem_ready) mem_req <= 1'b0;
@@ -223,19 +251,20 @@ module bus_tb (
             end
             fl_done <= !fl_done && ack_owed == 0 && roll(2) != 0;         // a FLUSH# ended; the next only after its acknowledges
             if (fl_done && p_wb != 0) ack_owed <= 2;
-            if (n_ops == ops && op == O_IDLE && dut.job == 2'd0 && ack_owed == 0) begin
+            if (n_ops == ops && op == O_IDLE && dut.job == 2'd0 && ack_owed == 0 && !wb_due && !mw_due && !hm_low && hitm_n) begin
                 for (int i = 0; i < WORDS; i++)
                     if (mem[i] != shadow[i]) begin
                         $display("FAIL: memory[%0d] %08x, expected %08x", i, mem[i], shadow[i]);
                         failed <= 1'b1;
                     end
                 if ((p_rdy != 100 && n_burst == 0) || (p_rdy != 0 && n_single == 0) || (p_boff != 0 && n_boff == 0) || (p_hold != 0 && n_hold == 0)
-                    || (p_stp != 0 && n_grant == 0) || (p_wb != 0 && n_ack == 0) || (p_ahold != 0 && n_snoop == 0) || (p_bs != 0 && n_narrow == 0))
+                    || (p_stp != 0 && n_grant == 0) || (p_wb != 0 && n_ack == 0) || (p_ahold != 0 && n_snoop == 0) || (p_bs != 0 && n_narrow == 0)
+                    || (p_wb != 0 && p_ahold != 0 && n_hitm == 0))
                     fail("a path was never exercised");
                 // undisturbed: every line read is two bursts of four (three continued transfers each)
                 if (p_rdy + p_boff + p_hold + p_ahold + p_stp + p_bs == 0 && n_burst != 6 * n_reads) fail("a burst was cut short");
-                $display("%0d operations in %0d clocks: %0d burst transfers, %0d cycles ended by RDY#, %0d back-offs, %0d holds, %0d Stop Grants, %0d snoops, %0d narrow transfers",
-                         n_ops, cycle, n_burst, n_single, n_boff, n_hold, n_grant, n_snoop, n_narrow);
+                $display("%0d operations in %0d clocks: %0d burst transfers, %0d cycles ended by RDY#, %0d back-offs, %0d holds, %0d Stop Grants, %0d snoops (%0d HITM#), %0d narrow transfers",
+                         n_ops, cycle, n_burst, n_single, n_boff, n_hold, n_grant, n_snoop, n_hitm, n_narrow);
                 done <= 1'b1;
             end
 
@@ -248,12 +277,87 @@ module bus_tb (
                 n_hold <= n_hold + 1;
             end
             ahold  <= ahold ? roll(700) != 0 : roll(p_ahold) != 0;
-            eads_n <= !(ahold && !a_oe);
             {inv, inv_1, inv_2} <= {1'(roll(500)), inv, inv_1};
+            if (hm_low && !wb_due && cycle == wb_end + 2) begin          // HITM# up a clock after the last ready
+                hm_low <= 1'b0;
+                if (!hitm_n) fail("HITM# held past its write-back");
+            end
+            {e_1, e_2} <= {!eads_n, e_1};
+            {sn_a1, sn_a2} <= {sn_a, sn_a1};
+            eads_n <= 1'b1;
+            eads_gap <= eads_gap + 1;
+            if (ahold && !a_oe && (p_wb == 0 || eads_gap >= 2 && hitm_n && !hm_low && !wb_due && !mw_due)) begin
+                // the snooped address: the line write in flight, else any line; the stand-in core
+                // keeps it dirty only when no other operation in flight touches it
+                logic [31:4] a;
+                logic        own;
+                own = op == O_WRITE && !mem_req && roll(500) != 0;
+                a = own ? {op_line, 1'($urandom_range(1))} : 28'($urandom_range(WORDS / 4 - 1));
+                eads_n   <= 1'b0;
+                eads_gap <= 0;
+                sn_a     <= a;
+                tb_dirty <= 1'b0;
+                tb_none  <= 1'b0;
+                tb_w     <= mem_wdata;
+                if (p_wb != 0 && op == O_WRITE && !mem_req && op_line == a[31:5]) begin
+                    tb_dirty <= roll(500) != 0;
+                    tb_none  <= roll(500) != 0;
+                    tb_data  <= mem_wdata;
+                end else if (p_wb != 0 && pending && !(op == O_READ && mem_addr == a[31:5]) && !(op == O_WRITE && mem_addr == a[31:5])
+                             && !(op == O_SINGLE && op_addr[31:5] == a[31:5]) && roll(400) != 0) begin
+                    logic [255:0] d;
+                    for (int i = 0; i < 8; i++) begin
+                        d[32*i +: 32] = shadow[{a[15:5], 3'(i)}];
+                        if (i / 4 == int'(a[4])) begin
+                            d[32*i +: 32] = $urandom;
+                            shadow[{a[15:5], 3'(i)}] <= d[32*i +: 32];
+                        end
+                    end
+                    tb_dirty <= 1'b1;
+                    tb_data  <= d;
+                end
+            end
+            if (snoop != e_2) fail("EADS# without its snoop pulse, or a pulse without EADS#");
             if (snoop) begin
                 n_snoop <= n_snoop + 1;
-                if (snoop_addr != 28'h123_4567) fail("snoop address");
+                if (snoop_addr != sn_a2) fail("snoop address");
                 if (snoop_inv != inv_2) fail("snoop INV");
+            end
+            // HITM#: the lookup, the stand-in core's copy, the expected write-back
+            if (hm_look != (e_1 && p_wb != 0)) fail("HITM# lookup without EADS# / missed");
+            if (hm_look && (hm_line != sn_a1[31:5] || hm_inv != inv_1)) fail("HITM# lookup line / INV");
+            if (hw_valid && hw_take) hw_valid <= 1'b0;
+            if (hw_wait != 0) begin
+                hw_wait <= hw_wait - 1;
+                if (hw_wait == 1) begin
+                    hw_valid <= 1'b1;
+                    hw_none  <= tb_none;
+                    hw_data  <= tb_data;
+                end
+            end
+            if (hm_look && (tb_dirty || dut.hit_job)) begin
+                n_hitm   <= n_hitm + 1;
+                hm_cycle <= cycle;
+                hm_low   <= 1'b1;
+                wb_due   <= 1'b1;
+                wb_a     <= sn_a1;
+                wb_beat  <= {sn_a1[4], 2'b00};
+                wb_full  <= inv_1 || !tb_dirty;
+                wb_left  <= inv_1 || !tb_dirty ? 8 : 4;
+                wb_inv   <= inv_1;
+                wb_data  <= tb_dirty && !tb_none ? tb_data : tb_w;
+                if (tb_dirty) hw_wait <= int'($urandom_range(5, 1));
+            end
+            if (cycle == hm_cycle + 1 && hm_low && hitm_n) fail("HITM# not low two clocks after EADS#");
+            if (!hitm_n && !hm_low) fail("HITM# without a hit");
+            if (mw_due) begin                                    // the bus master's write of the snooped 16 bytes
+                mw_due <= 1'b0;
+                for (int i = 0; i < 4; i++) begin
+                    logic [31:0] w;
+                    w = $urandom;
+                    mem[{wb_a[15:4], 2'(i)}] <= w;
+                    shadow[{wb_a[15:4], 2'(i)}] <= w;
+                end
             end
             if (!rst && enhanced != (p_wb != 0)) fail("bus mode against WB/WT# at RESET");
             stp_gap <= stpclk_n ? stp_gap + 1 : 0;            // high >= 8 clocks between assertions [19751C]
@@ -268,7 +372,7 @@ module bus_tb (
             if (hlda && !lock_n) fail("HLDA under LOCK#");
             if (!ads_n && (!ctl_oe || !a_oe)) fail("ADS# with a floated bus");
             if (!ads_n && $past(!ads_n)) fail("ADS# for two clocks");
-            if (!ads_n && stopped) fail("a cycle in Stop Grant");
+            if (!ads_n && stopped && !wb_due) fail("a cycle in Stop Grant");
             if (d_oe && s_drive) fail("both ends drive the data bus");
             bad_q  <= s_drive && bad_parity && s_served[0] && (!rdy_n || !brdy_n) && boff_n;
             bad_qq <= bad_q;
@@ -289,7 +393,12 @@ module bus_tb (
                 end
             end else unique case (ss)
                 S_IDLE: if (!ads_n) begin
-                    if (exp_valid && (a_o != exp_a || ~be_n != exp_be)) fail("the cycle after a narrow transfer");
+                    s_isw <= wb_due;
+                    if (wb_due) begin
+                        if (a_o != {wb_a[31:5], wb_beat} || cache_n || {mio, dc, wr} != 3'b111 || be_n != 4'd0)
+                            fail("the next cycle is not the snoop write-back");
+                        if (cycle < hm_cycle + 3) fail("ADS# in the clock after HITM#");
+                    end else if (exp_valid && (a_o != exp_a || ~be_n != exp_be)) fail("the cycle after a narrow transfer");
                     exp_valid <= 1'b0;
                     s_left <= 4'd0;
                     s_a <= a_o;
@@ -306,7 +415,7 @@ module bus_tb (
                         s_wait <= 0;
                         answer(wr);
                     end
-                    if (sc_lock && op == O_SINGLE && {mio, dc, wr} != 3'b001 && lock_n) fail("LOCK# high in a locked cycle");
+                    if (sc_lock && op == O_SINGLE && !wb_due && {mio, dc, wr} != 3'b001 && lock_n) fail("LOCK# high in a locked cycle");
                     if ({mio, dc, wr} == 3'b001) begin
                         if (a_o != 30'd4) fail("special cycle address");
                         if (be_n == 4'b1011) begin
@@ -321,6 +430,17 @@ module bus_tb (
                     if ((!rdy_n || !brdy_n)) begin              // the transfer the CPU samples now
                         logic [3:0] left;
                         left = s_be & ~s_served;
+                        if (s_isw) begin                        // a snoop write-back transfer
+                            if (hitm_n) fail("a snoop write-back without HITM#");
+                            if (d_o != wb_data[32*wb_beat +: 32]) fail("snoop write-back data");
+                            wb_beat <= wb_beat + 3'd1;
+                            wb_left <= wb_left - 1;
+                            if (wb_left == 1) begin
+                                wb_due <= 1'b0;
+                                wb_end <= cycle;
+                                mw_due <= wb_inv;
+                            end
+                        end
                         if (s_status[0]) begin
                             if (!d_oe) fail("write data not driven");
                             if (dp_o != {^d_o[31:24], ^d_o[23:16], ^d_o[15:8], ^d_o[7:0]}) fail("write parity");

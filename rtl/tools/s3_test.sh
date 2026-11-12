@@ -2,8 +2,10 @@
 # Usage: rtl/tools/s3_test.sh <test.S | test.c>...
 # M8 (plan/x86_core.md): x86_core_test.sh with the memory behind the Socket 3 bus: s3_bus against
 # FPGAcommon's chipset front end (rtl/tests/s3/cpu486_bif.v, copied from FPGAcommon/rtl/cpu486),
-# each test at host latencies 0, 1 and 3; the retire trace checked against Unicorn.
-set -eu
+# each test at host latencies 0, 1 and 3, then at 1 in enhanced mode with a snoop every 37 clocks
+# (core_top +snoop +hitm: HITM# write-backs through the chipset); the retire trace checked against Unicorn.
+set -euo pipefail   # a core_tb failure counts through its grep filter
+(($#)) || { echo "usage: $0 <test.S | test.c>..." >&2; exit 1; }
 tests=()
 for t; do tests+=("$(realpath "$t")"); done
 cd "$(dirname "$0")/.."
@@ -21,9 +23,12 @@ for t in "${tests[@]}"; do
     tools/x86_test.sh "$t" > /dev/null   # assembles build/x86/<name>.bin
     python3 -I -c "import sys; d = open(sys.argv[1], 'rb').read(); open(sys.argv[2], 'w').write(''.join('%02x\n' % b for b in d))" \
         "build/x86/$name.bin" "$out/$name.hex"
-    for lat in 0 1 3; do
-        echo "== $name, host latency $lat"
-        if "$out/obj/core_tb" "+image=$out/$name.hex" "+trace=$out/$name.trace" "+host_lat=$lat" +max=20000000 +stats | grep -v "^stats: [^m]"; then
+    for run in 0 1 3 "1 +snoop=37 +hitm=1"; do
+        echo "== $name, host latency $run"
+        lat=${run%% *}
+        extra=${run#"$lat"}
+        # shellcheck disable=SC2086
+        if "$out/obj/core_tb" "+image=$out/$name.hex" "+trace=$out/$name.trace" "+host_lat=$lat" $extra +max=20000000 +stats | grep -v "^stats: [^ms]"; then
             tools/x86_test.sh "$t" "$out/$name.trace" || rc=1
         else
             rc=1

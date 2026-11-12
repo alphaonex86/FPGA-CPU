@@ -18,7 +18,9 @@
 // - Retired stores drain into the L1D in order; a load that misses replays.
 // - Stores to code (x86_l1i snoop at the store address): the instruction
 //   retires, the pipeline flushes, fetch waits for the store's drain (which
-//   invalidates the L1I set) and restarts after it.
+//   invalidates the L1I set) and restarts after it. A store whose line an
+//   external snoop invalidated in the L1I after its bytes were fetched is not
+//   flagged: an L1I snoop hit flushes at the next instruction boundary.
 //   A mispredicted branch retires, the pipeline flushes the next cycle.
 // - Uncached loads / stores (x86_uc: the VGA window) go through the
 //   single-cycle port, exact size, in order; a UC load replays until it is
@@ -32,12 +34,22 @@
 // - snoop (EADS#: a bus master wrote snoop_line; enhanced mode: only with
 //   INV): queued (SN_N), each line invalidated in the L2 first, then in the
 //   L1D / L1I (a line those fill from the L2 meanwhile is caught there). A
-//   dirty line cannot be written back yet: kept, snoop_err (sticky), as for
-//   a full queue. The store drain waits while lines are queued (a store into
-//   a line the master wrote would dirty its stale copy).
+//   dirty line is kept (standard mode cannot write it back), snoop_err
+//   (sticky), as for a full queue. The store drain waits from hm_look on and
+//   while lines are queued (a store into a line the master wrote would dirty
+//   its stale copy).
+// - HITM# (enhanced mode): hm_dirty tells within the clock of hm_look whether
+//   hm_line is dirty in the L1D or the L2; such a line is read (the L1D's copy,
+//   else the L2's) and handed to the bus (hw_valid until hw_take; hw_none: the
+//   bus writes it already). With INV both caches then drop it at once (tags and
+//   write-backs in flight) and the queue invalidates the rest (L1I, clean copies).
 module x86_core
     import x86_pkg::*;
-(
+#(
+    parameter int L1I_KB = 16,
+    parameter int L1D_KB = 16,
+    parameter int L2_KB = 256
+) (
     input  logic                  clk,
     input  logic                  rst,
     input  logic [31:0]           reset_eip,
@@ -49,6 +61,14 @@ module x86_core
     input  logic                  enhanced,     // WB/WT# high at RESET
     output logic                  snoop_err,
     output logic                  flush_done,   // a FLUSH# write-back + invalidation ended (pulse)
+    input  logic                  hm_look,      // EADS# sampled this clock (address floated), a clock before snoop
+    input  logic [31:5]           hm_line,
+    input  logic                  hm_inv,
+    output logic                  hm_dirty,     // enhanced mode, with hm_look: HITM#
+    output logic                  hw_valid,     // the snoop write-back: held until hw_take
+    output logic                  hw_none,      // ... no data here: the bus writes the line already
+    output logic [255:0]          hw_data,
+    input  logic                  hw_take,
     // memory (L2 lines): a read answered later, writes posted
     output logic                  mem_req,
     output logic                  mem_we,
@@ -161,10 +181,44 @@ module x86_core
     logic [1:0]              sn_l1_done;     // L1D, L1I finished this line
     logic                    sn_any, sn_push, sn_err_now;
     assign sn_any = sn_head != sn_tail;
+
+    // HITM#: the snooped dirty line, read from the L1D, else the L2
+    typedef enum logic [1:0] {H_IDLE, H_L1D, H_L2, H_OUT} hs_t;
+    hs_t          hs;
+    logic [31:5]  hw_line, c_hm_line, sq_line;
+    logic         hw_inv, hw_kill, l1d_hm, l2_hm, l1d_sr_done, l1d_sr_hit, l2_sr_done, l2_sr_hit;
+    logic [255:0] l1d_sr_data, l2_sr_data;
+    assign c_hm_line = hs == H_IDLE ? hm_line : hw_line;
+    assign hm_dirty = enhanced && (l1d_hm || l2_hm);
+    assign hw_valid = hs == H_OUT;
+    assign hw_kill = hs == H_OUT && hw_take && hw_inv;
+    always_ff @(posedge clk)
+        if (rst) hs <= H_IDLE;
+        else unique case (hs)
+            H_IDLE: if (hm_look && hm_dirty) begin
+                hw_line <= hm_line;
+                hw_inv <= hm_inv;
+                hs <= H_L1D;
+            end
+            H_L1D: if (l1d_sr_done) begin
+                hw_data <= l1d_sr_data;
+                hw_none <= 1'b0;
+                hs <= l1d_sr_hit ? H_OUT : H_L2;
+            end
+            H_L2: if (l2_sr_done) begin
+                hw_data <= l2_sr_data;
+                hw_none <= !l2_sr_hit;
+                hs <= H_OUT;
+            end
+            default: if (hw_take) hs <= H_IDLE;
+        endcase
+
     // a repeat of the last line queued (its other 16 bytes) while that one waits is the same line;
-    // once its L2 step started, a fill of it may follow: queued again
-    assign sn_push = snoop && (snoop_inv || !enhanced)
-                     && !(sn_tail - sn_head >= 2 && sn_q[sn_tail[$clog2(SN_N)-1:0] - 1'd1] == snoop_line[31:5]);
+    // once its L2 step started, a fill of it may follow: queued again. A line HITM# answered is queued
+    // once written back (its snoop pulse is not)
+    assign sq_line = hw_kill ? hw_line : snoop_line[31:5];
+    assign sn_push = (hw_kill || snoop && (snoop_inv || !enhanced) && hs == H_IDLE)
+                     && !(sn_tail - sn_head >= 2 && sn_q[sn_tail[$clog2(SN_N)-1:0] - 1'd1] == sq_line);
     assign sn_err_now = sn_push && sn_tail - sn_head == ($clog2(SN_N)+1)'(SN_N)
                         || l2_x_done && l2_x_dirty || l1d_x_done && l1d_x_dirty;
     always_ff @(posedge clk)
@@ -175,7 +229,7 @@ module x86_core
             snoop_err <= 1'b0;
         end else begin
             if (sn_push && sn_tail - sn_head != ($clog2(SN_N)+1)'(SN_N)) begin
-                sn_q[sn_tail[$clog2(SN_N)-1:0]] <= snoop_line[31:5];
+                sn_q[sn_tail[$clog2(SN_N)-1:0]] <= sq_line;
                 sn_tail <= sn_tail + 1'd1;
             end
             if (sn_err_now) snoop_err <= 1'b1;
@@ -208,13 +262,15 @@ module x86_core
         if (!rst && l2_rvalid && !rd_busy) $error("L2 read data with no read in flight");
 `endif
     end
-    x86_l2 u_l2 (.clk(clk), .rst(rst), .req(l2_req), .we(l2_we), .addr(l2_addr), .wdata(l2_wdata),
+    x86_l2 #(.KB(L2_KB)) u_l2 (.clk(clk), .rst(rst), .req(l2_req), .we(l2_we), .addr(l2_addr), .wdata(l2_wdata),
                  .ready(l2_ready), .rvalid(l2_rvalid), .rdata(l2_rdata), .rcacheable(l2_rcache),
                  .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                  .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
                  .fl_req(fl_l2), .fl_done(l2_fl_done),
                  .ext_req(sn_any && !sn_l1), .ext_line(sn_q[sn_head[$clog2(SN_N)-1:0]]), .ext_done(l2_x_done),
-                 .ext_dirty(l2_x_dirty));
+                 .ext_dirty(l2_x_dirty),
+                 .hm_line(c_hm_line), .hm_dirty(l2_hm), .sr_req(hs == H_L2), .sr_done(l2_sr_done), .sr_hit(l2_sr_hit),
+                 .sr_data(l2_sr_data), .sr_kill(hw_kill));
 
     // L1I; stores to code (snoop, invalidation, fetch hold), its misses
     // after the older stores to the line (sq_busy) and the L1D probe
@@ -226,7 +282,9 @@ module x86_core
     logic [1:0][31:5]  sn_line;
     logic [31:5]       ic_miss_line, d_line;
     logic a20_q;                     // the A20 mask in effect
-    x86_l1i u_l1i (.clk(clk), .rst(rst), .pc_n({fetch_next[31:21], fetch_next[20] & !a20_q, fetch_next[19:4]}),
+    logic code_snooped;              // an external snoop hit the L1I since the last flush
+    logic l1i_x_hit;
+    x86_l1i #(.KB(L1I_KB)) u_l1i (.clk(clk), .rst(rst), .pc_n({fetch_next[31:21], fetch_next[20] & !a20_q, fetch_next[19:4]}),
                    .pc_f({fetch_pc[31:21], fetch_pc[20] & !a20_q, fetch_pc[19:4]}),
                    .hold(code_pend || code_pend_q), .hit(ic_hit), .bytes(ic_bytes),
                    .sn_line(sn_line), .sn_hit(ic_sn_hit),
@@ -235,7 +293,7 @@ module x86_core
                    .mem_req(im_req), .mem_addr(im_addr), .mem_ready(im_ready),
                    .mem_rvalid(im_rvalid), .mem_rdata(l2_rdata), .mem_rcacheable(l2_rcache),
                    .fl_req(fl_l1), .fl_done(l1i_fl_done),
-                   .ext_req(sn_l1 && !sn_l1_done[1]), .ext_line(sn_q[sn_head[$clog2(SN_N)-1:0]]), .ext_done(l1i_x_done));
+                   .ext_req(sn_l1 && !sn_l1_done[1]), .ext_line(sn_q[sn_head[$clog2(SN_N)-1:0]]), .ext_done(l1i_x_done), .ext_hit(l1i_x_hit));
 
     x86_frontend fe (.clk(clk), .rst(rst), .redirect(fe_redirect), .redirect_pc(fe_redirect_pc),
                      .take(dec_take), .fetch_next(fetch_next), .fetch_pc(fetch_pc),
@@ -489,7 +547,7 @@ module x86_core
                 if (e.kind == K_ILL || e.fault) begin r_halt = 1'b1; r_ill = 1'b1; stop = 1'b1; end
                 if (e.kind == K_ST && e.smc) smc = 1'b1;
                 if (e.kind == K_BR && e.mispred || e.kind == K_DF || smc && e.eop
-                    || a20m != a20_q && e.eop && e.kind != K_BR) begin
+                    || (a20m != a20_q || code_snooped) && e.eop && e.kind != K_BR) begin
                     r_flush = 1'b1;
                     r_flush_pc = e.kind == K_BR && e.mispred ? e.redirect_pc : e.next_eip;
                     r_btb = e.btbi;
@@ -918,10 +976,10 @@ module x86_core
 
     // ---------------- M: L1D data ----------------
     logic        m_ok;
-    x86_l1d u_l1d (.clk(clk), .rst(rst),
+    x86_l1d #(.KB(L1D_KB)) u_l1d (.clk(clk), .rst(rst),
                    .a_valid(ix_valid[2] && !uc_l), .a_addr(maddr(xr[2])), .a_size(ix[2].u.osz), .a_hit(a_hit),
                    .m_addr(am_addr), .m_data(load_data),
-                   .d_valid(sq_head != sq_cmt && !uc_s && !sn_any), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
+                   .d_valid(sq_head != sq_cmt && !uc_s && !sn_any && !hm_look && !snoop && hs == H_IDLE), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
                    .d_size(sq[sq_head[SQ_W-1:0]].size), .d_data(sq[sq_head[SQ_W-1:0]].data),
                    .d_done(l1_drain), .d_step(d_step), .d_line(d_line),
                    .pr_req(pr_req), .pr_line(ic_miss_line), .pr_done(pr_done),
@@ -929,7 +987,9 @@ module x86_core
                    .mem_ready(dm_ready), .mem_rvalid(dm_rvalid), .mem_rdata(l2_rdata), .mem_rcacheable(l2_rcache),
                    .fl_req(fl_l1), .fl_done(l1d_fl_done),
                    .ext_req(sn_l1 && !sn_l1_done[0]), .ext_line(sn_q[sn_head[$clog2(SN_N)-1:0]]), .ext_done(l1d_x_done),
-                   .ext_dirty(l1d_x_dirty));
+                   .ext_dirty(l1d_x_dirty),
+                   .hm_line(c_hm_line), .hm_dirty(l1d_hm), .sr_req(hs == H_L1D), .sr_done(l1d_sr_done), .sr_hit(l1d_sr_hit),
+                   .sr_data(l1d_sr_data), .sr_kill(hw_kill));
     assign m_ok = am_ok && !md_done;   // bus 2 taken by mul/div: replay
 
     // ---------------- stores to code ----------------
@@ -1082,6 +1142,9 @@ module x86_core
         flush <= r_flush && !rst;
         if (rst) a20_q <= 1'b0;
         else if (r_flush) a20_q <= a20m;
+        if (rst) code_snooped <= 1'b0;
+        else if (l1i_x_hit) code_snooped <= 1'b1;
+        else if (r_flush) code_snooped <= 1'b0;
         smc_q <= r_smc && !rst;
         code_pend_q <= code_pend;
         flush_pc <= r_flush_pc;

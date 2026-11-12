@@ -4,6 +4,7 @@
 # Verilator model (rtl/tests/x86/tb/core_top.sv) and checks its retire
 # trace against Unicorn instruction by instruction (x86_test.sh).
 set -eu
+(($#)) || { echo "usage: $0 <test.S>..." >&2; exit 1; }
 tests=()
 for t; do tests+=("$(realpath "$t")"); done
 cd "$(dirname "$0")/.."

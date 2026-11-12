@@ -16,6 +16,13 @@
 // - External snoop (EADS#, a bus master wrote ext_line): a tag copy read with ext_line, then the
 //   line's way invalidated if clean; a dirty one is kept and flagged (ext_dirty: standard mode
 //   cannot write it back). A fill of that line in flight is answered uncacheable, not kept.
+// - HITM# (enhanced bus mode): a {dirty, tag} copy per way in MLAB tells within the clock whether
+//   hm_line is dirty here, or held by the front as an L1D write-back (hm_dirty). sr_req reads the
+//   newest copy: the front's r_wdata, the engine's victim (d_rd), else the data RAM when its port
+//   is free. sr_kill (INV, the line written back): the front's write, the engine's write-back or
+//   write-allocate of the line are dropped and its tag invalidated, clean too (an older copy than
+//   the L1D's written back), as soon as the port is free (k_line); no engine start or flush step
+//   until then, no request taken (a read of the old copy).
 // - Prefetch: once demand reads stream (each within PF + 1 lines after the
 //   last), up to PF lines after the last one, in its 4 KB page, one at a
 //   time when the front and the engine are idle.
@@ -50,7 +57,15 @@ module x86_l2 #(
     input  logic          ext_req,
     input  logic [31:5]   ext_line,
     output logic          ext_done,
-    output logic          ext_dirty    // with ext_done
+    output logic          ext_dirty,   // with ext_done
+    // HITM#: hm_line is held from sr_req to sr_kill (no new lookup while a kill waits)
+    input  logic [31:5]   hm_line,
+    output logic          hm_dirty,
+    input  logic          sr_req,      // held until sr_done
+    output logic          sr_done,
+    output logic          sr_hit,      // with sr_done: the newest copy is here, in sr_data
+    output logic [255:0]  sr_data,
+    input  logic          sr_kill
 );
     localparam int WAYS = 4, SETS = KB * 1024 / 32 / WAYS, SW = $clog2(SETS), TW = 27 - SW;
 
@@ -94,6 +109,20 @@ module x86_l2 #(
     logic          t_wq;           // a tag write last clock (the copy read may predate it)
     logic [SW-1:0] w_setq;
     tg_t  [WAYS-1:0] x_rd;
+    // HITM#
+    logic [WAYS-1:0][TW+1:0] h_rd; // {valid, dirty, tag}
+    logic          h_hit;          // h_line dirty in the tags
+    logic [1:0]    h_way;
+    logic          k_hit;          // h_line valid in the tags
+    logic [1:0]    k_way;
+    logic          f_pend;         // the front holds a write of hm_line
+    logic          e_vic;          // the engine writes hm_line back
+    logic          sr_rd, sr_q;    // the data RAM reads hm_line this clock; its data next clock
+    logic          k_pend, k_wr;   // sr_kill: the tag invalidation waits for the port
+    logic [31:5]   k_line, h_line;
+    logic          e_vdrop;        // the engine's write-back is dropped (the snoop wrote it)
+    logic          e_cut;          // the engine's write-allocate is dropped
+    logic          hold_ev;        // no engine start, no flush step
 
     // tags (a RAM per way) and data ({set, way} rows), registered reads
     logic [SW-1:0]           t_ra, w_set;
@@ -119,6 +148,8 @@ module x86_l2 #(
         assign tw_e = clearing || t_we && w_way == 2'(gw);
         assign tw_a = clearing ? clr : w_set;
         assign tw_d = clearing ? '0 : t_wd;
+        x86_ram_async #(.W(TW + 2), .N(SETS)) h (.clk(clk), .we(tw_e), .wa(tw_a), .wd({tw_d.v, tw_d.v && tw_d.d, tw_d.tag}),
+                                                 .ra(h_line[5 +: SW]), .q(h_rd[gw]));
         always_ff @(posedge clk) begin
             if (tw_e) begin
                 t[tw_a] <= tw_d;
@@ -163,6 +194,27 @@ module x86_l2 #(
                 x_hit = 1'b1;
                 x_way = 2'(w);
             end
+        {h_hit, h_way, k_hit, k_way} = '0;
+        for (int w = 0; w < WAYS; w++)
+            if (h_rd[w][TW+1] && h_rd[w][TW-1:0] == h_line[31 -: TW]) begin
+                k_hit = 1'b1;
+                k_way = 2'(w);
+                h_hit = h_rd[w][TW];
+                h_way = 2'(w);
+            end
+    end
+
+    // HITM#: the lookup and the read of the newest copy
+    assign h_line = k_pend ? k_line : hm_line;
+    assign hold_ev = sr_kill || k_pend;
+    always_comb begin
+        f_pend = (st == S_TAG || st == S_HOLD) && r_we && r_addr == hm_line;
+        e_vic = (en == E_VRD || en == E_WB) && !e_vdrop && {v_tag, e_addr[5 +: SW]} == hm_line;
+        hm_dirty = h_hit || f_pend;
+        sr_rd = sr_req && !f_pend && !e_vic && h_hit && !sr_q && st != S_TAG && en != E_VRD && en != E_WB;
+        sr_hit = f_pend || e_vic && en == E_WB || sr_q;
+        sr_done = sr_req && (sr_hit || !h_hit);
+        sr_data = f_pend ? r_wdata : d_rd;
     end
 
     // prefetch: the next line within PF of the last demand read, same page
@@ -174,7 +226,7 @@ module x86_l2 #(
     // the engine starts on a miss in S_TAG (it alone writes the RAMs then)
     logic start, start_dirty;
     always_comb begin
-        start = st == S_TAG && !stale && !hit && !e_busy && !(r_we && !(t_rd[vway].v && t_rd[vway].d));
+        start = st == S_TAG && !stale && !hit && !e_busy && !hold_ev && !(r_we && !(t_rd[vway].v && t_rd[vway].d));
         start_dirty = t_rd[vway].v && t_rd[vway].d;
     end
 
@@ -182,10 +234,11 @@ module x86_l2 #(
     // RAM writes: a front line write (hit or clean allocate, engine idle),
     // the engine's fill or write-allocate
     always_comb begin
-        logic ew;
-        fw = st == S_TAG && r_we && !stale && !e_busy && (hit || !(t_rd[vway].v && t_rd[vway].d));
-        ew = en == E_WB && mem_ready && e_we;
-        sw_inv = en == E_WB && mem_ready && e_sw;
+        logic ew, e_go;
+        e_go = mem_ready || e_vdrop;
+        fw = st == S_TAG && r_we && !stale && !e_busy && (hit || !(t_rd[vway].v && t_rd[vway].d)) && !(sr_kill && f_pend);
+        ew = en == E_WB && e_go && e_we && !e_cut && !(sr_kill && e_addr == hm_line);
+        sw_inv = en == E_WB && e_go && e_sw;
         fill = en == E_MWAIT && mem_rvalid;
         d_we = fw || ew || fill;
         d_wd = fill ? mem_rdata : r_wdata;
@@ -195,15 +248,19 @@ module x86_l2 #(
         // the snoop's copy read is stale after a write to its set; it writes when nobody else does
         x_conf = t_wq && w_setq == ext_line[5 +: SW] || d_we || sw_inv;
         x_wr = xs == X_CHK && !clearing && !x_conf && x_hit && !x_rd[x_way].d;
-        t_we = d_we || sw_inv || x_wr;
-        t_wd = '{v: !sw_inv && !x_wr && (!fill || mem_cacheable && !e_stale && !e_snooped), d: !fill,
+        k_wr = k_pend && !clearing && !d_we && !sw_inv && !x_wr;
+        t_we = d_we || sw_inv || x_wr || k_wr && k_hit;
+        t_wd = '{v: !sw_inv && !x_wr && !k_wr && (!fill || mem_cacheable && !e_stale && !e_snooped), d: !fill,
                  tag: fw ? r_addr[31 -: TW] : e_addr[31 -: TW]};
         if (x_wr) begin
             w_set = ext_line[5 +: SW];
             w_way = x_way;
+        end else if (k_wr) begin
+            w_set = h_line[5 +: SW];
+            w_way = k_way;
         end
         d_ra = en == E_VRD || en == E_WB ? {e_addr[5 +: SW], e_way}   // the victim, kept for mem_wdata
-                                         : {r_addr[5 +: SW], st == S_TAG ? hway : r_way};
+             : sr_rd ? {hm_line[5 +: SW], h_way} : {r_addr[5 +: SW], st == S_TAG ? hway : r_way};
     end
 
     always_ff @(posedge clk) begin
@@ -218,13 +275,22 @@ module x86_l2 #(
             pf_base <= '0;
             sw_st <= W_IDLE;
             xs <= X_IDLE;
+            sr_q <= 1'b0;
+            k_pend <= 1'b0;
         end else begin
+            sr_q <= sr_rd;
+            if (sr_kill) begin
+                k_pend <= 1'b1;
+                k_line <= hm_line;
+                if (e_vic) e_vdrop <= 1'b1;
+                if (e_we && e_addr == hm_line) e_cut <= 1'b1;
+            end else if (k_wr) k_pend <= 1'b0;
             t_wq <= t_we;
             w_setq <= w_set;
             // the engine's memory line, read before the snoop: answered, not kept
             if (e_snooped) e_stale <= 1'b1;
             unique case (xs)
-                X_IDLE: if (ext_req && !ext_done) xs <= X_RD;
+                X_IDLE: if (ext_req && !ext_done && !hold_ev) xs <= X_RD;
                 X_RD: xs <= X_CHK;
                 X_CHK: if (clearing || !x_conf) xs <= X_IDLE;
                        else xs <= X_RD;
@@ -274,16 +340,20 @@ module x86_l2 #(
             case (en)
                 E_IDLE:
                     if (fw && !hit) rr <= rr + 2'd1;
-                    else if (sw_st == W_CHK && t_rd[sw_dirty].v && t_rd[sw_dirty].d) begin
+                    else if (sw_st == W_CHK && !hold_ev && t_rd[sw_dirty].v && t_rd[sw_dirty].d) begin
                         e_addr <= {t_rd[sw_dirty].tag, sw_set};
                         e_way <= sw_dirty;
                         e_we <= 1'b0;
                         e_sw <= 1'b1;
+                        e_vdrop <= 1'b0;
+                        e_cut <= 1'b0;
                         v_tag <= t_rd[sw_dirty].tag;
                         en <= E_VRD;
                     end else if (start) begin
                         e_sw <= 1'b0;
                         e_stale <= 1'b0;
+                        e_vdrop <= 1'b0;
+                        e_cut <= 1'b0;
                         e_addr <= r_addr;
                         e_way <= vway;
                         e_we <= r_we;
@@ -292,7 +362,7 @@ module x86_l2 #(
                         en <= start_dirty ? E_VRD : E_MREQ;
                     end
                 E_VRD: en <= E_WB;      // d_ra: the victim, d_rd next cycle
-                E_WB: if (mem_ready) en <= e_we || e_sw ? E_IDLE : E_MREQ;
+                E_WB: if (mem_ready || e_vdrop) en <= e_we || e_sw ? E_IDLE : E_MREQ;
                 E_MREQ: if (mem_ready) en <= E_MWAIT;
                 E_MWAIT: if (mem_rvalid) en <= E_IDLE;
                 default: en <= E_IDLE;
@@ -304,7 +374,8 @@ module x86_l2 #(
                 end
                 W_RD: sw_st <= W_CHK;
                 W_CHK:
-                    if (t_rd[sw_dirty].v && t_rd[sw_dirty].d) sw_st <= W_WAIT;
+                    if (hold_ev) sw_st <= W_RD;
+                    else if (t_rd[sw_dirty].v && t_rd[sw_dirty].d) sw_st <= W_WAIT;
                     else begin
                         sw_set <= sw_set + 1'd1;
                         sw_st <= W_RD;
@@ -319,16 +390,18 @@ module x86_l2 #(
                 W_DONE: if (!fl_req) sw_st <= W_IDLE;
                 default: sw_st <= W_IDLE;
             endcase
+            // the front's write of the snooped line is dropped (the snoop wrote it back)
+            if (sr_kill && f_pend) st <= S_IDLE;
         end
     end
 
-    assign ready = st == S_IDLE && !clearing && !fl_req;
+    assign ready = st == S_IDLE && !clearing && !fl_req && !hold_ev;   // a kill first: no read of the old copy
     assign rvalid = st == S_DATA || st == S_HOLD && !r_we && fill && e_addr == r_addr;
     assign rdata = st == S_DATA ? d_rd : mem_rdata;
     assign rcacheable = st == S_DATA || mem_cacheable && !e_stale && !e_snooped;
     assign ext_done = xs == X_CHK && (clearing || !x_conf);
     assign ext_dirty = x_hit && x_rd[x_way].d && !clearing;
-    assign mem_req = en == E_WB || en == E_MREQ;
+    assign mem_req = en == E_WB && !e_vdrop || en == E_MREQ;
     assign mem_we = en == E_WB;
     assign mem_addr = en == E_WB ? {v_tag, e_addr[5 +: SW]} : e_addr;
     assign mem_wdata = d_rd;

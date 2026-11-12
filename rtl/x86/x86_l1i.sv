@@ -1,4 +1,4 @@
-// L1 instruction cache (plan/x86_core.md M3): 16 KB, 4-way, 32-byte lines,
+// L1 instruction cache (plan/x86_core.md M3): KB kilobytes (default 16), 4-way, 32-byte lines,
 // one miss in flight. Two banks, half 0 and half 1 of each line; the RAMs
 // (tags and data, a copy per bank) are read with pc_n like the BTB, so in
 // F0 the 32 bytes from pc_f are the block's half and the other one, of the
@@ -20,7 +20,9 @@
 // then S_CLR (and the buffer); fl_done until fl_req drops, no hit or miss.
 module x86_l1i
     import x86_pkg::*;
-(
+#(
+    parameter int KB = 16
+) (
     input  logic            clk,
     input  logic            rst,
     input  logic [31:4]     pc_n,      // the next fetch block: RAMs read with it
@@ -51,9 +53,10 @@ module x86_l1i
     // external snoop: held until ext_done
     input  logic            ext_req,
     input  logic [31:5]     ext_line,
-    output logic            ext_done
+    output logic            ext_done,
+    output logic            ext_hit     // the line was here, being filled or buffered (pipeline: refetch)
 );
-    localparam int SETS = 128, WAYS = 4, SW = $clog2(SETS), TW = 32 - 5 - SW;
+    localparam int WAYS = 4, SETS = KB * 1024 / 32 / WAYS, SW = $clog2(SETS), TW = 32 - 5 - SW;
 
     typedef struct packed {
         logic          v;
@@ -99,6 +102,7 @@ module x86_l1i
         x_now = ext_req && ext_line == f_line && st != S_IDLE;
         x_wr = ext_req && x_hit && !inv && !fill && st != S_CLR;
         ext_done = ext_req && (st == S_CLR || !x_hit || x_wr);
+        ext_hit = x_wr || x_now || ext_req && (nc_valid[0] && nc_line[0] == ext_line || nc_valid[1] && nc_line[1] == ext_line);
     end
     always_comb
         for (int b = 0; b < 2; b++) begin

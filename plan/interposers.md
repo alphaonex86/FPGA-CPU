@@ -90,6 +90,9 @@ Layout: `hw/<variant>/` per project, `hw/lib/` shared symbols/footprints,
   on thermal tape over U1 (no PCB change) is likely needed; the Quartus power
   estimate on the real RTL decides, and the height above U1 depends on M1/M2
   (D6), most of all on socket 3 where U1 sits beside the ZIF socket.
+  Estimate 2026-11-12 (full socket 3 build, 5CEFA9F23C8, core and bus at 33 MHz, vectorless 12.5 %
+  toggle): 1.10 W (core static 0.54, dynamic 0.52, I/O 0.04), Tj ~ 40 + 1.1 x 14-16 = 55-58 C: no
+  heatsink at this clock; to be redone when the core gets its own faster clock.
 - **D1** (decided 2026-10-31 by the operator) Socket 3: external 12 V supply
   on the interposer (barrel jack, FPGAmotherboard power tree); the socket VCC
   pins stay unused (board LDO PQ30RV21: 2 A abs max, `hw/common/socket3_notes.md` R2).

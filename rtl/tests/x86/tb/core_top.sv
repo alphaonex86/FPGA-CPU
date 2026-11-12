@@ -1,4 +1,4 @@
-// M2 testbench top: x86_core with a 1 MB memory loaded from +image=<hex> at
+// M2 testbench top: x86_core (cache sizes: the parameters, x86_bench.sh) with a 4 MB memory loaded from +image=<hex> at
 // 0x1000 behind a line port of +mem_lat=<cycles> read latency (default
 // 10; writes posted, one read in flight), writing the retire trace (one line per x86
 // instruction, x86_trace_check format) to +trace=<file>; +debug prints the
@@ -10,7 +10,11 @@
 // Single cycles (uncached: the VGA window) take one clock without S3_BUS; a line access to that
 // window stops the run. Without S3_BUS the 64 KB at 0x80000 come without KEN#: an L1D or L2 line
 // installed from there stops the run (the core must learn the region and go uncached).
-module core_top (
+module core_top #(
+    parameter int L1I_KB = 16,
+    parameter int L1D_KB = 16,
+    parameter int L2_KB = 256
+) (
     input  logic clk,
     input  logic rst,
     output logic halted,
@@ -19,7 +23,7 @@ module core_top (
     output logic [31:0] insns
 );
     import x86_pkg::*;
-    localparam int MEM = 1 << 20;
+    localparam int MEM = 1 << 22;
 
     logic [7:0]  mem [MEM];
     logic        mem_req, mem_we, mem_ready, mem_rvalid, rd_pend;
@@ -49,7 +53,7 @@ module core_top (
     logic [31:0] st_skew, st_alu3, st_mem2, st_replay, st_replay_md;   // issue contention
     logic [31:0] st_miss, st_wb;              // L2 misses, writebacks
     logic [31:0] st_imiss, st_dmiss, st_dwb;  // L1I, L1D misses, L1D writebacks
-    logic [31:0] st_sn [5];                   // snoops queued; lines invalidated in L2 / L1D / L1I; dirty kept
+    logic [31:0] st_sn [7];                   // snoops queued; lines invalidated in L2 / L1D / L1I; dirty kept; HITM#, with INV
     logic [31:0] mp_cycle [ROB_N];
     logic        ind [ROB_N];       // the ROB entry is an indirect branch (RET: predicted taken)
     logic        refill;
@@ -65,32 +69,59 @@ module core_top (
     // the trace must not change)
     logic         bus_snoop, bus_snoop_inv, bus_enhanced, snoop_err, flush_done;
     logic [31:4]  bus_snoop_line;
+    logic         hm_look, hm_inv, hw_take, hm_dirty, hw_valid, hw_none;
+    logic [31:4]  hm_line;
+    logic [255:0] hw_data;
 `ifndef S3_BUS
-    int           snoop_n;
+    // +hitm=1: enhanced mode, INV at random; a dirty line's write-back (HITM#) is written into the
+    // memory, no line is read meanwhile (the bus waits for it); with INV the line must come back
+    // from there: the trace checks the written-back data
+    int           snoop_n, hitm_mode;
     logic [31:0]  sn_rand;
-    initial if (!$value$plusargs("snoop=%d", snoop_n)) snoop_n = 0;
-    assign bus_snoop_inv = 1'b1;
-    assign bus_enhanced = 1'b0;
+    logic         hitm_wait;
+    initial begin
+        if (!$value$plusargs("snoop=%d", snoop_n)) snoop_n = 0;
+        if (!$value$plusargs("hitm=%d", hitm_mode)) hitm_mode = 0;
+    end
+    assign bus_enhanced = hitm_mode != 0;
+    assign hw_take = hw_valid;
     always_ff @(posedge clk) begin
         sn_rand <= $urandom;
-        bus_snoop <= snoop_n > 0 && cycles % snoop_n == 0;
+        hm_look <= !rst && snoop_n > 0 && cycles % snoop_n == 0 && !hitm_wait;
         unique case (sn_rand[1:0])
-            2'd0: bus_snoop_line <= {core.l2_addr, sn_rand[2]};
-            2'd1: bus_snoop_line <= {core.d_line, sn_rand[2]};
-            2'd2: bus_snoop_line <= {core.fetch_pc[31:5], sn_rand[2]};
-            default: bus_snoop_line <= {12'd0, sn_rand[31:16]};
+            2'd0: hm_line <= {core.l2_addr, sn_rand[2]};
+            2'd1: hm_line <= {core.d_line, sn_rand[2]};
+            2'd2: hm_line <= {core.fetch_pc[31:5], sn_rand[2]};
+            default: hm_line <= {12'd0, sn_rand[31:16]};
         endcase
+        hm_inv <= hitm_mode == 0 || sn_rand[3];
+        bus_snoop <= hm_look;                    // the snoop pulse comes a clock after the lookup
+        bus_snoop_line <= hm_line;
+        bus_snoop_inv <= hm_inv;
+        if (rst) hitm_wait <= 1'b0;
+        else if (hm_look && hm_dirty) hitm_wait <= 1'b1;
+        else if (hw_valid) hitm_wait <= 1'b0;
+        if (!rst && hw_valid && hw_none) begin
+            $display("FAIL: HITM# without data (cycle %0d)", cycles);
+            $finish;
+        end
     end
+`else
+    assign hm_line[4] = 1'b0;
 `endif
 
 `ifdef S3_BUS
-    x86_core core (.clk(clk), .rst(s3_rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
+    x86_core #(.L1I_KB(L1I_KB), .L1D_KB(L1D_KB), .L2_KB(L2_KB)) core (.clk(clk), .rst(s3_rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
                    .snoop(bus_snoop), .snoop_line(bus_snoop_line), .snoop_inv(bus_snoop_inv), .enhanced(bus_enhanced),
                    .snoop_err(snoop_err), .flush_done(flush_done),
+                   .hm_look(hm_look), .hm_line(hm_line[31:5]), .hm_inv(hm_inv), .hm_dirty(hm_dirty), .hw_valid(hw_valid), .hw_none(hw_none), .hw_data(hw_data),
+                   .hw_take(hw_take),
 `else
-    x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
+    x86_core #(.L1I_KB(L1I_KB), .L1D_KB(L1D_KB), .L2_KB(L2_KB)) core (.clk(clk), .rst(rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
                    .snoop(bus_snoop), .snoop_line(bus_snoop_line), .snoop_inv(bus_snoop_inv), .enhanced(bus_enhanced),
                    .snoop_err(snoop_err), .flush_done(flush_done),
+                   .hm_look(hm_look), .hm_line(hm_line[31:5]), .hm_inv(hm_inv), .hm_dirty(hm_dirty), .hw_valid(hw_valid), .hw_none(hw_none), .hw_data(hw_data),
+                   .hw_take(hw_take),
 `endif
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
@@ -115,6 +146,39 @@ module core_top (
     logic         s3_rst;
 
     assign s3_rst = rst || cpu_reset;
+    // +snoop=<n>: every n clocks a snoop under AHOLD (cpu486_bif never snoops) of the L1s' last L2
+    // request, the drain's line, the fetch line or a line in the 1 MB, INV at random; +hitm=1: WB/WT#
+    // high at RESET (enhanced mode: HITM# write-backs reach the memory through the chipset)
+    // (a fill through the chipset takes ~40 clocks: snooping its line faster starves it, as a bus master
+    // writing that line without pause would; s3_test.sh uses 37)
+    int           sn_n, sn_hitm, sn_t;
+    logic [31:4]  sn_a;
+    logic [31:0]  sn_rand;
+    logic         sn_ah, sn_eads, sn_inv, chip_wbwt_n, chip_ahold, chip_eads_n, chip_inv;
+    initial begin
+        if (!$value$plusargs("snoop=%d", sn_n)) sn_n = 0;
+        if (!$value$plusargs("hitm=%d", sn_hitm)) sn_hitm = 0;
+    end
+    assign wbwt_n = sn_hitm != 0 || chip_wbwt_n;
+    assign ahold  = chip_ahold || sn_ah;
+    assign eads_n = chip_eads_n && !sn_eads;
+    assign inv    = sn_eads ? sn_inv : chip_inv;
+    // AHOLD for 5 clocks, EADS# in the third (the address floated); released in time for a write-back
+    always_ff @(posedge clk) begin
+        sn_rand <= $urandom;
+        sn_t    <= rst || sn_n == 0 || sn_t == sn_n - 1 ? 0 : sn_t + 1;
+        sn_ah   <= !rst && sn_n > 4 && sn_t < 5;
+        sn_eads <= !rst && sn_n > 4 && sn_t == 2;
+        if (sn_t == 2) begin
+            unique case (sn_rand[1:0])
+                2'd0: sn_a <= {core.l2_addr, sn_rand[2]};
+                2'd1: sn_a <= {core.d_line, sn_rand[2]};
+                2'd2: sn_a <= {core.fetch_pc[31:5], sn_rand[2]};
+                default: sn_a <= {12'd0, sn_rand[31:16]};
+            endcase
+            sn_inv <= sn_rand[3];
+        end
+    end
     assign ads_n  = a_oe ? ads_r : 1'b1;            // the pad: floated with the address, pulled up
     assign d_pin  = d_oe ? d_o : chip_d_oe ? chip_d : 32'hffff_ffff;
     s3_bus bus (.clk(clk), .rst(s3_rst),
@@ -123,8 +187,10 @@ module core_top (
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(1'b0), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
                 .quiet(1'b1), .flush_done(flush_done), .stopped(), .snoop(bus_snoop), .snoop_addr(bus_snoop_line), .snoop_inv(bus_snoop_inv),
-                .enhanced(bus_enhanced), .a_o(a_o), .a_oe(a_oe), .a_i(a_o[31:4]), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
-                .blast_n(blast_n), .lock_n(), .cache_n(), .ctl_oe(), .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe),
+                .enhanced(bus_enhanced),
+                .hm_look(hm_look), .hm_line(hm_line[31:5]), .hm_inv(hm_inv), .hm_dirty(hm_dirty), .hw_valid(hw_valid),
+                .hw_none(hw_none), .hw_data(hw_data), .hw_take(hw_take), .a_o(a_o), .a_oe(a_oe), .a_i(a_oe ? a_o[31:4] : sn_a), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
+                .blast_n(blast_n), .lock_n(), .cache_n(), .hitm_n(), .ctl_oe(), .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe),
                 .d_i(d_pin), .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]}), .pchk_n(),
                 .hlda(), .breq(), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n), .hold(hold), .ahold(ahold),
                 .boff_n(boff_n), .eads_n(eads_n), .inv(inv), .wb_wt_n(wbwt_n), .stpclk_n(1'b1), .bs8_n(1'b1),
@@ -133,20 +199,20 @@ module core_top (
                 .clk(clk), .rst_n(!rst), .cpu_a(a_o), .cpu_be_n(be_n), .cpu_ads_n(ads_n), .cpu_mio_n(mio),
                 .cpu_dc_n(dc), .cpu_wr_n(wr), .cpu_blast_n(blast_n), .cpu_d_i(d_pin), .cpu_d_o(chip_d),
                 .cpu_d_oe(chip_d_oe), .cpu_brdy_n(brdy_n), .cpu_ken_n(ken_n), .cpu_reset(cpu_reset),
-                .cpu_rdy_n(rdy_n), .cpu_wbwt_n(wbwt_n), .cpu_ahold(ahold), .cpu_hold(hold), .cpu_eads_n(eads_n),
-                .cpu_inv(inv), .cpu_boff_n(boff_n),
+                .cpu_rdy_n(rdy_n), .cpu_wbwt_n(chip_wbwt_n), .cpu_ahold(chip_ahold), .cpu_hold(hold), .cpu_eads_n(chip_eads_n),
+                .cpu_inv(chip_inv), .cpu_boff_n(boff_n),
                 .host_req(host_req), .host_we(host_we), .host_mio(), .host_dc(), .host_addr(host_addr),
                 .host_wdata(host_wdata), .host_be(host_be), .host_ready(host_ready), .host_rdata(host_rdata),
                 .host_rvalid(host_ready && !host_we),
                 .spc_stb(), .spc_a(), .spc_be(), .err_burst_write());
     assign host_ready = host_req && !host_ack && host_cnt >= host_lat;      // HOSTPORT.md C4
-    assign host_rdata = {mem[20'({host_addr, 1'b1})], mem[20'({host_addr, 1'b0})]};
+    assign host_rdata = {mem[22'({host_addr, 1'b1})], mem[22'({host_addr, 1'b0})]};
     always_ff @(posedge clk) begin
         host_ack <= host_ready;
         host_cnt <= host_req && !host_ready && !host_ack ? host_cnt + 1 : 0;
         if (host_ready && host_we) begin
-            if (host_be[0]) mem[20'({host_addr, 1'b0})] <= host_wdata[7:0];
-            if (host_be[1]) mem[20'({host_addr, 1'b1})] <= host_wdata[15:8];
+            if (host_be[0]) mem[22'({host_addr, 1'b0})] <= host_wdata[7:0];
+            if (host_be[1]) mem[22'({host_addr, 1'b1})] <= host_wdata[15:8];
         end
         if (!rst && d_oe && chip_d_oe) begin
             $display("FAIL: both ends drive the data bus (cycle %0d)", cycles);
@@ -160,9 +226,9 @@ module core_top (
     initial if (!$value$plusargs("host_lat=%d", host_lat)) host_lat = 0;
 `else
     always_comb begin
-        for (int i = 0; i < 32; i++) mem_rdata[8*i +: 8] = mem[20'({rd_line, 5'd0} + 32'(i))];
+        for (int i = 0; i < 32; i++) mem_rdata[8*i +: 8] = mem[22'({rd_line, 5'd0} + 32'(i))];
     end
-    assign mem_ready = !rd_pend;
+    assign mem_ready = !rd_pend && !hitm_wait;
     assign mem_rvalid = rd_pend && rd_cnt == 0;
     assign sc_ready = !sc_done;
     assign mem_cacheable = rd_line[31:16] != 16'h0008;
@@ -211,7 +277,7 @@ module core_top (
             {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush, st_mp_wait, st_refill} <= '0;
             {st_skew, st_alu3, st_mem2, st_replay, st_replay_md, st_miss, st_wb} <= '0;
             {st_imiss, st_dmiss, st_dwb} <= '0;
-            for (int i = 0; i < 5; i++) st_sn[i] <= '0;
+            for (int i = 0; i < 7; i++) st_sn[i] <= '0;
             rd_pend <= 1'b0;
 `ifndef S3_BUS
             sc_done <= 1'b0;
@@ -302,6 +368,8 @@ module core_top (
             if (core.u_l1d.x_wr) st_sn[2] <= st_sn[2] + 32'd1;
             if (core.u_l1i.x_wr) st_sn[3] <= st_sn[3] + 32'd1;
             if (core.l2_x_done && core.l2_x_dirty || core.l1d_x_done && core.l1d_x_dirty) st_sn[4] <= st_sn[4] + 32'd1;
+            if (hw_valid && hw_take) st_sn[5] <= st_sn[5] + 32'd1;
+            if (core.hw_kill) st_sn[6] <= st_sn[6] + 32'd1;
             if (mem_req && mem_ready) begin
                 if (mem_we) st_wb <= st_wb + 32'd1;
                 else st_miss <= st_miss + 32'd1;
@@ -310,14 +378,16 @@ module core_top (
             sc_done <= sc_req && sc_ready;
             if (sc_req && sc_ready)
                 for (int b = 0; b < 4; b++) begin
-                    if (!sc_status[0]) sc_rdata[8*b +: 8] <= mem[20'({sc_addr, 2'(b)})];
-                    else if (sc_be[b]) mem[20'({sc_addr, 2'(b)})] <= sc_wdata[8*b +: 8];
+                    if (!sc_status[0]) sc_rdata[8*b +: 8] <= mem[22'({sc_addr, 2'(b)})];
+                    else if (sc_be[b]) mem[22'({sc_addr, 2'(b)})] <= sc_wdata[8*b +: 8];
                 end
             if (mem_rvalid) rd_pend <= 1'b0;
             else if (rd_pend) rd_cnt <= rd_cnt - 1;
+            if (hw_valid)
+                for (int i = 0; i < 32; i++) mem[22'({core.hw_line, 5'd0} + 32'(i))] <= hw_data[8*i +: 8];
             if (mem_req && mem_ready) begin
                 if (mem_we) begin
-                    for (int i = 0; i < 32; i++) mem[20'({mem_addr, 5'd0} + 32'(i))] <= mem_wdata[8*i +: 8];
+                    for (int i = 0; i < 32; i++) mem[22'({mem_addr, 5'd0} + 32'(i))] <= mem_wdata[8*i +: 8];
                 end else begin
                     rd_pend <= 1'b1;
                     rd_cnt <= mem_lat - 1;
@@ -367,8 +437,8 @@ module core_top (
             $display("stats: misses: L1I %0d, L1D %0d (writebacks %0d), L2 %0d (writebacks %0d; memory read latency %0d)",
                      st_imiss, st_dmiss, st_dwb, st_miss, st_wb, mem_lat);
         if (stats)
-            $display("stats: snoops %0d: invalidated L2 %0d, L1D %0d, L1I %0d; dirty kept %0d",
-                     st_sn[0], st_sn[1], st_sn[2], st_sn[3], st_sn[4]);
+            $display("stats: snoops %0d: invalidated L2 %0d, L1D %0d, L1I %0d; dirty kept %0d; HITM# %0d (INV %0d)",
+                     st_sn[0], st_sn[1], st_sn[2], st_sn[3], st_sn[4], st_sn[5], st_sn[6]);
         if (stats)
             $display("stats: flushes: Jcc %0d, indirect %0d, RET %0d, other branch %0d, DF %0d, store to code %0d",
                      st_fl[0], st_fl[1], st_fl[2], st_fl[3], st_fl[4], st_fl[5]);

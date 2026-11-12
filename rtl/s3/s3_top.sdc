@@ -8,10 +8,10 @@ set skew 0.6
 create_clock -name clk -period $period [get_ports clk]
 derive_pll_clocks
 derive_clock_uncertainty
-set bus_out [get_ports {a[*] d[*] dp[*] be_n[*] ads_n m_io_n d_c_n w_r_n blast_n lock_n plock_n pcd pwt cache_n hlda breq pchk_n}]
+set bus_out [get_ports {a[*] d[*] dp[*] be_n[*] ads_n m_io_n d_c_n w_r_n blast_n lock_n plock_n pcd pwt cache_n hitm_n hlda breq pchk_n}]
 set_output_delay -clock clk -max [expr {$period - 14.0 + $skew}] $bus_out
 set_output_delay -clock clk -min [expr {-3.0 + $skew}] $bus_out
-set bus_in [get_ports {a[*] d[*] dp[*] rdy_n brdy_n ken_n hold ahold boff_n eads_n bs8_n bs16_n reset}]
+set bus_in [get_ports {a[*] d[*] dp[*] rdy_n brdy_n ken_n hold ahold boff_n eads_n inv bs8_n bs16_n reset}]
 set_input_delay -clock clk -max [expr {$period - 5.0 + $skew}] $bus_in
 set_input_delay -clock clk -min [expr {3.0 - $skew}] $bus_in
 # the PLL clock runs s3_top's PHASE (> 0) after the pin clock: an input is taken at its next edge, not
@@ -24,4 +24,4 @@ set_max_delay -from [get_registers {*bus|a_oe* *bus|d_oe* *bus|ctl_oe*}] -to [ge
 set_false_path -from [get_ports {a20m_n stpclk_n vcore_ok}]
 set_false_path -to [get_registers {*locked_r[0]}]
 set_false_path -from [get_registers {*pll_rst}]
-set_false_path -to [get_ports {ferr_n hitm_n smiact_n tdo}]
+set_false_path -to [get_ports {ferr_n smiact_n tdo}]

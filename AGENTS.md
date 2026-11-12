@@ -91,6 +91,9 @@ chipset, same sockets; source of `sockets/kicad/`).
 - Routing runs several routers one after the other, each on its own unrouted copy of the PCB,
   5 days at most per tool and board; all failing = never the budget: a routing-setup fault (e.g.
   routing order) or a fault outside routing (e.g. placement) (operator, 2026-11-08 / 11-11).
+- Every architectural change or optimisation of rtl/x86: run `rtl/tools/x86_bench.sh "<note>"`
+  (row in `plan/bench_history.md`; own core only, not the Mu; L1I_KB / L1D_KB / L2_KB select the
+  cache sizes to compare) (operator, 2026-11-12).
 - Never more than 4 CPUs for all of this project's heavy jobs together: they run in
   `claude-route.slice` (operator, 2026-11-11).
 - CPU goal is maximum performance inside the selected Cyclone V: large rewrites,
