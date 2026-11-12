@@ -372,8 +372,8 @@ replicated per read port plus a live-value table.
    cycles in enhanced mode.
    - The snoop: EADS# looks the line up in
      L1D / L2 dirty tags within a clock (HITM# is due 2 clocks after EADS#), then the line is
-     handed to the bus unit (snoop write-back, 0-4-8-C burst with CACHE#, HITM# until its last
-     BRDY#) and kept clean or invalidated (INV). The UMC board runs this enhanced bus mode with its
+     handed to the bus unit (snoop write-back with CACHE#, 0-4-8-C, HITM# until its last
+     ready) and kept clean or invalidated (INV). The UMC board runs this enhanced bus mode with its
      jumpers set for a write-back P24D; in standard mode (WB/WT# low at RESET: FPGAmotherboard,
      no DMA) a snoop hit on a dirty line cannot be answered and is flagged.
      Invalidation done 2026-11-11: s3_bus passes INV and latches the mode (WB/WT# at RESET); the
@@ -384,7 +384,13 @@ replicated per read port plus a live-value table.
      line is kept and `snoop_err` set (sticky, as for a full queue; no pin: JTAG later). Test: the
      second pass of `x86_core_test.sh` adds `+snoop=13` (the last L2 request, the drain's line, the
      fetch line or a random one; c1_mix: ~400 L2 / 350 L1I invalidations per run, trace unchanged);
-     a dirty line invalidated in the L2 fails it. Next: enhanced mode (HITM#, the write-back).
+     a dirty line invalidated in the L2 fails it.
+     Write-back cycles done 2026-11-11: in enhanced mode a line write has CACHE# low, every BE#,
+     BS8# / BS16# ignored, and runs non-bursted (8 single cycles; the databook allows it). A burst
+     was built and tested but misses 33 MHz by 5.06 ns (bus-only build): the next dword must leave
+     in the clock after BRDY#, and BRDY# (die top, X88 Y115) is a die height away from D (Y0); the
+     pins are fixed. Burst write-backs are a later optimization (a 0-4-8-C shift register next to
+     the D pads, measured first). Next: HITM# and the snoop write-back.
 6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
 7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
    Socket 7 and Socket 370.

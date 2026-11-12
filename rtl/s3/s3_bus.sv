@@ -16,11 +16,14 @@
 //   T1 (after the idle clock nobody else drives; its enable may then take the slow way).
 // - Line read: per 16-byte block one burst from offset 0 (486 order 0-4-8-C); after a transfer ended
 //   by RDY# or a back-off the rest of the block as single cycles (a burst from another offset has
-//   another order). Line write: 8 single cycles (write-through towards the board: no burst write).
+//   another order). Line write: 8 single cycles; in enhanced mode a write-back (CACHE# low, never
+//   narrow: BS8# / BS16# ignored), non-bursted as the databook allows: a burst would drive the next
+//   dword in the clock after BRDY#, a pin -> pin loop from BRDY# (die top) to D (die bottom) that
+//   misses 33 MHz by 5 ns.
 // - BOFF#: floats the bus in the next clock, the transfer starts again when it is released. HOLD:
 //   granted between cycles (not under LOCK#). AHOLD: the address floats, no new cycle. EADS# on a
 //   floated address: `snoop` with the line address and INV (for the caches). `enhanced`: WB/WT# as
-//   RESET falls (only the mode is latched; the write-back protocol is not there yet).
+//   RESET falls.
 // - STPCLK# with the core quiet and no job: Stop Grant special cycle (address 10h, BE2# low), then
 //   no job until it is released.
 // - Even parity out on DP, PCHK# the clock after a read's data is stored.
@@ -30,8 +33,7 @@
 //   BLAST# low, so the board ended it anyway; in a burst the next transfer is made the last one
 //   (BLAST# low, its data ignored: BE# cannot follow RDY# within a clock, they are not on the fast
 //   balls) and the rest of the 16-byte block goes as single cycles, not cached.
-// Not yet: the write-back protocol (HITM#, INV, the write-back of a line the snoop hits: the
-// core's L2 holds dirty lines), FLUSH#, SRESET (plan/x86_core.md M5).
+// Not yet: HITM# and the snoop write-back, the flush acknowledge cycles, SRESET (plan/x86_core.md M5).
 module s3_bus (
     input  logic         clk,
     input  logic         rst,
@@ -119,7 +121,7 @@ module s3_bus (
     logic         take, take_last, take_mem;
     logic [2:0]   take_beat;
     logic [3:0]   take_be;
-    logic         ready, ends, burst, write, job_done, prep, start, try, ads_go;
+    logic         ready, ends, burst, write, wback, job_done, prep, start, try, ads_go;
     logic [3:0]   moved, rem_left;
     logic         partial, dw_done;
     logic         j_grant, j_sc, j_mem;      // a job is taken this clock
@@ -146,11 +148,12 @@ module s3_bus (
     endfunction
 
     assign write    = job == J_WRITE || (job == J_SINGLE && status[0]);
+    assign wback    = job == J_WRITE && enhanced;            // a write-back
     assign burst    = job == J_READ && !single;
     assign ready    = st == T2 && boff_n && (!rdy_n || !brdy_n);
     assign ends     = !rdy_n || !blast_n;                 // with RDY#, BRDY# is ignored
     assign beat_n   = beat + 3'd1;
-    assign moved    = drop ? 4'd0 : lanes(rem, bs8_q, bs16_q);
+    assign moved    = drop ? 4'd0 : wback ? rem : lanes(rem, bs8_q, bs16_q);
     assign rem_left = rem & ~moved;
     assign partial  = !drop && rem_left != 4'd0;
     assign dw_done  = !drop && rem_left == 4'd0;
@@ -254,7 +257,7 @@ module s3_bus (
             a_o[31:4] <= addr[31:4];              // A20M#: the core masks it
             be_n <= ~rem;
             {mio, dc, wr} <= job == J_READ ? MEM_READ : job == J_WRITE ? MEM_WRITE : status;
-            cache_n <= !burst;
+            cache_n <= !(burst || wback);
             d_o  <= wdata;
             dp_o <= parity(wdata);
             if (job == J_SINGLE && sc_lock && !grant) begin

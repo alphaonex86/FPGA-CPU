@@ -7,7 +7,8 @@
 // transfer drives junk on the lanes it does not serve, writes only those, and the next cycle must
 // carry exactly the remaining BE# at the same address; a narrow burst must end at its next transfer.
 // Undisturbed (every rate 0), every line read must be two full bursts. +seed=<n> +ops=<n>; +rdy=<percent of transfers ended by RDY#> +boff= +hold= +ahold= +stp= (per mille
-// of clocks); +bs=<percent of narrow pages>.
+// of clocks); +bs=<percent of narrow pages>; +wb=1: WB/WT# high at RESET (enhanced mode: line writes are
+// write-backs: CACHE# low, every BE#, BS8# / BS16# ignored [Intel486 databook 241731-002]: driven anyway).
 module bus_tb (
     input  logic clk,
     output logic done,
@@ -16,7 +17,7 @@ module bus_tb (
     localparam int WORDS = 1 << 14;                 // 64 KB of dwords
     logic [31:0] mem [WORDS], shadow [WORDS];
     logic        rst;
-    int          seed, ops, p_rdy, p_boff, p_hold, p_ahold, p_stp, p_bs;
+    int          seed, ops, p_rdy, p_boff, p_hold, p_ahold, p_stp, p_bs, p_wb;
     int          n_ops, n_reads, n_burst, n_single, n_boff, n_hold, n_grant, n_snoop, n_narrow, cycle, stp_gap;
     logic [1:0]  width [16];                        // per 4 KB page: 0 32-bit, 1 16-bit, 2 8-bit
 
@@ -48,6 +49,7 @@ module bus_tb (
     logic [31:0]  s_data, s_junk, s_mask;
     logic [31:2]  beat_addr, cur_a;
     logic [1:0]   cur_w;
+    logic         cur_wb, s_wb;                    // the cycle is a write-back (CACHE# low, a memory write)
     logic         s_drop;                          // a narrow burst went on: this transfer only ends it
     logic [3:0]   s_served, s_left, exp_be;
     logic         exp_valid;
@@ -60,9 +62,10 @@ module bus_tb (
     endfunction
 
     assign cur_a     = ss == S_IDLE ? a_o : s_a;
-    assign cur_w     = width[cur_a[15:12]];
-    assign bs8_n     = !((ss != S_IDLE || !ads_n) && cur_w == 2'd2);
-    assign bs16_n    = !((ss != S_IDLE || !ads_n) && cur_w == 2'd1);
+    assign cur_wb    = ss == S_IDLE ? !ads_n && !cache_n && {mio, dc, wr} == 3'b111 : s_wb;
+    assign cur_w     = cur_wb ? 2'd0 : width[cur_a[15:12]];        // a write-back ignores BS8# / BS16#
+    assign bs8_n     = !((ss != S_IDLE || !ads_n) && width[cur_a[15:12]] == 2'd2);
+    assign bs16_n    = !((ss != S_IDLE || !ads_n) && width[cur_a[15:12]] == 2'd1);
     assign s_served  = s_drop ? 4'd0 : lanes(s_be, cur_w);
     assign beat_addr = {s_a[31:4], s_a[3:2] ^ s_beat};
     for (genvar b = 0; b < 4; b++) begin : g_mask
@@ -82,7 +85,7 @@ module bus_tb (
                 .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe), .d_i(d_pin),
                 .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]} ^ {3'd0, bad_parity}),
                 .pchk_n(pchk_n), .hlda(hlda), .breq(breq), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n),
-                .hold(hold), .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .inv(inv), .wb_wt_n(1'b0), .stpclk_n(stpclk_n),
+                .hold(hold), .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .inv(inv), .wb_wt_n(p_wb != 0), .stpclk_n(stpclk_n),
                 .bs8_n(bs8_n), .bs16_n(bs16_n));
 
     task automatic fail(input string what);
@@ -122,6 +125,7 @@ module bus_tb (
         if (!$value$plusargs("ahold=%d", p_ahold)) p_ahold = 20;
         if (!$value$plusargs("stp=%d", p_stp)) p_stp = 5;
         if (!$value$plusargs("bs=%d", p_bs)) p_bs = 20;
+        if (!$value$plusargs("wb=%d", p_wb)) p_wb = 0;
         void'($urandom(seed));
         for (int i = 0; i < 16; i++)
             width[i] = int'($urandom_range(99)) < p_bs ? 2'($urandom_range(2, 1)) : 2'd0;
@@ -248,7 +252,7 @@ module bus_tb (
                 if (snoop_addr != 28'h123_4567) fail("snoop address");
                 if (snoop_inv != inv_2) fail("snoop INV");
             end
-            if (enhanced) fail("enhanced mode with WB/WT# low");
+            if (!rst && enhanced != (p_wb != 0)) fail("bus mode against WB/WT# at RESET");
             stp_gap <= stpclk_n ? stp_gap + 1 : 0;            // high >= 8 clocks between assertions [19751C]
             if (stpclk_n && stp_gap >= 8 && roll(p_stp) != 0) stpclk_n <= 1'b0;
             else if (!stpclk_n && stopped && roll(200) != 0) stpclk_n <= 1'b1;
@@ -287,6 +291,10 @@ module bus_tb (
                     s_left <= 4'd0;
                     s_a <= a_o;
                     s_status <= {mio, dc, wr};
+                    s_wb <= cur_wb;
+                    if (wr && !cache_n && p_wb == 0) fail("CACHE# on a write in standard mode");
+                    if (p_wb != 0 && op == O_WRITE && {mio, dc, wr} == 3'b111 && cache_n) fail("a line write without CACHE#");
+                    if (cur_wb && be_n != 4'd0) fail("a write-back cycle without every BE#");
                     s_be <= ~be_n;
                     s_beat <= 2'd0;
                     s_wait <= int'($urandom_range(3));
@@ -339,7 +347,7 @@ module bus_tb (
                             n_burst <= n_burst + 1;
                             if (roll(500) != 0) begin           // the next transfer in the next clock
                                 s_wait <= 0;
-                                answer(1'b0);
+                                answer(s_status[0]);
                             end
                         end
                     end else if (s_wait != 0) s_wait <= s_wait - 1;
