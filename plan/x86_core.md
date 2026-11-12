@@ -376,6 +376,15 @@ replicated per read port plus a live-value table.
      BRDY#) and kept clean or invalidated (INV). The UMC board runs this enhanced bus mode with its
      jumpers set for a write-back P24D; in standard mode (WB/WT# low at RESET: FPGAmotherboard,
      no DMA) a snoop hit on a dirty line cannot be answered and is flagged.
+     Invalidation done 2026-11-11: s3_bus passes INV and latches the mode (WB/WT# at RESET); the
+     core queues the 32-byte lines of EADS# (standard mode: all; enhanced: with INV; 8 entries, a
+     repeat of the last waiting line merged) and invalidates each in the L2 (its own tag copy, a
+     write when the port is free; a memory line being read is answered uncacheable and not kept),
+     then in the L1D / L1I (a tag copy each; a fill of the line in flight is not installed). A dirty
+     line is kept and `snoop_err` set (sticky, as for a full queue; no pin: JTAG later). Test: the
+     second pass of `x86_core_test.sh` adds `+snoop=13` (the last L2 request, the drain's line, the
+     fetch line or a random one; c1_mix: ~400 L2 / 350 L1I invalidations per run, trace unchanged);
+     a dirty line invalidated in the L2 fails it. Next: enhanced mode (HITM#, the write-back).
 6. M6 x87 (80-bit) and MMX; M7 SSE/SSE2.
 7. M8 bus units behind L2: Socket 3 (486), DE25-Nano adapter (D11), then
    Socket 7 and Socket 370.

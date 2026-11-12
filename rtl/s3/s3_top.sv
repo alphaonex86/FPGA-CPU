@@ -12,7 +12,8 @@
 // FPGAmotherboard compatibility).
 // FLUSH#: the core writes its caches back and invalidates them (standard mode: no special cycle).
 // Inputs the core has no use for yet (plan/x86_core.md M5): INTR, NMI, SMI#, IGNNE#,
-// SRESET, INV, WB/WT#, UP#, CLKMUL, the CPU JTAG pins.
+// SRESET, UP#, CLKMUL, the CPU JTAG pins. snoop_err (a snoop on a dirty line in standard mode) has
+// no pin: internal until the JTAG readout.
 module s3_top #(
     parameter string FREQ  = "33.333333 MHz",
     parameter string PHASE = "987 ps",   // > 0: s3_top.sdc takes the inputs at the next edge
@@ -83,6 +84,8 @@ module s3_top #(
     logic [31:0]  d_o;
     logic [3:0]   dp_o, be_o;
     logic         a_oe, ctl_oe, d_oe, ads_o, mio, dc, wr, blast_o, lock_o, cache_o;
+    logic         snoop, snoop_inv, enhanced;
+    logic [31:4]  snoop_line;
 
     c2_bclk_pll #(.FREQ(FREQ), .PHASE(PHASE), .VCO(VCO)) pll (.refclk(clk), .rst(pll_rst), .clk(clk_pll), .clk_in(),
                                                        .locked(locked));
@@ -105,6 +108,7 @@ module s3_top #(
     end
 
     x86_core core (.clk(clk_p), .rst(rst), .reset_eip(32'hffff_fff0), .a20m(!a20m_s[1]), .cache_flush(!flush_s[1]),
+                   .snoop(snoop), .snoop_line(snoop_line), .snoop_inv(snoop_inv), .enhanced(enhanced), .snoop_err(),
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
                    .mem_cacheable(mem_cacheable), .sc_req(sc_req), .sc_status(sc_status), .sc_addr(sc_addr), .sc_be(sc_be), .sc_wdata(sc_wdata),
@@ -117,12 +121,13 @@ module s3_top #(
                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(1'b0), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
-                .quiet(1'b1), .stopped(), .snoop(), .snoop_addr(),
+                .quiet(1'b1), .stopped(), .snoop(snoop), .snoop_addr(snoop_line), .snoop_inv(snoop_inv),
+                .enhanced(enhanced),
                 .a_o(a_o), .a_oe(a_oe), .a_i(a[31:4]), .be_n(be_o), .ads_n(ads_o), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_o), .lock_n(lock_o), .cache_n(cache_o), .ctl_oe(ctl_oe),
                 .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe), .d_i(d), .dp_i(dp), .pchk_n(pchk_n),
                 .hlda(hlda), .breq(breq), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n), .hold(hold),
-                .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .stpclk_n(stpclk_n),
+                .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .inv(inv), .wb_wt_n(wb_wt_n), .stpclk_n(stpclk_n),
                 .bs8_n(bs8_n), .bs16_n(bs16_n));
 
     assign a       = a_oe ? a_o : 'z;

@@ -20,6 +20,9 @@
 // - Flush (FLUSH#, WBINVD): fl_req held; every dirty line is written back
 //   (S_SWP, a way per clock, the probe's write-back), then S_CLR; fl_done
 //   until fl_req drops. No hit, miss or drain meanwhile.
+// - External snoop (EADS#): a fourth tag copy looks ext_line up; a clean hit
+//   is invalidated when the tag port is free, a dirty one kept and flagged
+//   (ext_dirty). A fill of that line in flight is not installed (f_stale).
 // - A line that came without KEN# is not installed (the victim stays): the
 //   access replays and goes uncached (x86_uc has learned its region).
 module x86_l1d
@@ -57,7 +60,12 @@ module x86_l1d
     input  logic          mem_rcacheable,
     // flush
     input  logic          fl_req,
-    output logic          fl_done
+    output logic          fl_done,
+    // external snoop: held until ext_done
+    input  logic          ext_req,
+    input  logic [31:5]   ext_line,
+    output logic          ext_done,
+    output logic          ext_dirty    // with ext_done
 );
     localparam int SETS = 128, WAYS = 4, SW = $clog2(SETS), TW = 32 - 5 - SW;
 
@@ -77,15 +85,15 @@ module x86_l1d
         return sz == SZ8 ? 4'h1 : sz == SZ16 ? 4'h3 : 4'hF;
     endfunction
 
-    // ---------------- tags: [copy][way], copy 0 even / 1 odd load line, 2 drain
+    // ---------------- tags: [copy][way], copy 0 even / 1 odd load line, 2 drain, 3 snoop
     logic          t_we;
     logic [SW-1:0] t_set;
     logic [1:0]    t_way;
     tg_t           t_wd;
-    logic [2:0][SW-1:0]       t_ra;
-    tg_t  [2:0][WAYS-1:0]     t_rd;
+    logic [3:0][SW-1:0]       t_ra;
+    tg_t  [3:0][WAYS-1:0]     t_rd;
     genvar gc, gw;
-    generate for (gc = 0; gc < 3; gc = gc + 1) begin : tc
+    generate for (gc = 0; gc < 4; gc = gc + 1) begin : tc
         for (gw = 0; gw < WAYS; gw = gw + 1) begin : tw
             x86_ram_async #(.W($bits(tg_t)), .N(SETS)) t (.clk(clk), .we(t_we && (st == S_CLR || t_way == 2'(gw))),
                                                           .wa(t_set), .wd(t_wd), .ra(t_ra[gc]),
@@ -114,6 +122,9 @@ module x86_l1d
     logic [SW-1:0]  clr;           // S_CLR: the set cleared this clock
     logic [SW+1:0]  sw;            // S_SWP: {set, way} looked at this clock
     logic           sweeping, swept;
+    logic           f_stale;       // the line being filled was snooped
+    logic           x_hit, x_wr, x_fill;
+    logic [1:0]     x_way;
     tg_t            sw_tg;
     logic [31:5]    f_line;        // the line being filled
     logic [1:0]     f_way;
@@ -147,7 +158,7 @@ module x86_l1d
         a_need[1] = (a_dw[0] ? m8[3:0] : m8[7:4]) != 4'd0;
     end
     assign probing = st == S_IDLE && pr_req;
-    assign t_ra = {st == S_SWP ? sw[2 +: SW] : probing ? pr_line[5 +: SW] : d_line[5 +: SW], set_of(a_bdw[1]), set_of(a_bdw[0])};
+    assign t_ra = {ext_line[5 +: SW], st == S_SWP ? sw[2 +: SW] : probing ? pr_line[5 +: SW] : d_line[5 +: SW], set_of(a_bdw[1]), set_of(a_bdw[0])};
     assign sw_tg = t_rd[2][sw[1:0]];
     assign fl_done = swept;
     always_comb begin
@@ -224,6 +235,19 @@ module x86_l1d
         pr_done = probing && !(p_hit && t_rd[2][p_way].d) || st == S_WB && probe && mem_ready;
     end
 
+    // external snoop: a clean hit is written invalid when the tag port is free
+    always_comb begin
+        x_hit = 1'b0;
+        x_way = 2'd0;
+        for (int w = 0; w < WAYS; w++)
+            if (t_rd[3][w].v && t_rd[3][w].tag == ext_line[31 -: TW]) begin
+                x_hit = 1'b1;
+                x_way = 2'(w);
+            end
+        x_fill = ext_req && ext_line == f_line && !probe && (st == S_REQ || st == S_WAIT);
+    end
+    assign ext_dirty = x_hit && t_rd[3][x_way].d && st != S_CLR;
+
     // ---------------- bank and tag ports
     always_comb begin
         logic        miss_a, miss_b;
@@ -278,6 +302,14 @@ module x86_l1d
                 t_wd = '{v: 1'b1, d: 1'b1, tag: d_line[31 -: TW]};
             end
         end
+        x_wr = ext_req && x_hit && !ext_dirty && !t_we && st != S_CLR;
+        if (x_wr) begin
+            t_we = 1'b1;
+            t_set = ext_line[5 +: SW];
+            t_way = x_way;
+            t_wd = '0;
+        end
+        ext_done = ext_req && (st == S_CLR || !x_hit || ext_dirty || x_wr);
         // a miss (a load in A first, else the drain) when the MSHR is free
         miss_a = a_valid && st == S_IDLE && !pr_req && (a_need[0] && !a_bhit[0] || a_need[1] && !a_bhit[1]);
         miss = st == S_IDLE && !pr_req && !fl_req && (miss_a || d_valid && !d_hit);
@@ -297,6 +329,7 @@ module x86_l1d
         end else begin
             if (d_write) d_second <= !d_done;
             if (!fl_req) swept <= 1'b0;
+            if (x_fill) f_stale <= 1'b1;
             case (st)
                 S_IDLE:
                     if (probing) begin
@@ -320,6 +353,7 @@ module x86_l1d
                                                    && d_line[5 +: SW] == miss_line[5 +: SW]);
                         f_line <= miss_line;
                         f_way <= w;
+                        f_stale <= 1'b0;
                         v_tag <= miss_ways[w].tag;
                         probe <= 1'b0;
                         st <= dirty ? S_EVRD : S_REQ;
@@ -352,7 +386,7 @@ module x86_l1d
                 S_WAIT:
                     if (mem_rvalid) begin
                         f_buf <= mem_rdata;
-                        st <= mem_rcacheable ? S_FILL : S_IDLE;
+                        st <= mem_rcacheable && !f_stale && !x_fill ? S_FILL : S_IDLE;
                     end
                 S_FILL: st <= S_IDLE;
                 S_CLR: begin

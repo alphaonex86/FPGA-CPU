@@ -28,6 +28,8 @@ module x86_core_synth (
     logic [33:0]      trace_q;
 
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h000F_FFF0), .a20m(fold[1]), .cache_flush(fold[2]),
+                   .snoop(fold[3]), .snoop_line(fold[31:4] ^ mem_rdata[27:0]), .snoop_inv(fold[1]), .enhanced(fold[2]),
+                   .snoop_err(),
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
                    .mem_cacheable(fold[0]), .sc_req(sc_req), .sc_status(sc_status), .sc_addr(sc_addr), .sc_be(sc_be), .sc_wdata(sc_wdata),

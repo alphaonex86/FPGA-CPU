@@ -19,7 +19,8 @@
 //   another order). Line write: 8 single cycles (write-through towards the board: no burst write).
 // - BOFF#: floats the bus in the next clock, the transfer starts again when it is released. HOLD:
 //   granted between cycles (not under LOCK#). AHOLD: the address floats, no new cycle. EADS# on a
-//   floated address: `snoop` with the line address (invalidation, for the caches).
+//   floated address: `snoop` with the line address and INV (for the caches). `enhanced`: WB/WT# as
+//   RESET falls (only the mode is latched; the write-back protocol is not there yet).
 // - STPCLK# with the core quiet and no job: Stop Grant special cycle (address 10h, BE2# low), then
 //   no job until it is released.
 // - Even parity out on DP, PCHK# the clock after a read's data is stored.
@@ -58,6 +59,8 @@ module s3_bus (
     output logic         stopped,
     output logic         snoop,
     output logic [31:4]  snoop_addr,
+    output logic         snoop_inv,
+    output logic         enhanced,        // WB/WT# high at RESET: the write-back bus protocol
     // pins; *_oe: the group is driven
     output logic [31:2]  a_o,
     output logic         a_oe,
@@ -86,6 +89,8 @@ module s3_bus (
     input  logic         ahold,
     input  logic         boff_n,
     input  logic         eads_n,
+    input  logic         inv,
+    input  logic         wb_wt_n,
     input  logic         stpclk_n,        // asynchronous
     input  logic         bs8_n,
     input  logic         bs16_n
@@ -104,7 +109,7 @@ module s3_bus (
     logic [2:0]   status;
     logic [31:2]  s_addr, addr;
     logic [31:0]  s_wdata, wdata;
-    logic         ken_q, ken_first, ken_all, lock_on, hold_q, ahold_q, eads_q, bs8_q, bs16_q;
+    logic         ken_q, ken_first, ken_all, lock_on, hold_q, ahold_q, eads_q, inv_q, wbwt_q, bs8_q, bs16_q;
     logic [3:0]   rem;             // bytes of the current dword still to move (active high)
     logic         drop;            // the burst's next transfer only ends it: its data is ignored
     logic [31:4]  a_q;
@@ -218,11 +223,15 @@ module s3_bus (
         hold_q     <= hold;
         ahold_q    <= ahold;
         eads_q     <= !eads_n;
+        inv_q      <= inv;
+        wbwt_q     <= wb_wt_n;
+        if (rst) enhanced <= wbwt_q;
         bs8_q      <= !bs8_n;
         bs16_q     <= !bs16_n;
         a_q        <= a_i;
         snoop      <= !a_oe && eads_q;
         snoop_addr <= a_q;
+        snoop_inv  <= inv_q;
         // the registers fed from the pins
         ads_go  <= start && !ahold;
         ctl_oe  <= st_n != HELD && st_n != BACKOFF;

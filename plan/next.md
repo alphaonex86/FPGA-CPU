@@ -64,9 +64,11 @@ with every gate passing. Read AGENTS.md first; details in plan/interposers.md (T
 - CPU core: advance `rtl/x86` from M3 to M5 (real mode, interrupts, I/O) until it boots the BIOS
   in simulation, while routing runs; memory system first (plan/x86_core.md M5 list), then the ISA.
   KEN#: learned per 64 KB region (operator). Done 2026-11-11: BS8# / BS16#, PLL lock range and
-  clock stop, RESET cache clear, A20M# in the core, uncached accesses + KEN#. Next: FLUSH# /
-  WBINVD sweep, the snoop (HITM# / INV, write-back bursts with CACHE# in enhanced mode), SRESET
-  with the M5 interrupt machinery. Every RTL change needs a new full build (`s3.ok`).
+  clock stop, RESET cache clear, A20M# in the core, uncached accesses + KEN#, FLUSH# (write back +
+  invalidate), the RDY# / BRDY# / BOFF# loop in one LUT level (bus-only build +0.985 / +0.968 ns).
+  Next: the snoop (EADS# invalidation in both modes; enhanced mode: HITM#, the snoop write-back
+  ahead of any pending cycle, write-back bursts with CACHE#), WBINVD / INVD with M5, SRESET with
+  the M5 interrupt machinery. Every RTL change needs a new full build (`s3.ok`).
 - Speed grade C8 vs C7: decide after the full Quartus build (step 1), ask the operator with the
   slack numbers.
 - Socket 7 (`gen_socket7_t8.py` fails on purpose: S_VCC3 feed of PS2 / U3 in the S_VCC2 area of

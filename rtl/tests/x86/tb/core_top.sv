@@ -49,6 +49,7 @@ module core_top (
     logic [31:0] st_skew, st_alu3, st_mem2, st_replay, st_replay_md;   // issue contention
     logic [31:0] st_miss, st_wb;              // L2 misses, writebacks
     logic [31:0] st_imiss, st_dmiss, st_dwb;  // L1I, L1D misses, L1D writebacks
+    logic [31:0] st_sn [5];                   // snoops queued; lines invalidated in L2 / L1D / L1I; dirty kept
     logic [31:0] mp_cycle [ROB_N];
     logic        ind [ROB_N];       // the ROB entry is an indirect branch (RET: predicted taken)
     logic        refill;
@@ -59,11 +60,37 @@ module core_top (
     logic flush_tb;
     initial if (!$value$plusargs("flush=%d", flush_n)) flush_n = 0;
     assign flush_tb = flush_n > 0 && cycles % flush_n < 2;
+    // snoops: from the bus unit with S3_BUS, else +snoop=<n>: an invalidation every n clocks of the
+    // L1s' last L2 request, the drain's line, the fetch line or a line anywhere in the 1 MB (dirty ones are kept:
+    // the trace must not change)
+    logic         bus_snoop, bus_snoop_inv, bus_enhanced, snoop_err;
+    logic [31:4]  bus_snoop_line;
+`ifndef S3_BUS
+    int           snoop_n;
+    logic [31:0]  sn_rand;
+    initial if (!$value$plusargs("snoop=%d", snoop_n)) snoop_n = 0;
+    assign bus_snoop_inv = 1'b1;
+    assign bus_enhanced = 1'b0;
+    always_ff @(posedge clk) begin
+        sn_rand <= $urandom;
+        bus_snoop <= snoop_n > 0 && cycles % snoop_n == 0;
+        unique case (sn_rand[1:0])
+            2'd0: bus_snoop_line <= {core.l2_addr, sn_rand[2]};
+            2'd1: bus_snoop_line <= {core.d_line, sn_rand[2]};
+            2'd2: bus_snoop_line <= {core.fetch_pc[31:5], sn_rand[2]};
+            default: bus_snoop_line <= {12'd0, sn_rand[31:16]};
+        endcase
+    end
+`endif
 
 `ifdef S3_BUS
     x86_core core (.clk(clk), .rst(s3_rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
+                   .snoop(bus_snoop), .snoop_line(bus_snoop_line), .snoop_inv(bus_snoop_inv), .enhanced(bus_enhanced),
+                   .snoop_err(snoop_err),
 `else
     x86_core core (.clk(clk), .rst(rst), .reset_eip(32'h1000), .a20m(1'b0), .cache_flush(flush_tb),
+                   .snoop(bus_snoop), .snoop_line(bus_snoop_line), .snoop_inv(bus_snoop_inv), .enhanced(bus_enhanced),
+                   .snoop_err(snoop_err),
 `endif
                    .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                    .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata),
@@ -95,12 +122,13 @@ module core_top (
                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(1'b0), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
-                .quiet(1'b1), .stopped(), .snoop(), .snoop_addr(),
-                .a_o(a_o), .a_oe(a_oe), .a_i(a_o[31:4]), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
+                .quiet(1'b1), .stopped(), .snoop(bus_snoop), .snoop_addr(bus_snoop_line), .snoop_inv(bus_snoop_inv),
+                .enhanced(bus_enhanced), .a_o(a_o), .a_oe(a_oe), .a_i(a_o[31:4]), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_n), .lock_n(), .cache_n(), .ctl_oe(), .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe),
                 .d_i(d_pin), .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]}), .pchk_n(),
                 .hlda(), .breq(), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n), .hold(hold), .ahold(ahold),
-                .boff_n(boff_n), .eads_n(eads_n), .stpclk_n(1'b1), .bs8_n(1'b1), .bs16_n(1'b1));
+                .boff_n(boff_n), .eads_n(eads_n), .inv(inv), .wb_wt_n(wbwt_n), .stpclk_n(1'b1), .bs8_n(1'b1),
+                .bs16_n(1'b1));
     cpu486_bif #(.MEM_TOP(32'h0010_0000)) chipset (
                 .clk(clk), .rst_n(!rst), .cpu_a(a_o), .cpu_be_n(be_n), .cpu_ads_n(ads_n), .cpu_mio_n(mio),
                 .cpu_dc_n(dc), .cpu_wr_n(wr), .cpu_blast_n(blast_n), .cpu_d_i(d_pin), .cpu_d_o(chip_d),
@@ -183,6 +211,7 @@ module core_top (
             {st_empty, st_wait, st_uq_empty, st_dec_redir, st_flush, st_mp_wait, st_refill} <= '0;
             {st_skew, st_alu3, st_mem2, st_replay, st_replay_md, st_miss, st_wb} <= '0;
             {st_imiss, st_dmiss, st_dwb} <= '0;
+            for (int i = 0; i < 5; i++) st_sn[i] <= '0;
             rd_pend <= 1'b0;
 `ifndef S3_BUS
             sc_done <= 1'b0;
@@ -268,6 +297,11 @@ module core_top (
             if (core.im_ready) st_imiss <= st_imiss + 32'd1;
             if (core.dm_req && core.dm_ready && !core.dm_we) st_dmiss <= st_dmiss + 32'd1;
             if (core.dm_req && core.dm_ready && core.dm_we) st_dwb <= st_dwb + 32'd1;
+            if (core.sn_push) st_sn[0] <= st_sn[0] + 32'd1;
+            if (core.u_l2.x_wr) st_sn[1] <= st_sn[1] + 32'd1;
+            if (core.u_l1d.x_wr) st_sn[2] <= st_sn[2] + 32'd1;
+            if (core.u_l1i.x_wr) st_sn[3] <= st_sn[3] + 32'd1;
+            if (core.l2_x_done && core.l2_x_dirty || core.l1d_x_done && core.l1d_x_dirty) st_sn[4] <= st_sn[4] + 32'd1;
             if (mem_req && mem_ready) begin
                 if (mem_we) st_wb <= st_wb + 32'd1;
                 else st_miss <= st_miss + 32'd1;
@@ -332,6 +366,9 @@ module core_top (
         if (stats)
             $display("stats: misses: L1I %0d, L1D %0d (writebacks %0d), L2 %0d (writebacks %0d; memory read latency %0d)",
                      st_imiss, st_dmiss, st_dwb, st_miss, st_wb, mem_lat);
+        if (stats)
+            $display("stats: snoops %0d: invalidated L2 %0d, L1D %0d, L1I %0d; dirty kept %0d",
+                     st_sn[0], st_sn[1], st_sn[2], st_sn[3], st_sn[4]);
         if (stats)
             $display("stats: flushes: Jcc %0d, indirect %0d, RET %0d, other branch %0d, DF %0d, store to code %0d",
                      st_fl[0], st_fl[1], st_fl[2], st_fl[3], st_fl[4], st_fl[5]);

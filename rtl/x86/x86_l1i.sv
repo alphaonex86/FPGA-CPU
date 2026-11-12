@@ -14,6 +14,8 @@
 // not installed; the last two (a block may need two lines) are kept in a
 // buffer of their own (nc_*) and hit from there, until a store to code
 // drains into one.
+// External snoop (EADS#): a tag copy looks ext_line up, its way is written
+// invalid when the tag port is free; a fill of it in flight is not kept.
 // Flush: fl_req held; a miss not yet at L2 is dropped, one at L2 finishes,
 // then S_CLR (and the buffer); fl_done until fl_req drops, no hit or miss.
 module x86_l1i
@@ -45,7 +47,11 @@ module x86_l1i
     input  logic            mem_rcacheable,
     // flush
     input  logic            fl_req,
-    output logic            fl_done
+    output logic            fl_done,
+    // external snoop: held until ext_done
+    input  logic            ext_req,
+    input  logic [31:5]     ext_line,
+    output logic            ext_done
 );
     localparam int SETS = 128, WAYS = 4, SW = $clog2(SETS), TW = 32 - 5 - SW;
 
@@ -74,11 +80,26 @@ module x86_l1i
     logic [1:0][255:0]           nc_data;
     logic                        nc_rr;      // the entry the next uncached fill takes
     logic                        flushing;
+    tg_t  [WAYS-1:0]             x_rd;       // the snoop's copy
+    logic                        x_hit, x_wr, x_now;
+    logic [1:0]                  x_way;
     // tag writes: an invalidation (every way of its set) first, else the fill
     logic [SW-1:0]               t_wa;
     tg_t                         t_wd;
-    assign t_wa = st == S_CLR ? clr : inv ? inv_line[5 +: SW] : f_line[5 +: SW];
-    assign t_wd = '{v: !inv && !f_stale && st != S_CLR, tag: f_line[31 -: TW]};
+    assign t_wa = st == S_CLR ? clr : inv ? inv_line[5 +: SW] : x_wr ? ext_line[5 +: SW] : f_line[5 +: SW];
+    assign t_wd = '{v: !inv && !f_stale && !x_now && !x_wr && st != S_CLR, tag: f_line[31 -: TW]};
+    always_comb begin
+        x_hit = 1'b0;
+        x_way = 2'd0;
+        for (int w = 0; w < WAYS; w++)
+            if (x_rd[w].v && x_rd[w].tag == ext_line[31 -: TW]) begin
+                x_hit = 1'b1;
+                x_way = 2'(w);
+            end
+        x_now = ext_req && ext_line == f_line && st != S_IDLE;
+        x_wr = ext_req && x_hit && !inv && !fill && st != S_CLR;
+        ext_done = ext_req && (st == S_CLR || !x_hit || x_wr);
+    end
     always_comb
         for (int b = 0; b < 2; b++) begin
             logic [31:5] l;
@@ -92,7 +113,7 @@ module x86_l1i
             (* ramstyle = "no_rw_check" *) tg_t t [SETS];
             (* ramstyle = "no_rw_check" *) logic [127:0] d [SETS];
             initial for (int i = 0; i < SETS; i++) t[i] = '0;
-            assign t_we = st == S_CLR || inv || fill && mem_rcacheable && f_way == 2'(gw);
+            assign t_we = st == S_CLR || inv || fill && mem_rcacheable && f_way == 2'(gw) || x_wr && x_way == 2'(gw);
             always_ff @(posedge clk) begin
                 if (t_we) t[t_wa] <= t_wd;
                 if (fill && f_way == 2'(gw)) d[f_line[5 +: SW]] <= mem_rdata[128 * gb +: 128];
@@ -101,6 +122,10 @@ module x86_l1i
             end
             x86_ram_async #(.W($bits(tg_t)), .N(SETS)) s (.clk(clk), .we(t_we), .wa(t_wa), .wd(t_wd),   // snoop copy
                                                           .ra(sn_line[gb][5 +: SW]), .q(s_rd[gb][gw]));
+            if (gb == 0) begin : xc
+                x86_ram_async #(.W($bits(tg_t)), .N(SETS)) x (.clk(clk), .we(t_we), .wa(t_wa), .wd(t_wd),
+                                                              .ra(ext_line[5 +: SW]), .q(x_rd[gw]));
+            end
         end
     end endgenerate
 
@@ -159,15 +184,16 @@ module x86_l1i
             fl_done <= 1'b0;
         end else begin
             if (!fl_req) fl_done <= 1'b0;
-            filled <= fill || inv;
-            for (int e = 0; e < 2; e++) if (inv && nc_line[e] == inv_line) nc_valid[e] <= 1'b0;
+            filled <= fill || inv || x_wr;
+            for (int e = 0; e < 2; e++)
+                if (inv && nc_line[e] == inv_line || ext_req && nc_line[e] == ext_line) nc_valid[e] <= 1'b0;
             if (fill && !mem_rcacheable) begin
-                nc_valid[nc_rr] <= !f_stale;
+                nc_valid[nc_rr] <= !f_stale && !x_now;
                 nc_line[nc_rr] <= f_line;
                 nc_data[nc_rr] <= mem_rdata;
                 nc_rr <= !nc_rr;
             end
-            if (inv && st != S_IDLE && inv_line[5 +: SW] == f_line[5 +: SW]) f_stale <= 1'b1;
+            if (inv && st != S_IDLE && inv_line[5 +: SW] == f_line[5 +: SW] || x_now) f_stale <= 1'b1;
             case (st)
                 S_IDLE:
                     if (fl_req) begin

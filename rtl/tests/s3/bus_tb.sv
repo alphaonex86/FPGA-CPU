@@ -31,6 +31,7 @@ module bus_tb (
     logic [31:0]  sc_wdata, sc_rdata, d_o, d_pin;
     logic         stopped, snoop, a_oe, ads_n, mio, dc, wr, blast_n, lock_n, cache_n, ctl_oe, d_oe;
     logic [31:4]  snoop_addr;
+    logic         snoop_inv, enhanced, inv, inv_1, inv_2;   // INV, and as the snoop pulse sees it
     logic         pchk_n, hlda, breq, ads_r;
     assign ads_n = a_oe ? ads_r : 1'b1;           // the pad: floated with the address, pulled up on the board
     logic         rdy_n, brdy_n, ken_n, hold, ahold, boff_n, eads_n, stpclk_n, bs8_n, bs16_n;
@@ -75,13 +76,13 @@ module bus_tb (
                 .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
                 .sc_req(sc_req), .sc_status(sc_status), .sc_lock(sc_lock), .sc_addr(sc_addr), .sc_be(sc_be),
                 .sc_wdata(sc_wdata), .sc_ready(sc_ready), .sc_done(sc_done), .sc_rdata(sc_rdata),
-                .quiet(1'b1), .stopped(stopped), .snoop(snoop), .snoop_addr(snoop_addr),
+                .quiet(1'b1), .stopped(stopped), .snoop(snoop), .snoop_addr(snoop_addr), .snoop_inv(snoop_inv), .enhanced(enhanced),
                 .a_o(a_o), .a_oe(a_oe), .a_i(28'h123_4567), .be_n(be_n), .ads_n(ads_r), .mio(mio), .dc(dc), .wr(wr),
                 .blast_n(blast_n), .lock_n(lock_n), .cache_n(cache_n), .ctl_oe(ctl_oe),
                 .d_o(d_o), .dp_o(dp_o), .d_oe(d_oe), .d_i(d_pin),
                 .dp_i({^d_pin[31:24], ^d_pin[23:16], ^d_pin[15:8], ^d_pin[7:0]} ^ {3'd0, bad_parity}),
                 .pchk_n(pchk_n), .hlda(hlda), .breq(breq), .rdy_n(rdy_n), .brdy_n(brdy_n), .ken_n(ken_n),
-                .hold(hold), .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .stpclk_n(stpclk_n),
+                .hold(hold), .ahold(ahold), .boff_n(boff_n), .eads_n(eads_n), .inv(inv), .wb_wt_n(1'b0), .stpclk_n(stpclk_n),
                 .bs8_n(bs8_n), .bs16_n(bs16_n));
 
     task automatic fail(input string what);
@@ -241,10 +242,13 @@ module bus_tb (
             end
             ahold  <= ahold ? roll(700) != 0 : roll(p_ahold) != 0;
             eads_n <= !(ahold && !a_oe);
+            {inv, inv_1, inv_2} <= {1'(roll(500)), inv, inv_1};
             if (snoop) begin
                 n_snoop <= n_snoop + 1;
                 if (snoop_addr != 28'h123_4567) fail("snoop address");
+                if (snoop_inv != inv_2) fail("snoop INV");
             end
+            if (enhanced) fail("enhanced mode with WB/WT# low");
             stp_gap <= stpclk_n ? stp_gap + 1 : 0;            // high >= 8 clocks between assertions [19751C]
             if (stpclk_n && stp_gap >= 8 && roll(p_stp) != 0) stpclk_n <= 1'b0;
             else if (!stpclk_n && stopped && roll(200) != 0) stpclk_n <= 1'b1;

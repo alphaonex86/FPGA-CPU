@@ -13,6 +13,9 @@
 //   then the reset clear; fl_done until fl_req drops.
 // - A memory line that came without KEN# (mem_cacheable low) is answered
 //   (rcacheable low) but not kept: its way is left invalid.
+// - External snoop (EADS#, a bus master wrote ext_line): a tag copy read with ext_line, then the
+//   line's way invalidated if clean; a dirty one is kept and flagged (ext_dirty: standard mode
+//   cannot write it back). A fill of that line in flight is answered uncacheable, not kept.
 // - Prefetch: once demand reads stream (each within PF + 1 lines after the
 //   last), up to PF lines after the last one, in its 4 KB page, one at a
 //   time when the front and the engine are idle.
@@ -42,7 +45,12 @@ module x86_l2 #(
     input  logic          mem_cacheable,  // with mem_rvalid
     // flush
     input  logic          fl_req,
-    output logic          fl_done
+    output logic          fl_done,
+    // external snoop: held until ext_done
+    input  logic          ext_req,
+    input  logic [31:5]   ext_line,
+    output logic          ext_done,
+    output logic          ext_dirty    // with ext_done
 );
     localparam int WAYS = 4, SETS = KB * 1024 / 32 / WAYS, SW = $clog2(SETS), TW = 27 - SW;
 
@@ -75,6 +83,17 @@ module x86_l2 #(
     logic [SW-1:0] sw_set;
     logic          e_sw;           // the engine writes a dirty way back for the flush
     logic          sw_inv;         // ... and invalidates it now
+    // external snoop: X_RD reads the copy, X_CHK compares and invalidates
+    typedef enum logic [1:0] {X_IDLE, X_RD, X_CHK} xs_t;
+    xs_t           xs;
+    logic          x_wr;           // the snoop writes its way invalid now
+    logic [1:0]    x_way;
+    logic          x_hit, x_conf;
+    logic          e_stale;        // the engine's line was snooped while it was read
+    logic          e_snooped;      // ... this clock
+    logic          t_wq;           // a tag write last clock (the copy read may predate it)
+    logic [SW-1:0] w_setq;
+    tg_t  [WAYS-1:0] x_rd;
 
     // tags (a RAM per way) and data ({set, way} rows), registered reads
     logic [SW-1:0]           t_ra, w_set;
@@ -91,11 +110,18 @@ module x86_l2 #(
     genvar gw;
     generate for (gw = 0; gw < WAYS; gw = gw + 1) begin : tw
         (* ramstyle = "no_rw_check" *) tg_t t [SETS];
-        initial for (int i = 0; i < SETS; i++) t[i] = '0;
+        (* ramstyle = "no_rw_check" *) tg_t x [SETS];   // the snoop's copy
+        initial for (int i = 0; i < SETS; i++) {t[i], x[i]} = '0;
         always_ff @(posedge clk) begin
-            if (clearing) t[clr] <= '0;
-            else if (t_we && w_way == 2'(gw)) t[w_set] <= t_wd;
+            if (clearing) begin
+                t[clr] <= '0;
+                x[clr] <= '0;
+            end else if (t_we && w_way == 2'(gw)) begin
+                t[w_set] <= t_wd;
+                x[w_set] <= t_wd;
+            end
             t_rd[gw] <= t[t_ra];
+            x_rd[gw] <= x[ext_line[5 +: SW]];
         end
     end endgenerate
     (* ramstyle = "no_rw_check" *) logic [255:0] data [SETS * WAYS];
@@ -126,6 +152,13 @@ module x86_l2 #(
         vway = victim(t_rd, rr);
         sw_dirty = 2'd0;
         for (int w = 0; w < WAYS; w++) if (t_rd[w].v && t_rd[w].d) sw_dirty = 2'(w);
+        x_hit = 1'b0;
+        x_way = 2'd0;
+        for (int w = 0; w < WAYS; w++)
+            if (x_rd[w].v && x_rd[w].tag == ext_line[31 -: TW]) begin
+                x_hit = 1'b1;
+                x_way = 2'(w);
+            end
     end
 
     // prefetch: the next line within PF of the last demand read, same page
@@ -154,8 +187,17 @@ module x86_l2 #(
         d_wd = fill ? mem_rdata : r_wdata;
         w_set = fw ? r_addr[5 +: SW] : e_addr[5 +: SW];
         w_way = fw ? (hit ? hway : vway) : e_way;
-        t_we = d_we || sw_inv;
-        t_wd = '{v: !sw_inv && (!fill || mem_cacheable), d: !fill, tag: fw ? r_addr[31 -: TW] : e_addr[31 -: TW]};
+        e_snooped = xs == X_CHK && (en == E_MREQ || en == E_MWAIT) && e_addr == ext_line;
+        // the snoop's copy read is stale after a write to its set; it writes when nobody else does
+        x_conf = t_wq && w_setq == ext_line[5 +: SW] || d_we || sw_inv;
+        x_wr = xs == X_CHK && !clearing && !x_conf && x_hit && !x_rd[x_way].d;
+        t_we = d_we || sw_inv || x_wr;
+        t_wd = '{v: !sw_inv && !x_wr && (!fill || mem_cacheable && !e_stale && !e_snooped), d: !fill,
+                 tag: fw ? r_addr[31 -: TW] : e_addr[31 -: TW]};
+        if (x_wr) begin
+            w_set = ext_line[5 +: SW];
+            w_way = x_way;
+        end
         d_ra = en == E_VRD || en == E_WB ? {e_addr[5 +: SW], e_way}   // the victim, kept for mem_wdata
                                          : {r_addr[5 +: SW], st == S_TAG ? hway : r_way};
     end
@@ -171,7 +213,19 @@ module x86_l2 #(
             pf_line <= '0;
             pf_base <= '0;
             sw_st <= W_IDLE;
+            xs <= X_IDLE;
         end else begin
+            t_wq <= t_we;
+            w_setq <= w_set;
+            // the engine's memory line, read before the snoop: answered, not kept
+            if (e_snooped) e_stale <= 1'b1;
+            unique case (xs)
+                X_IDLE: if (ext_req && !ext_done) xs <= X_RD;
+                X_RD: xs <= X_CHK;
+                X_CHK: if (clearing || !x_conf) xs <= X_IDLE;
+                       else xs <= X_RD;
+                default: xs <= X_IDLE;
+            endcase
             fill_q <= fill;
             if (clearing) begin
                 clr <= clr + 1'd1;
@@ -225,6 +279,7 @@ module x86_l2 #(
                         en <= E_VRD;
                     end else if (start) begin
                         e_sw <= 1'b0;
+                        e_stale <= 1'b0;
                         e_addr <= r_addr;
                         e_way <= vway;
                         e_we <= r_we;
@@ -266,7 +321,9 @@ module x86_l2 #(
     assign ready = st == S_IDLE && !clearing && !fl_req;
     assign rvalid = st == S_DATA || st == S_HOLD && !r_we && fill && e_addr == r_addr;
     assign rdata = st == S_DATA ? d_rd : mem_rdata;
-    assign rcacheable = st == S_DATA || mem_cacheable;
+    assign rcacheable = st == S_DATA || mem_cacheable && !e_stale && !e_snooped;
+    assign ext_done = xs == X_CHK && (clearing || !x_conf);
+    assign ext_dirty = x_hit && x_rd[x_way].d && !clearing;
     assign mem_req = en == E_WB || en == E_MREQ;
     assign mem_we = en == E_WB;
     assign mem_addr = en == E_WB ? {v_tag, e_addr[5 +: SW]} : e_addr;

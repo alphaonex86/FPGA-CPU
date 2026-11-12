@@ -29,6 +29,12 @@
 // - cache_flush (FLUSH#): the L1D and L1I first (the L1D writes its dirty lines
 //   back into the L2), then the L2 (into memory), then the learned UC
 //   regions; each cache stays blocked until the last is done. Held: again.
+// - snoop (EADS#: a bus master wrote snoop_line; enhanced mode: only with
+//   INV): queued (SN_N), each line invalidated in the L2 first, then in the
+//   L1D / L1I (a line those fill from the L2 meanwhile is caught there). A
+//   dirty line cannot be written back yet: kept, snoop_err (sticky), as for
+//   a full queue. The store drain waits while lines are queued (a store into
+//   a line the master wrote would dirty its stale copy).
 module x86_core
     import x86_pkg::*;
 (
@@ -37,6 +43,11 @@ module x86_core
     input  logic [31:0]           reset_eip,
     input  logic                  a20m,         // A20M# asserted, synchronous
     input  logic                  cache_flush,  // FLUSH# asserted, synchronous
+    input  logic                  snoop,        // EADS# on a floated address
+    input  logic [31:4]           snoop_line,
+    input  logic                  snoop_inv,    // INV (enhanced mode)
+    input  logic                  enhanced,     // WB/WT# high at RESET
+    output logic                  snoop_err,
     // memory (L2 lines): a read answered later, writes posted
     output logic                  mem_req,
     output logic                  mem_we,
@@ -139,6 +150,43 @@ module x86_core
             if (l2_fl_done) {fl_l1, fl_l2} <= '0;
         end else if (fl_l1) fl_l2 <= l1i_fl_done && l1d_fl_done;
         else fl_l1 <= cache_flush;
+
+    // external snoops: a queue of lines, L2 then L1D + L1I per line
+    localparam int SN_N = 8;
+    logic [SN_N-1:0][31:5]   sn_q;
+    logic [$clog2(SN_N):0]   sn_head, sn_tail;
+    logic                    sn_l1, l1d_x_done, l1i_x_done, l2_x_done, l1d_x_dirty, l2_x_dirty;
+    logic [1:0]              sn_l1_done;     // L1D, L1I finished this line
+    logic                    sn_any, sn_push, sn_err_now;
+    assign sn_any = sn_head != sn_tail;
+    // a repeat of the last line queued (its other 16 bytes) while that one waits is the same line;
+    // once its L2 step started, a fill of it may follow: queued again
+    assign sn_push = snoop && (snoop_inv || !enhanced)
+                     && !(sn_tail - sn_head >= 2 && sn_q[sn_tail[$clog2(SN_N)-1:0] - 1'd1] == snoop_line[31:5]);
+    assign sn_err_now = sn_push && sn_tail - sn_head == ($clog2(SN_N)+1)'(SN_N)
+                        || l2_x_done && l2_x_dirty || l1d_x_done && l1d_x_dirty;
+    always_ff @(posedge clk)
+        if (rst) begin
+            {sn_head, sn_tail} <= '0;
+            sn_l1 <= 1'b0;
+            sn_l1_done <= '0;
+            snoop_err <= 1'b0;
+        end else begin
+            if (sn_push && sn_tail - sn_head != ($clog2(SN_N)+1)'(SN_N)) begin
+                sn_q[sn_tail[$clog2(SN_N)-1:0]] <= snoop_line[31:5];
+                sn_tail <= sn_tail + 1'd1;
+            end
+            if (sn_err_now) snoop_err <= 1'b1;
+            if (!sn_l1) sn_l1 <= l2_x_done;
+            else if ((sn_l1_done | {l1i_x_done, l1d_x_done}) == 2'b11) begin
+                sn_l1 <= 1'b0;
+                sn_l1_done <= '0;
+                sn_head <= sn_head + 1'd1;
+            end else sn_l1_done <= sn_l1_done | {l1i_x_done, l1d_x_done};
+`ifndef SYNTHESIS
+            if (sn_err_now && !snoop_err) $display("snoop_err: a snoop hit a dirty line or the queue was full");
+`endif
+        end
     always_ff @(posedge clk) if (mem_req && mem_ready && !mem_we) mem_rd_region <= mem_addr[31:16];
     assign l2_req = (im_req || dm_req) && !rd_busy;
     assign l2_we = !im_req && dm_we;
@@ -162,7 +210,9 @@ module x86_core
                  .ready(l2_ready), .rvalid(l2_rvalid), .rdata(l2_rdata), .rcacheable(l2_rcache),
                  .mem_req(mem_req), .mem_we(mem_we), .mem_addr(mem_addr), .mem_wdata(mem_wdata),
                  .mem_ready(mem_ready), .mem_rvalid(mem_rvalid), .mem_rdata(mem_rdata), .mem_cacheable(mem_cacheable),
-                 .fl_req(fl_l2), .fl_done(l2_fl_done));
+                 .fl_req(fl_l2), .fl_done(l2_fl_done),
+                 .ext_req(sn_any && !sn_l1), .ext_line(sn_q[sn_head[$clog2(SN_N)-1:0]]), .ext_done(l2_x_done),
+                 .ext_dirty(l2_x_dirty));
 
     // L1I; stores to code (snoop, invalidation, fetch hold), its misses
     // after the older stores to the line (sq_busy) and the L1D probe
@@ -182,7 +232,8 @@ module x86_core
                    .miss_line(ic_miss_line), .sq_busy(ic_sq_busy), .pr_req(pr_req), .pr_done(pr_done),
                    .mem_req(im_req), .mem_addr(im_addr), .mem_ready(im_ready),
                    .mem_rvalid(im_rvalid), .mem_rdata(l2_rdata), .mem_rcacheable(l2_rcache),
-                   .fl_req(fl_l1), .fl_done(l1i_fl_done));
+                   .fl_req(fl_l1), .fl_done(l1i_fl_done),
+                   .ext_req(sn_l1 && !sn_l1_done[1]), .ext_line(sn_q[sn_head[$clog2(SN_N)-1:0]]), .ext_done(l1i_x_done));
 
     x86_frontend fe (.clk(clk), .rst(rst), .redirect(fe_redirect), .redirect_pc(fe_redirect_pc),
                      .take(dec_take), .fetch_next(fetch_next), .fetch_pc(fetch_pc),
@@ -868,13 +919,15 @@ module x86_core
     x86_l1d u_l1d (.clk(clk), .rst(rst),
                    .a_valid(ix_valid[2] && !uc_l), .a_addr(maddr(xr[2])), .a_size(ix[2].u.osz), .a_hit(a_hit),
                    .m_addr(am_addr), .m_data(load_data),
-                   .d_valid(sq_head != sq_cmt && !uc_s), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
+                   .d_valid(sq_head != sq_cmt && !uc_s && !sn_any), .d_addr(sq[sq_head[SQ_W-1:0]].addr),
                    .d_size(sq[sq_head[SQ_W-1:0]].size), .d_data(sq[sq_head[SQ_W-1:0]].data),
                    .d_done(l1_drain), .d_step(d_step), .d_line(d_line),
                    .pr_req(pr_req), .pr_line(ic_miss_line), .pr_done(pr_done),
                    .mem_req(dm_req), .mem_we(dm_we), .mem_addr(dm_addr), .mem_wdata(l2_wdata),
                    .mem_ready(dm_ready), .mem_rvalid(dm_rvalid), .mem_rdata(l2_rdata), .mem_rcacheable(l2_rcache),
-                   .fl_req(fl_l1), .fl_done(l1d_fl_done));
+                   .fl_req(fl_l1), .fl_done(l1d_fl_done),
+                   .ext_req(sn_l1 && !sn_l1_done[0]), .ext_line(sn_q[sn_head[$clog2(SN_N)-1:0]]), .ext_done(l1d_x_done),
+                   .ext_dirty(l1d_x_dirty));
     assign m_ok = am_ok && !md_done;   // bus 2 taken by mul/div: replay
 
     // ---------------- stores to code ----------------

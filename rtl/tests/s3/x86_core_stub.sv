@@ -6,6 +6,11 @@ module x86_core (
     input  logic [31:0]  reset_eip,
     input  logic         a20m,
     input  logic         cache_flush,
+    input  logic         snoop,
+    input  logic [31:4]  snoop_line,
+    input  logic         snoop_inv,
+    input  logic         enhanced,
+    output logic         snoop_err,
     output logic         mem_req,
     output logic         mem_we,
     output logic [31:5]  mem_addr,
@@ -74,4 +79,5 @@ module x86_core (
         end
     end
     assign {ret_valid, ret_eop, ret_next_eip, ret_wdst, ret_dst, ret_value, ret_wflags, ret_flags, halted, illegal} = '0;
+    assign snoop_err = snoop ^ snoop_inv ^ enhanced ^ ^snoop_line;   // keeps the bus unit's snoop outputs
 endmodule
